@@ -29,29 +29,293 @@ The local symbol table
 ~~~~~~~~~~~~~~~~~~~~~~
 
 The local symbol table is more complicated and is defined as an array of
-arrays of hashes. The upper array has one element for each subroutine
-entered; the leaf hashes are small symbol tables, having the symbol names
-as keys. Everytime a subroutine is executed, a new array is pushed into
-the top of the main array, and everytime a block is entered, a new hash is
-pushed into the subroutine array. On exit, the created values are popped.
-Local symbols created with the _local_ directive are stored in the last
-hash defined in the last array.
+arrays of hashes. All arrays are managed as stacks. The main array has
+one element for each subroutine entered; the leaf hashes are small symbol
+tables, having the symbol names as keys. Everytime a subroutine is
+executed, a new array is pushed onto the top of the main array, and
+everytime a block is entered, a new hash is pushed onto the subroutine
+array. On exit, the created values are popped. Local symbols created with
+the _local_ directive are stored in the last hash defined in the last
+array.
+
+The array pushed on each subroutine is called a _subroutine frame_, and
+the hash pushed on each block is called a _block frame_.
 
 If the symbol table was to be defined in mpsl code, it could be as follows:
 
  local_symbol_table = [
-	[ {}, {}, {} ],		/* symbol tables for caller subroutines */
-	[ {}, {} ],		/* are 'dormant' */
+	[ {}, {}, {} ],		/* caller subroutine frames (dormant) */
+	[ {}, {} ],
 	[ {} ],
-	[ {}, {}, {}, {} ]	/* this is the active local symbol table */
+	[ {}, {}, {}, {} ]	/* current subroutine frame */
  ];
 
-For locating a symbol, only the hashes stored in the last array are
-searched, from last to first, and if the symbol is not found, it's assumed
-to be a global one.
+For locating a symbol, only the block frames stored in the top subroutine
+frame are scanned, from last to first. If it's not found there, it's
+assumed to be a global one.
 
 The bytecode
 ------------
+
+When the compiler parses a mpsl source code file, it generates a bunch of
+mpsl instructions, each one stored in a mpdm array. This (usually small)
+array contains in the first element a scalar value, the _opcode_, and
+optionally other values, that are also mpsl instructions (unless in a very
+special case) and act as the opcode's arguments. All instructions return a
+value after execution. A mpsl compiled program is a chain of instructions
+that call each other.
+
+A description of each opcode follows:
+
+MULTI
+~~~~~
+
+ MULTI <ins1> <ins2>
+
+A MULTI instruction executes <ins1>, then <ins2>, and returns the exit
+value of it.
+
+LITERAL
+~~~~~~~
+
+ LITERAL <value>
+
+A LITERAL instruction clones (using mpdm_clone()) and returns the stored
+value. This is the special case described in the introduction paragraph;
+the arguments for all other instructions are themselves instructions.
+
+SYMVAL
+~~~~~~
+
+ SYMVAL <ins1>
+
+A SYMVAL instruction executes <ins1> and accepts its return value as a
+symbol name, that is looked up in the symbol table and its assigned value
+(if any) returned.
+
+ASSIGN
+~~~~~~
+
+ ASSIGN <ins1> <ins2>
+
+An ASSIGN instruction executes <ins1> and accepts its return value as a
+symbol name; then <ins2> is executed and its return value assigned to that
+symbol. The new value is returned.
+
+EXEC
+~~~~
+
+ EXEC <ins1>
+
+An EXEC instruction executes <ins1> and accepts its return value as an
+executable one; then is executed and its exit value returned.
+
+IF
+~~
+
+ IF <ins1> <ins2>
+ IF <ins1> <ins2> <ins3>
+
+An IF instruction executes <ins1> and, if it returns a true value,
+executes <ins2> and returns its value. If it's not true, return NULL or,
+if <ins3> is defined, it executes it and returns its value.
+
+WHILE
+~~~~~
+
+ WHILE <ins1> <ins2>
+
+A WHILE instruction executes <ins1> and, if it's a true value, executes
+<ins2>. This operation is repeated until <ins1> returns a non-true value.
+It always returns NULL.
+
+LOCAL
+~~~~~
+
+ LOCAL <ins1>
+
+A LOCAL instruction executes <ins1> and takes its return value as an array
+of symbol names to be created in the local symbol table. It always returns
+NULL.
+
+UMINUS
+~~~~~~
+
+ UMINUS <ins1>
+
+An UMINUS instruction executes <ins1>, gets its value as a real number and
+returns the unary minus operation on it (effectively multiplying it by -1).
+
+Math operations
+~~~~~~~~~~~~~~~
+
+ ADD <ins1> <ins2>
+ SUB <ins1> <ins2>
+ MUL <ins1> <ins2>
+ DIV <ins1> <ins2>
+ MOD <ins1> <ins2>
+
+These instructions execute the addition, substraction, multiply, divide and
+modulo math operations from the exit values of the two instructions, and
+return the result.
+
+NOT
+~~~
+
+ NOT <ins1>
+
+A NOT instruction executes <ins1>, takes its return value as a boolean
+one, and returns its negation.
+
+AND
+~~~
+
+ AND <ins1> <ins2>
+
+An AND instruction executes <ins1>. If its return value is accepted as a
+non-true value, returns it; otherwise, executes <ins2> and returns its
+value. This is a short-circuiting operation; if <ins1> is non-true, <ins2>
+is never executed.
+
+OR
+~~
+
+ OR <ins1> <ins2>
+
+An OR instruction executes <ins1>. If its return value is accepted as a
+true value, returns it; otherwise, executes <ins2> and returns its value.
+This is a short-circuiting operation; if <ins1> is true, <ins2> is never
+executed.
+
+Numeric comparisons
+~~~~~~~~~~~~~~~~~~~
+
+ NUMEQ <ins1> <ins2>
+ NUMLT <ins1> <ins2>
+ NUMLE <ins1> <ins2>
+ NUMGT <ins1> <ins2>
+ NUMGE <ins1> <ins2>
+
+These instructions execute the equality, less-than, less-or-equal-than,
+greater-than and greater-or-equal-than numeric comparisons on the exit
+values of <ins1> and <ins2>, and returns a boolean value.
+
+STRCAT
+~~~~~~
+
+ STRCAT <ins1> <ins2>
+
+A STRCAT instruction executes both <ins1> and <ins2>, and concatenates the
+two (accepted as strings) exit values.
+
+STREQ
+~~~~~
+
+ STREQ <ins1> <ins2>
+
+A STREQ instruction executes both <ins1> and <ins2>, compares the return
+values of both as strings, and returns a boolean value.
+
+Postfix immediate unary operations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ PINC <ins1>
+ PDEC <ins1>
+
+These instructions execute <ins1> and accept its return value as a symbol
+name. Its value is incremented or decremented, and then reassigned to it.
+The new value for the symbol is returned.
+
+Suffix immediate unary operations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ SINC <ins1>
+ SDEC <ins1>
+
+These instructions execute <ins1> and accept its return value as a symbol
+value. Its value is incremented or decremented, and then reassigned to it.
+The old value for the symbol is returned.
+
+Immediate math operations
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ IADD <ins1> <ins2>
+ ISUB <ins1> <ins2>
+ IMUL <ins1> <ins2>
+ IDIV <ins1> <ins2>
+
+These instructions execute <ins1> and accept its return value as a symbol
+name. Then <ins2> is executed, and its return value added, substracted,
+multiplied or divided by the value of the symbol, and then reassigned to
+it. The new value is returned.
+
+BREAK
+~~~~~
+
+ BREAK
+
+A BREAK instruction forces the exit of a loop as WHILE or FOREACH. Returns
+NULL.
+
+RETURN
+~~~~~~
+
+ RETURN
+ RETURN <ins1>
+
+A RETURN instruction forces the exit of the current subroutine. If <ins1>
+is defined, it's executed and its value returned, or NULL otherwise.
+
+FOREACH
+~~~~~~~
+
+ FOREACH <ins1> <ins2> <ins3>
+
+A FOREACH instruction executes <ins1> and accepts its return value as a
+symbol name, and executes <ins2> and accepts its return value as an array
+to be iterated onto. Then, in a loop, each element in <ins2> is assigned
+to <ins1> and <ins3> executed. NULL is always returned.
+
+RANGE
+~~~~~
+
+ RANGE <ins1> <ins2>
+
+A RANGE instruction executes both <ins1> and <ins2> and, taken their
+return values as real numbers, returns an array containing a sequence of
+all the values in between (including them).
+
+LIST
+~~~~
+
+ LIST <ins1> <ins2> ...
+
+A LIST instruction executes all the instructions and returns an array with
+all their return values.
+
+HASH
+~~~~
+
+ HASH <ins1> <ins2> ...
+
+A HASH instruction executes all the instructions and returns a hash with
+all their return values used as key / value pairs.
+
+SUBFRAME
+~~~~~~~~
+
+ SUBFRAME <ins1>
+
+A SUBFRAME instruction creates a subroutine frame, executes <ins1>,
+destroys the subroutine frame and returns <ins1> exit value.
+
+BLKFRAME
+~~~~~~~~
+
+ BLKFRAME <ins1>
+
+A BLKFRAME instruction creates a block frame, executes <ins1>,
+destroys the block frame and returns <ins1> exit value.
 
 ----
 Angel Ortega - http://www.triptico.com
