@@ -1,0 +1,11 @@
+.config.log
+Makefile
+config.cflags
+config.h
+config.ldflags
+lex.yy.c
+makefile.opts
+stress
+test.db
+y.tab.c
+y.tab.h

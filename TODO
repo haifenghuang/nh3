@@ -1,5 +1,5 @@
-Minimum Profit Data Manager (mpdm) TODO / Bug List
-==================================================
+Minimum Profit Scripting Language (mpsl) TODO / Bug List
+========================================================
 
 Release Critical Bugs
 ---------------------
@@ -13,90 +13,23 @@ Release Critical Bugs
 Open Bugs
 ---------
 
- * 1015: The auto-sweep introduced by _mpdm.high_threshold is
-   extremely unsafe. At least, internal parts of mpdm should be
-   autosweep-safe.
- * 1018: Support for optional features (like gdbm) should be stored
-   in an mpdm array or hash to easily ask for capabilities.
- * 1032: Nondyn arrays must be protected in mpdm_aexpand(),
-   mpdm_acollapse(), etc.
+None!
 
 Pending Enhancements
 --------------------
 
- * 1004: Create a tie function for mpdm_dump().
- * 1006: stat().
- * 1007: chmod().
- * 1008: bread().
- * 1009: bwrite().
- * 1016: Add optional iconv support.
- * 1017: Add optional gettext support.
- * 1027: Store all static _tie... values in ties in the main
-   control structure.
- * 1028: With the closing of bugs #1026, #1027 and #1029, it should be
-   easy to have multiple mpdm engines, just by commuting the _mpdm
-   pointer. So, there should exist an mpdm_cleanup() function,
-   that would, after destroying values by calling mpdm_shutdown(),
-   free the rest of values stored inside. This kind of cleanup should
-   not be necessary on normal shutdown, as memory will be freed by
-   the operating system anyway.
- * 1029: Store the regex cache in the main control structure.
  * 1024: Implement the 'continue' directive in mpsl.
 
 Closed
 ------
 
- * 1000: All string operations should use wchar_t instead of char
-   (Closed by: #1001; Sat, 3 Jul 2004 11:14:00 +0200).
- * 1001: Merge mpdm-branch-wchar
-   (Closes: #1000; Sun, 4 Jul 2004 11:06:00 +0200).
- * 1002: mpdm_aget() and mpdm_aset() should accept negative offsets
-   (Mon, 12 Jul 2004 17:44:00 +0200).
- * 1012: mpdm_startup() and mpdm_shutdown() (Thu, 26 Aug 2004 20:10:02 +0200)
- * 1013: Move the hardwired '16' number of minimum elements to an
-   struct _mpdm element, set from mpdm_startup()
-   (Thu, 26 Aug 2004 20:10:18 +0200).
- * 1014: Create a new high threshold for values, to force calling
-   mpdm_sweep() from mpdm_new() if that threshold is overpassed (this
-   will allow a limit to be imposed to the number of unreferenced
-   values) (Thu, 26 Aug 2004 20:26:21 +0200).
- * 1019: Rework mpdm_dump() to avoid using dynamic values
-   (Wed, 08 Sep 2004 21:52:39 +0200).
- * 1020: Set errno on errors (Discarded; Thu, 07 Oct 2004 17:11:52 +0200).
- * 1003: Beyond ties; suppress all flags (except some internal ones as IVAL
-   or EXEC). Everything should be done with ties; for example, there
-   should exist a _CMP tie function that would be executed when two
-   values being compared have the same tie (or, better, the same _CMP
-   function). Specially, MPDM_STRING and MPDM_MULTIPLE should disappear.
-   A value will be assumed multiple when having a tie function _AEXPAND
-   (or _AGET, or so). Code will become incidentally clean (no more "if
-   flags & MPDM_" scattered through the code). Risky change!
-   (Discarded; Wed, 08 Dec 2004 09:48:27 +0100).
- * 1005: Should ties be in a special source file, mpdm_t.c ?
-   (Discarded; Wed, 08 Dec 2004 09:49:06 +0100).
  * 1011: Will the scripting language be included here, or as a
    separated package? it could poison the mpdm concept as a 'low
    level utility library' (Yes; Wed, 08 Dec 2004 09:51:55 +0100).
  * 1010: Find a name for the scripting language (Mpsl should be
    fine; Wed, 08 Dec 2004 09:52:32 +0100).
- * 1026: Make the _mpdm control structure public
-   (Wed, 08 Dec 2004 11:34:54 +0100).
- * 1025: Change non-dyn values. They should be stored in a pool of
-   values, and 'allocated' from within mpdm_new(). Two macros, for
-   instance MPDM_ND_BEGIN() and MPDM_ND_END(), could save
-   / restore a static index to that pool. Instead, the allocation
-   from the pool would just wrap (Wed, 08 Dec 2004 16:52:21 +0100).
- * 1030: non-dyn array values are completely broken; the creation
-   should include the array of values and not take it from mpdm_alloc().
-   (Wed, 08 Dec 2004 19:16:05 +0100).
- * 1031: Size in MPDM_ND_A() is superfluous, as it can be calculated
-   (Wed, 08 Dec 2004 22:12:57 +0100).
- * 1033: Create a new mpdm_hexists() function
-   (Thu, 09 Dec 2004 11:19:03 +0100).
  * 1021: Merge mpsl (the scripting language) lex and yacc files from
    CVS project filp2 (Thu, 09 Dec 2004 11:55:42 +0100).
- * 1037: Add caching support in values for real numbers (like ival).
-   (Sun, 12 Dec 2004 17:54:34 +0100).
  * 1034: Implement ++ and -- (Tue, 14 Dec 2004 12:15:25 +0100).
  * 1035: Implement +=, -=, *=, /= (Tue, 14 Dec 2004 12:15:28 +0100).
  * 1036: Implement the 'local' variable creation in mpsl.
@@ -108,12 +41,6 @@ Closed
    instead of two (Thu, 16 Dec 2004 09:08:38 +0100).
  * 1040: MPSL_OP_SYMNAM (SYMBOL) should not exist; it should just
    be a MPSL_OP_LIST (Fri, 17 Dec 2004 07:49:10 +0100).
- * 1043: Change mpdm_write() so that it doesn't use printf(), but
-   wcstombs() and an small local buffer (Mon, 20 Dec 2004 08:41:20 -0800).
- * 1045: mpdm_dump() should not use printf() for mpdm_string(), but
-   convert by hand using wcstombs() (Mon, 20 Dec 2004 08:44:52 -0800).
- * 1044: mpdm_write() should include a 3rd argument, a separator
-   for the end of line (Mon, 20 Dec 2004 08:54:39 -0800).
  * 1041: MPSL_OP_SYMLIST (SYMLIST) should not exist, and be just
    a MPSL_OP_LIST. Also, it should have only one argument
    with the list of symbols, and not an undefined number or arguments.
@@ -124,13 +51,8 @@ Closed
    not values (Fri, 24 Dec 2004 18:49:29 +0100).
  * 1046: Subroutine definitions are using MPSL_OP_SUB that is
    really the substract opcode (Sun, 26 Dec 2004 19:26:32 +0100).
- * 1048: mpdm_rval() breaks locales (Wed, 05 Jan 2005 16:05:52 +0100).
  * 1022: Implement return values for mpsl functions (Closed by #1052;
    Sat, 08 Jan 2005 21:30:37 +0100).
- * 1047: Change _mpdm_sym() to force the creation of all intermediate
-   arrays or hashes in the way. Also, it does not make much sense to
-   be in plain mpdm; it should be part of mpsl (Discarded;
-   Sat, 08 Jan 2005 21:30:55 +0100).
  * 1049: Multiple instructions are buggy; they should always have
    two arguments (Though the parser now spits 18 shift/reduce conflicts,
    everything seems to be fine; Sat, 08 Jan 2005 21:32:57 +0100).

@@ -87,131 +87,20 @@ echo "#define CONFOPT_PREFIX \"$PREFIX\"" >> config.h
 
 # configuration directives
 
-# Win32
-echo -n "Testing for win32... "
-if [ "$WITHOUT_WIN32" = "1" ] ; then
-	echo "Disabled by user"
-else
-	echo "#include <windows.h>" > .tmp.c
-	echo "#include <commctrl.h>" >> .tmp.c
-	echo "int STDCALL WinMain(HINSTANCE h, HINSTANCE p, LPSTR c, int m)" >> .tmp.c
-	echo "{ return 0; }" >> .tmp.c
-
-	TMP_LDFLAGS="-mwindows -lcomctl32"
-	$CC .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-
-	if [ $? = 0 ] ; then
-		echo "#define CONFOPT_WIN32 1" >> config.h
-		echo "$TMP_LDFLAGS " >> config.ldflags
-		echo "OK"
-		WITHOUT_UNIX_GLOB=1
-	else
-		echo "No"
-	fi
-fi
-
-# glob.h support
-if [ "$WITHOUT_UNIX_GLOB" != 1 ] ; then
-	echo -n "Testing for unix-like glob.h... "
-	echo "#include <stdio.h>" > .tmp.c
-	echo "#include <glob.h>" >> .tmp.c
-	echo "int main(void) { glob_t g; g.gl_offs=1; glob(\"*\",GLOB_MARK,NULL,&g); return 0; }" >> .tmp.c
-
-	$CC .tmp.c -o .tmp.o 2>> .config.log
-
-	if [ $? = 0 ] ; then
-		echo "#define CONFOPT_GLOB_H 1" >> config.h
-		echo "OK"
-	else
-		echo "No; activated workaround"
-	fi
-fi
-
-# regex
-echo -n "Testing for regular expressions... "
-
-if [ "$WITH_PCRE" = 1 ] ; then
-	# try first the pcre library
-	TMP_CFLAGS="-I/usr/local/include"
-	TMP_LDFLAGS="-L/usr/local/lib -lpcre -lpcreposix"
-	echo "#include <pcreposix.h>" > .tmp.c
-	echo "int main(void) { regex_t r; regmatch_t m; regcomp(&r,\".*\",REG_EXTENDED|REG_ICASE); return 0; }" >> .tmp.c
-
-	$CC $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-
-	if [ $? = 0 ] ; then
-		echo "OK (using pcre library)"
-		echo "#define CONFOPT_PCRE 1" >> config.h
-		echo "$TMP_CFLAGS " >> config.cflags
-		echo "$TMP_LDFLAGS " >> config.ldflags
-		REGEX_YET=1
-	fi
-fi
-
-if [ "$REGEX_YET" != 1 -a "$WITH_INCLUDED_REGEX" != 1 ] ; then
-	echo "#include <sys/types.h>" > .tmp.c
-	echo "#include <regex.h>" >> .tmp.c
-	echo "int main(void) { regex_t r; regmatch_t m; regcomp(&r,\".*\",REG_EXTENDED|REG_ICASE); return 0; }" >> .tmp.c
-
-	$CC .tmp.c -o .tmp.o 2>> .config.log
-
-	if [ $? = 0 ] ; then
-		echo "OK (using system one)"
-		echo "#define CONFOPT_SYSTEM_REGEX 1" >> config.h
-		REGEX_YET=1
-	fi
-fi
-
-if [ "$REGEX_YET" != 1 ] ; then
-	# if system libraries lack regex, try compiling the
-	# included gnu_regex.c
-
-	$CC -c -DSTD_HEADERS -DREGEX gnu_regex.c -o .tmp.o 2>> .config.log
-
-	if [ $? = 0 ] ; then
-		echo "OK (using included gnu_regex.c)"
-		echo "#define HAVE_STRING_H 1" >> config.h
-		echo "#define REGEX 1" >> config.h
-		echo "#define CONFOPT_INCLUDED_REGEX 1" >> config.h
-	else
-		echo "#define CONFOPT_NO_REGEX 1" >> config.h
-		echo "No (No usable regex library)"
-	fi
-fi
-
-# unistd.h detection
-echo -n "Testing for unistd.h... "
-echo "#include <unistd.h>" > .tmp.c
-echo "int main(void) { return(0); }" >> .tmp.c
-
-$CC .tmp.c -o .tmp.o 2>> .config.log
-
-if [ $? = 0 ] ; then
-	echo "#define CONFOPT_UNISTD_H 1" >> config.h
+# mpdm
+echo -n "Testing for mpdm... "
+if [ -f ../mpdm/mpdm.h ] ; then
+	echo "-I../mpdm" >> config.cflags
+	echo "-L../mpdm -lmpdm" >> config.ldflags
 	echo "OK"
 else
 	echo "No"
-fi
-
-# gdbm detection
-echo -n "Testing for GDBM library... "
-echo "#include <gdbm.h>" > .tmp.c
-echo "int main(void) {" >> .tmp.c
-echo "gdbm_close(gdbm_open(\".t\", 512, GDBM_WRCREAT, 0666, 0));" >> .tmp.c
-echo "return 0; }" >> .tmp.c
-TMP_LDFLAGS="-lgdbm"
-
-$CC .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-
-if [ $? = 0 ] ; then
-	echo "#define CONFOPT_GDBM 1" >> config.h
-	echo "$TMP_LDFLAGS" >> config.ldflags
-	echo "OK"
-else
-	echo "No"
+	exit 1
 fi
 
 #########################################################
+
+cat ../mpdm/config.ldflags >> config.ldflags
 
 # final setup
 

@@ -1,17 +1,15 @@
 # -*- Mode: sh
 
-TARGET=libmpdm.a
+TARGET=libmpsl.a
 LIB=$(TARGET)
 
 all: $(TARGET)
 
-PROJ=mpdm
+PROJ=mpsl
 CFLAGS=-g -Wall
 DOCS=
 
-OBJS=mpdm_v.o mpdm_a.o mpdm_h.o mpdm_d.o mpdm_s.o mpdm_f.o \
-	mpdm_r.o mpdm_dh.o gnu_regex.o \
-	mpsl_c.o mpsl_l.o mpsl_y.o mpsl_f.o
+OBJS=mpsl_c.o mpsl_l.o mpsl_y.o mpsl_f.o
 
 ##################################################################
 
@@ -34,19 +32,20 @@ lex.yy.c: mpsl.l
 	flex mpsl.l
 
 mpsl_l.o: lex.yy.c y.tab.h
-	$(CC) $(CFLAGS) -c lex.yy.c -o mpsl_l.o
+	$(CC) $(CFLAGS) `cat config.cflags` -c lex.yy.c -o mpsl_l.o
 
 mpsl_y.o: y.tab.c
-	$(CC) $(CFLAGS) -c y.tab.c -o mpsl_y.o
+	$(CC) $(CFLAGS) `cat config.cflags` -c y.tab.c -o mpsl_y.o
 
 dep:
-	gcc -MM *.c > makefile.depend
+	gcc `cat config.cflags` -MM *.c > makefile.depend
 
 $(LIB): $(OBJS)
 	$(AR) rv $(LIB) $(OBJS)
 
 stress: stress.c $(LIB)
-	$(CC) $(CFLAGS) `cat config.ldflags` stress.c -L. -lmpdm -o $@
+	$(CC) $(CFLAGS) `cat config.cflags` \
+		`cat config.ldflags` stress.c -L. -lmpdm -o $@
 
 clean:
 	rm -f $(TARGET) $(LIB) $(OBJS) *.o tags *.tar.gz stress
