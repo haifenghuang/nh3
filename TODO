@@ -11,8 +11,6 @@ Release Critical Bugs
  * 1054: Add a main() function, similar to the filp one.
  * 1058: Function execution should bang when the
    function is not found.
- * 1059: Add support for anonymous subroutines (for doing,
-   for example, a = sub { code; }).
 
 Open Bugs
 ---------
@@ -70,5 +68,7 @@ Closed
    (Wed, 23 Feb 2005 08:20:51 +0100).
  * 1061: Implement the %= operator (Mon, 07 Mar 2005 07:45:05 +0100).
  * 1062: Add line info to syntax errors (Mon, 07 Mar 2005 08:15:17 +0100).
+ * 1059: Add support for anonymous subroutines (for doing,
+   for example, a = sub { code; }) (Mon, 07 Mar 2005 16:30:16 +0100).
 
 Email bugs to angel@triptico.com

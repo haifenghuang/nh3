@@ -88,3 +88,7 @@ print("c: ", c, "\n");
 
 a = sub { print("I'm working for the world go round!\n"); };
 a();
+
+sum = sub (a, b) { return(a + b); };
+print("sum 5 + 3: ", sum(5, 3), "\n");
+print("sum 25 + 33: ", sum(25, 33), "\n");

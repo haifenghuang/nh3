@@ -374,8 +374,14 @@ expr:
 				}
  
 	| SUB '{' stmt_list '}'	{
-					/* anonymous subroutine */
+					/* anonymous subroutine (without args) */
 					$$ = INS1(L"LITERAL", _mpsl_x($3, NULL));
+				}
+
+	| SUB '(' sym_list ')' '{' stmt_list '}'
+				{
+					/* anonymous subroutine (with args) */
+					$$ = INS1(L"LITERAL", _mpsl_x($6, $3));
 				}
 
 	| '(' expr ')'		{
