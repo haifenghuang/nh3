@@ -44,6 +44,9 @@ wchar_t * _mpsl_next_char=NULL;
 /* file stream for compiling from file */
 FILE * _mpsl_file=NULL;
 
+/* line number */
+int _mpsl_line=0;
+
 /* string being parsed */
 static wchar_t * _mpsl_string=NULL;
 static int _mpsl_string_i=0;
@@ -61,7 +64,7 @@ static void _mpsl_add_string(wchar_t c)
 
 DIGIT		[0-9]
 LETTER		[a-zA-Z_]
-WSPACE		[ \t\n]+
+WSPACE		[ \t]+
 
 INTEGER		{DIGIT}+
 REAL		{DIGIT}*[\.]?{DIGIT}+
@@ -131,12 +134,15 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 
 {WSPACE}	;	/* ignore spaces */
 
+\n		{ _mpsl_line++; }
+
 \/\*		{ BEGIN REM; /* C-like comments */ }
 <REM>\*\/	{ BEGIN 0; }
-<REM>\n		;
+<REM>\n		{ _mpsl_line++; }
 <REM>.		;
 
 \"		{ BEGIN STR; _mpsl_string=NULL; _mpsl_string_i=0; }
+<STR>\n		{ _mpsl_add_string(L'\n'); _mpsl_line++; }
 <STR>\\n	{ _mpsl_add_string(L'\n'); }
 <STR>\\t	{ _mpsl_add_string(L'\t'); }
 <STR>\\r	{ _mpsl_add_string(L'\r'); }

@@ -13,7 +13,6 @@ Release Critical Bugs
    function is not found.
  * 1059: Add support for anonymous subroutines (for doing,
    for example, a = sub { code; }).
- * 1062: Add line info to syntax errors.
 
 Open Bugs
 ---------
@@ -70,5 +69,6 @@ Closed
    complex values with mpdm_sget() / mpdm_sset()
    (Wed, 23 Feb 2005 08:20:51 +0100).
  * 1061: Implement the %= operator (Mon, 07 Mar 2005 07:45:05 +0100).
+ * 1062: Add line info to syntax errors (Mon, 07 Mar 2005 08:15:17 +0100).
 
 Email bugs to angel@triptico.com

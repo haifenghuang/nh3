@@ -42,6 +42,9 @@ void yyerror(char * s);
 /* pointer to source code being compiled */
 extern wchar_t * _mpsl_next_char;
 
+/* line number */
+extern int _mpsl_line;
+
 /* pointer to file being compiled */
 extern FILE * _mpsl_file;
 
@@ -415,7 +418,7 @@ expr:
 
 void yyerror(char * s)
 {
-	printf("yyerror: %s\n", s);
+	printf("yyerror: %s in line %d\n", s, _mpsl_line);
 }
 
 
@@ -446,6 +449,7 @@ mpdm_v mpsl_compile(mpdm_v code)
 
 	/* point to code */
 	_mpsl_next_char=(wchar_t *) code->data;
+	_mpsl_line=0;
 
 	mpdm_ref(code);
 
@@ -473,6 +477,7 @@ mpdm_v mpsl_compile_file(mpdm_v filename)
 
 	/* point to file */
 	_mpsl_file=(FILE *)f->data;
+	_mpsl_line=0;
 
 	/* compile! */
 	if(yyparse() == 0)
