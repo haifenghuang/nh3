@@ -105,6 +105,13 @@ The value for the element a[0] is also 100; a and b both point to the same
 array. A special-purpose function, clone(), can be used if you want them
 to be different values.
 
+Arrays grow when assigned to an out-of-bounds subscript:
+
+ ary = [ 0, 1, 2, 3 ];
+ print("size: ", size(ary), "\n");	/* prints size: 4 */
+ ary[100] = 100;
+ print("size: ", size(ary), "\n");	/* prints size: 101 */
+
 Hashes
 ~~~~~~
 
