@@ -14,6 +14,7 @@ Release Critical Bugs
  * 1059: Add support for anonymous subroutines (for doing,
    for example, a = sub { code; }).
  * 1061: Implement the %= operator.
+ * 1062: Add line info to syntax errors.
 
 Open Bugs
 ---------
