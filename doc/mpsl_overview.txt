@@ -367,16 +367,25 @@ Subroutines can also accept arguments:
 		print("Option is ", o, "\n");
  }
 
+Subroutine arguments can be used as local variables (in fact, that is exactly
+what they are).
+
+As in assignations, when you pass a multiple value (arrays and hashes) as
+an argument to a subroutine, it's always done by reference, so modifying
+it will change the original value:
+
+ sub dequeue(queue) { local a = apop(queue); do_something_with(a); }
+ 
+ my_q = [ 10, 20, 30 ];
+ dequeue(my_q);		/* on exit, my_q will contain only [ 10, 20 ] */
+
 As every code fragment in mpsl, subroutines always return a value. By
 default, a subroutine returns the result of the last operation:
 
  sub avg(a, b) { a += b; a /= 2; }
 
-Subroutine arguments can be used as local variables (in fact, that is exactly
-what they are).
-
-The value to be returned can also be forced by using the 'return' keyword,
-that can also be used to break execution flow:
+The value to be returned can be explicitly expressed by using the 'return'
+keyword, that can also be used to break execution flow:
 
  sub div(a, b)
  {
@@ -389,11 +398,41 @@ that can also be used to break execution flow:
 	return(a / b);
  }
 
+When calling a subroutine, parentheses are always mandatory, even if it
+has no arguments. If a subroutine is referenced without its arguments,
+it's not called, but a pointer to it returned instead:
+
+ sub sum(a, b) { return(a + b); }
+ 
+ a = sum(10, 20);	/* a == 30 */
+ b = sum;		/* b has a pointer to the sum subroutine */
+ 
+ c = b(20, 30);		/* c == 50, same as calling sum(20, 30) */
+
+The 'sub' directive can also be used as an rvalue to define anonymous
+subroutines. So, the following can be done:
+
+ on_exit_subs = [];
+ apush(on_exit_subs, sub { print("Close files\n"); } );
+ apush(on_exit_subs, sub { print("Clean up memory\n"); } );
+ apush(on_exit_subs, sub { print("Other stuff\n"); } );
+ 
+ /* exiting; calling all functions stored in on_exit_subs */
+ foreach(f, on_exit_subs) f();
+
+Anonymous functions can also accept arguments:
+
+ math_ops = [
+ 	sub (a, b) { print(a, " + ", b, ": ", a + b, "\n"); },
+ 	sub (a, b) { print(a, " - ", b, ": ", a - b, "\n"); },
+ 	sub (a, b) { print(a, " * ", b, ": ", a * b, "\n"); },
+ 	sub (a, b) { print(a, " / ", b, ": ", a / b, "\n"); }
+ ];
+ 
+ foreach(f, math_ops) f(10, 20);
+
 Subroutines are defined in execution time
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Anonymous subroutines
-~~~~~~~~~~~~~~~~~~~~~
 
 Regular expressions
 -------------------

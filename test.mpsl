@@ -120,3 +120,20 @@ sub avg(a, b) { a += b; a /= 2; }
 print("avg(100, 50) == ", avg(100, 50), "\n");
 print("avg(65536, 16384) == ", avg(65536, 16384), "\n");
 print("avg(123456, 654321) == ", avg(123456, 654321), "\n");
+
+on_exit_subs = [];
+apush(on_exit_subs, sub { print("Close files\n"); } );
+apush(on_exit_subs, sub { print("Clean up memory\n"); } );
+apush(on_exit_subs, sub { print("Other stuff\n"); } );
+
+/* now exiting */
+foreach(f, on_exit_subs) f();
+
+math_ops = [
+	sub (a, b) { print(a, " + ", b, ": ", a + b, "\n"); },
+	sub (a, b) { print(a, " - ", b, ": ", a - b, "\n"); },
+	sub (a, b) { print(a, " * ", b, ": ", a * b, "\n"); },
+	sub (a, b) { print(a, " / ", b, ": ", a / b, "\n"); }
+];
+
+foreach(f, math_ops) f(10, 20);
