@@ -13,9 +13,6 @@ Release Critical Bugs
    function is not found.
  * 1059: Add support for anonymous subroutines (for doing,
    for example, a = sub { code; }).
- * 1060: Though local symbol names must be single to the
-   parser, they need to be accesible / assignable as
-   complex values with mpdm_sget() / mpdm_sset().
 
 Open Bugs
 ---------
@@ -67,5 +64,9 @@ Closed
  * 1053: Implement the 'RANGE' opcode (Sun, 06 Feb 2005 17:55:04 +0100).
  * 1056: Add c-style strings (\n, \t, etc) (Mon, 07 Feb 2005 19:22:50 +0100).
  * 1057: Add a mpsl_compile_file() function (Mon, 21 Feb 2005 18:31:13 +0100).
+ * 1060: Though local symbol names must be single to the
+   parser, they need to be accesible / assignable as
+   complex values with mpdm_sget() / mpdm_sset()
+   (Wed, 23 Feb 2005 08:20:51 +0100).
 
 Email bugs to angel@triptico.com

@@ -211,18 +211,7 @@ void mpsl_local_set_symbols(mpdm_v s, mpdm_v v)
  */
 mpdm_v mpsl_set_symbol(mpdm_v s, mpdm_v v)
 {
-	mpdm_v l;
-
-	if((l=mpsl_local_find_symbol(s)) != NULL)
-	{
-		if(s->flags & MPDM_MULTIPLE)
-			s=mpdm_aget(s, 0);
-
-		mpdm_hset(l, s, v);
-		return(v);
-	}
-
-	mpdm_sset(NULL, s, v);
+	mpdm_sset(mpsl_local_find_symbol(s), s, v);
 	return(v);
 }
 
@@ -236,17 +225,7 @@ mpdm_v mpsl_set_symbol(mpdm_v s, mpdm_v v)
  */
 mpdm_v mpsl_get_symbol(mpdm_v s)
 {
-	mpdm_v l;
-
-	if((l=mpsl_local_find_symbol(s)) != NULL)
-	{
-		if(s->flags & MPDM_MULTIPLE)
-			s=mpdm_aget(s, 0);
-
-		return(mpdm_hget(l, s));
-	}
-
-	return(mpdm_sget(NULL, s));
+	return(mpdm_sget(mpsl_local_find_symbol(s), s));
 }
 
 
