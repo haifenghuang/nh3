@@ -159,3 +159,35 @@ print("\nASCII-sorted:\n", ajoin("\n", l),"\n");
 
 l = asort([ 1, 2, 10, 20, 100, 200 ], sub (a, b) { a - b; });
 print("\nNumeric-sorted:\n", ajoin("\n", l),"\n");
+
+print("\nFile tests:\n");
+
+f=open("test.txt", "w");
+ls = [ "Strings\n", "to be written\n", "to a file.\n" ];
+
+if(f != NULL)
+{
+	write(f, ls);
+	close(f);
+}
+else
+	print("Error writing to test.txt\n");
+
+f=open("test.txt", "r");
+
+if(f != NULL)
+{
+	foreach(l, ls)
+	{
+		if(l eq read(f))
+			print("Read OK\n");
+		else
+			print("Read failed.\n");
+	}
+
+	close(f);
+}
+else
+	print("Error reading from test.txt\n");
+
+unlink("test.txt");
