@@ -261,7 +261,7 @@ _O_TYPE _mpsl_exec_i(_O_ARGS);
 #define RF(v) mpdm_ref(v)
 #define UF(v) mpdm_unref(v)
 
-_O_TYPE _O_multi(_O_ARGS) { mpdm_v v=RF(M1); if(!*f) v=RF(M2); return(UF(v)); }
+_O_TYPE _O_multi(_O_ARGS) { mpdm_v v=RF(M1); if(!*f) v=M2; else UF(v); return(v); }
 _O_TYPE _O_literal(_O_ARGS) { return(mpdm_clone(C1)); }
 _O_TYPE _O_symval(_O_ARGS) { return(GET(M1)); }
 _O_TYPE _O_assign(_O_ARGS) { return(SET(M1, M2)); }
