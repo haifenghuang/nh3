@@ -1,0 +1,57 @@
+Mpsl guts
+=========
+
+ Angel Ortega <angel@triptico.com>
+
+This document describes the internal details of this mpsl implementation.
+
+The symbol table
+----------------
+
+There are three different scopes for a symbol in mpsl: global (accesible
+from everywhere), local to subroutine (accesible from the subroutine where
+it's defined) or local to block (accesible from the block where it's
+defined). The priority for symbols with the same name is, obviously,
+inverse: a local to block symbol obscures a local to subroutine one, and
+both a global one. Also, as blocks can be nested, local values defined in
+the inner blocks obscure the ones defined outside.
+
+The global symbol table
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The global symbol table is the simpler one: all global symbols are keys of
+the root hash (as returned from mpdm's function mpdm_root()). Once a
+global symbol is defined, it's stored there until explicit deletion of
+host program termination. Mpsl library functions are also global symbols,
+and share the same namespace.
+
+The local symbol table
+~~~~~~~~~~~~~~~~~~~~~~
+
+The local symbol table is more complicated and is defined as an array of
+arrays of hashes. The upper array has one element for each subroutine
+entered; the leaf hashes are small symbol tables, having the symbol names
+as keys. Everytime a subroutine is executed, a new array is pushed into
+the top of the main array, and everytime a block is entered, a new hash is
+pushed into the subroutine array. On exit, the created values are popped.
+Local symbols created with the _local_ directive are stored in the last
+hash defined in the last array.
+
+If the symbol table was to be defined in mpsl code, it could be as follows:
+
+ local_symbol_table = [
+	[ {}, {}, {} ],		/* symbol tables for caller subroutines */
+	[ {}, {} ],		/* are 'dormant' */
+	[ {} ],
+	[ {}, {}, {}, {} ]	/* this is the active local symbol table */
+ ];
+
+For locating a symbol, only the hashes stored in the last array are
+searched, from last to first, and if the symbol is not found, it's assumed
+to be a global one.
+
+The bytecode
+------------
+
+----
+Angel Ortega - http://www.triptico.com
