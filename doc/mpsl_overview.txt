@@ -199,14 +199,62 @@ Conditional and looping constructs
 If
 ~~
 
+Mpsl has the usual 'if' conditional construct. The condition can be any
+mpsl expression, and the conditional code must be written between braces
+if it's more than one instruction, just like in C.
+
+ /* one instruction */
+ if(a > b)
+	do_something();
+ 
+ /* more than one instruction (braces needed) */
+ if(c == d)
+ {
+	do_this();
+	do_that();
+ }
+
+'If' conditionals can also include an else instruction or block:
+
+ if(tab_size == 8)
+	print("You are sane\n");
+ else
+	print("Weirdo!\n");
+
 While
 ~~~~~
+
+'While' conditionals are exactly as you suppose they are:
+
+ while(player_is_alive)
+ {
+	/* game loop */
+	move_player();
+	move_baddies();
+	update_counter();
+ }
+
+As in 'if', the loop body needs braces if it has more than one instruction.
 
 Foreach
 ~~~~~~~
 
+'Foreach' is a special conditional to do something with all elements of an
+array. The usual construction is as follows:
+
+ /* week days */
+ weekdays = [ 'monday', 'tuesday', 'wednesday', 'thurday', 'friday' ];
+ 
+ foreach(w, weekdays)
+	print("I hate ", w, "s\n");
+
+Each value of the array will be assigned to the variable and the loop body
+executed. As always, the variable is created if it doesn't exist.
+
 Break
 ~~~~~
+
+'While' and 'foreach' loops can be exited by using break, just as in C.
 
 Builtin operators and functions
 -------------------------------
