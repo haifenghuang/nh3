@@ -16,6 +16,8 @@ days = {
 
 print("English for lunes is ", days.lunes, "\n");
 print("English for martes is ", days['martes'], "\n");
+day="miercoles";
+print("English for ", day, " is ", days[day], "\n");
 
 /* multiple level structure */
 window={};
@@ -29,5 +31,26 @@ content=glob("*.*");
 print("Current directory: ", ajoin(", ", content), "\n");
 print("Number of files: ", size(content), "\n");
 
-_random=0;
+foreach(a, content)
+{
+	print("Value for a: ", a, "\n");
+}
 
+a="hey!";
+if(a eq "hey!")
+{
+	local a;
+
+	a="wow!";
+	print("Value for a: ", a, "\n");
+}
+print("Value for a: ", a, "\n");
+
+if(a eq "hey!")
+{
+	print("Variable scope is fine\n");
+}
+else
+{
+	print("Something weird happened to variable 'a'\n");
+}
