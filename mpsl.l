@@ -48,40 +48,53 @@ FILE * _mpsl_file=NULL;
 int _mpsl_line=0;
 
 /* string being parsed */
-static wchar_t * _mpsl_string=NULL;
-static int _mpsl_string_s=0;
-static int _mpsl_string_i=0;
+static char * _dyn_string=NULL;
+static int _dyn_string_s=0;
+static int _dyn_string_i=0;
 
-static wchar_t * _mpsl_add_string(wchar_t c)
+static wchar_t * _wc_dyn_string=NULL;
+static int _wc_dyn_string_s=0;
+
+static char * _mpsl_add_string(char c)
 /* ever growing dynamic string */
 {
-	if(_mpsl_string_s <= _mpsl_string_i)
+	if(_dyn_string_s <= _dyn_string_i)
 	{
-		_mpsl_string_s += 16;
-
-		_mpsl_string=realloc(_mpsl_string,
-			(_mpsl_string_s) * sizeof(wchar_t));
+		_dyn_string_s += 16;
+		_dyn_string=realloc(_dyn_string, _dyn_string_s);
 	}
 
-	_mpsl_string[_mpsl_string_i++]=c;
+	_dyn_string[_dyn_string_i++]=c;
 
-	return(_mpsl_string);
+	return(_dyn_string);
 }
 
 
-static mpdm_v _mpsl_literal_cache(wchar_t * str)
+static mpdm_v _mpsl_literal(char * str)
 /* the cache of literal values */
 {
 	static mpdm_v lc=NULL;
 	mpdm_v v;
+	int n;
 
 	/* creates the cache, if it doesn't exist */
 	if(lc == NULL)
 		lc=mpdm_ref(MPDM_H(0));
 
-	if((v=mpdm_hget_s(lc, str)) == NULL)
+	/* allocs wchar_t space, if needed */
+	if((n=mbstowcs(NULL, str, 0)) > _wc_dyn_string_s)
 	{
-		v=MPDM_S(str);
+		_wc_dyn_string_s=n;
+		_wc_dyn_string=realloc(_wc_dyn_string, (n + 1) * sizeof(wchar_t));
+	}
+
+	/* really converts */
+	mbstowcs(_wc_dyn_string, str, n);
+	_wc_dyn_string[n]=L'\0';
+
+	if((v=mpdm_hget_s(lc, _wc_dyn_string)) == NULL)
+	{
+		v=MPDM_S(_wc_dyn_string);
 		mpdm_hset(lc, v, v);
 	}
 
@@ -106,20 +119,20 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 
 {INTEGER}	{
 			/* integers */
-			yylval.v=MPDM_MBS(yytext);
+			yylval.v=_mpsl_literal(yytext);
 			return(INTEGER);
 		}
 
 {REAL}		{
 			/* real numbers */
-			yylval.v=MPDM_MBS(yytext);
+			yylval.v=_mpsl_literal(yytext);
 			return(REAL);
 		}
 
 \'[^']*\'	{
 			/* single quoted string; return as is */
 			yytext[yyleng - 1]='\0';
-			yylval.v=MPDM_MBS(yytext + 1);
+			yylval.v=_mpsl_literal(yytext + 1);
 			return(STRING);
 		}
 
@@ -157,7 +170,7 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 
 {SYMBOL}	{
 			/* symbol name */
-			yylval.v=MPDM_MBS(yytext);
+			yylval.v=_mpsl_literal(yytext);
 			return(SYMBOL);
 		}
 
@@ -170,23 +183,19 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 <REM>\n		{ _mpsl_line++; }
 <REM>.		;
 
-\"		{ BEGIN STR; _mpsl_string_i=0; }
-<STR>\n		{ _mpsl_add_string(L'\n'); _mpsl_line++; }
-<STR>\\n	{ _mpsl_add_string(L'\n'); }
-<STR>\\t	{ _mpsl_add_string(L'\t'); }
-<STR>\\r	{ _mpsl_add_string(L'\r'); }
-<STR>\\e	{ _mpsl_add_string((wchar_t) 27); }
-<STR>\\\"	{ _mpsl_add_string(L'\"'); }
+\"		{ BEGIN STR; _dyn_string_i=0; }
+<STR>\n		{ _mpsl_add_string('\n'); _mpsl_line++; }
+<STR>\\n	{ _mpsl_add_string('\n'); }
+<STR>\\t	{ _mpsl_add_string('\t'); }
+<STR>\\r	{ _mpsl_add_string('\r'); }
+<STR>\\e	{ _mpsl_add_string(27); }
+<STR>\\\"	{ _mpsl_add_string('\"'); }
 <STR>\"		{
-			yylval.v=_mpsl_literal_cache(_mpsl_add_string(L'\0'));
+			yylval.v=_mpsl_literal(_mpsl_add_string('\0'));
 			BEGIN 0;
 			return(STRING);
 		}
-<STR>.		{
-			wchar_t wc;
-			mbtowc(&wc, yytext, 1);
-			_mpsl_add_string(wc);
-		}
+<STR>.		{ _mpsl_add_string(*yytext); }
 
 .		{ return(*yytext); }
 
