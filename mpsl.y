@@ -71,28 +71,6 @@ static mpdm_v _mpsl_x(mpdm_v a1, mpdm_v a2)
 }
 
 
-static mpdm_v _lc(mpdm_v v)
-/* the cache of literal values */
-{
-	static mpdm_v lc=NULL;
-
-	if(v->flags & MPDM_STRING)
-	{
-		mpdm_v w;
-
-		if(lc == NULL)
-			lc=mpdm_ref(MPDM_H(0));
-
-		if((w=mpdm_hget(lc, v)) == NULL)
-			mpdm_hset(lc, v, v);
-		else
-			v=w;
-	}
-
-	return(v);
-}
-
-
 %}
 
 %union {

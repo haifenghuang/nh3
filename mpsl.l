@@ -49,14 +49,43 @@ int _mpsl_line=0;
 
 /* string being parsed */
 static wchar_t * _mpsl_string=NULL;
+static int _mpsl_string_s=0;
 static int _mpsl_string_i=0;
 
-static void _mpsl_add_string(wchar_t c)
-/* dynamic string */
+static wchar_t * _mpsl_add_string(wchar_t c)
+/* ever growing dynamic string */
 {
-	_mpsl_string=realloc(_mpsl_string,
-		(_mpsl_string_i + 1) * sizeof(wchar_t));
+	if(_mpsl_string_s <= _mpsl_string_i)
+	{
+		_mpsl_string_s += 16;
+
+		_mpsl_string=realloc(_mpsl_string,
+			(_mpsl_string_s) * sizeof(wchar_t));
+	}
+
 	_mpsl_string[_mpsl_string_i++]=c;
+
+	return(_mpsl_string);
+}
+
+
+static mpdm_v _mpsl_literal_cache(wchar_t * str)
+/* the cache of literal values */
+{
+	static mpdm_v lc=NULL;
+	mpdm_v v;
+
+	/* creates the cache, if it doesn't exist */
+	if(lc == NULL)
+		lc=mpdm_ref(MPDM_H(0));
+
+	if((v=mpdm_hget_s(lc, str)) == NULL)
+	{
+		v=MPDM_S(str);
+		mpdm_hset(lc, v, v);
+	}
+
+	return(v);
 }
 
 
@@ -141,7 +170,7 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 <REM>\n		{ _mpsl_line++; }
 <REM>.		;
 
-\"		{ BEGIN STR; _mpsl_string=NULL; _mpsl_string_i=0; }
+\"		{ BEGIN STR; _mpsl_string_i=0; }
 <STR>\n		{ _mpsl_add_string(L'\n'); _mpsl_line++; }
 <STR>\\n	{ _mpsl_add_string(L'\n'); }
 <STR>\\t	{ _mpsl_add_string(L'\t'); }
@@ -149,9 +178,7 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 <STR>\\e	{ _mpsl_add_string((wchar_t) 27); }
 <STR>\\\"	{ _mpsl_add_string(L'\"'); }
 <STR>\"		{
-			_mpsl_add_string(L'\0');
-			yylval.v=_mpdm_new_wcs(MPDM_STRING, _mpsl_string,
-				_mpsl_string_i - 1, _mpdm_tie_fre());
+			yylval.v=_mpsl_literal_cache(_mpsl_add_string(L'\0'));
 			BEGIN 0;
 			return(STRING);
 		}
