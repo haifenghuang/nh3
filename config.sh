@@ -89,9 +89,10 @@ echo "#define CONFOPT_PREFIX \"$PREFIX\"" >> config.h
 
 # mpdm
 echo -n "Testing for mpdm... "
-if [ -f ../mpdm/mpdm.h ] ; then
-	echo "-I../mpdm" >> config.cflags
-	echo "-L../mpdm -lmpdm" >> config.ldflags
+MPDM=../mpdm
+if [ -f $MPDM/mpdm.h ] ; then
+	echo "-I$MPDM" >> config.cflags
+	echo "-L$MPDM -lmpdm" >> config.ldflags
 	echo "OK"
 else
 	echo "No"
@@ -100,10 +101,11 @@ fi
 
 #########################################################
 
-cat ../mpdm/config.ldflags >> config.ldflags
+cat $MPDM/config.ldflags >> config.ldflags
 
 # final setup
 
+echo "MPDM=$MPDM" >> makefile.opts
 echo "VERSION=$VERSION" >> makefile.opts
 echo "PREFIX=$PREFIX" >> makefile.opts
 echo >> makefile.opts
