@@ -71,3 +71,13 @@ ary = [ 0, 1, 2, 3 ];
 print("size: ", size(ary), "\n");
 ary[100] = 100;
 print("size: ", size(ary), "\n");
+
+a = 10;
+b = 20;
+
+/* ternary operator */
+c = a > b && a || b;
+print("c: ", c, "\n");
+
+c = a < b && a || b;
+print("c: ", c, "\n");
