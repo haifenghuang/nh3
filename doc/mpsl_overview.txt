@@ -343,11 +343,57 @@ The well known binary +=, -=, *=, /= and %= also exist:
 Subroutines
 -----------
 
-Without arguments
-~~~~~~~~~~~~~~~~~
+Subroutines (also called functions) are created with the 'sub' keyword:
 
-With arguments
-~~~~~~~~~~~~~~
+ sub main_loop
+ {
+	while(!exit_requested)
+	{
+		local o;
+ 
+		o = get_option();
+		process_option(k);
+		draw_screen();
+	}
+ }
+
+Subroutines can also accept arguments:
+
+ sub process_option(o)
+ {
+	if(o == -1)
+		exit_requested=1;
+	else
+		print("Option is ", o, "\n");
+ }
+
+As every code fragment in mpsl, subroutines always return a value. By
+default, a subroutine returns the result of the last operation:
+
+ sub avg(a, b) { a += b; a /= 2; }
+
+Subroutine arguments can be used as local variables (in fact, that is exactly
+what they are).
+
+The value to be returned can also be forced by using the 'return' keyword,
+that can also be used to break execution flow:
+
+ sub div(a, b)
+ {
+	if(b == 0)
+	{
+		print("Invalid value for b.\n");
+		return(0);
+	}
+ 
+	return(a / b);
+ }
+
+Subroutines are defined in execution time
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Anonymous subroutines
+~~~~~~~~~~~~~~~~~~~~~
 
 Regular expressions
 -------------------
