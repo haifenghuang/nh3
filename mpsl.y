@@ -492,6 +492,7 @@ mpdm_v mpsl_compile_file(mpdm_v filename)
 		x=_mpsl_x(_mpsl_bytecode, NULL);
 
 	fclose(_mpsl_file);
+	_mpsl_file=NULL;
 
 	return(x);
 }
