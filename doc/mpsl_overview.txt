@@ -287,8 +287,8 @@ used.
 Strings
 ~~~~~~~
 
-The eq operator is used for testing string equality, and ~ is used for
-concatenating strings.
+The 'eq' operator is used for testing string equality, 'ne' for the
+opposite and ~ is used for concatenating strings.
 
 Mpsl's scalar values are used for both string and numerical values, so (as
 in Perl) the string and numeric comparison operators must be different:
