@@ -208,9 +208,9 @@ stmt:
 					   creation and assignation */
 					$$ = INS2(L"MULTI",
 						INS1(L"LOCAL",
-							INS1(L"LITERAL", _lc($2))),
+							INS1(L"LITERAL", $2)),
 						INS2(L"ASSIGN",
-							INS1(L"LITERAL", _lc($2)),$4)
+							INS1(L"LITERAL", $2),$4)
 						);
 				}
 	| BREAK ';'		{
@@ -249,12 +249,12 @@ list:
 sym_list:
 	SYMBOL			{
 					$$ = INS1(L"LIST",
-						INS1(L"LITERAL", _lc($1)));
+						INS1(L"LITERAL", $1));
 				}
 	| sym_list ',' SYMBOL	{
 					/* comma-separated list of symbols */
 					mpdm_apush($1,
-						INS1(L"LITERAL", _lc($3)));
+						INS1(L"LITERAL", $3));
 					$$ = $1;
 				}
 	;
@@ -276,18 +276,18 @@ hash:
 compsym:
 	SYMBOL			{
 					$$ = INS1(L"LIST",
-						INS1(L"LITERAL", _lc($1)));
+						INS1(L"LITERAL", $1));
 				}
 	| compsym '.' INTEGER	{
 					/* a.5 compound symbol */
 					mpdm_apush($1,
-				  		INS1(L"LITERAL", _lc($3)));
+				  		INS1(L"LITERAL", $3));
 				  	$$ = $1;
 				}
 	| compsym '.' SYMBOL	{
 					/* a.b compound symbol */
 					mpdm_apush($1,
-				  		INS1(L"LITERAL", _lc($3)));
+				  		INS1(L"LITERAL", $3));
 				  	$$ = $1;
 				}
 	| compsym '[' expr ']'	{
@@ -300,15 +300,15 @@ compsym:
 expr:
 	INTEGER			{
 					/* literal integer */
-					$$ = INS1(L"LITERAL", _lc($1));
+					$$ = INS1(L"LITERAL", $1);
 				}
 	| STRING		{
 					/* literal string */
-					$$ = INS1(L"LITERAL", _lc($1));
+					$$ = INS1(L"LITERAL", $1);
 				}
 	| REAL			{
 					/* literal real number */
-					$$ = INS1(L"LITERAL", _lc($1));
+					$$ = INS1(L"LITERAL", $1);
 				}
 	| compsym		{
 					/* compound symbol */
