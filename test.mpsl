@@ -92,3 +92,31 @@ a();
 sum = sub (a, b) { return(a + b); };
 print("sum 5 + 3: ", sum(5, 3), "\n");
 print("sum 25 + 33: ", sum(25, 33), "\n");
+
+/* greatest common divisor (Euclid's algorithm) */
+sub gcd(m, n)
+{
+	while (m > 0)
+	{
+		if(n > m)
+		{
+			local t = m;
+			m = n;
+			n = t;
+		}
+
+		m -= n;
+	}
+
+	return(n);
+}
+
+print("gcd(100, 50) == ", gcd(100, 50), "\n");
+print("gcd(65536, 16384) == ", gcd(65536, 16384), "\n");
+print("gcd(123456, 654321) == ", gcd(123456, 654321), "\n");
+
+sub avg(a, b) { a += b; a /= 2; }
+
+print("avg(100, 50) == ", avg(100, 50), "\n");
+print("avg(65536, 16384) == ", avg(65536, 16384), "\n");
+print("avg(123456, 654321) == ", avg(123456, 654321), "\n");
