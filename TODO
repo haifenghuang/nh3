@@ -13,6 +13,7 @@ Release Critical Bugs
    function is not found.
  * 1059: Add support for anonymous subroutines (for doing,
    for example, a = sub { code; }).
+ * 1061: Implement the %= operator.
 
 Open Bugs
 ---------
