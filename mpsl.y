@@ -373,6 +373,11 @@ expr:
 					$$ = INS2(L"OR", $1, $3);
 				}
  
+	| SUB '{' stmt_list '}'	{
+					/* anonymous subroutine */
+					$$ = INS1(L"LITERAL", _mpsl_x($3, NULL));
+				}
+
 	| '(' expr ')'		{
 					/* parenthesized expression */
 					$$ = $2;
