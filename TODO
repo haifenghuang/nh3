@@ -18,8 +18,6 @@ Pending Enhancements
 --------------------
 
  * 1024: Implement the 'continue' directive in mpsl.
- * 1060: The compiler should use a cache for literal string
-   values.
 
 Closed
 ------
@@ -74,5 +72,7 @@ Closed
  * 1052: Implement the 'return' directive in mpsl
    (Mon, 07 Mar 2005 16:32:34 +0100).
  * 1050: Document the virtual machine (Mon, 07 Mar 2005 16:32:49 +0100).
+ * 1060: The compiler should use a cache for literal string
+   values (Mon, 14 Mar 2005 08:16:24 +0100).
 
 Email bugs to angel@triptico.com
