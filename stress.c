@@ -540,6 +540,7 @@ void test_mpsl_file(void)
 
 	_mpsl_trace=0;
 
+	printf("Compiling from file:\n");
 	v=_test_mpsl_file("test.mpsl");
 	v=mpdm_exec(v, NULL);
 }
