@@ -61,7 +61,6 @@ static void _mpsl_add_string(wchar_t c)
 
 DIGIT		[0-9]
 LETTER		[a-zA-Z_]
-COMMENT		#.*\n
 WSPACE		[ \t\n]+
 
 INTEGER		{DIGIT}+
@@ -129,8 +128,6 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 			yylval.v=MPDM_MBS(yytext);
 			return(SYMBOL);
 		}
-
-{COMMENT}	;	/* ignore comments */
 
 {WSPACE}	;	/* ignore spaces */
 
