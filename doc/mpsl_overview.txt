@@ -1,0 +1,91 @@
+Mpsl overview
+=============
+
+ Angel Ortega <angel@triptico.com>
+
+Syntax
+------
+
+Comments
+~~~~~~~~
+
+Strings
+~~~~~~~
+
+True and false
+~~~~~~~~~~~~~~
+
+Data types
+----------
+
+Scalars
+~~~~~~~
+
+Arrays
+~~~~~~
+
+Hashes
+~~~~~~
+
+Variables
+---------
+
+Naming
+~~~~~~
+
+Scoping
+~~~~~~~
+
+By value or by reference
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Conditional and looping constructs
+----------------------------------
+
+If
+~~
+
+While
+~~~~~
+
+Foreach
+~~~~~~~
+
+Break
+~~~~~
+
+Builtin operators and functions
+-------------------------------
+
+Assignment
+~~~~~~~~~~
+
+Arithmetic
+~~~~~~~~~~
+
+Numeric comparison
+~~~~~~~~~~~~~~~~~~
+
+Boolean logic
+~~~~~~~~~~~~~
+
+Immediate operations
+~~~~~~~~~~~~~~~~~~~~
+
+Subroutines
+-----------
+
+Without arguments
+~~~~~~~~~~~~~~~~~
+
+With arguments
+~~~~~~~~~~~~~~
+
+Regular expressions
+-------------------
+
+File I/O
+--------
+
+----
+Angel Ortega <angel@triptico.com>
