@@ -254,25 +254,91 @@ executed. As always, the variable is created if it doesn't exist.
 Break
 ~~~~~
 
-'While' and 'foreach' loops can be exited by using break, just as in C.
+Exit from 'While' and 'foreach' loops can be forced by using break, just
+as in C.
 
-Builtin operators and functions
--------------------------------
+Builtin operators
+-----------------
 
 Assignment
 ~~~~~~~~~~
 
+To assign a value to a variable, use the = operator. Remember that scalars
+are always assigned by value, and multiple values (arrays and hashes) are
+always assigned by reference (in case you need a copy of a multiple value,
+use the clone() function).
+
 Arithmetic
 ~~~~~~~~~~
+
+The usual +, -, *, / and % operators are used for addition, substraction,
+multiply, divide and modulo, as always. Operands for the modulo operator
+are treated as integers, and for the rest of them, as real numbers.
+Operator precedence are like in C; you can always use parentheses to
+explicitly force your desired precedence.
 
 Numeric comparison
 ~~~~~~~~~~~~~~~~~~
 
+The usual == (equality), != (inequality), > (greater than), < (less than),
+>= (greater or equal than) and <= (less or equal than) operands can be
+used.
+
+Strings
+~~~~~~~
+
+The eq operator is used for testing string equality, and ~ is used for
+concatenating strings.
+
+Mpsl's scalar values are used for both string and numerical values, so (as
+in Perl) the string and numeric comparison operators must be different:
+
+ a = 0; b = 0.0;
+ if(a == b) { /* this is truth */ }
+ if(a eq b) { /* this is false */ }
+
 Boolean logic
 ~~~~~~~~~~~~~
 
-Immediate operations
-~~~~~~~~~~~~~~~~~~~~
+As in C, && (logical and) and || (logical or) are used. They don't return
+just a boolean value, but the value that matches the condition, so that
+you can do:
+
+ a = 0; b = 100;
+ c = a || b;		/* c ends with a value of 100 */
+ c = a && b;		/* c ends with a value of 0 */
+ a = 50;
+ c = a || b;		/* c ends with a value of 50 */
+ c = a && b;		/* c ends with a value of 100 */
+
+Mpsl lacks a ternary conditional operator (as the ? : one in C), but it
+can be easily simulated with && and || operators:
+
+ /* assigns to c the greatest of a and b */
+ c = a > b && a || b;
+
+There is also the ! operator, that negates a condition.
+
+Immediate operators
+~~~~~~~~~~~~~~~~~~~
+
+Immediate operators act directly over variables. The most usual examples
+are the unary ++ and --, that are used as in C.
+
+ a = 100;
+ a++;		/* a's value is now 101 */
+ a--;		/* back to 100 */
+
+Also as in C, this operators can be used as prefixes or suffixes, giving
+the following result:
+
+ a = 100;
+ b = a++;	/* b's value is 100, a's value is 101 */
+ c = ++a;	/* c's and a's value is both 102 */
+
+The well known binary +=, -=, *=, /= and %= also exist:
+
+ a += 25;	/* adds 25 to a */
 
 Subroutines
 -----------
