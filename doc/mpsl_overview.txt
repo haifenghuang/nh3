@@ -431,6 +431,16 @@ Anonymous functions can also accept arguments:
  
  foreach(f, math_ops) f(10, 20);
 
+This kind of anonymous subroutines are commonly used as callbacks. The
+following examples use the two-argument version of asort() to sort arrays
+in different ways:
+
+ /* reverse-sort the array (comparing each element backwards) */
+ sorted_ary = asort(unsorted_ary, sub (a, b) { cmp(b, a); } );
+ 
+ /* numeric sort (instead of plain ASCII) */
+ sorted_ary = asort(unsorted_ary, sub (a, b) { a - b; } );
+
 Subroutines are defined in execution time
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -153,3 +153,9 @@ print("\nSorted, with explicit callback function:\n", ajoin("\n", l),"\n");
 
 l=asort(hkeys(days), sub (a, b) { cmp(b, a); });
 print("\nReverse-sorted:\n", ajoin("\n", l),"\n");
+
+l = asort([ 1, 2, 10, 20, 100, 200 ]);
+print("\nASCII-sorted:\n", ajoin("\n", l),"\n");
+
+l = asort([ 1, 2, 10, 20, 100, 200 ], sub (a, b) { a - b; });
+print("\nNumeric-sorted:\n", ajoin("\n", l),"\n");
