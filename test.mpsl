@@ -66,3 +66,8 @@ print(math.sum(5, 4), "\n");
 
 _sum=math.sum;
 print(_sum(6, 7), "\n");
+
+ary = [ 0, 1, 2, 3 ];
+print("size: ", size(ary), "\n");
+ary[100] = 100;
+print("size: ", size(ary), "\n");
