@@ -89,7 +89,7 @@ static mpdm_v _F_print(mpdm_v a)
 	int n;
 
 	for(n=0;n < mpdm_size(a);n++)
-		printf("%ls", mpdm_string(A(n)));
+		_mpdm_write_wcs(stdout, mpdm_string(A(n)));
 	return(NULL);
 }
 
