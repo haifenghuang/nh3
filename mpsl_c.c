@@ -246,6 +246,7 @@ _O_TYPE _mpsl_exec_i(_O_ARGS);
 #define M3 M(3)
 
 #define R(x) mpdm_rval(x)
+#define I(x) mpdm_ival(x)
 
 #define RM1 mpdm_rval(M(1))
 #define RM2 mpdm_rval(M(2))
@@ -289,6 +290,7 @@ _O_TYPE _O_immadd(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(R(GET(s))
 _O_TYPE _O_immsub(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(R(GET(s)) - RM2))); }
 _O_TYPE _O_immmul(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(R(GET(s)) * RM2))); }
 _O_TYPE _O_immdiv(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(R(GET(s)) / RM2))); }
+_O_TYPE _O_immmod(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(I(GET(s)) % IM2))); }
 _O_TYPE _O_immsinc(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v v=GET(s); SET(UF(s), MPDM_R(R(v) + 1)); return(v); }
 _O_TYPE _O_immsdec(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v v=GET(s); SET(UF(s), MPDM_R(R(v) - 1)); return(v); }
 _O_TYPE _O_numeq(_O_ARGS) { mpdm_v v1=M1; mpdm_v v2=M2; return(BOOL((v1 == NULL || v2 == NULL) ? (v1 == v2) : (R(v1) == R(v2)))); }
@@ -430,6 +432,7 @@ static struct _op
 	{ L"ISUB",	_O_immsub },
 	{ L"IMUL",	_O_immmul },
 	{ L"IDIV",	_O_immdiv },
+	{ L"IMOD",	_O_immmod },
 	{ L"NOT",	_O_not },
 	{ L"AND",	_O_and },
 	{ L"OR",	_O_or },

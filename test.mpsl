@@ -81,3 +81,7 @@ print("c: ", c, "\n");
 
 c = a < b && a || b;
 print("c: ", c, "\n");
+
+c = 100;
+c %= 49;
+print("c: ", c, "\n");

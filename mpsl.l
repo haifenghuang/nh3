@@ -121,7 +121,8 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 "-="		return ISUB;
 "*="		return IMUL;
 "/="		return IDIV;
-"%"		return MODULO;
+"%"		return MOD;
+"%="		return IMOD;
 
 {SYMBOL}	{
 			/* symbol name */

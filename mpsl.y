@@ -81,11 +81,11 @@ static mpdm_v _mpsl_x(mpdm_v a1, mpdm_v a2)
 %nonassoc ELSE
 
 %left BOOLAND BOOLOR
-%left INC DEC IADD ISUB IMUL IDIV
+%left INC DEC IADD ISUB IMUL IDIV IMOD
 %left '!'
 %left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE HASHPAIR RANGE '>''<'
 %left '+' '-'
-%left '*' '/' MODULO
+%left '*' '/' MOD
 %nonassoc UMINUS
 
 %type <ins> stmt expr sym_list stmt_list list hash compsym
@@ -304,7 +304,7 @@ expr:
 	| expr '-' expr		{ $$ = INS2(L"SUB", $1, $3); }
 	| expr '*' expr		{ $$ = INS2(L"MUL", $1, $3); }
 	| expr '/' expr		{ $$ = INS2(L"DIV", $1, $3); }
-	| expr MODULO expr	{ $$ = INS2(L"MOD", $1, $3); }
+	| expr MOD expr		{ $$ = INS2(L"MOD", $1, $3); }
 
 				/* immediate math operations */
 	| INC compsym		{ $$ = INS1(L"PINC", $2); }
@@ -315,6 +315,7 @@ expr:
 	| compsym ISUB expr	{ $$ = INS2(L"ISUB", $1, $3); }
 	| compsym IMUL expr	{ $$ = INS2(L"IMUL", $1, $3); }
 	| compsym IDIV expr	{ $$ = INS2(L"IDIV", $1, $3); }
+	| compsym IMOD expr	{ $$ = INS2(L"IMOD", $1, $3); }
 
 	| '!' expr		{
 					/* boolean not */
