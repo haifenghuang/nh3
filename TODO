@@ -18,6 +18,8 @@ Pending Enhancements
 --------------------
 
  * 1024: Implement the 'continue' directive in mpsl.
+ * 1060: The compiler should use a cache for literal string
+   values.
 
 Closed
 ------
