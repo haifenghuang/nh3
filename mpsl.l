@@ -135,6 +135,7 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 
 \/\*		{ BEGIN REM; /* C-like comments */ }
 <REM>\*\/	{ BEGIN 0; }
+<REM>\n		;
 <REM>.		;
 
 \"		{ BEGIN STR; _mpsl_string=NULL; _mpsl_string_i=0; }
