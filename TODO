@@ -10,6 +10,10 @@ Release Critical Bugs
  * 1052: Implement the 'return' directive in mpsl.
  * 1054: Add a main() function, similar to the filp one.
  * 1057: Add a mpsl_compile_file() function.
+ * 1058: Function execution should bang when the
+   function is not found.
+ * 1059: Add support for anonymous subroutines (for doing,
+   for example, a = sub { code; }).
 
 Open Bugs
 ---------
