@@ -526,6 +526,10 @@ void test_mpsl3(void)
 	v=mpdm_exec(v, NULL);
 	mpdm_dump(v);
 
+	v=_test_mpsl("sub t(h) { h.x; } H={}; H.x=5; t(h);");
+	v=mpdm_exec(v, NULL);
+	_test("Accesing a hash's component passed as argument", mpdm_ival(v) == 5);
+
 /*	mpdm_dump(mpdm_root());*/
 }
 
