@@ -50,6 +50,7 @@
 static mpdm_v _F_size(mpdm_v a) { return(MPDM_I(mpdm_size(A0))); }
 static mpdm_v _F_clone(mpdm_v a) { return(mpdm_clone(A0)); }
 static mpdm_v _F_dump(mpdm_v a) { mpdm_dump(A0); return(NULL); }
+static mpdm_v _F_cmp(mpdm_v a) { return(MPDM_I(mpdm_cmp(A0, A1))); }
 
 static mpdm_v _F_is_array(mpdm_v a) { return(mpsl_boolean(A0->flags & MPDM_MULTIPLE)); }
 static mpdm_v _F_is_hash(mpdm_v a) { return(mpsl_boolean(A0->flags & MPDM_HASH)); }
@@ -102,6 +103,7 @@ static struct
 	{ L"size",	_F_size },
 	{ L"clone",	_F_clone },
 	{ L"dump",	_F_dump },
+	{ L"cmp",	_F_cmp },
 	{ L"is_array",	_F_is_array },
 	{ L"is_hash",	_F_is_hash },
 	{ L"is_exec",	_F_is_exec },

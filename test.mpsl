@@ -137,3 +137,7 @@ math_ops = [
 ];
 
 foreach(f, math_ops) f(10, 20);
+
+print("cmp('sunday','monday'): ", cmp('sunday','monday'), "\n");
+print("cmp('friday','monday'): ", cmp('friday','monday'), "\n");
+print("cmp('sunday','sunday'): ", cmp('sunday','sunday'), "\n");
