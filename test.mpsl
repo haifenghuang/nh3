@@ -196,3 +196,14 @@ else
 	print("Error reading from test.txt\n");
 
 unlink("test.txt");
+
+sub chop(s) { sregex("/\n$/", s, NULL); }
+
+eol = "\n";
+sub chop2(s) { sregex("/" ~ eol ~ "$/", s, NULL); }
+
+if(chop("text with eol\n") eq "text with eol")
+	print("Sregex works!\n");
+
+if(chop2("text with eol\n") eq "text with eol")
+	print("Sregex works!\n");
