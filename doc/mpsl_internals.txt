@@ -1,5 +1,5 @@
-Mpsl guts
-=========
+Mpsl internals
+==============
 
  Angel Ortega <angel@triptico.com>
 
