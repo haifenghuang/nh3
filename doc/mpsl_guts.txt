@@ -73,7 +73,7 @@ MULTI
  MULTI <ins1> <ins2>
 
 A MULTI instruction executes <ins1>, then <ins2>, and returns the exit
-value of it.
+value of the latter.
 
 LITERAL
 ~~~~~~~
@@ -108,7 +108,7 @@ EXEC
  EXEC <ins1>
 
 An EXEC instruction executes <ins1> and accepts its return value as an
-executable one; then is executed and its exit value returned.
+executable one; then it's executed and its exit value returned.
 
 IF
 ~~
@@ -117,8 +117,8 @@ IF
  IF <ins1> <ins2> <ins3>
 
 An IF instruction executes <ins1> and, if it returns a true value,
-executes <ins2> and returns its value. If it's not true, return NULL or,
-if <ins3> is defined, it executes it and returns its value.
+executes <ins2> and returns its value. If it's not true, returns NULL or,
+if <ins3> is defined, executes it and returns its value.
 
 WHILE
 ~~~~~
@@ -157,7 +157,8 @@ Math operations
 
 These instructions execute the addition, substraction, multiply, divide and
 modulo math operations from the exit values of the two instructions, and
-return the result.
+return the result. Values are treated as real numbers except in MOD, where
+they are treated as integers.
 
 NOT
 ~~~
@@ -198,7 +199,7 @@ Numeric comparisons
 
 These instructions execute the equality, less-than, less-or-equal-than,
 greater-than and greater-or-equal-than numeric comparisons on the exit
-values of <ins1> and <ins2>, and returns a boolean value.
+values of <ins1> and <ins2>, and return a boolean value.
 
 STRCAT
 ~~~~~~
@@ -213,8 +214,8 @@ STREQ
 
  STREQ <ins1> <ins2>
 
-A STREQ instruction executes both <ins1> and <ins2>, compares the return
-values of both as strings, and returns a boolean value.
+A STREQ instruction executes both <ins1> and <ins2>, tests for string equality
+of both values, and returns a boolean value.
 
 Postfix immediate unary operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
