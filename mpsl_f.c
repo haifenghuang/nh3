@@ -65,7 +65,7 @@ static mpdm_v _F_apush(mpdm_v a) { return(mpdm_apush(A0,A1)); }
 static mpdm_v _F_apop(mpdm_v a) { return(mpdm_apop(A0)); }
 static mpdm_v _F_aqueue(mpdm_v a) { return(mpdm_aqueue(A0,A1,IA2)); }
 static mpdm_v _F_aseek(mpdm_v a) { return(MPDM_I(mpdm_aseek(A0,A1,IA2))); }
-static mpdm_v _F_asort(mpdm_v a) { return(mpdm_asort_cb(A0,IA1,A2)); }
+static mpdm_v _F_asort(mpdm_v a) { return(mpdm_asort_cb(A0,1,A1)); }
 static mpdm_v _F_asplit(mpdm_v a) { return(mpdm_asplit(A0,A1)); }
 static mpdm_v _F_ajoin(mpdm_v a) { return(mpdm_ajoin(A0,A1)); }
 

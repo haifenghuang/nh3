@@ -141,3 +141,15 @@ foreach(f, math_ops) f(10, 20);
 print("cmp('sunday','monday'): ", cmp('sunday','monday'), "\n");
 print("cmp('friday','monday'): ", cmp('friday','monday'), "\n");
 print("cmp('sunday','sunday'): ", cmp('sunday','sunday'), "\n");
+
+l=hkeys(days);
+print("\nUnsorted:\n", ajoin("\n", l), "\n");
+
+l=asort(hkeys(days));
+print("\nSorted:\n", ajoin("\n", l),"\n");
+
+l=asort(hkeys(days), sub (a, b) { cmp(a, b); });
+print("\nSorted, with explicit callback function:\n", ajoin("\n", l),"\n");
+
+l=asort(hkeys(days), sub (a, b) { cmp(b, a); });
+print("\nReverse-sorted:\n", ajoin("\n", l),"\n");
