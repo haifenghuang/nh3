@@ -6,7 +6,6 @@ LIB=$(TARGET)
 all: $(TARGET)
 
 PROJ=mpsl
-CFLAGS=-g -Wall
 DOCS=
 
 OBJS=mpsl_c.o mpsl_l.o mpsl_y.o mpsl_f.o
