@@ -477,26 +477,21 @@ mpdm_v mpsl_compile(mpdm_v code)
 mpdm_v mpsl_compile_file(mpdm_v filename)
 {
 	mpdm_v x=NULL;
-	mpdm_v f;
 
-	if((f=mpdm_open(filename, MPDM_LS(L"r"))) == NULL)
+	filename=MPDM_2MBS(filename->data);
+
+	if((_mpsl_file=fopen((char *)filename->data, "r")) == NULL)
 		return(NULL);
-
-	mpdm_ref(f);
 
 	_mpsl_lib();
 
-	/* point to file */
-	_mpsl_file=(FILE *)f->data;
 	_mpsl_line=0;
 
 	/* compile! */
 	if(yyparse() == 0)
 		x=_mpsl_x(_mpsl_bytecode, NULL);
 
-	mpdm_unref(f);
-
-	mpdm_close(f);
+	fclose(_mpsl_file);
 
 	return(x);
 }

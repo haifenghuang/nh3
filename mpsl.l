@@ -217,10 +217,7 @@ int yy_input_for_flex(char * buf, int max)
 		int c;
 
 		if((c=fgetc(_mpsl_file)) == EOF)
-		{
-			_mpsl_file=NULL;
 			return(0);
-		}
 
 		buf[0]=c;
 		return(1);
