@@ -54,3 +54,12 @@ else
 {
 	print("Something weird happened to variable 'a'\n");
 }
+
+math={};
+
+sub math.sum(a, b) { return(a + b); }
+
+print(math.sum(5, 4), "\n");
+
+_sum=math.sum;
+print(_sum(6, 7), "\n");
