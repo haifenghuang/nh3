@@ -167,7 +167,10 @@ ls = [ "Strings\n", "to be written\n", "to a file.\n" ];
 
 if(f != NULL)
 {
-	write(f, ls);
+	local l;
+
+	foreach(l, ls)
+		write(f, l);
 	close(f);
 }
 else
@@ -177,6 +180,8 @@ f=open("test.txt", "r");
 
 if(f != NULL)
 {
+	local l;
+
 	foreach(l, ls)
 	{
 		if(l eq read(f))
