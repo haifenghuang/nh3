@@ -47,54 +47,60 @@ FILE * _mpsl_file=NULL;
 /* line number */
 int _mpsl_line=0;
 
-/* string being parsed */
-static char * _dyn_string=NULL;
-static int _dyn_string_s=0;
-static int _dyn_string_i=0;
+/* dynamic string manipulation macros */
+#ifndef ds_init
+struct ds { char * d; int p; int s; };
+#define ds_init(x) do { x.d=(char *)0; x.p=x.s=0; } while(0)
+#define ds_rewind(x) x.p=0;
+#define ds_free(x) do { if(x.d) free(x.d); ds_init(x); } while(0)
+#define ds_redim(x) do { if(x.p >= x.s) x.d=realloc(x.d, x.s += 32); } while(0)
+#define ds_poke(x,c) do { ds_redim(x); x.d[x.p++]=c; } while(0)
+#define ds_pokes(x,t) do { char *p=t; while(*p) ds_poke(x, *p++); } while(0)
+#endif /* ds_init */
 
-static wchar_t * _wc_dyn_string=NULL;
-static int _wc_dyn_string_s=0;
+/* a dynamic string */
+struct ds _ds;
 
-static char * _mpsl_add_string(char c)
-/* ever growing dynamic string */
+static wchar_t * _s_mbstowcs(char * str)
+/* converts from mbs to wcs, using a static buffer */
 {
-	if(_dyn_string_s <= _dyn_string_i)
+	static wchar_t * _wc=NULL;
+	static int _wc_s=0;
+	int n;
+
+	/* allocs wchar_t space, if needed */
+	if((n=mbstowcs(NULL, str, 0)) > _wc_s)
 	{
-		_dyn_string_s += 16;
-		_dyn_string=realloc(_dyn_string, _dyn_string_s);
+		_wc_s=n;
+		_wc=realloc(_wc, (_wc_s + 1) * sizeof(wchar_t));
 	}
 
-	_dyn_string[_dyn_string_i++]=c;
+	/* really converts */
+	mbstowcs(_wc, str, n);
+	_wc[n]=L'\0';
 
-	return(_dyn_string);
+	return(_wc);
 }
 
 
-static mpdm_v _mpsl_literal(char * str)
+static mpdm_v _mpsl_lc(char * str)
 /* the cache of literal values */
 {
 	static mpdm_v lc=NULL;
 	mpdm_v v;
-	int n;
+	wchar_t * ptr;
 
 	/* creates the cache, if it doesn't exist */
 	if(lc == NULL)
 		lc=mpdm_ref(MPDM_H(0));
 
-	/* allocs wchar_t space, if needed */
-	if((n=mbstowcs(NULL, str, 0)) > _wc_dyn_string_s)
-	{
-		_wc_dyn_string_s=n;
-		_wc_dyn_string=realloc(_wc_dyn_string, (n + 1) * sizeof(wchar_t));
-	}
+	/* convert to wchar_t */
+	ptr=_s_mbstowcs(str);
 
-	/* really converts */
-	mbstowcs(_wc_dyn_string, str, n);
-	_wc_dyn_string[n]=L'\0';
-
-	if((v=mpdm_hget_s(lc, _wc_dyn_string)) == NULL)
+	/* search in cache */
+	if((v=mpdm_hget_s(lc, ptr)) == NULL)
 	{
-		v=MPDM_S(_wc_dyn_string);
+		v=MPDM_S(ptr);
 		mpdm_hset(lc, v, v);
 	}
 
@@ -119,20 +125,20 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 
 {INTEGER}	{
 			/* integers */
-			yylval.v=_mpsl_literal(yytext);
+			yylval.v=_mpsl_lc(yytext);
 			return(INTEGER);
 		}
 
 {REAL}		{
 			/* real numbers */
-			yylval.v=_mpsl_literal(yytext);
+			yylval.v=_mpsl_lc(yytext);
 			return(REAL);
 		}
 
 \'[^']*\'	{
 			/* single quoted string; return as is */
 			yytext[yyleng - 1]='\0';
-			yylval.v=_mpsl_literal(yytext + 1);
+			yylval.v=_mpsl_lc(yytext + 1);
 			return(STRING);
 		}
 
@@ -170,7 +176,7 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 
 {SYMBOL}	{
 			/* symbol name */
-			yylval.v=_mpsl_literal(yytext);
+			yylval.v=_mpsl_lc(yytext);
 			return(SYMBOL);
 		}
 
@@ -183,19 +189,20 @@ SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 <REM>\n		{ _mpsl_line++; }
 <REM>.		;
 
-\"		{ BEGIN STR; _dyn_string_i=0; }
-<STR>\n		{ _mpsl_add_string('\n'); _mpsl_line++; }
-<STR>\\n	{ _mpsl_add_string('\n'); }
-<STR>\\t	{ _mpsl_add_string('\t'); }
-<STR>\\r	{ _mpsl_add_string('\r'); }
-<STR>\\e	{ _mpsl_add_string(27); }
-<STR>\\\"	{ _mpsl_add_string('\"'); }
+\"		{ BEGIN STR; ds_rewind(_ds); }
+<STR>\n		{ ds_poke(_ds,'\n'); _mpsl_line++; }
+<STR>\\n	{ ds_poke(_ds,'\n'); }
+<STR>\\t	{ ds_poke(_ds,'\t'); }
+<STR>\\r	{ ds_poke(_ds,'\r'); }
+<STR>\\e	{ ds_poke(_ds,27); }
+<STR>\\\"	{ ds_poke(_ds,'\"'); }
 <STR>\"		{
-			yylval.v=_mpsl_literal(_mpsl_add_string('\0'));
+			ds_poke(_ds,'\0');
+			yylval.v=_mpsl_lc(_ds.d);
 			BEGIN 0;
 			return(STRING);
 		}
-<STR>.		{ _mpsl_add_string(*yytext); }
+<STR>.		{ ds_poke(_ds,*yytext); }
 
 .		{ return(*yytext); }
 
