@@ -70,6 +70,16 @@ mpdm_v _test_mpsl(char * code)
 }
 
 
+mpdm_v _test_mpsl_file(char * file)
+{
+	mpdm_v v=mpsl_compile_file(MPDM_MBS(file));
+
+	printf("Compile file: ");
+	_test(file, v != NULL);
+	return(v);
+}
+
+
 void test_mpsl(void)
 {
 	mpdm_v v;
@@ -520,6 +530,17 @@ void test_mpsl3(void)
 }
 
 
+void test_mpsl_file(void)
+{
+	mpdm_v v;
+
+	_mpsl_trace=0;
+
+	v=_test_mpsl_file("test.mpsl");
+	v=mpdm_exec(v, NULL);
+}
+
+
 int main(void)
 {
 	mpdm_startup();
@@ -528,6 +549,7 @@ int main(void)
 	test_mpsl();
 	test_mpsl2();
 	test_mpsl3();
+	test_mpsl_file();
 
 	mpdm_sweep(-1);
 	mpdm_sweep(-1);

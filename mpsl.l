@@ -41,6 +41,9 @@ int yy_input_for_flex(char * buf, int max);
 /* internal pointer to next character in code */
 wchar_t * _mpsl_next_char=NULL;
 
+/* file stream for compiling from file */
+FILE * _mpsl_file=NULL;
+
 /* string being parsed */
 static wchar_t * _mpsl_string=NULL;
 static int _mpsl_string_i=0;
@@ -161,20 +164,41 @@ int yywrap(void) { return(1); }
 
 int yy_input_for_flex(char * buf, int max)
 {
-	char tmp[MB_CUR_MAX + 1];
-
-	if(_mpsl_next_char == NULL || *_mpsl_next_char == L'\0')
-		return(0);
-
-	if(wctomb(tmp, *_mpsl_next_char) != 1)
+	if(_mpsl_file != NULL)
 	{
-		_mpsl_next_char=NULL;
-		return(0);
+		int c;
+
+		if((c=fgetc(_mpsl_file)) == EOF)
+		{
+			_mpsl_file=NULL;
+			return(0);
+		}
+
+		buf[0]=c;
+		return(1);
+	}
+	else
+	if(_mpsl_next_char != NULL)
+	{
+		char tmp[MB_CUR_MAX + 1];
+
+		if(*_mpsl_next_char == L'\0')
+		{
+			_mpsl_next_char=NULL;
+			return(0);
+		}
+
+		if(wctomb(tmp, *_mpsl_next_char) != 1)
+		{
+			_mpsl_next_char=NULL;
+			return(0);
+		}
+
+		_mpsl_next_char ++;
+
+		buf[0]=tmp[0];
+		return(1);
 	}
 
-	_mpsl_next_char ++;
-
-	buf[0]=tmp[0];
-
-	return(1);
+	return(0);
 }

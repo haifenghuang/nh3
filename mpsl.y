@@ -42,6 +42,9 @@ void yyerror(char * s);
 /* pointer to source code being compiled */
 extern wchar_t * _mpsl_next_char;
 
+/* pointer to file being compiled */
+extern FILE * _mpsl_file;
+
 /* shortcut macros to insert instructions */
 
 #define INS0(o)			_ins(o, 0, NULL, NULL, NULL)
@@ -450,6 +453,33 @@ mpdm_v mpsl_compile(mpdm_v code)
 		x=_mpsl_x(_mpsl_bytecode, NULL);
 
 	mpdm_unref(code);
+
+	return(x);
+}
+
+
+mpdm_v mpsl_compile_file(mpdm_v filename)
+{
+	mpdm_v x=NULL;
+	mpdm_v f;
+
+	if((f=mpdm_open(filename, MPDM_LS(L"r"))) == NULL)
+		return(NULL);
+
+	mpdm_ref(f);
+
+	_mpsl_lib();
+
+	/* point to file */
+	_mpsl_file=(FILE *)f->data;
+
+	/* compile! */
+	if(yyparse() == 0)
+		x=_mpsl_x(_mpsl_bytecode, NULL);
+
+	mpdm_unref(f);
+
+	mpdm_close(f);
 
 	return(x);
 }

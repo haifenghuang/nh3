@@ -1,0 +1,33 @@
+/* test.mpsl */
+
+/* program written in mpsl
+   (Minimum Profit Scripting Language) */
+
+print("This is a test.\n");
+
+/* hash */
+days = {
+	"lunes"		=> "monday",
+	"martes"	=> "tuesday",
+	"miercoles"	=> "wednesday",
+	"jueves"	=> "thursday",
+	"viernes"	=> "friday"
+	};
+
+print("English for lunes is ", days.lunes, "\n");
+print("English for martes is ", days['martes'], "\n");
+
+/* multiple level structure */
+window={};
+window.ids={};
+wid={ 'x' => 640, 'y' => 400 };
+window.ids['main']=wid;
+
+dump(window);
+
+content=glob("*.*");
+print("Current directory: ", ajoin(", ", content), "\n");
+print("Number of files: ", size(content), "\n");
+
+_random=0;
+

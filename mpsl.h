@@ -34,3 +34,4 @@ mpdm_v mpsl_get_symbol(mpdm_v s);
 mpdm_v _mpsl_exec(mpdm_v c, mpdm_v args);
 
 mpdm_v mpsl_compile(mpdm_v code);
+mpdm_v mpsl_compile_file(mpdm_v filename);
