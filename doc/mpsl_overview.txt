@@ -139,8 +139,8 @@ Hash definitions *must* use the => to mark key/value pairs.
 Hash assignation is always by reference, as in arrays (in fact, hashes are
 just a special case of array).
 
-Abridged access to hash members
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Compact access to hash members
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Hashes can, and ofter are, used as records. Given the following hash of
 hashes:
@@ -153,10 +153,10 @@ The save_on_exit component can also be accessed by using:
 
  app.config.save_on_exit = 1;
 
-Please note that variables in abridged mode are *not* automatically
-created unless the path to them already exist; so 'app' and 'app.config'
-must exist and be hashes, or the 'save_on_exit' component will not be
-created and fail silently. This is a common pitfall.
+Please note that variables are *not* automatically created unless the path
+to them already exist; so 'app' and 'app.config' must exist and be hashes,
+or the 'save_on_exit' component will not be created and fail silently.
+This is a common pitfall.
 
 Variable names
 ~~~~~~~~~~~~~~
@@ -254,7 +254,7 @@ executed. As always, the variable is created if it doesn't exist.
 Break
 ~~~~~
 
-Exit from 'While' and 'foreach' loops can be forced by using break, just
+Exit from 'While' and 'foreach' loops can be forced by using 'break', just
 as in C.
 
 Builtin operators
@@ -441,8 +441,22 @@ in different ways:
  /* numeric sort (instead of plain ASCII) */
  sorted_ary = asort(unsorted_ary, sub (a, b) { a - b; } );
 
-Subroutines are defined in execution time
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Subroutines are defined in execution time and *not* in compilation time.
+This means that you can redefine a subroutine whenever you want, but be
+aware that you can't use it before the 'sub' instruction has been
+executed. This is a common pitfall:
+
+ /* call a function before it exists: error */
+ print("Average for 2 and 3 is ", avg(2, 3), "\n");
+ 
+ sub avg(a, b) { a += b; a /= 2; }
+ 
+ /* now you can use it */
+ print("Average for 4 and 5 is ", avg(4, 5), "\n");
+
+It's easier to see subroutine definitions as an assignation of a code
+block to a variable: you would never access a variable before assigning a
+value to it.
 
 Regular expressions
 -------------------
