@@ -25,6 +25,9 @@ window.ids={};
 wid={ 'x' => 640, 'y' => 400 };
 window.ids['main']=wid;
 
+print("x: ", window['ids']['main']['x'], "\n");
+print("x: ", window.ids.main.x, "\n");
+
 dump(window);
 
 content=glob("*.*");
