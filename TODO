@@ -13,6 +13,9 @@ Release Critical Bugs
    function is not found.
  * 1059: Add support for anonymous subroutines (for doing,
    for example, a = sub { code; }).
+ * 1060: Though local symbol names must be single to the
+   parser, they need to be accesible / assignable as
+   complex values with mpdm_sget() / mpdm_sset().
 
 Open Bugs
 ---------
