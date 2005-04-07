@@ -550,6 +550,8 @@ int main(void)
 {
 	mpdm_startup();
 
+	_mpdm->default_sweep=64;
+
 	_mpsl_trace=1;
 	test_mpsl();
 	test_mpsl2();

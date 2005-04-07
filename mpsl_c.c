@@ -485,6 +485,9 @@ _O_TYPE _mpsl_exec_i(_O_ARGS)
 {
 	mpdm_v ret=NULL;
 
+	/* reference both code and arguments */
+	mpdm_ref(c); mpdm_ref(a);
+
 	if(c != NULL)
 	{
 		int op;
@@ -506,6 +509,9 @@ _O_TYPE _mpsl_exec_i(_O_ARGS)
 	if(_mpsl_trace)
 		printf("** %ls: %ls\n", mpdm_string(C0), mpdm_string(ret));
 
+	/* unreference */
+	mpdm_unref(a); mpdm_unref(c);
+
 	/* sweep some values */
 	mpdm_sweep(0);
 
@@ -518,14 +524,8 @@ mpdm_v _mpsl_exec(mpdm_v c, mpdm_v a)
 	int f=0;
 	mpdm_v v;
 
-	/* reference both code and arguments */
-	mpdm_ref(c); mpdm_ref(a);
-
 	/* execute first instruction */
 	v=_mpsl_exec_i(c, a, &f);
-
-	/* unreference */
-	mpdm_unref(a); mpdm_unref(c);
 
 	return(v);
 }
