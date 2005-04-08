@@ -286,11 +286,11 @@ _O_TYPE _O_strcat(_O_ARGS) { mpdm_v v=RF(M1); mpdm_v r=mpdm_strcat(v, M2); UF(v)
 _O_TYPE _O_streq(_O_ARGS) { mpdm_v v=RF(M1); mpdm_v r=BOOL(mpdm_cmp(v, M2) == 0); UF(v); return(r); }
 _O_TYPE _O_immpinc(_O_ARGS) { mpdm_v s=M1; return(SET(s, MPDM_R(R(GET(s)) + 1))); }
 _O_TYPE _O_immpdec(_O_ARGS) { mpdm_v s=M1; return(SET(s, MPDM_R(R(GET(s)) - 1))); }
-_O_TYPE _O_immadd(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(R(GET(s)) + RM2))); }
-_O_TYPE _O_immsub(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(R(GET(s)) - RM2))); }
-_O_TYPE _O_immmul(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(R(GET(s)) * RM2))); }
-_O_TYPE _O_immdiv(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(R(GET(s)) / RM2))); }
-_O_TYPE _O_immmod(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(I(GET(s)) % IM2))); }
+_O_TYPE _O_immadd(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v r=SET(s, MPDM_R(R(GET(s)) + RM2)); UF(s); return(r); }
+_O_TYPE _O_immsub(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v r=SET(s, MPDM_R(R(GET(s)) - RM2)); UF(s); return(r); }
+_O_TYPE _O_immmul(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v r=SET(s, MPDM_R(R(GET(s)) * RM2)); UF(s); return(r); }
+_O_TYPE _O_immdiv(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v r=SET(s, MPDM_R(R(GET(s)) / RM2)); UF(s); return(r); }
+_O_TYPE _O_immmod(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v r=SET(s, MPDM_R(I(GET(s)) % IM2)); UF(s); return(r); }
 _O_TYPE _O_immsinc(_O_ARGS) { mpdm_v s=M1; mpdm_v v=GET(s); SET(s, MPDM_R(R(v) + 1)); return(v); }
 _O_TYPE _O_immsdec(_O_ARGS) { mpdm_v s=M1; mpdm_v v=GET(s); SET(s, MPDM_R(R(v) - 1)); return(v); }
 _O_TYPE _O_numeq(_O_ARGS) { mpdm_v v1=RF(M1); mpdm_v v2=M2; UF(v1); return(BOOL((v1 == NULL || v2 == NULL) ? (v1 == v2) : (R(v1) == R(v2)))); }
