@@ -264,8 +264,8 @@ _O_TYPE _mpsl_exec_i(_O_ARGS);
 _O_TYPE _O_multi(_O_ARGS) { mpdm_v v=RF(M1); if(!*f) v=M2; else UF(v); return(v); }
 _O_TYPE _O_literal(_O_ARGS) { return(mpdm_clone(C1)); }
 _O_TYPE _O_symval(_O_ARGS) { return(GET(M1)); }
-_O_TYPE _O_assign(_O_ARGS) { mpdm_v v=RF(M1); return(SET(UF(v), M2)); }
-_O_TYPE _O_exec(_O_ARGS) { mpdm_v v=RF(M1); return(mpdm_exec(UF(v), M2)); }
+_O_TYPE _O_assign(_O_ARGS) { mpdm_v v=RF(M1); mpdm_v r=SET(v, M2); UF(v); return(r); }
+_O_TYPE _O_exec(_O_ARGS) { mpdm_v v=RF(M1); mpdm_v r=mpdm_exec(v, M2); UF(v); return(r); }
 _O_TYPE _O_if(_O_ARGS) { return(ISTRU(M1) ? M2 : M3); }
 _O_TYPE _O_while(_O_ARGS) { while(! *f && ISTRU(M1)) M2; if(*f == 1) *f=0; return(NULL); }
 _O_TYPE _O_local(_O_ARGS) { mpsl_local_set_symbols(M1, NULL); return(NULL); }
@@ -282,8 +282,8 @@ _O_TYPE _O_numlt(_O_ARGS) { return(BOOL(RM1 < RM2)); }
 _O_TYPE _O_numle(_O_ARGS) { return(BOOL(RM1 <= RM2)); }
 _O_TYPE _O_numgt(_O_ARGS) { return(BOOL(RM1 > RM2)); }
 _O_TYPE _O_numge(_O_ARGS) { return(BOOL(RM1 >= RM2)); }
-_O_TYPE _O_strcat(_O_ARGS) { mpdm_v v=RF(M1); return(mpdm_strcat(UF(v), M2)); }
-_O_TYPE _O_streq(_O_ARGS) { mpdm_v v=RF(M1); return(BOOL(mpdm_cmp(UF(v), M2) == 0)); }
+_O_TYPE _O_strcat(_O_ARGS) { mpdm_v v=RF(M1); mpdm_v r=mpdm_strcat(v, M2); UF(v); return(r); }
+_O_TYPE _O_streq(_O_ARGS) { mpdm_v v=RF(M1); mpdm_v r=BOOL(mpdm_cmp(v, M2) == 0); UF(v); return(r); }
 _O_TYPE _O_immpinc(_O_ARGS) { mpdm_v s=M1; return(SET(s, MPDM_R(R(GET(s)) + 1))); }
 _O_TYPE _O_immpdec(_O_ARGS) { mpdm_v s=M1; return(SET(s, MPDM_R(R(GET(s)) - 1))); }
 _O_TYPE _O_immadd(_O_ARGS) { mpdm_v s=RF(M1); return(SET(UF(s), MPDM_R(R(GET(s)) + RM2))); }
@@ -502,7 +502,7 @@ _O_TYPE _mpsl_exec_i(_O_ARGS)
 
 			/* and call it if existent */
 			if(o->func != NULL)
-				ret=o->func(c, a, f);
+				ret=mpdm_ref(o->func(c, a, f));
 		}
 	}
 
@@ -515,7 +515,7 @@ _O_TYPE _mpsl_exec_i(_O_ARGS)
 	/* sweep some values */
 	mpdm_sweep(0);
 
-	return(ret);
+	return(mpdm_unref(ret));
 }
 
 

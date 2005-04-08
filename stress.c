@@ -60,7 +60,7 @@ void _test(char * str, int ok)
 
 /* tests */
 
-mpdm_v _set(mpdm_v * v1, mpdm_v v2)
+void _set(mpdm_v * v1, mpdm_v v2)
 {
 	mpdm_unref(*v1);
 	*v1=mpdm_ref(v2);
