@@ -460,11 +460,15 @@ void test_mpsl2(void)
 	mpdm_unref(w);
 
 	/* string concatenation */
+	w=mpdm_ref(MPDM_LS(L"big lebowski"));
+
 	v=_test_mpsl("\"big\" ~ \" lebowski\";");
-	_test("~ (strcat 1)", mpdm_cmp(_test_exec(v, NULL), MPDM_LS(L"big lebowski")) == 0);
+	_test("~ (strcat 1)", mpdm_cmp(_test_exec(v, NULL), w) == 0);
 
 	v=_test_mpsl("\"big\" ~ \" \" ~ \"lebowski\";");
-	_test("~ (strcat 2)", mpdm_cmp(_test_exec(v, NULL), MPDM_LS(L"big lebowski")) == 0);
+	_test("~ (strcat 2)", mpdm_cmp(_test_exec(v, NULL), w) == 0);
+
+	mpdm_unref(w);
 }
 
 
