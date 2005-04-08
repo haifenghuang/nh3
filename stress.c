@@ -62,7 +62,10 @@ void _test(char * str, int ok)
 
 mpdm_v _test_mpsl(char * code)
 {
-	mpdm_v v=mpsl_compile(MPDM_MBS(code));
+	static mpdm_v v=NULL;
+
+	mpdm_unref(v);
+	v=mpdm_ref(mpsl_compile(MPDM_MBS(code)));
 
 	printf("Compile: ");
 	_test(code, v != NULL);
@@ -72,10 +75,24 @@ mpdm_v _test_mpsl(char * code)
 
 mpdm_v _test_mpsl_file(char * file)
 {
-	mpdm_v v=mpsl_compile_file(MPDM_MBS(file));
+	static mpdm_v v=NULL;
+
+	mpdm_unref(v);
+	v=mpdm_ref(mpsl_compile_file(MPDM_MBS(file)));
 
 	printf("Compile file: ");
 	_test(file, v != NULL);
+	return(v);
+}
+
+
+mpdm_v _test_exec(mpdm_v x, mpdm_v a)
+{
+	static mpdm_v v=NULL;
+
+	mpdm_unref(v);
+	v=mpdm_ref(mpdm_exec(x, a));
+
 	return(v);
 }
 
@@ -87,7 +104,7 @@ void test_mpsl(void)
 	printf("mpsl (Minimum Profit Scripting Language)\n\n");
 
 	v=mpsl_compile(MPDM_LS(L"a=1;"));
-	mpdm_exec(v, NULL);
+	_test_exec(v, NULL);
 
 	printf("mpsl compilation tests-------------\n");
 
@@ -153,257 +170,257 @@ void test_mpsl2(void)
 	/* execution tests */
 	v=_test_mpsl("666;");
 	mpdm_dump(v);
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("literal number", mpdm_ival(v) == 666);
 
 	v=_test_mpsl("\"goodbye\";");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("literal string", mpdm_cmp(v, MPDM_LS(L"goodbye")) == 0);
 
 	v=_test_mpsl("1 + 3 + 5;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("mpsl calculator 1", mpdm_rval(v) == 9.0);
 
 	v=_test_mpsl("1 + ((3 - 5) * 8);");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("mpsl calculator 2", mpdm_rval(v) == -15.0);
 
 	/* next value cannot be tested as an exact equality,
 	   as rounding errors will manifest */
 	v=_test_mpsl("1.5 + ((3.1 - 5.8) * 8.0);");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("mpsl calculator 3",
 		mpdm_rval(v) < -20.0 && mpdm_rval(v) > -21.0);
 
 	v=_test_mpsl("2 + 3 * 4;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("mpsl calculator 4", mpdm_rval(v) == 14.0);
 
 	v=_test_mpsl("2 * 3 + 4;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("mpsl calculator 5", mpdm_rval(v) == 10.0);
 
-	v=mpdm_exec(_test_mpsl("2 + 3 * 4;"), NULL);
-	w=mpdm_exec(_test_mpsl("2 + (3 * 4);"), NULL);
+	v=_test_exec(_test_mpsl("2 + 3 * 4;"), NULL);
+	w=_test_exec(_test_mpsl("2 + (3 * 4);"), NULL);
 	_test("mpsl calculator 6 (operator precedence)", mpdm_rval(v) == mpdm_rval(w));
 
-	v=mpdm_exec(_test_mpsl("2 + 3 * 4;"), NULL);
-	w=mpdm_exec(_test_mpsl("(2 + 3) * 4;"), NULL);
+	v=_test_exec(_test_mpsl("2 + 3 * 4;"), NULL);
+	w=_test_exec(_test_mpsl("(2 + 3) * 4;"), NULL);
 	_test("mpsl calculator 7 (operator precedence)", mpdm_rval(v) != mpdm_rval(w));
 
 	v=_test_mpsl("/* array */ [\"this\", \"one\", \"is\", 666, \"cool\"];");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	mpdm_dump(v);
 	_test("mpsl array", mpdm_ival(mpdm_aget(v, 3)) == 666);
 
 	v=_test_mpsl("/* hash */ { \"enero\" => \"january\", \"febrero\" => \"february\" };");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	mpdm_dump(v);
 	_test("mpsl hash", mpdm_cmp(mpdm_hget(v,
 		MPDM_LS(L"febrero")), MPDM_LS(L"february")) == 0);
 
 	v=_test_mpsl("! 1;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("boolean not 1", v == NULL);
 	v=_test_mpsl("! 0;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("boolean not 2", v != NULL);
 
 	v=_test_mpsl("1 && 3;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("boolean and 1", mpdm_ival(v) == 3);
 	v=_test_mpsl("1 && 0;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("boolean and 2", !mpsl_is_true(v));
 	v=_test_mpsl("0 && 1;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("boolean and 3", !mpsl_is_true(v));
 
 	v=_test_mpsl("1 || 3;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("boolean or 1", mpdm_ival(v) == 1);
 	v=_test_mpsl("2 || 0;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("boolean or 2", mpdm_ival(v) == 2);
 	v=_test_mpsl("0 || 3;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("boolean or 3", mpdm_ival(v) == 3);
 
 	v=_test_mpsl("6 == 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric == 1", v != NULL);
 	v=_test_mpsl("8.0 == 8.0;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric == 2", v != NULL);
 	v=_test_mpsl("6 == 8;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric == 3", v == NULL);
 
 	v=_test_mpsl("6 != 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric != 1", v == NULL);
 	v=_test_mpsl("8.0 != 8.0;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric != 2", v == NULL);
 	v=_test_mpsl("6 != 8;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric != 3", v != NULL);
 
 	v=_test_mpsl("6 < 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric < 1", v == NULL);
 	v=_test_mpsl("8 < 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric < 2", v == NULL);
 	v=_test_mpsl("5 < 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric < 3", v != NULL);
 
 	v=_test_mpsl("6 > 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric > 1", v == NULL);
 	v=_test_mpsl("8 > 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric > 2", v != NULL);
 	v=_test_mpsl("5 > 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric > 3", v == NULL);
 
 	v=_test_mpsl("6 <= 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric <= 1", v != NULL);
 	v=_test_mpsl("8 <= 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric <= 2", v == NULL);
 	v=_test_mpsl("5 <= 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric <= 3", v != NULL);
 
 	v=_test_mpsl("6 >= 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric >= 1", v != NULL);
 	v=_test_mpsl("8 >= 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric >= 2", v != NULL);
 	v=_test_mpsl("5 >= 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("numeric >= 3", v == NULL);
 
 	v=_test_mpsl("11 % 6;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("modulo", mpdm_ival(v) == 5);
 
 	v=_test_mpsl("variable=16384;");
 	mpdm_dump(v);
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("assign 1", mpdm_ival(v) == 16384);
 
 	v=_test_mpsl("array=[10, 20, 30, 40];");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("assign 2", mpdm_ival(mpdm_aget(v, 2)) == 30);
 
 	v=_test_mpsl("a=1; b=2; c=3;");
 	mpdm_dump(v);
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 
 	v=_test_mpsl("CACHE={}; CACHE.regex=[]; CACHE.regex[0]=12345;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 
 	v=_test_mpsl("variable;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("symval 1", mpdm_ival(v) == 16384);
 
 	v=_test_mpsl("variable2=1 + ((3 - 5) * 8); variable2;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("symval 2", mpdm_rval(v) == -15);
 
 	v=_test_mpsl("variable3=variable2 * 2;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("symval 3", mpdm_ival(v) == -30);
 
 	v=_test_mpsl("sub mysum(a, b) { a + b; }");
 	mpdm_dump(v);
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("sub 1", v != NULL);
 
 	v=_test_mpsl("sub pi() { 3.1416; }");
 	mpdm_dump(v);
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("sub 2", v != NULL);
 
 	v=_test_mpsl("var10=pi();");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("exec 1", mpdm_rval(v) == 3.1416);
 
 	v=_test_mpsl("var11=pi() * 10000; var11;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("exec 2", mpdm_rval(v) == 31416);
 
 	v=_test_mpsl("mysum(100, 20);");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("exec 3", mpdm_rval(v) == 120.0);
 
 	v=_test_mpsl("a = NULL;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("NULL 1", v == NULL);
 
 	v=_test_mpsl("a == NULL;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("NULL 2", mpdm_ival(v) == 1);
 
 	v=_test_mpsl("local a, b; a = 1; b = 2;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 
 	v=_test_mpsl("a == NULL;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("local 1", mpdm_ival(v) == 1);
 
 	v=_test_mpsl("66 * -1;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("uminus", mpdm_ival(v) == -66);
 
 	v=_test_mpsl("\"test\" eq \"test\";");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("streq 1", mpsl_is_true(v));
 
 	v=_test_mpsl("\"test\" eq \"prueba\";");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("streq 1", ! mpsl_is_true(v));
 
 	v=_test_mpsl("a = 6; ++ a;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("pinc", mpdm_ival(v) == 7);
 
 	v=_test_mpsl("a++;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("sinc", mpdm_ival(v) == 7);
 
 	v=_test_mpsl("a += 10;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("iadd", mpdm_ival(v) == 18);
 
 	v=_test_mpsl("local a, b, c; a=1; b=2; c=3; if(a == b) c=1000; c;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("if 1", mpdm_ival(v) == 3);
 
 	v=_test_mpsl("local a, b, c; a=1; b=2; c=3; if(a <= b) c=1000; c;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("if 2", mpdm_ival(v) == 1000);
 
 	v=_test_mpsl("local a, b, c; a=1; b=2; if(a == b) c=1000; else c=2000; c;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("ifelse", mpdm_ival(v) == 2000);
 
 	v=_test_mpsl("local a; a = 0; while(a < 100) { a++; } a;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("ifelse", mpdm_ival(v) == 100);
 
 	v=_test_mpsl("a=mysum(100, 50); a;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("mysum 1", mpdm_ival(v) == 150);
 
 	v=_test_mpsl("a=mysum(2000, 500); a;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("mysum 2", mpdm_ival(v) == 2500);
 
 	w=mpdm_ref(MPDM_A(2));
@@ -413,37 +430,37 @@ void test_mpsl2(void)
 	/* asks for the value of the mysum symbol (the code) */
 	v=_test_mpsl("mysum;");
 	/* executes, so mysum() itself is being returned */
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	mpdm_dump(v);
-	_test("mysum 3", mpdm_ival(mpdm_exec(v, w)) == 150);
+	_test("mysum 3", mpdm_ival(_test_exec(v, w)) == 150);
 
 	mpdm_aset(w, MPDM_I(75), 1);
-	_test("mysum 4", mpdm_ival(mpdm_exec(v, w)) == 175);
+	_test("mysum 4", mpdm_ival(_test_exec(v, w)) == 175);
 
 	/* compiles (and executes) the definition of gcd() */
 	v=_test_mpsl("/* greatest common divisor (Euclid's algorithm) */ sub gcd(m, n) { while (m > 0) { if(n > m) { local t = m; m = n; n = t; } m -= n; } n; }");
-	mpdm_exec(v, NULL);
+	_test_exec(v, NULL);
 
 	/* gets a pointer to gcd() */
-	v=mpdm_exec(_test_mpsl("gcd;"), NULL);
+	v=_test_exec(_test_mpsl("gcd;"), NULL);
 	mpdm_dump(v);
 
 	/* executes gcd(100, 50); */
 	mpdm_aset(w, MPDM_I(50), 1);
-	_test("gcd() 1", mpdm_ival(mpdm_exec(v, w)) == 50);
+	_test("gcd() 1", mpdm_ival(_test_exec(v, w)) == 50);
 
 	/* executes gcd(100, 75); */
 	mpdm_aset(w, MPDM_I(75), 1);
-	_test("gcd() 2", mpdm_ival(mpdm_exec(v, w)) == 25);
+	_test("gcd() 2", mpdm_ival(_test_exec(v, w)) == 25);
 
 	mpdm_unref(w);
 
 	/* string concatenation */
 	v=_test_mpsl("\"big\" ~ \" lebowski\";");
-	_test("~ (strcat 1)", mpdm_cmp(mpdm_exec(v, NULL), MPDM_LS(L"big lebowski")) == 0);
+	_test("~ (strcat 1)", mpdm_cmp(_test_exec(v, NULL), MPDM_LS(L"big lebowski")) == 0);
 
 	v=_test_mpsl("\"big\" ~ \" \" ~ \"lebowski\";");
-	_test("~ (strcat 2)", mpdm_cmp(mpdm_exec(v, NULL), MPDM_LS(L"big lebowski")) == 0);
+	_test("~ (strcat 2)", mpdm_cmp(_test_exec(v, NULL), MPDM_LS(L"big lebowski")) == 0);
 }
 
 
@@ -453,81 +470,81 @@ void test_mpsl3(void)
 
 	v=_test_mpsl("v=[10,20]; w=v[0]; w;");
 	mpdm_dump(v);
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	mpdm_dump(v);
 
 	/* library functions tests */
 	v=_test_mpsl("dump( [1, 2, 3, 4, 5] );");
-	mpdm_exec(v, NULL);
+	_test_exec(v, NULL);
 
 	v=_test_mpsl("if(size([2, 3, 4]) == 3) { dump(\"YES\"); } else { dump(\"NO\"); }");
-	mpdm_exec(v, NULL);
+	_test_exec(v, NULL);
 
 	v=_test_mpsl("is_array(1);");
-	_test("is_array 1", mpdm_exec(v, NULL) == NULL);
+	_test("is_array 1", _test_exec(v, NULL) == NULL);
 	v=_test_mpsl("is_array([]);");
-	_test("is_array 2", mpdm_exec(v, NULL) != NULL);
+	_test("is_array 2", _test_exec(v, NULL) != NULL);
 	v=_test_mpsl("is_array({});");
-	_test("is_array 3", mpdm_exec(v, NULL) != NULL);
+	_test("is_array 3", _test_exec(v, NULL) != NULL);
 
 	v=_test_mpsl("is_hash(1);");
-	_test("is_hash 1", mpdm_exec(v, NULL) == NULL);
+	_test("is_hash 1", _test_exec(v, NULL) == NULL);
 	v=_test_mpsl("is_hash([]);");
-	_test("is_hash 2", mpdm_exec(v, NULL) == NULL);
+	_test("is_hash 2", _test_exec(v, NULL) == NULL);
 	v=_test_mpsl("is_hash({});");
-	_test("is_hash 3", mpdm_exec(v, NULL) != NULL);
+	_test("is_hash 3", _test_exec(v, NULL) != NULL);
 
 	v=_test_mpsl("v=splice(\"inventions of life\", NULL, 0, 10); v[1];");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("splice 1", mpdm_cmp(v, MPDM_LS(L"inventions")) == 0);
 
 	v=_test_mpsl("v[0];");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("splice 2", mpdm_cmp(v, MPDM_LS(L" of life")) == 0);
 
 	v=_test_mpsl("sub func() { if(1 == 1) { return(6); 24; } 12; }");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	v=_test_mpsl("a=func();");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("return 1", mpdm_ival(v) == 6);
 
 	v=_test_mpsl("a=func(); 500;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("return 2", mpdm_ival(v) == 500);
 
 	v=_test_mpsl("a=1; while(a < 10) { a++; } a;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("while", mpdm_ival(v) == 10);
 
 	v=_test_mpsl("a=1; while(a < 10) { if(a == 5) break; a++; } a;");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("break", mpdm_ival(v) == 5);
 
 	v=_test_mpsl("b=0; foreach(a, [1, 2, 3, 4]) { dump(a); b += a; } return(b);");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("foreach", mpdm_ival(v) == 10);
 
 	v=_test_mpsl("b=0; foreach(a, [1 .. 20]) { dump(a); b += a; } return(b);");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("foreach+range 1", mpdm_ival(v) == 210);
 
 	v=_test_mpsl("b=0; foreach(a, [20 .. 1]) { dump(a); b += a; } return(b);");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("foreach+range 2", mpdm_ival(v) == 210);
 
 	v=_test_mpsl("print(\"print: \", 1, 2, [1, 2, 3], func(), 4);");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 
 	v=_test_mpsl("'This is\\na string.';");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	mpdm_dump(v);
 
 	v=_test_mpsl("\"This is\\na string.\";");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	mpdm_dump(v);
 
 	v=_test_mpsl("sub t(h) { dump(h); dump(h.x); h.x; } H={}; H.x=5; t(H);");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 	_test("Accesing a hash's component passed as argument", mpdm_ival(v) == 5);
 
 /*	mpdm_dump(mpdm_root());*/
@@ -542,7 +559,7 @@ void test_mpsl_file(void)
 
 	printf("Compiling from file:\n");
 	v=_test_mpsl_file("test.mpsl");
-	v=mpdm_exec(v, NULL);
+	v=_test_exec(v, NULL);
 }
 
 
