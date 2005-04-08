@@ -60,12 +60,18 @@ void _test(char * str, int ok)
 
 /* tests */
 
+mpdm_v _set(mpdm_v * v1, mpdm_v v2)
+{
+	mpdm_unref(*v1);
+	*v1=mpdm_ref(v2);
+}
+
+
 mpdm_v _test_mpsl(char * code)
 {
 	static mpdm_v v=NULL;
 
-	mpdm_unref(v);
-	v=mpdm_ref(mpsl_compile(MPDM_MBS(code)));
+	_set(&v, mpsl_compile(MPDM_MBS(code)));
 
 	printf("Compile: ");
 	_test(code, v != NULL);
@@ -77,8 +83,7 @@ mpdm_v _test_mpsl_file(char * file)
 {
 	static mpdm_v v=NULL;
 
-	mpdm_unref(v);
-	v=mpdm_ref(mpsl_compile_file(MPDM_MBS(file)));
+	_set(&v, mpsl_compile_file(MPDM_MBS(file)));
 
 	printf("Compile file: ");
 	_test(file, v != NULL);
@@ -90,8 +95,7 @@ mpdm_v _test_exec(mpdm_v x, mpdm_v a)
 {
 	static mpdm_v v=NULL;
 
-	mpdm_unref(v);
-	v=mpdm_ref(mpdm_exec(x, a));
+	_set(&v, mpdm_exec(x, a));
 
 	return(v);
 }
