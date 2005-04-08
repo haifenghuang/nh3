@@ -575,6 +575,7 @@ int main(void)
 	test_mpsl3();
 	test_mpsl_file();
 
+	printf("memory: %d\n", _mpdm->memory_usage);
 	mpdm_sweep(-1);
 	mpdm_sweep(-1);
 	mpdm_sweep(-1);
@@ -584,6 +585,7 @@ int main(void)
 	mpdm_sweep(-1);
 	mpdm_sweep(-1);
 	mpdm_sweep(-1);
+	printf("memory: %d\n", _mpdm->memory_usage);
 
 	mpdm_shutdown();
 
