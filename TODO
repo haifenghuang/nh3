@@ -8,6 +8,7 @@ Release Critical Bugs
  * 1054: Add a main() function, similar to the filp one.
  * 1058: Function execution should bang when the
    function is not found.
+ * 1063: Create a sprintf()-like library function.
 
 Open Bugs
 ---------
