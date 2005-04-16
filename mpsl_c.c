@@ -357,10 +357,17 @@ _O_TYPE _O_hash(_O_ARGS)
 	mpdm_v ret=RF(MPDM_H(0));
 
 	for(n=1;n < mpdm_size(c);n += 2)
-		mpdm_hset(ret, M(n), M(n + 1));
+	{
+		mpdm_v v=RF(M(n));
+
+		mpdm_hset(ret, v, M(n + 1));
+
+		UF(v);
+	}
 
 	return(UF(ret));
 }
+
 
 _O_TYPE _O_subframe(_O_ARGS)
 /* runs an instruction inside a subroutine frame */
