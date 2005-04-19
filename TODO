@@ -7,8 +7,12 @@ Release Critical Bugs
  * 1051: Document the scripting language.
  * 1054: Add a main() function, similar to the filp one.
  * 1058: Function execution should bang when the
-   function is not found.
+   function is not found, or at least exist a default
+   handler function for it.
  * 1063: Create a sprintf()-like library function.
+ * 1064: Compilation errors should be stored somewhere
+   (not just printed on stdout).
+ * 1065: Add the filename to compilation errors.
 
 Open Bugs
 ---------
