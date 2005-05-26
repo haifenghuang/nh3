@@ -47,44 +47,44 @@
 #define IA2 IA(2)
 #define IA3 IA(3)
 
-static mpdm_t _F_size(mpdm_t a) { return(MPDM_I(mpdm_size(A0))); }
-static mpdm_t _F_clone(mpdm_t a) { return(mpdm_clone(A0)); }
-static mpdm_t _F_dump(mpdm_t a) { mpdm_dump(A0); return(NULL); }
-static mpdm_t _F_cmp(mpdm_t a) { return(MPDM_I(mpdm_cmp(A0, A1))); }
+static mpdm_t F_size(mpdm_t a) { return(MPDM_I(mpdm_size(A0))); }
+static mpdm_t F_clone(mpdm_t a) { return(mpdm_clone(A0)); }
+static mpdm_t F_dump(mpdm_t a) { mpdm_dump(A0); return(NULL); }
+static mpdm_t F_cmp(mpdm_t a) { return(MPDM_I(mpdm_cmp(A0, A1))); }
 
-static mpdm_t _F_is_array(mpdm_t a) { return(mpsl_boolean(A0->flags & MPDM_MULTIPLE)); }
-static mpdm_t _F_is_hash(mpdm_t a) { return(mpsl_boolean(A0->flags & MPDM_HASH)); }
-static mpdm_t _F_is_exec(mpdm_t a) { return(mpsl_boolean(A0->flags & MPDM_EXEC)); }
+static mpdm_t F_is_array(mpdm_t a) { return(mpsl_boolean(A0->flags & MPDM_MULTIPLE)); }
+static mpdm_t F_is_hash(mpdm_t a) { return(mpsl_boolean(A0->flags & MPDM_HASH)); }
+static mpdm_t F_is_exec(mpdm_t a) { return(mpsl_boolean(A0->flags & MPDM_EXEC)); }
 
-static mpdm_t _F_splice(mpdm_t a) { return(mpdm_splice(A0,A1,IA2,IA3)); }
-static mpdm_t _F_aexpand(mpdm_t a) { return(mpdm_aexpand(A0,IA1,IA2)); }
-static mpdm_t _F_acollapse(mpdm_t a) { return(mpdm_acollapse(A0,IA1,IA2)); }
-static mpdm_t _F_ains(mpdm_t a) { return(mpdm_ains(A0,A1,IA2)); }
-static mpdm_t _F_adel(mpdm_t a) { return(mpdm_adel(A0,IA1)); }
-static mpdm_t _F_apush(mpdm_t a) { return(mpdm_apush(A0,A1)); }
-static mpdm_t _F_apop(mpdm_t a) { return(mpdm_apop(A0)); }
-static mpdm_t _F_aqueue(mpdm_t a) { return(mpdm_aqueue(A0,A1,IA2)); }
-static mpdm_t _F_aseek(mpdm_t a) { return(MPDM_I(mpdm_aseek(A0,A1,IA2))); }
-static mpdm_t _F_asort(mpdm_t a) { return(mpdm_asort_cb(A0,1,A1)); }
-static mpdm_t _F_asplit(mpdm_t a) { return(mpdm_asplit(A0,A1)); }
-static mpdm_t _F_ajoin(mpdm_t a) { return(mpdm_ajoin(A0,A1)); }
+static mpdm_t F_splice(mpdm_t a) { return(mpdm_splice(A0,A1,IA2,IA3)); }
+static mpdm_t F_aexpand(mpdm_t a) { return(mpdm_aexpand(A0,IA1,IA2)); }
+static mpdm_t F_acollapse(mpdm_t a) { return(mpdm_acollapse(A0,IA1,IA2)); }
+static mpdm_t F_ains(mpdm_t a) { return(mpdm_ains(A0,A1,IA2)); }
+static mpdm_t F_adel(mpdm_t a) { return(mpdm_adel(A0,IA1)); }
+static mpdm_t F_apush(mpdm_t a) { return(mpdm_apush(A0,A1)); }
+static mpdm_t F_apop(mpdm_t a) { return(mpdm_apop(A0)); }
+static mpdm_t F_aqueue(mpdm_t a) { return(mpdm_aqueue(A0,A1,IA2)); }
+static mpdm_t F_aseek(mpdm_t a) { return(MPDM_I(mpdm_aseek(A0,A1,IA2))); }
+static mpdm_t F_asort(mpdm_t a) { return(mpdm_asort_cb(A0,1,A1)); }
+static mpdm_t F_asplit(mpdm_t a) { return(mpdm_asplit(A0,A1)); }
+static mpdm_t F_ajoin(mpdm_t a) { return(mpdm_ajoin(A0,A1)); }
 
-static mpdm_t _F_hsize(mpdm_t a) { return(MPDM_I(mpdm_hsize(A0))); }
-static mpdm_t _F_hexists(mpdm_t a) { return(mpsl_boolean(mpdm_hexists(A0, A1))); }
-static mpdm_t _F_hdel(mpdm_t a) { return(mpdm_hdel(A0, A1)); }
-static mpdm_t _F_hkeys(mpdm_t a) { return(mpdm_hkeys(A0)); }
+static mpdm_t F_hsize(mpdm_t a) { return(MPDM_I(mpdm_hsize(A0))); }
+static mpdm_t F_hexists(mpdm_t a) { return(mpsl_boolean(mpdm_hexists(A0, A1))); }
+static mpdm_t F_hdel(mpdm_t a) { return(mpdm_hdel(A0, A1)); }
+static mpdm_t F_hkeys(mpdm_t a) { return(mpdm_hkeys(A0)); }
 
-static mpdm_t _F_open(mpdm_t a) { return(mpdm_open(A0, A1)); }
-static mpdm_t _F_close(mpdm_t a) { return(mpdm_close(A0)); }
-static mpdm_t _F_read(mpdm_t a) { return(mpdm_read(A0)); }
-static mpdm_t _F_write(mpdm_t a) { return(mpsl_boolean(mpdm_write(A0,A1))); }
-static mpdm_t _F_unlink(mpdm_t a) { return(mpsl_boolean(mpdm_unlink(A0))); }
-static mpdm_t _F_glob(mpdm_t a) { return(mpdm_glob(A0)); }
+static mpdm_t F_open(mpdm_t a) { return(mpdm_open(A0, A1)); }
+static mpdm_t F_close(mpdm_t a) { return(mpdm_close(A0)); }
+static mpdm_t F_read(mpdm_t a) { return(mpdm_read(A0)); }
+static mpdm_t F_write(mpdm_t a) { return(mpsl_boolean(mpdm_write(A0,A1))); }
+static mpdm_t F_unlink(mpdm_t a) { return(mpsl_boolean(mpdm_unlink(A0))); }
+static mpdm_t F_glob(mpdm_t a) { return(mpdm_glob(A0)); }
 
-static mpdm_t _F_regex(mpdm_t a) { return(mpdm_regex(A0,A1,IA2)); }
-static mpdm_t _F_sregex(mpdm_t a) { return(mpdm_sregex(A0,A1,A2,IA3)); }
+static mpdm_t F_regex(mpdm_t a) { return(mpdm_regex(A0,A1,IA2)); }
+static mpdm_t F_sregex(mpdm_t a) { return(mpdm_sregex(A0,A1,A2,IA3)); }
 
-static mpdm_t _F_print(mpdm_t a)
+static mpdm_t F_print(mpdm_t a)
 {
 	int n;
 
@@ -98,44 +98,44 @@ static struct
 {
 	wchar_t * name;
 	mpdm_t (* func)(mpdm_t);
-} _mpsl_funcs[]=
+} mpsl_funcs[]=
 {
-	{ L"size",	_F_size },
-	{ L"clone",	_F_clone },
-	{ L"dump",	_F_dump },
-	{ L"cmp",	_F_cmp },
-	{ L"is_array",	_F_is_array },
-	{ L"is_hash",	_F_is_hash },
-	{ L"is_exec",	_F_is_exec },
-	{ L"splice",	_F_splice },
-	{ L"aexpand",	_F_aexpand },
-	{ L"acollapse",	_F_acollapse },
-	{ L"ains",	_F_ains },
-	{ L"adel",	_F_adel },
-	{ L"apush",	_F_apush },
-	{ L"apop",	_F_apop },
-	{ L"aqueue",	_F_aqueue },
-	{ L"aseek",	_F_aseek },
-	{ L"asort",	_F_asort },
-	{ L"asplit",	_F_asplit },
-	{ L"ajoin",	_F_ajoin },
-	{ L"hsize",	_F_hsize },
-	{ L"hexists",	_F_hexists },
-	{ L"hdel",	_F_hdel },
-	{ L"hkeys",	_F_hkeys },
-	{ L"open",	_F_open },
-	{ L"close",	_F_close },
-	{ L"read",	_F_read },
-	{ L"write",	_F_write },
-	{ L"unlink",	_F_unlink },
-	{ L"glob",	_F_glob },
-	{ L"regex",	_F_regex },
-	{ L"sregex",	_F_sregex },
-	{ L"print",	_F_print },
+	{ L"size",	F_size },
+	{ L"clone",	F_clone },
+	{ L"dump",	F_dump },
+	{ L"cmp",	F_cmp },
+	{ L"is_array",	F_is_array },
+	{ L"is_hash",	F_is_hash },
+	{ L"is_exec",	F_is_exec },
+	{ L"splice",	F_splice },
+	{ L"aexpand",	F_aexpand },
+	{ L"acollapse",	F_acollapse },
+	{ L"ains",	F_ains },
+	{ L"adel",	F_adel },
+	{ L"apush",	F_apush },
+	{ L"apop",	F_apop },
+	{ L"aqueue",	F_aqueue },
+	{ L"aseek",	F_aseek },
+	{ L"asort",	F_asort },
+	{ L"asplit",	F_asplit },
+	{ L"ajoin",	F_ajoin },
+	{ L"hsize",	F_hsize },
+	{ L"hexists",	F_hexists },
+	{ L"hdel",	F_hdel },
+	{ L"hkeys",	F_hkeys },
+	{ L"open",	F_open },
+	{ L"close",	F_close },
+	{ L"read",	F_read },
+	{ L"write",	F_write },
+	{ L"unlink",	F_unlink },
+	{ L"glob",	F_glob },
+	{ L"regex",	F_regex },
+	{ L"sregex",	F_sregex },
+	{ L"print",	F_print },
 	{ NULL,		NULL }
 };
 
-void _mpsl_lib(void)
+void mpsl_lib(void)
 /* inits the mpsl library */
 {
 	mpdm_t r;
@@ -150,7 +150,7 @@ void _mpsl_lib(void)
 	mpdm_hset_s(r, L"MPSL_LIB", mpsl_boolean(1));
 
 	/* creates all the symbols */
-	for(n=0;_mpsl_funcs[n].name != NULL;n++)
-		mpdm_hset_s(r, _mpsl_funcs[n].name,
-			MPDM_X(_mpsl_funcs[n].func));
+	for(n=0;mpsl_funcs[n].name != NULL;n++)
+		mpdm_hset_s(r, mpsl_funcs[n].name,
+			MPDM_X(mpsl_funcs[n].func));
 }

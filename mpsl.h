@@ -23,7 +23,7 @@
 
 */
 
-extern int _mpsl_trace;
+extern int mpsl_trace;
 
 int mpsl_is_true(mpdm_t v);
 mpdm_t mpsl_boolean(int b);
@@ -31,7 +31,7 @@ mpdm_t mpsl_boolean(int b);
 mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v);
 mpdm_t mpsl_get_symbol(mpdm_t s);
 
-mpdm_t _mpsl_exec(mpdm_t c, mpdm_t args);
+mpdm_t mpsl_exec(mpdm_t c, mpdm_t args);
 
 mpdm_t mpsl_compile(mpdm_t code);
 mpdm_t mpsl_compile_file(mpdm_t filename);

@@ -34,40 +34,40 @@
 ********************/
 
 /* the bytecode */
-static mpdm_t _mpsl_bytecode=NULL;
+static mpdm_t mpsl_bytecode=NULL;
 
 int yylex(void);
 void yyerror(char * s);
 
 /* pointer to source code being compiled */
-extern wchar_t * _mpsl_next_char;
+extern wchar_t * mpsl_next_char;
 
 /* line number */
-extern int _mpsl_line;
+extern int mpsl_line;
 
 /* pointer to file being compiled */
-extern FILE * _mpsl_file;
+extern FILE * mpsl_file;
 
 /* shortcut macros to insert instructions */
 
-#define INS0(o)			_ins(o, 0, NULL, NULL, NULL)
-#define INS1(o,a1)		_ins(o, 1, a1, NULL, NULL)
-#define INS2(o,a1,a2)		_ins(o, 2, a1, a2, NULL)
-#define INS3(o,a1,a2,a3)	_ins(o, 3, a1, a2, a3)
+#define INS0(o)			do_ins(o, 0, NULL, NULL, NULL)
+#define INS1(o,a1)		do_ins(o, 1, a1, NULL, NULL)
+#define INS2(o,a1,a2)		do_ins(o, 2, a1, a2, NULL)
+#define INS3(o,a1,a2,a3)	do_ins(o, 3, a1, a2, a3)
 
-static mpdm_t _ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3);
+static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3);
 
 /* defined in mpsl_c.c */
-mpdm_t _mpsl_op(wchar_t * opcode);
+mpdm_t mpsl_op(wchar_t * opcode);
 
 /*******************
 	Code
 ********************/
 
-static mpdm_t _mpsl_x(mpdm_t a1, mpdm_t a2)
+static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2)
 {
-	return(MPDM_X2(_mpsl_exec,
-		_ins(L"SUBFRAME", a2 == NULL ? 1 : 2, a1, a2, NULL)));
+	return(MPDM_X2(mpsl_exec,
+		do_ins(L"SUBFRAME", a2 == NULL ? 1 : 2, a1, a2, NULL)));
 }
 
 
@@ -101,7 +101,7 @@ program:
 
 function:
 	function stmt_list	{
-					_mpsl_bytecode=$2;
+					mpsl_bytecode=$2;
 				}
 	| /* NULL */
 	;
@@ -142,7 +142,7 @@ stmt:
 					   without arguments */
 					$$ = INS2(L"ASSIGN", $2,
 						INS1(L"LITERAL",
-							_mpsl_x($4, NULL)));
+							mpsl_x($4, NULL)));
 				}
 
 	| SUB compsym '(' ')' '{' stmt_list '}'
@@ -152,7 +152,7 @@ stmt:
 					   syntax, including parens) */
 					$$ = INS2(L"ASSIGN", $2,
 						INS1(L"LITERAL",
-							_mpsl_x($6, NULL)));
+							mpsl_x($6, NULL)));
 				}
 
 	| SUB compsym '(' sym_list ')' '{' stmt_list '}'
@@ -161,7 +161,7 @@ stmt:
 					   with arguments */
 					$$ = INS2(L"ASSIGN", $2,
 						INS1(L"LITERAL",
-							_mpsl_x($7, $4)));
+							mpsl_x($7, $4)));
 				}
 
 	| FOREACH '(' compsym ',' expr ')' stmt
@@ -375,13 +375,13 @@ expr:
  
 	| SUB '{' stmt_list '}'	{
 					/* anonymous subroutine (without args) */
-					$$ = INS1(L"LITERAL", _mpsl_x($3, NULL));
+					$$ = INS1(L"LITERAL", mpsl_x($3, NULL));
 				}
 
 	| SUB '(' sym_list ')' '{' stmt_list '}'
 				{
 					/* anonymous subroutine (with args) */
-					$$ = INS1(L"LITERAL", _mpsl_x($6, $3));
+					$$ = INS1(L"LITERAL", mpsl_x($6, $3));
 				}
 
 	| '(' expr ')'		{
@@ -429,11 +429,11 @@ expr:
 
 void yyerror(char * s)
 {
-	printf("yyerror: %s in line %d\n", s, _mpsl_line);
+	printf("yyerror: %s in line %d\n", s, mpsl_line);
 }
 
 
-static mpdm_t _ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
+static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 /* adds an instruction */
 {
 	mpdm_t v;
@@ -441,7 +441,7 @@ static mpdm_t _ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 	v=MPDM_A(args + 1);
 
 	/* inserts the opcode */
-	mpdm_aset(v, _mpsl_op(opcode), 0);
+	mpdm_aset(v, mpsl_op(opcode), 0);
 	if(args > 0) mpdm_aset(v, a1, 1);
 	if(args > 1) mpdm_aset(v, a2, 2);
 	if(args > 2) mpdm_aset(v, a3, 3);
@@ -450,23 +450,23 @@ static mpdm_t _ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 }
 
 
-void _mpsl_lib(void);
+void mpsl_lib(void);
 
 mpdm_t mpsl_compile(mpdm_t code)
 {
 	mpdm_t x=NULL;
 
-	_mpsl_lib();
+	mpsl_lib();
 
 	/* point to code */
-	_mpsl_next_char=(wchar_t *) code->data;
-	_mpsl_line=0;
+	mpsl_next_char=(wchar_t *) code->data;
+	mpsl_line=0;
 
 	mpdm_ref(code);
 
 	/* compile! */
 	if(yyparse() == 0)
-		x=_mpsl_x(_mpsl_bytecode, NULL);
+		x=mpsl_x(mpsl_bytecode, NULL);
 
 	mpdm_unref(code);
 
@@ -480,19 +480,19 @@ mpdm_t mpsl_compile_file(mpdm_t filename)
 
 	filename=MPDM_2MBS(filename->data);
 
-	if((_mpsl_file=fopen((char *)filename->data, "r")) == NULL)
+	if((mpsl_file=fopen((char *)filename->data, "r")) == NULL)
 		return(NULL);
 
-	_mpsl_lib();
+	mpsl_lib();
 
-	_mpsl_line=0;
+	mpsl_line=0;
 
 	/* compile! */
 	if(yyparse() == 0)
-		x=_mpsl_x(_mpsl_bytecode, NULL);
+		x=mpsl_x(mpsl_bytecode, NULL);
 
-	fclose(_mpsl_file);
-	_mpsl_file=NULL;
+	fclose(mpsl_file);
+	mpsl_file=NULL;
 
 	return(x);
 }

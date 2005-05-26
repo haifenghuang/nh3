@@ -79,5 +79,6 @@ Closed
  * 1050: Document the virtual machine (Mon, 07 Mar 2005 16:32:49 +0100).
  * 1060: The compiler should use a cache for literal string
    values (Mon, 14 Mar 2005 08:16:24 +0100).
+ * 1066: Rename all symbols starting with _ (Thu, 26 May 2005 20:41:46 +0200).
 
 Email bugs to angel@triptico.com
