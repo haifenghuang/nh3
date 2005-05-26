@@ -34,7 +34,7 @@
 ********************/
 
 /* the bytecode */
-static mpdm_v _mpsl_bytecode=NULL;
+static mpdm_t _mpsl_bytecode=NULL;
 
 int yylex(void);
 void yyerror(char * s);
@@ -55,16 +55,16 @@ extern FILE * _mpsl_file;
 #define INS2(o,a1,a2)		_ins(o, 2, a1, a2, NULL)
 #define INS3(o,a1,a2,a3)	_ins(o, 3, a1, a2, a3)
 
-static mpdm_v _ins(wchar_t * opcode, int args, mpdm_v a1, mpdm_v a2, mpdm_v a3);
+static mpdm_t _ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3);
 
 /* defined in mpsl_c.c */
-mpdm_v _mpsl_op(wchar_t * opcode);
+mpdm_t _mpsl_op(wchar_t * opcode);
 
 /*******************
 	Code
 ********************/
 
-static mpdm_v _mpsl_x(mpdm_v a1, mpdm_v a2)
+static mpdm_t _mpsl_x(mpdm_t a1, mpdm_t a2)
 {
 	return(MPDM_X2(_mpsl_exec,
 		_ins(L"SUBFRAME", a2 == NULL ? 1 : 2, a1, a2, NULL)));
@@ -74,8 +74,8 @@ static mpdm_v _mpsl_x(mpdm_v a1, mpdm_v a2)
 %}
 
 %union {
-	mpdm_v v;	/* a simple value */
-	mpdm_v ins;	/* an 'instruction': [ opcode, args ] */
+	mpdm_t v;	/* a simple value */
+	mpdm_t ins;	/* an 'instruction': [ opcode, args ] */
 };
 
 %token <v> NULLV INTEGER REAL STRING SYMBOL LITERAL
@@ -433,10 +433,10 @@ void yyerror(char * s)
 }
 
 
-static mpdm_v _ins(wchar_t * opcode, int args, mpdm_v a1, mpdm_v a2, mpdm_v a3)
+static mpdm_t _ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 /* adds an instruction */
 {
-	mpdm_v v;
+	mpdm_t v;
 
 	v=MPDM_A(args + 1);
 
@@ -452,9 +452,9 @@ static mpdm_v _ins(wchar_t * opcode, int args, mpdm_v a1, mpdm_v a2, mpdm_v a3)
 
 void _mpsl_lib(void);
 
-mpdm_v mpsl_compile(mpdm_v code)
+mpdm_t mpsl_compile(mpdm_t code)
 {
-	mpdm_v x=NULL;
+	mpdm_t x=NULL;
 
 	_mpsl_lib();
 
@@ -474,9 +474,9 @@ mpdm_v mpsl_compile(mpdm_v code)
 }
 
 
-mpdm_v mpsl_compile_file(mpdm_v filename)
+mpdm_t mpsl_compile_file(mpdm_t filename)
 {
-	mpdm_v x=NULL;
+	mpdm_t x=NULL;
 
 	filename=MPDM_2MBS(filename->data);
 

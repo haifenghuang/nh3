@@ -83,11 +83,11 @@ static wchar_t * _s_mbstowcs(char * str)
 }
 
 
-static mpdm_v _mpsl_lc(char * str)
+static mpdm_t _mpsl_lc(char * str)
 /* the cache of literal values */
 {
-	static mpdm_v lc=NULL;
-	mpdm_v v;
+	static mpdm_t lc=NULL;
+	mpdm_t v;
 	wchar_t * ptr;
 
 	/* creates the cache, if it doesn't exist */

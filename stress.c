@@ -60,16 +60,16 @@ void _test(char * str, int ok)
 
 /* tests */
 
-void _set(mpdm_v * v1, mpdm_v v2)
+void _set(mpdm_t * v1, mpdm_t v2)
 {
 	mpdm_unref(*v1);
 	*v1=mpdm_ref(v2);
 }
 
 
-mpdm_v _test_mpsl(char * code)
+mpdm_t _test_mpsl(char * code)
 {
-	static mpdm_v v=NULL;
+	static mpdm_t v=NULL;
 
 	_set(&v, mpsl_compile(MPDM_MBS(code)));
 
@@ -79,9 +79,9 @@ mpdm_v _test_mpsl(char * code)
 }
 
 
-mpdm_v _test_mpsl_file(char * file)
+mpdm_t _test_mpsl_file(char * file)
 {
-	static mpdm_v v=NULL;
+	static mpdm_t v=NULL;
 
 	_set(&v, mpsl_compile_file(MPDM_MBS(file)));
 
@@ -91,9 +91,9 @@ mpdm_v _test_mpsl_file(char * file)
 }
 
 
-mpdm_v _test_exec(mpdm_v x, mpdm_v a)
+mpdm_t _test_exec(mpdm_t x, mpdm_t a)
 {
-	static mpdm_v v=NULL;
+	static mpdm_t v=NULL;
 
 	_set(&v, mpdm_exec(x, a));
 
@@ -103,7 +103,7 @@ mpdm_v _test_exec(mpdm_v x, mpdm_v a)
 
 void test_mpsl(void)
 {
-	mpdm_v v;
+	mpdm_t v;
 
 	printf("mpsl (Minimum Profit Scripting Language)\n\n");
 
@@ -168,8 +168,8 @@ void test_mpsl(void)
 
 void test_mpsl2(void)
 {
-	mpdm_v v;
-	mpdm_v w;
+	mpdm_t v;
+	mpdm_t w;
 
 	/* execution tests */
 	v=_test_mpsl("666;");
@@ -474,7 +474,7 @@ void test_mpsl2(void)
 
 void test_mpsl3(void)
 {
-	mpdm_v v;
+	mpdm_t v;
 
 	v=_test_mpsl("v=[10,20]; w=v[0]; w;");
 	mpdm_dump(v);
@@ -561,7 +561,7 @@ void test_mpsl3(void)
 
 void test_mpsl_file(void)
 {
-	mpdm_v v;
+	mpdm_t v;
 
 	_mpsl_trace=0;
 

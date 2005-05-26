@@ -35,10 +35,10 @@
 ********************/
 
 /* array containing the opcodes */
-mpdm_v _mpsl_ops=NULL;
+mpdm_t _mpsl_ops=NULL;
 
 /* local symbol table */
-mpdm_v _mpsl_local=NULL;
+mpdm_t _mpsl_local=NULL;
 
 /* instruction execution tracing flag */
 int _mpsl_trace=0;
@@ -54,7 +54,7 @@ int _mpsl_trace=0;
  * If @v is a valid mpsl 'false' value (NULL, "" or the "0" string),
  * returns zero, or nonzero otherwise.
  */
-int mpsl_is_true(mpdm_v v)
+int mpsl_is_true(mpdm_t v)
 {
 	/* if value or its data is NULL, it's false */
 	if(v == NULL || v->data == NULL)
@@ -81,9 +81,9 @@ int mpsl_is_true(mpdm_v v)
  *
  * Returns mpsl's 'false' or 'true' values depending on the value in @b.
  */
-mpdm_v mpsl_boolean(int b)
+mpdm_t mpsl_boolean(int b)
 {
-	static mpdm_v _true=NULL;
+	static mpdm_t _true=NULL;
 
 	if(_true == NULL)
 		_true=mpdm_ref(MPDM_I(1));
@@ -97,7 +97,7 @@ mpdm_v mpsl_boolean(int b)
  *
  * Creates a block frame in the local variable symbol table.
  */
-mpdm_v mpsl_local_add_blkframe(void)
+mpdm_t mpsl_local_add_blkframe(void)
 {
 	/* pushes a new hash onto the last subframe */
 	return(mpdm_apush(mpdm_aget(_mpsl_local, -1), MPDM_H(0)));
@@ -150,11 +150,11 @@ void mpsl_local_del_subframe(void)
 }
 
 
-mpdm_v mpsl_local_find_symbol(mpdm_v s)
+mpdm_t mpsl_local_find_symbol(mpdm_t s)
 {
 	int n;
-	mpdm_v l;
-	mpdm_v v = NULL;
+	mpdm_t l;
+	mpdm_t v = NULL;
 
 	/* if s is multiple, take just the first element */
 	if(s->flags & MPDM_MULTIPLE)
@@ -165,7 +165,7 @@ mpdm_v mpsl_local_find_symbol(mpdm_v s)
 	/* travel the local symbol table trying to find it */
 	for(n=mpdm_size(l) - 1;n >=0;n--)
 	{
-		mpdm_v h = mpdm_aget(l, n);
+		mpdm_t h = mpdm_aget(l, n);
 
 		if(mpdm_hexists(h, s))
 		{
@@ -178,9 +178,9 @@ mpdm_v mpsl_local_find_symbol(mpdm_v s)
 }
 
 
-void mpsl_local_set_symbols(mpdm_v s, mpdm_v v)
+void mpsl_local_set_symbols(mpdm_t s, mpdm_t v)
 {
-	mpdm_v l;
+	mpdm_t l;
 
 	if(s == NULL)
 		return;
@@ -209,7 +209,7 @@ void mpsl_local_set_symbols(mpdm_v s, mpdm_v v)
  * a local symbol, it's assigned to it; otherwise, it's set as a global
  * symbol (and created if it does not exist).
  */
-mpdm_v mpsl_set_symbol(mpdm_v s, mpdm_v v)
+mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v)
 {
 	mpdm_sset(mpsl_local_find_symbol(s), s, v);
 	return(v);
@@ -223,7 +223,7 @@ mpdm_v mpsl_set_symbol(mpdm_v s, mpdm_v v)
  * Gets the value of a symbol. The symbol can be local or global
  * (if the symbol exists in both tables, the local value will be returned).
  */
-mpdm_v mpsl_get_symbol(mpdm_v s)
+mpdm_t mpsl_get_symbol(mpdm_t s)
 {
 	return(mpdm_sget(mpsl_local_find_symbol(s), s));
 }
@@ -231,8 +231,8 @@ mpdm_v mpsl_get_symbol(mpdm_v s)
 
 /** opcodes **/
 
-#define _O_TYPE static mpdm_v
-#define _O_ARGS mpdm_v c, mpdm_v a, int * f
+#define _O_TYPE static mpdm_t
+#define _O_ARGS mpdm_t c, mpdm_t a, int * f
 
 _O_TYPE _mpsl_exec_i(_O_ARGS);
 
@@ -261,11 +261,11 @@ _O_TYPE _mpsl_exec_i(_O_ARGS);
 #define RF(v) mpdm_ref(v)
 #define UF(v) mpdm_unref(v)
 
-_O_TYPE _O_multi(_O_ARGS) { mpdm_v v=RF(M1); if(!*f) v=M2; else UF(v); return(v); }
+_O_TYPE _O_multi(_O_ARGS) { mpdm_t v=RF(M1); if(!*f) v=M2; else UF(v); return(v); }
 _O_TYPE _O_literal(_O_ARGS) { return(mpdm_clone(C1)); }
 _O_TYPE _O_symval(_O_ARGS) { return(GET(M1)); }
-_O_TYPE _O_assign(_O_ARGS) { mpdm_v v=RF(M1); mpdm_v r=SET(v, M2); UF(v); return(r); }
-_O_TYPE _O_exec(_O_ARGS) { mpdm_v v=RF(M1); mpdm_v r=mpdm_exec(v, M2); UF(v); return(r); }
+_O_TYPE _O_assign(_O_ARGS) { mpdm_t v=RF(M1); mpdm_t r=SET(v, M2); UF(v); return(r); }
+_O_TYPE _O_exec(_O_ARGS) { mpdm_t v=RF(M1); mpdm_t r=mpdm_exec(v, M2); UF(v); return(r); }
 _O_TYPE _O_if(_O_ARGS) { return(ISTRU(M1) ? M2 : M3); }
 _O_TYPE _O_while(_O_ARGS) { while(! *f && ISTRU(M1)) M2; if(*f == 1) *f=0; return(NULL); }
 _O_TYPE _O_local(_O_ARGS) { mpsl_local_set_symbols(M1, NULL); return(NULL); }
@@ -276,32 +276,32 @@ _O_TYPE _O_mul(_O_ARGS) { return(MPDM_R(RM1 * RM2)); }
 _O_TYPE _O_div(_O_ARGS) { return(MPDM_R(RM1 / RM2)); }
 _O_TYPE _O_mod(_O_ARGS) { return(MPDM_I(IM1 % IM2)); }
 _O_TYPE _O_not(_O_ARGS) { return(BOOL(! ISTRU(M1))); }
-_O_TYPE _O_and(_O_ARGS) { mpdm_v r=M1; return(ISTRU(r) ? M2 : r); }
-_O_TYPE _O_or(_O_ARGS) { mpdm_v r=M1; return(ISTRU(r) ? r : M2); }
+_O_TYPE _O_and(_O_ARGS) { mpdm_t r=M1; return(ISTRU(r) ? M2 : r); }
+_O_TYPE _O_or(_O_ARGS) { mpdm_t r=M1; return(ISTRU(r) ? r : M2); }
 _O_TYPE _O_numlt(_O_ARGS) { return(BOOL(RM1 < RM2)); }
 _O_TYPE _O_numle(_O_ARGS) { return(BOOL(RM1 <= RM2)); }
 _O_TYPE _O_numgt(_O_ARGS) { return(BOOL(RM1 > RM2)); }
 _O_TYPE _O_numge(_O_ARGS) { return(BOOL(RM1 >= RM2)); }
-_O_TYPE _O_strcat(_O_ARGS) { mpdm_v v=RF(M1); mpdm_v r=mpdm_strcat(v, M2); UF(v); return(r); }
-_O_TYPE _O_streq(_O_ARGS) { mpdm_v v=RF(M1); mpdm_v r=BOOL(mpdm_cmp(v, M2) == 0); UF(v); return(r); }
-_O_TYPE _O_immpinc(_O_ARGS) { mpdm_v s=M1; return(SET(s, MPDM_R(R(GET(s)) + 1))); }
-_O_TYPE _O_immpdec(_O_ARGS) { mpdm_v s=M1; return(SET(s, MPDM_R(R(GET(s)) - 1))); }
-_O_TYPE _O_immadd(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v r=SET(s, MPDM_R(R(GET(s)) + RM2)); UF(s); return(r); }
-_O_TYPE _O_immsub(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v r=SET(s, MPDM_R(R(GET(s)) - RM2)); UF(s); return(r); }
-_O_TYPE _O_immmul(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v r=SET(s, MPDM_R(R(GET(s)) * RM2)); UF(s); return(r); }
-_O_TYPE _O_immdiv(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v r=SET(s, MPDM_R(R(GET(s)) / RM2)); UF(s); return(r); }
-_O_TYPE _O_immmod(_O_ARGS) { mpdm_v s=RF(M1); mpdm_v r=SET(s, MPDM_R(I(GET(s)) % IM2)); UF(s); return(r); }
-_O_TYPE _O_immsinc(_O_ARGS) { mpdm_v s=M1; mpdm_v v=GET(s); SET(s, MPDM_R(R(v) + 1)); return(v); }
-_O_TYPE _O_immsdec(_O_ARGS) { mpdm_v s=M1; mpdm_v v=GET(s); SET(s, MPDM_R(R(v) - 1)); return(v); }
-_O_TYPE _O_numeq(_O_ARGS) { mpdm_v v1=RF(M1); mpdm_v v2=M2; UF(v1); return(BOOL((v1 == NULL || v2 == NULL) ? (v1 == v2) : (R(v1) == R(v2)))); }
+_O_TYPE _O_strcat(_O_ARGS) { mpdm_t v=RF(M1); mpdm_t r=mpdm_strcat(v, M2); UF(v); return(r); }
+_O_TYPE _O_streq(_O_ARGS) { mpdm_t v=RF(M1); mpdm_t r=BOOL(mpdm_cmp(v, M2) == 0); UF(v); return(r); }
+_O_TYPE _O_immpinc(_O_ARGS) { mpdm_t s=M1; return(SET(s, MPDM_R(R(GET(s)) + 1))); }
+_O_TYPE _O_immpdec(_O_ARGS) { mpdm_t s=M1; return(SET(s, MPDM_R(R(GET(s)) - 1))); }
+_O_TYPE _O_immadd(_O_ARGS) { mpdm_t s=RF(M1); mpdm_t r=SET(s, MPDM_R(R(GET(s)) + RM2)); UF(s); return(r); }
+_O_TYPE _O_immsub(_O_ARGS) { mpdm_t s=RF(M1); mpdm_t r=SET(s, MPDM_R(R(GET(s)) - RM2)); UF(s); return(r); }
+_O_TYPE _O_immmul(_O_ARGS) { mpdm_t s=RF(M1); mpdm_t r=SET(s, MPDM_R(R(GET(s)) * RM2)); UF(s); return(r); }
+_O_TYPE _O_immdiv(_O_ARGS) { mpdm_t s=RF(M1); mpdm_t r=SET(s, MPDM_R(R(GET(s)) / RM2)); UF(s); return(r); }
+_O_TYPE _O_immmod(_O_ARGS) { mpdm_t s=RF(M1); mpdm_t r=SET(s, MPDM_R(I(GET(s)) % IM2)); UF(s); return(r); }
+_O_TYPE _O_immsinc(_O_ARGS) { mpdm_t s=M1; mpdm_t v=GET(s); SET(s, MPDM_R(R(v) + 1)); return(v); }
+_O_TYPE _O_immsdec(_O_ARGS) { mpdm_t s=M1; mpdm_t v=GET(s); SET(s, MPDM_R(R(v) - 1)); return(v); }
+_O_TYPE _O_numeq(_O_ARGS) { mpdm_t v1=RF(M1); mpdm_t v2=M2; UF(v1); return(BOOL((v1 == NULL || v2 == NULL) ? (v1 == v2) : (R(v1) == R(v2)))); }
 _O_TYPE _O_break(_O_ARGS) { *f=1; return(NULL); }
-_O_TYPE _O_return(_O_ARGS) { mpdm_v v=M1; *f=-1; return(v); }
+_O_TYPE _O_return(_O_ARGS) { mpdm_t v=M1; *f=-1; return(v); }
 
 _O_TYPE _O_foreach(_O_ARGS)
 /* foreach loop */
 {
-	mpdm_v s=RF(M1);
-	mpdm_v v=RF(M2);
+	mpdm_t s=RF(M1);
+	mpdm_t v=RF(M2);
 	int n;
 
 	for(n=0;n < mpdm_size(v) && ! *f;n++)
@@ -324,7 +324,7 @@ _O_TYPE _O_range(_O_ARGS)
 	double n;
 	double v1=RM1;
 	double v2=RM2;
-	mpdm_v ret=MPDM_A(0);
+	mpdm_t ret=MPDM_A(0);
 
 	if(v1 < v2)
 		for(n=v1;n <= v2;n++)
@@ -341,7 +341,7 @@ _O_TYPE _O_list(_O_ARGS)
 /* build list from instructions */
 {
 	int n;
-	mpdm_v ret=RF(MPDM_A(mpdm_size(c) - 1));
+	mpdm_t ret=RF(MPDM_A(mpdm_size(c) - 1));
 
 	for(n=1;n < mpdm_size(c);n++)
 		mpdm_aset(ret, M(n), n - 1);
@@ -354,11 +354,11 @@ _O_TYPE _O_hash(_O_ARGS)
 /* build hash from instructions */
 {
 	int n;
-	mpdm_v ret=RF(MPDM_H(0));
+	mpdm_t ret=RF(MPDM_H(0));
 
 	for(n=1;n < mpdm_size(c);n += 2)
 	{
-		mpdm_v v=RF(M(n));
+		mpdm_t v=RF(M(n));
 
 		mpdm_hset(ret, v, M(n + 1));
 
@@ -372,7 +372,7 @@ _O_TYPE _O_hash(_O_ARGS)
 _O_TYPE _O_subframe(_O_ARGS)
 /* runs an instruction inside a subroutine frame */
 {
-	mpdm_v ret;
+	mpdm_t ret;
 
 	/* creates a subroutine frame */
 	mpsl_local_add_subframe();
@@ -393,7 +393,7 @@ _O_TYPE _O_subframe(_O_ARGS)
 _O_TYPE _O_blkframe(_O_ARGS)
 /* runs an instruction under a block frame */
 {
-	mpdm_v ret;
+	mpdm_t ret;
 
 	mpsl_local_add_blkframe();
 	ret=M1;
@@ -406,7 +406,7 @@ _O_TYPE _O_blkframe(_O_ARGS)
 static struct _op
 {
 	wchar_t * name;
-	mpdm_v (* func)(_O_ARGS);
+	mpdm_t (* func)(_O_ARGS);
 } _op_table[]=
 {
 	{ L"MULTI",	_O_multi },
@@ -454,7 +454,7 @@ static struct _op
 };
 
 
-mpdm_v _mpsl_op(wchar_t * opcode)
+mpdm_t _mpsl_op(wchar_t * opcode)
 {
 	if(_mpsl_ops == NULL)
 	{
@@ -465,7 +465,7 @@ mpdm_v _mpsl_op(wchar_t * opcode)
 
 		for(n=0;_op_table[n].name != NULL;n++)
 		{
-			mpdm_v v=MPDM_LS(_op_table[n].name);
+			mpdm_t v=MPDM_LS(_op_table[n].name);
 			v->ival=n;
 			v->flags |= MPDM_IVAL;
 
@@ -490,7 +490,7 @@ mpdm_v _mpsl_op(wchar_t * opcode)
  */
 _O_TYPE _mpsl_exec_i(_O_ARGS)
 {
-	mpdm_v ret=NULL;
+	mpdm_t ret=NULL;
 
 	/* reference both code and arguments */
 	mpdm_ref(c); mpdm_ref(a);
@@ -526,10 +526,10 @@ _O_TYPE _mpsl_exec_i(_O_ARGS)
 }
 
 
-mpdm_v _mpsl_exec(mpdm_v c, mpdm_v a)
+mpdm_t _mpsl_exec(mpdm_t c, mpdm_t a)
 {
 	int f=0;
-	mpdm_v v;
+	mpdm_t v;
 
 	/* execute first instruction */
 	v=_mpsl_exec_i(c, a, &f);
