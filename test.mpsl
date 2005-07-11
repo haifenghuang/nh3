@@ -207,3 +207,23 @@ if(chop("text with eol\n") eq "text with eol")
 
 if(chop2("text with eol\n") eq "text with eol")
 	print("Sregex works!\n");
+
+source = "#!/usr/bin/env mpsl\n\n/* I'm a mpsl script\n\tand I *feel* good! */ /* look! */\n\nexit;\n";
+print(source);
+
+/* taken from http://aspn.activestate.com/ASPN/Cookbook/Rx/Recipe/59811 */
+r="|/\*[^*]*\*+([^/*][^*]*\*+)*/|c";
+
+sub substr(s, o, l) { local w=splice(s, NULL, o, l); return(w[1]); }
+
+c=regex(r, source);
+dump(c);
+dump(substr(source, c[0], c[1]));
+
+c=regex(r, source, c[0] + c[1]);
+dump(c);
+dump(substr(source, c[0], c[1]));
+
+c=regex(r, source, c[0] + c[1]);
+dump(c);
+dump(substr(source, c[0], c[1]));
