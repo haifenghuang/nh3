@@ -212,18 +212,19 @@ source = "#!/usr/bin/env mpsl\n\n/* I'm a mpsl script\n\tand I *feel* good! */ /
 print(source);
 
 /* taken from http://aspn.activestate.com/ASPN/Cookbook/Rx/Recipe/59811 */
-r="|/\*[^*]*\*+([^/*][^*]*\*+)*/|c";
+r="|/\*[^*]*\*+([^/*][^*]*\*+)*/|";
 
 sub substr(s, o, l) { local w=splice(s, NULL, o, l); return(w[1]); }
 
-c=regex(r, source);
-dump(c);
-dump(substr(source, c[0], c[1]));
+v=regex(r, source);
+dump(v);
+/* get last matching coords */
+c=regex();
 
-c=regex(r, source, c[0] + c[1]);
-dump(c);
-dump(substr(source, c[0], c[1]));
+v=regex(r, source, c[0] + c[1]);
+dump(v);
+/* get last matching coords */
+c=regex();
 
-c=regex(r, source, c[0] + c[1]);
-dump(c);
-dump(substr(source, c[0], c[1]));
+v=regex(r, source, c[0] + c[1]);
+dump(v);
