@@ -115,10 +115,6 @@ stmt:
 					/* expression, as is */
 					$$ = $1;
 				}
-	| compsym '=' expr ';'	{
-					/* simple assignation */
-					$$ = INS2(L"ASSIGN", $1, $3);
-				}
 
 	| WHILE '(' expr ')' stmt
 				{
@@ -421,6 +417,10 @@ expr:
 					/* function call (with args) */
 					$$ = INS2(L"EXEC",
 						INS1(L"SYMVAL", $1), $3);
+				}
+	| compsym '=' expr	{
+					/* simple assignation */
+					$$ = INS2(L"ASSIGN", $1, $3);
 				}
 
 	;

@@ -228,3 +228,24 @@ c=regex();
 
 v=regex(r, source, c[0] + c[1]);
 dump(v);
+
+/* assignations as expressions */
+print("\nAssignations as expressions: cat file\n");
+if(f=open("config.h", "r"))
+{
+	/* again assignations as expressions */
+	while(v=read(f))
+		print(v);
+
+	close(f);
+}
+
+print("\nAssignations as expressions: looped regex matching\n");
+c=0;
+
+while(v=regex(r, source, c))
+{
+	print(v, "\n");
+	c=regex();
+	c=c[0] + c[1];
+}

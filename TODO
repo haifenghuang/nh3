@@ -13,7 +13,6 @@ Release Critical Bugs
  * 1064: Compilation errors should be stored somewhere
    (not just printed on stdout).
  * 1065: Add the filename to compilation errors.
- * 1067: Allow assignations in while() condition.
 
 Open Bugs
 ---------
@@ -81,5 +80,7 @@ Closed
  * 1060: The compiler should use a cache for literal string
    values (Mon, 14 Mar 2005 08:16:24 +0100).
  * 1066: Rename all symbols starting with _ (Thu, 26 May 2005 20:41:46 +0200).
+ * 1067: Allow assignations in while() condition
+   (Tue, 12 Jul 2005 07:54:49 +0200).
 
 Email bugs to angel@triptico.com
