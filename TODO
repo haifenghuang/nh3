@@ -13,6 +13,8 @@ Release Critical Bugs
  * 1064: Compilation errors should be stored somewhere
    (not just printed on stdout).
  * 1065: Add the filename to compilation errors.
+ * 1068: Implement a dumper function to dump an mpdm_t
+   as mpsl source code.
 
 Open Bugs
 ---------
