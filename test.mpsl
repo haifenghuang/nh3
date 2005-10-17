@@ -249,3 +249,10 @@ while(v=regex(r, source, c))
 	c=regex();
 	c=c[0] + c[1];
 }
+
+print("Various encodings\n");
+
+foreach(enc, [ "UTF-8", NULL, "ISO-8859-1", "INVALID" ])
+{
+	print("Encoding ", enc, ": ", encoding(enc), "\n");
+}
