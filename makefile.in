@@ -36,13 +36,17 @@ mpsl_l.o: lex.yy.c y.tab.h
 mpsl_y.o: y.tab.c
 	$(CC) $(CFLAGS) `cat config.cflags` -c y.tab.c -o mpsl_y.o
 
+$(MPDM)/libmpdm.a:
+	( cd $(MPDM); $(MAKE) )
+
 dep:
-	gcc `cat config.cflags` -MM *.c > makefile.depend
+	gcc `cat config.cflags` -MM *.c | \
+		sed -e 's;$(MPDM)/;$$(MPDM)/;g' > makefile.depend
 
 $(LIB): $(OBJS)
 	$(AR) rv $(LIB) $(OBJS)
 
-stress: stress.c $(LIB)
+stress: stress.c $(LIB) $(MPDM)/libmpdm.a
 	$(CC) $(CFLAGS) `cat config.cflags` stress.c \
 		-L. -lmpsl `cat config.ldflags` -o $@
 

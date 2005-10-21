@@ -1,5 +1,3 @@
-lex.yy.o: lex.yy.c ../mpdm/mpdm.h y.tab.h
-mpsl_c.o: mpsl_c.c config.h ../mpdm/mpdm.h mpsl.h
-mpsl_f.o: mpsl_f.c config.h ../mpdm/mpdm.h mpsl.h
-stress.o: stress.c ../mpdm/mpdm.h mpsl.h
-y.tab.o: y.tab.c ../mpdm/mpdm.h mpsl.h
+mpsl_c.o: mpsl_c.c config.h $(MPDM)/mpdm.h mpsl.h
+mpsl_f.o: mpsl_f.c config.h $(MPDM)/mpdm.h mpsl.h
+stress.o: stress.c $(MPDM)/mpdm.h mpsl.h
