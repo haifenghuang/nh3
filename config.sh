@@ -100,12 +100,18 @@ echo "#define CONFOPT_PREFIX \"$PREFIX\"" >> config.h
 # configuration directives
 
 # mpdm
-echo -n "Testing for mpdm... "
-MPDM=../mpdm
-if [ -f $MPDM/mpdm.h ] ; then
+echo -n "Looking for mpdm... "
+
+for MPDM in ./mpdm ../mpdm NOTFOUND ; do
+	if [ -d $MPDM ] && [ -f $MPDM/mpdm.h ] ; then
+		break
+	fi
+done
+
+if [ "$MPDM" != "NOTFOUND" ] ; then
 	echo "-I$MPDM" >> config.cflags
 	echo "-L$MPDM -lmpdm" >> config.ldflags
-	echo "OK"
+	echo "OK ($MPDM)"
 else
 	echo "No"
 	exit 1
