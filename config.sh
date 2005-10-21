@@ -44,7 +44,7 @@ if [ "$CONFIG_HELP" = "1" ] ; then
 	exit 1
 fi
 
-echo "Configuring..."
+echo "Configuring mpsl..."
 
 echo "/* automatically created by config.sh - do not modify */" > config.h
 echo "# automatically created by config.sh - do not modify" > makefile.opts
@@ -117,9 +117,14 @@ else
 	exit 1
 fi
 
-#########################################################
-
 cat $MPDM/config.ldflags >> config.ldflags
+
+# If mpdm is not configured, do it
+if [ ! -f $MPDM/Makefile ] ; then
+	( cd $MPDM ; ./config.sh )
+fi
+
+#########################################################
 
 # final setup
 
