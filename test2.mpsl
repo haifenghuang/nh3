@@ -1,0 +1,7 @@
+/* to be included from test.mpsl */
+print("I'm test2.mpsl\n");
+
+/* return data to upper level */
+return(6);
+
+print("This code is never executes\n");
