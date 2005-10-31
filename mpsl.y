@@ -45,6 +45,9 @@ extern wchar_t * mpsl_next_char;
 /* line number */
 extern int mpsl_line;
 
+/* filename */
+char * mpsl_filename = NULL;
+
 /* pointer to file being compiled */
 extern FILE * mpsl_file;
 
@@ -429,7 +432,12 @@ expr:
 
 void yyerror(char * s)
 {
-	printf("yyerror: %s in line %d\n", s, mpsl_line);
+	char tmp[1024];
+
+	snprintf(tmp, sizeof(tmp), "%s in line %d of '%s'",
+		s, mpsl_line + 1, mpsl_filename);
+
+	printf("%s\n", tmp);
 }
 
 
@@ -460,7 +468,9 @@ mpdm_t mpsl_compile(mpdm_t code)
 
 	/* point to code */
 	mpsl_next_char=(wchar_t *) code->data;
+
 	mpsl_line=0;
+	mpsl_filename="<INLINE>";
 
 	mpdm_ref(code);
 
@@ -480,7 +490,9 @@ mpdm_t mpsl_compile_file(mpdm_t filename)
 
 	filename=MPDM_2MBS(filename->data);
 
-	if((mpsl_file=fopen((char *)filename->data, "r")) == NULL)
+	mpsl_filename = filename->data;
+
+	if((mpsl_file=fopen(mpsl_filename, "r")) == NULL)
 		return(NULL);
 
 	mpsl_lib();

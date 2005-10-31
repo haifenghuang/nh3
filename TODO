@@ -12,7 +12,6 @@ Release Critical Bugs
  * 1063: Create a sprintf()-like library function.
  * 1064: Compilation errors should be stored somewhere
    (not just printed on stdout).
- * 1065: Add the filename to compilation errors.
  * 1068: Implement a dumper function to dump an mpdm_t
    as mpsl source code.
 
@@ -84,5 +83,7 @@ Closed
  * 1066: Rename all symbols starting with _ (Thu, 26 May 2005 20:41:46 +0200).
  * 1067: Allow assignations in while() condition
    (Tue, 12 Jul 2005 07:54:49 +0200).
+ * 1065: Add the filename to compilation errors
+   (Mon, 31 Oct 2005 16:15:04 +0100).
 
 Email bugs to angel@triptico.com
