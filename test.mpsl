@@ -264,14 +264,11 @@ sub dumper(v, i)
 {
 	local ret = "";
 	local ind = "";
-	local n = 0;
+	local n;
 
 	/* create the indentation string */
-	while(n < i)
-	{
+	foreach(n, [ 0 .. i ])
 		ind = ind ~ "  ";
-		n++;
-	}
 
 	if(is_exec(v))
 		ret = "sub { 'DUMMY' }";
