@@ -14,6 +14,7 @@ Release Critical Bugs
    (not just printed on stdout).
  * 1068: Implement a dumper function to dump an mpdm_t
    as mpsl source code.
+ * 1069: Implement a for() instruction.
 
 Open Bugs
 ---------
