@@ -260,9 +260,18 @@ foreach(enc, [ "UTF-8", NULL, "ISO-8859-1", "INVALID" ])
 ret = load("test2.mpsl");
 print("test2.mpsl returned ", ret, "\n");
 
-sub dumper(v)
+sub dumper(v, i)
 {
 	local ret = "";
+	local ind = "";
+	local n = 0;
+
+	/* create the indentation string */
+	while(n < i)
+	{
+		ind = ind ~ "  ";
+		n++;
+	}
 
 	if(is_exec(v))
 		ret = "sub { 'DUMMY' }";
@@ -272,7 +281,12 @@ sub dumper(v)
 	else
 	if (is_array(v))
 	{
-		ret = "[ ]";
+		local w = [];
+
+		ret = "[\n";
+
+		foreach(n, v)
+			apush(w, dumper(v[n]);
 	}
 	else
 	if(regex("/^[0-9\.]+$/", v))
@@ -280,7 +294,7 @@ sub dumper(v)
 	else
 		ret = "'" ~ v ~ "'";
 
-	return(ret);
+	return(ind ~ ret);
 }
 
 foreach(v, [ "hola", 100, 5 + 4, 4.6, [ 1, 2, 3], { 'a' => 1, 'b' => 2 }, sub { 1; } ])
