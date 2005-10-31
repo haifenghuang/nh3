@@ -277,7 +277,16 @@ sub dumper(v, i)
 		ret = "sub { 'DUMMY' }";
 	else
 	if (is_hash(v))
-		ret = "{ }";
+	{
+		local w = [];
+
+		ret = "{\n";
+
+		foreach(n, hkeys(v))
+			apush(w, dumper(n, i + 1) ~ " => " ~ dumper(v[n], i + 1));
+
+		ret = ret ~ ajoin(",\n", w) ~ "\n" ~ ind ~ "}";
+	}
 	else
 	if (is_array(v))
 	{
@@ -286,7 +295,9 @@ sub dumper(v, i)
 		ret = "[\n";
 
 		foreach(n, v)
-			apush(w, dumper(v[n]);
+			apush(w, dumper(n, i + 1));
+
+		ret = ret ~ ajoin(",\n", w) ~ "\n" ~ ind ~ "]";
 	}
 	else
 	if(regex("/^[0-9\.]+$/", v))
@@ -297,5 +308,6 @@ sub dumper(v, i)
 	return(ind ~ ret);
 }
 
-foreach(v, [ "hola", 100, 5 + 4, 4.6, [ 1, 2, 3], { 'a' => 1, 'b' => 2 }, sub { 1; } ])
+foreach(v, [ "hola", 100, 5 + 4, 4.6, [ 1, 2, 3],
+	{ 'a' => 1, 'b' => { 'bb' => 11, 'cc' => 22 } }, sub { 1; } ])
 	print("v = ", dumper(v), "\n");
