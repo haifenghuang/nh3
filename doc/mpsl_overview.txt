@@ -458,6 +458,25 @@ It's easier to see subroutine definitions as an assignation of a code
 block to a variable: you would never access a variable before assigning a
 value to it.
 
+Type-checking functions
+-----------------------
+
+There are three functions to test a type of a value: is_exec(), is_hash()
+and is_array(). They return true if the tested value is executable, a hash
+or an array, respectively.
+
+On this implementation, executable and hash values are also arrays, so if
+you need to act differently on the type of a value, the correct order is
+is_exec(), is_hash() and is_array(), as in the following example:
+
+ if(is_exec(v)) { print("v is executable\n"); }
+ else
+ if(is_hash(v)) { print("v is a hash with ", hsize(v), " pairs\n"); }
+ else
+ if(is_array(v) { print("v is an array with ", size(v), " elements\n"); }
+ else
+ 	print("v is a scalar\n");
+
 Regular expressions
 -------------------
 
