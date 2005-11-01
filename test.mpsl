@@ -311,11 +311,24 @@ foreach(v, [ "hola", 100, 5 + 4, 4.6, [ 1, 2, 3],
 
 print("More regex tests (matching words)\n");
 
-v="This is a word, other5-w1th_1234 numb3r5\nseveral:punctuation;marks!!!s_func(100,23);";
+v="This is a word, 'other5-w1th_1234' numb3r5\nseveral:'punctuation;marks!!!'s_func(100,23);";
 print("Test phrase: ", v, "\n");
+
 r="/\w+/";
 c=0;
 
+print("Words:\n");
+while(w=regex(r, v, c))
+{
+	print(w, "\n");
+	c=regex();
+	c=c[0] + c[1];
+}
+
+r="/'[^']*'/";
+c=0;
+
+print("Quotes:\n");
 while(w=regex(r, v, c))
 {
 	print(w, "\n");
