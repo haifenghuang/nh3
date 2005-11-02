@@ -8,7 +8,7 @@ all: $(TARGET)
 PROJ=mpsl
 DOCS=
 
-OBJS=mpsl_c.o mpsl_l.o mpsl_y.o mpsl_f.o
+OBJS=mpsl_c.o mpsl_l.o mpsl_m.o mpsl_y.o mpsl_f.o
 
 ##################################################################
 
