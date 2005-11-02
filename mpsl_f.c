@@ -159,3 +159,19 @@ void mpsl_lib(void)
 		mpdm_hset_s(r, mpsl_funcs[n].name,
 			MPDM_X(mpsl_funcs[n].func));
 }
+
+
+void mpsl_argv(int argc, char * argv[])
+/* fills the ARGV array */
+{
+	int n;
+	mpdm_t ARGV;
+
+	/* create the ARGV array */
+	ARGV=MPDM_A(0);
+
+	for(n = 0;n < argc;n++)
+		mpdm_apush(ARGV, MPDM_MBS(argv[n]));
+
+	mpdm_hset_s(mpdm_root(), L"ARGV", ARGV);
+}
