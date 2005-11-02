@@ -1,7 +1,7 @@
 # -*- Mode: sh
 
-TARGET=libmpsl.a
-LIB=$(TARGET)
+TARGET=mpsl
+LIB=libmpsl.a
 
 all: $(TARGET)
 
@@ -45,6 +45,9 @@ dep:
 
 $(LIB): $(OBJS)
 	$(AR) rv $(LIB) $(OBJS)
+
+$(TARGET): $(LIB) $(MPDM)/libmpdm.a
+	$(CC) -L. -lmpsl `cat config.ldflags` -o $@
 
 stress: stress.c $(LIB) $(MPDM)/libmpdm.a
 	$(CC) $(CFLAGS) `cat config.cflags` stress.c \
