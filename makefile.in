@@ -6,7 +6,7 @@ LIB=libmpsl.a
 all: $(TARGET)
 
 PROJ=mpsl
-DOCS=
+DOCS=doc/mpsl_internals.txt doc/mpsl_overview.txt
 
 OBJS=mpsl_c.o mpsl_l.o mpsl_m.o mpsl_y.o mpsl_f.o
 
