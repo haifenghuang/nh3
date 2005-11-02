@@ -26,6 +26,7 @@
 #include "config.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <wchar.h>
 #include "mpdm.h"
 #include "mpsl.h"
@@ -36,20 +37,47 @@
 
 int mpsl_main(int argc, char * argv[])
 {
+	mpdm_t v;
+	char * script = NULL;
+	char * immscript = NULL;
+
 	if(argc == 1)
 	{
 		printf("mpsl %s - Minimum Profit Scripting Language\n", VERSION);
 		printf("Copyright (C) 2003-2005 Angel Ortega <angel@triptico.com>\n");
 		printf("This software is covered by the GPL license. NO WARRANTY.\n\n");
 
-		printf("Usage: mpsl {script.mpsl}\n\n");
+		printf("Usage: mpsl [-e 'script' | script.mpsl ]\n\n");
 
 		return(0);
 	}
 
 	mpdm_startup();
 
+	/* skip the executable */
+	argv++;	argc--;
+
+	if(strcmp(argv[0], "-e") == 0)
+	{
+		argv++; argc--;
+
+		immscript=argv[0];
+	}
+	else
+	{
+		/* get the script name */
+		script = argv[0];
+	}
+
+	/* set arguments */
 	mpsl_argv(argc, argv);
+
+	if(immscript != NULL)
+		v=mpsl_compile(MPDM_MBS(immscript));
+	else
+		v=mpsl_compile_file(MPDM_MBS(script));
+
+	if(v != NULL) mpdm_exec(v, NULL);
 
 	mpdm_shutdown();
 

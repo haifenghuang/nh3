@@ -47,7 +47,7 @@ $(LIB): $(OBJS)
 	$(AR) rv $(LIB) $(OBJS)
 
 $(TARGET): $(LIB) $(MPDM)/libmpdm.a
-	$(CC) -L. -lmpsl `cat config.ldflags` -o $@
+	$(CC) $(CFLAGS) -L. -lmpsl `cat config.ldflags` -o $@
 
 stress: stress.c $(LIB) $(MPDM)/libmpdm.a
 	$(CC) $(CFLAGS) `cat config.cflags` stress.c \

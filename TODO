@@ -5,7 +5,6 @@ Release Critical Bugs
 ---------------------
 
  * 1051: Document the scripting language.
- * 1054: Add a main() function, similar to the filp one.
  * 1058: Function execution should bang when the
    function is not found, or at least exist a default
    handler function for it.
@@ -86,5 +85,7 @@ Closed
    (Tue, 12 Jul 2005 07:54:49 +0200).
  * 1065: Add the filename to compilation errors
    (Mon, 31 Oct 2005 16:15:04 +0100).
+ * 1054: Add a main() function, similar to the filp one
+   (Wed, 02 Nov 2005 16:59:36 +0100).
 
 Email bugs to angel@triptico.com
