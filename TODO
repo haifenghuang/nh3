@@ -13,7 +13,8 @@ Release Critical Bugs
    (not just printed on stdout).
  * 1068: Implement a dumper function to dump an mpdm_t
    as mpsl source code.
- * 1069: Implement a for() instruction.
+ * 1070: Add an INC array to be used as a search path when
+   loading mpsl code.
 
 Open Bugs
 ---------
@@ -24,6 +25,7 @@ Pending Enhancements
 --------------------
 
  * 1024: Implement the 'continue' directive in mpsl.
+ * 1069: Implement a C-like for() instruction.
 
 Closed
 ------
