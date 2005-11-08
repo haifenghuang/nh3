@@ -149,10 +149,10 @@ void mpsl_lib(void)
 	r=mpdm_root();
 
 	/* already done? */
-	if(mpdm_hget_s(r, L"MPSL_LIB") != NULL)
+	if(mpdm_hget_s(r, L"MPSL") != NULL)
 		return;
 
-	mpdm_hset_s(r, L"MPSL_LIB", mpsl_boolean(1));
+	mpdm_hset_s(r, L"MPSL", MPDM_MBS(VERSION));
 
 	/* creates all the symbols */
 	for(n=0;mpsl_funcs[n].name != NULL;n++)
