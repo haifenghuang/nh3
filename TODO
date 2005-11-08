@@ -13,8 +13,6 @@ Release Critical Bugs
    (not just printed on stdout).
  * 1068: Implement a dumper function to dump an mpdm_t
    as mpsl source code.
- * 1070: Add an INC array to be used as a search path when
-   loading mpsl code.
 
 Open Bugs
 ---------
@@ -89,5 +87,7 @@ Closed
    (Mon, 31 Oct 2005 16:15:04 +0100).
  * 1054: Add a main() function, similar to the filp one
    (Wed, 02 Nov 2005 16:59:36 +0100).
+ * 1070: Add an INC array to be used as a search path when
+   loading mpsl code (Tue, 08 Nov 2005 15:57:02 +0100).
 
 Email bugs to angel@triptico.com

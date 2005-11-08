@@ -485,6 +485,7 @@ mpdm_t mpsl_compile(mpdm_t code)
 
 
 static FILE * inc_fopen(char * filename)
+/* loads filename, searching in INC if not directly accesible */
 {
 	mpdm_t a;
 	FILE * f = NULL;
