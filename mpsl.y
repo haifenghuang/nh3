@@ -484,6 +484,27 @@ mpdm_t mpsl_compile(mpdm_t code)
 }
 
 
+static FILE * inc_fopen(char * filename)
+{
+	mpdm_t a;
+	FILE * f = NULL;
+
+	if ((f = fopen(filename, "r")) != NULL)
+		return(f);
+
+	if((a=mpdm_hget_s(mpdm_root(), L"INC")) != NULL)
+	{
+		int n;
+
+		/* loop through INC, prepending each path
+		   to the filename */
+		for (n = 0;n < mpdm_size(a);n++)
+		{
+		}
+	}
+}
+
+
 mpdm_t mpsl_compile_file(mpdm_t filename)
 {
 	mpdm_t x=NULL;
@@ -492,7 +513,7 @@ mpdm_t mpsl_compile_file(mpdm_t filename)
 
 	mpsl_filename = filename->data;
 
-	if((mpsl_file=fopen(mpsl_filename, "r")) == NULL)
+	if((mpsl_file=inc_fopen(mpsl_filename)) == NULL)
 		return(NULL);
 
 	mpsl_lib();
