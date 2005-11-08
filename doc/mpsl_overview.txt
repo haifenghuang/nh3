@@ -483,5 +483,29 @@ Regular expressions
 File I/O
 --------
 
+Special symbols
+---------------
+
+ARGV
+~~~~
+
+Stores the command line arguments sent to the main() function.
+
+INC
+~~~
+
+Holds an array of paths on disk where source files will be searched
+for by the load() command.
+
+ERROR
+~~~~~
+
+Stores the last error message.
+
+MPSL
+~~~~
+
+Stores the mpsl version as a string.
+
 ----
 Angel Ortega <angel@triptico.com>
