@@ -488,6 +488,7 @@ static FILE * inc_fopen(char * filename)
 {
 	mpdm_t a;
 	FILE * f = NULL;
+	char tmp[1024];
 
 	if ((f = fopen(filename, "r")) != NULL)
 		return(f);
@@ -500,8 +501,18 @@ static FILE * inc_fopen(char * filename)
 		   to the filename */
 		for (n = 0;n < mpdm_size(a);n++)
 		{
+			mpdm_t v = mpdm_aget(a, n);
+
+			v = MPDM_2MBS(v->data);
+			snprintf(tmp, sizeof(tmp), "%s/%s",
+				(char *)v->data, filename);
+
+			if ((f = fopen(tmp, "r")) != NULL)
+				break;
 		}
 	}
+
+	return(f);
 }
 
 
