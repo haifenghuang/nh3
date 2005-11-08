@@ -434,10 +434,10 @@ void yyerror(char * s)
 {
 	char tmp[1024];
 
-	snprintf(tmp, sizeof(tmp), "%s in line %d of '%s'",
-		s, mpsl_line + 1, mpsl_filename);
+	snprintf(tmp, sizeof(tmp), "%s in %s, line %d",
+		s, mpsl_filename, mpsl_line + 1);
 
-	printf("%s\n", tmp);
+	mpdm_hset_s(mpdm_root(), L"ERROR", MPDM_MBS(tmp));
 }
 
 

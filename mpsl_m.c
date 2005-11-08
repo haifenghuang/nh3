@@ -77,7 +77,18 @@ int mpsl_main(int argc, char * argv[])
 	else
 		v=mpsl_compile_file(MPDM_MBS(script));
 
-	if(v != NULL) mpdm_exec(v, NULL);
+	if(v != NULL)
+		mpdm_exec(v, NULL);
+	else
+	{
+		mpdm_t e = mpdm_hget_s(mpdm_root(), L"ERROR");
+
+		if(e != NULL)
+		{
+			mpdm_write_wcs(stdout, mpdm_string(e));
+			printf("\n");
+		}
+	}
 
 	mpdm_shutdown();
 
