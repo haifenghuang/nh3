@@ -413,13 +413,11 @@ expr:
 
 	| compsym '(' ')'	{
 					/* function call (without args) */
-					$$ = INS1(L"EXEC",
-						INS1(L"SYMVAL", $1));
+					$$ = INS1(L"EXEC", $1);
 				}
 	| compsym '(' list ')'	{
 					/* function call (with args) */
-					$$ = INS2(L"EXEC",
-						INS1(L"SYMVAL", $1), $3);
+					$$ = INS2(L"EXEC", $1, $3);
 				}
 	| compsym '=' expr	{
 					/* simple assignation */

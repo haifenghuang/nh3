@@ -1,6 +1,9 @@
 /* to be included from test.mpsl */
 print("I'm test2.mpsl\n");
 
+print("The following should generate a warning\n");
+v = undefined_function();
+
 /* return data to upper level */
 return(6);
 

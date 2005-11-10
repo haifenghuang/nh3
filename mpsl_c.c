@@ -265,7 +265,6 @@ O_TYPE O_multi(O_ARGS) { mpdm_t v=RF(M1); if(!*f) v=M2; else UF(v); return(v); }
 O_TYPE O_literal(O_ARGS) { return(mpdm_clone(C1)); }
 O_TYPE O_symval(O_ARGS) { return(GET(M1)); }
 O_TYPE O_assign(O_ARGS) { mpdm_t v=RF(M1); mpdm_t r=SET(v, M2); UF(v); return(r); }
-O_TYPE O_exec(O_ARGS) { mpdm_t v=RF(M1); mpdm_t r=mpdm_exec(v, M2); UF(v); return(r); }
 O_TYPE O_if(O_ARGS) { return(ISTRU(M1) ? M2 : M3); }
 O_TYPE O_while(O_ARGS) { while(! *f && ISTRU(M1)) M2; if(*f == 1) *f=0; return(NULL); }
 O_TYPE O_local(O_ARGS) { mpsl_local_set_symbols(M1, NULL); return(NULL); }
@@ -296,6 +295,35 @@ O_TYPE O_immsdec(O_ARGS) { mpdm_t s=M1; mpdm_t v=GET(s); SET(s, MPDM_R(R(v) - 1)
 O_TYPE O_numeq(O_ARGS) { mpdm_t v1=RF(M1); mpdm_t v2=M2; UF(v1); return(BOOL((v1 == NULL || v2 == NULL) ? (v1 == v2) : (R(v1) == R(v2)))); }
 O_TYPE O_break(O_ARGS) { *f=1; return(NULL); }
 O_TYPE O_return(O_ARGS) { mpdm_t v=M1; *f=-1; return(v); }
+
+O_TYPE O_exec(O_ARGS)
+/* executes the value of a symbol */
+{
+	mpdm_t s, v, r;
+
+	/* gets the symbol name */
+	s=RF(M1);
+
+	/* gets the symbol value */
+	if ((v = GET(s)) == NULL) {
+		/* not found or NULL value? warn */
+		/* FIXME: This is a hack */
+		mpdm_t t;
+		char * ptr;
+
+		t = mpdm_ajoin(MPDM_LS(L"."), s);
+		t = MPDM_2MBS((wchar_t *) t->data);
+		fprintf(stderr, "WARNING: Undefined function %s()\n",
+			(char *)t->data);
+	}
+
+	/* executes */
+	r=mpdm_exec(v, M2);
+
+	UF(s);
+
+	return(r);
+}
 
 O_TYPE O_foreach(O_ARGS)
 /* foreach loop */
