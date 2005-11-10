@@ -108,10 +108,10 @@ EXEC
  EXEC <ins1>
  EXEC <ins1> <ins2>
 
-An EXEC instruction executes <ins1> and accepts its return value as an
-executable one; if exists, executes <ins2> and accepts its return value
-as a list of arguments for the executable value; then it's executed and
-its exit value returned.
+An EXEC instruction takes the value of the symbol returned by <ins1> and
+accepts its return value as an executable one; if exists, executes <ins2>
+and accepts its return value as a list of arguments for the executable
+value; then it's executed and its exit value returned.
 
 IF
 ~~
