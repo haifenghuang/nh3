@@ -309,7 +309,6 @@ O_TYPE O_exec(O_ARGS)
 		/* not found or NULL value? warn */
 		/* FIXME: This is a hack */
 		mpdm_t t;
-		char * ptr;
 
 		t = mpdm_ajoin(MPDM_LS(L"."), s);
 		t = MPDM_2MBS((wchar_t *) t->data);
