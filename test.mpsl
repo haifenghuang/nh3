@@ -340,12 +340,17 @@ while(w=regex(r, v, c))
 }
 
 print("Hexadecimal and octal numbers:\n");
-if(255 == 0xff)
+
+v = 0xff;
+
+if(v == 255)
 	print("Hexadecimal numbers work!!!\n");
 else
 	print("Hexadecimal numbers DON'T work!!!\n");
 
-if(0177 == 0x7f)
+v = 0177;
+
+if(v == 127)
 	print("Octal numbers work!!!\n");
 else
 	print("Octal numbers DON'T work!!!\n");
