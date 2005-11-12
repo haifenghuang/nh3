@@ -8,8 +8,6 @@ Release Critical Bugs
  * 1063: Create a sprintf()-like library function.
  * 1068: Implement a dumper function to dump an mpdm_t
    as mpsl source code.
- * 1072: Add parsing of hexadecimal numbers.
- * 1073: Add parsing of octal numbers.
 
 Open Bugs
 ---------
@@ -92,5 +90,9 @@ Closed
    function is not found, or at least exist a default
    handler function for it (Closed by #1071;
    Thu, 10 Nov 2005 08:28:27 +0100).
+ * 1072: Add parsing of hexadecimal numbers
+   (Sat, 12 Nov 2005 12:32:52 +0100).
+ * 1073: Add parsing of octal numbers
+   (Sat, 12 Nov 2005 12:33:00 +0100).
 
 Email bugs to angel@triptico.com
