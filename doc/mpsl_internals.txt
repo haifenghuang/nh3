@@ -3,7 +3,7 @@ Mpsl internals
 
  Angel Ortega <angel@triptico.com>
 
-This document describes the internal details of this mpsl implementation.
+This document describes some internal details of this mpsl implementation.
 
 The symbol table
 ----------------

@@ -485,8 +485,12 @@ is_exec(), is_hash() and is_array(), as in the following example:
 Regular expressions
 -------------------
 
+To be written.
+
 File I/O
 --------
+
+To be written.
 
 Special symbols
 ---------------
