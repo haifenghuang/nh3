@@ -458,6 +458,14 @@ static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3
 
 void mpsl_lib(void);
 
+/**
+ * mpsl_compile - Compiles a string of mpsl code.
+ * @code: A value containing a string of mpsl code
+ *
+ * Compiles a string of mpsl code and returns an mpdm value executable
+ * by mpdm_exec(). If there is a syntax (or other type) error, NULL
+ * is returned instead.
+ */
 mpdm_t mpsl_compile(mpdm_t code)
 {
 	mpdm_t x=NULL;
@@ -515,6 +523,14 @@ static FILE * inc_fopen(char * filename)
 }
 
 
+/**
+ * mpsl_compile_file - Compiles a file of mpsl code.
+ * @filename: Name of the mpsl source code.
+ *
+ * Compiles a source file of mpsl code and returns an mpdm value
+ * executable by mpdm_exec(). If there is a syntax (or other type)
+ * error, NULL is returned instead.
+ */
 mpdm_t mpsl_compile_file(mpdm_t filename)
 {
 	mpdm_t x=NULL;

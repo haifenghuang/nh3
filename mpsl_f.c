@@ -164,8 +164,15 @@ void mpsl_lib(void)
 }
 
 
+/**
+ * mpsl_argv - Fills the ARGV global array.
+ * @argc: number of arguments
+ * @argv: array of string values
+ *
+ * Fills the ARGV global mpsl array with an array of arguments. These
+ * are usually the ones sent to main().
+ */
 void mpsl_argv(int argc, char * argv[])
-/* fills the ARGV array */
 {
 	int n;
 	mpdm_t ARGV;

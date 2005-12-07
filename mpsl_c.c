@@ -48,7 +48,7 @@ int mpsl_trace=0;
 ********************/
 
 /**
- * mpsl_is_true - Tests if a value is true
+ * mpsl_is_true - Tests if a value is true.
  * @v: the value
  *
  * If @v is a valid mpsl 'false' value (NULL, "" or the "0" string),
@@ -76,7 +76,7 @@ int mpsl_is_true(mpdm_t v)
 
 
 /**
- * mpsl_boolean - Returns mpsl values true or false
+ * mpsl_boolean - Returns 'true' or 'false' mpsl stock values.
  * @b: boolean selector
  *
  * Returns mpsl's 'false' or 'true' values depending on the value in @b.
@@ -93,7 +93,7 @@ mpdm_t mpsl_boolean(int b)
 
 
 /**
- * mpsl_local_add_blkframe - Creates a block frame
+ * mpsl_local_add_blkframe - Creates a block frame.
  *
  * Creates a block frame in the local variable symbol table.
  */
@@ -105,7 +105,7 @@ mpdm_t mpsl_local_add_blkframe(void)
 
 
 /**
- * mpsl_local_del_blkframe - Deletes a block frame
+ * mpsl_local_del_blkframe - Deletes a block frame.
  *
  * Deletes a block frame previously created by
  * mpsl_local_add_blkframe().
@@ -118,7 +118,7 @@ void mpsl_local_del_blkframe(void)
 
 
 /**
- * mpsl_local_add_subframe - Creates a subroutine frame
+ * mpsl_local_add_subframe - Creates a subroutine frame.
  *
  * Creates a subroutine frame in the local variable symbol table.
  */
@@ -136,7 +136,7 @@ void mpsl_local_add_subframe(void)
 
 
 /**
- * mpsl_local_del_subframe - Deletes a subroutine frame
+ * mpsl_local_del_subframe - Deletes a subroutine frame.
  *
  * Deletes a subroutine frame previously created by
  * mpsl_local_add_subframe().
@@ -150,7 +150,8 @@ void mpsl_local_del_subframe(void)
 }
 
 
-mpdm_t mpsl_local_find_symbol(mpdm_t s)
+static mpdm_t mpsl_local_find_symbol(mpdm_t s)
+/* finds a symbol in the local symbol table */
 {
 	int n;
 	mpdm_t l;
@@ -178,7 +179,8 @@ mpdm_t mpsl_local_find_symbol(mpdm_t s)
 }
 
 
-void mpsl_local_set_symbols(mpdm_t s, mpdm_t v)
+static void mpsl_local_set_symbols(mpdm_t s, mpdm_t v)
+/* sets (or creates) a list of local symbols with a list of values */
 {
 	mpdm_t l;
 
@@ -201,7 +203,7 @@ void mpsl_local_set_symbols(mpdm_t s, mpdm_t v)
 
 
 /**
- * mpsl_set_symbol - Sets value to a symbol
+ * mpsl_set_symbol - Sets value to a symbol.
  * @s: symbol name
  * @v: value
  *
@@ -217,7 +219,7 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v)
 
 
 /**
- * mpsl_get_symbol - Gets the value of a symbol
+ * mpsl_get_symbol - Gets the value of a symbol.
  * @s: symbol name
  *
  * Gets the value of a symbol. The symbol can be local or global
@@ -505,17 +507,9 @@ mpdm_t mpsl_op(wchar_t * opcode)
 }
 
 
-/**
- * mpsl_exec_i - Executes one mpsl instruction
- * @c: Multiple value containing the bytecode
- * @args: Optional arguments for the bytecode
- * @f: Pointer to the flow control status
- *
- * Executes one mpsl instruction in the mpsl virtual machine.
- * Called from mpsl_exec() (which holds the flow control
- * status variable).
- */
 O_TYPE mpsl_exec_i(O_ARGS)
+/* Executes one mpsl instruction in the mpsl virtual machine. Called
+   from mpsl_exec() (which holds the flow control status variable) */
 {
 	mpdm_t ret=NULL;
 
@@ -554,6 +548,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 
 
 mpdm_t mpsl_exec(mpdm_t c, mpdm_t a)
+/* executes an mpsl instruction stream */
 {
 	int f=0;
 	mpdm_t v;
