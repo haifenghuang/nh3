@@ -65,7 +65,7 @@ distclean: realclean docsclean
 docs:
 	mkdir -p doc
 	-mp_doccer mpsl_*.c mpsl.y -o doc/mpsl_api -f html1 \
-	-t "Minimum Profit Scripting Language API ($(VERSION))" \
+	-t "Mpsl C API ($(VERSION))" \
 	-a 'Angel Ortega - angel@triptico.com'
 	-grutatxt -i doc/mpsl_overview.txt -o doc/mpsl_overview.html
 	-grutatxt -i doc/mpsl_internals.txt -o doc/mpsl_internals.html

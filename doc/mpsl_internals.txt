@@ -21,7 +21,7 @@ The global symbol table
 
 The global symbol table is the simpler one: all global symbols are keys of
 the root hash (as returned from mpdm's function mpdm_root()). Once a
-global symbol is defined, it's stored there until explicit deletion of
+global symbol is defined, it's stored there until explicit deletion or
 host program termination. Mpsl library functions are also global symbols,
 and share the same namespace.
 

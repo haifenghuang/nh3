@@ -8,7 +8,7 @@ Syntax
 
 Mpsl (Minimum Profit Scripting Language) is a programming language
 concieved as an scripting engine for the Minimum Profit Text Editor,
-though in can also be used as a general-purpose programming tool. An mpsl
+though it can also be used as a general-purpose programming tool. An mpsl
 program consists of a sequence of statements which run from top to bottom.
 Loops, subroutines and other control structures allow you to jump around
 within the code. It is a free-form language, meaning that you can format
@@ -42,7 +42,7 @@ Subroutine calls
 ~~~~~~~~~~~~~~~~
 
 Function and subroutine calls must enclose its arguments between
-parentheses, and separated by commas:
+parentheses, and separate them by commas:
 
  print("This is ", 'a list ', "of ", 5, " arguments\n");
 
@@ -95,7 +95,7 @@ size is dynamic and can grow or shrink at the programmer's wish.
  
  print(workdays[0], "\n");	/* prints monday */
  
- heterogeneous_array = [ 1, "string", NULL, function(), workdays ];
+ heterogeneous_array = [ 1, "string", [ 1, 2, 3 ], NULL, function(), workdays ];
 
 Array assignation is always by reference; by doing
 
@@ -112,6 +112,11 @@ Arrays grow when assigned to an out-of-bounds subscript:
  ary[100] = 100;
  print("size: ", size(ary), "\n");	/* prints size: 101 */
 
+The range operator can be used to populate an array with consecutive,
+integer values, as in the example:
+
+ ary = [ 1 .. 100 ];	/* ary contains 100 elements, from 1 to 100 */
+
 Hashes
 ~~~~~~
 
@@ -120,18 +125,18 @@ values can be of any type (scalar, array or hash). However, keys are
 usually scalar values, in particular strings.
 
  en2es_workdays = {
-	"monday"	=>	"lunes",
-	"tuesday"	=>	"martes",
-	"wednesday"	=>	"miércoles",
-	"thursday"	=>	"jueves",
-	"friday"	=>	"viernes"
+	'monday'	=>	'lunes',
+	'tuesday'	=>	'martes',
+	'wednesday'	=>	'miércoles',
+	'thursday'	=>	'jueves',
+	'friday'	=>	'viernes'
 	};
  
  print(en2es_workdays['monday'], "\n"); /* prints lunes */
  
  week = {
-	"workdays"	=>	workdays,
-	"weekend"	=>	[ 'saturday', 'sunday' ]
+	'workdays'	=>	workdays,
+	'weekend'	=>	[ 'saturday', 'sunday' ]
 	};
 
 Hash definitions *must* use the => to mark key/value pairs.
@@ -254,7 +259,7 @@ executed. As always, the variable is created if it doesn't exist.
 Break
 ~~~~~
 
-Exit from 'While' and 'foreach' loops can be forced by using 'break', just
+Exit from 'while' and 'foreach' loops can be forced by using 'break', just
 as in C.
 
 Builtin operators
