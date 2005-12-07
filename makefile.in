@@ -59,11 +59,19 @@ clean:
 realclean: clean
 	rm -f y.tab.c y.tab.h lex.yy.c
 
-distclean: realclean
+distclean: realclean docsclean
 	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile
 
 docs:
 	mkdir -p doc
+	-mp_doccer mpsl_*.c mpsl.y -o doc/mpsl_api -f html1 \
+	-t "Minimum Profit Scripting Language API ($(VERSION))" \
+	-a 'Angel Ortega - angel@triptico.com'
+	-grutatxt -i doc/mpsl_overview.txt -o doc/mpsl_overview.html
+	-grutatxt -i doc/mpsl_internals.txt -o doc/mpsl_internals.html
+
+docsclean:
+	rm -f doc/*.html
 
 dist: distclean ChangeLog y.tab.c y.tab.h lex.yy.c
 	cd .. ; ln -s $(PROJ) $(PROJ)-$(VERSION); \
