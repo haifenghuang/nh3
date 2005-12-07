@@ -4,11 +4,11 @@ Mpsl documentation index
 Minimum Profit Scripting Language
 ---------------------------------
 
- * ./mpsl_overview.html (Overview). Introduction to Mpsl.
+ * ./mpsl_overview.html (Overview). Introduction to mpsl.
  * ./mpsl_internals.html (Internals). Notes about this particular
-   Mpsl implementation.
- * Reference. Reference of Mpsl functions and variables (under construction).
- * ./mpsl_api.html (C API). Reference for using Mpsl from inside C programs.
+   mpsl implementation.
+ * Reference. Reference of mpsl functions and variables (under construction).
+ * ./mpsl_api.html (C API). Reference for using mpsl from inside C programs.
 
 ---
 Angel Ortega <angel@triptico.com>
