@@ -525,8 +525,10 @@ static FILE * inc_fopen(char * filename)
  * @filename: Name of the mpsl source code.
  *
  * Compiles a source file of mpsl code and returns an mpdm value
- * executable by mpdm_exec(). If there is a syntax (or other type)
- * error, NULL is returned instead.
+ * executable by mpdm_exec(). The source file is searched in any of the
+ * paths defined in the INC mpsl global array (take note that the current
+ * directory is NOT searched by default). If the file cannot be found
+ * or there is any other error, NULL is returned instead.
  */
 mpdm_t mpsl_compile_file(mpdm_t filename)
 {
