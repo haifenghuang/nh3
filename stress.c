@@ -565,6 +565,9 @@ void test_mpsl_file(void)
 
 	mpsl_trace=0;
 
+	/* Create an INC array with the current directory */
+	mpdm_exec(mpsl_compile(MPDM_LS(L"INC = [ '.' ];")), NULL);
+
 	printf("Compiling from file:\n");
 	v=do_test_mpsl_file("test.mpsl");
 	v=do_test_exec(v, NULL);

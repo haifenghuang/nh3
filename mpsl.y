@@ -497,10 +497,7 @@ static FILE * inc_fopen(char * filename)
 	FILE * f = NULL;
 	char tmp[1024];
 
-	if ((f = fopen(filename, "r")) != NULL)
-		return(f);
-
-	if((a=mpdm_hget_s(mpdm_root(), L"INC")) != NULL)
+	if((a = mpdm_hget_s(mpdm_root(), L"INC")) != NULL)
 	{
 		int n;
 
