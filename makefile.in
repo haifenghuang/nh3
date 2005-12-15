@@ -1,6 +1,5 @@
 # -*- Mode: sh
 
-TARGET=mpsl
 LIB=libmpsl.a
 
 all: $(TARGET)
