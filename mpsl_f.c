@@ -159,8 +159,9 @@ void mpsl_lib(void)
 		mpdm_hset_s(r, mpsl_funcs[n].name,
 			MPDM_X(mpsl_funcs[n].func));
 
-	/* creates INC */
-	mpdm_hset_s(r, L"INC", MPDM_A(0));
+	/* creates INC, unless already defined */
+	if(mpdm_hget_s(r, L"INC") == NULL)
+		mpdm_hset_s(r, L"INC", MPDM_A(0));
 }
 
 
