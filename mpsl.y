@@ -539,7 +539,15 @@ mpdm_t mpsl_compile_file(mpdm_t filename)
 	mpsl_filename = filename->data;
 
 	if((mpsl_file=inc_fopen(mpsl_filename)) == NULL)
+	{
+		char tmp[128];
+
+		snprintf(tmp, sizeof(tmp) - 1, "File '%s' not found in INC",
+			mpsl_filename);
+		mpdm_hset_s(mpdm_root(), L"ERROR", MPDM_MBS(tmp));
+
 		return(NULL);
+	}
 
 	mpsl_lib();
 
