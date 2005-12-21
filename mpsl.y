@@ -475,13 +475,14 @@ mpdm_t mpsl_compile(mpdm_t code)
 	/* point to code */
 	mpsl_next_char=(wchar_t *) code->data;
 
-	mpsl_line=0;
-	mpsl_filename="<INLINE>";
+	mpsl_line = 0;
+	mpsl_filename = "<INLINE>";
+	mpsl_bytecode = NULL;
 
 	mpdm_ref(code);
 
 	/* compile! */
-	if(yyparse() == 0)
+	if(yyparse() == 0 && mpsl_bytecode != NULL)
 		x=mpsl_x(mpsl_bytecode, NULL);
 
 	mpdm_unref(code);
@@ -551,10 +552,11 @@ mpdm_t mpsl_compile_file(mpdm_t filename)
 
 	mpsl_lib();
 
-	mpsl_line=0;
+	mpsl_line = 0;
+	mpsl_bytecode = NULL;
 
 	/* compile! */
-	if(yyparse() == 0)
+	if(yyparse() == 0 && mpsl_bytecode != NULL)
 		x=mpsl_x(mpsl_bytecode, NULL);
 
 	fclose(mpsl_file);
