@@ -36,16 +36,16 @@ int yy_input_for_flex(char * buf, int max);
 
 /* redefinition of input function for GNU Flex */
 #undef YY_INPUT
-#define YY_INPUT(b,r,m) (r=yy_input_for_flex(b,m))
+#define YY_INPUT(b,r,m) (r = yy_input_for_flex(b,m))
 
 /* internal pointer to next character in code */
-wchar_t * mpsl_next_char=NULL;
+wchar_t * mpsl_next_char = NULL;
 
 /* file stream for compiling from file */
-FILE * mpsl_file=NULL;
+FILE * mpsl_file = NULL;
 
 /* line number */
-int mpsl_line=0;
+int mpsl_line = 0;
 
 /* dynamic string manipulation macros */
 #ifndef ds_init
@@ -64,20 +64,20 @@ struct ds ds_v;
 static wchar_t * s_mbstowcs(char * str)
 /* converts from mbs to wcs, using a static buffer */
 {
-	static wchar_t * wc=NULL;
-	static int wc_s=0;
+	static wchar_t * wc = NULL;
+	static int wc_s = 0;
 	int n;
 
 	/* allocs wchar_t space, if needed */
-	if((n=mbstowcs(NULL, str, 0)) > wc_s)
+	if((n = mbstowcs(NULL, str, 0)) > wc_s)
 	{
-		wc_s=n;
-		wc=realloc(wc, (wc_s + 1) * sizeof(wchar_t));
+		wc_s = n;
+		wc = realloc(wc, (wc_s + 1) * sizeof(wchar_t));
 	}
 
 	/* really converts */
 	mbstowcs(wc, str, n);
-	wc[n]=L'\0';
+	wc[n] = L'\0';
 
 	return(wc);
 }
@@ -86,21 +86,21 @@ static wchar_t * s_mbstowcs(char * str)
 static mpdm_t mpsl_lc(char * str)
 /* the cache of literal values */
 {
-	static mpdm_t lc=NULL;
+	static mpdm_t lc = NULL;
 	mpdm_t v;
 	wchar_t * ptr;
 
 	/* creates the cache, if it doesn't exist */
 	if(lc == NULL)
-		lc=mpdm_ref(MPDM_H(0));
+		lc = mpdm_ref(MPDM_H(0));
 
 	/* convert to wchar_t */
-	ptr=s_mbstowcs(str);
+	ptr = s_mbstowcs(str);
 
 	/* search in cache */
-	if((v=mpdm_hget_s(lc, ptr)) == NULL)
+	if((v = mpdm_hget_s(lc, ptr)) == NULL)
 	{
-		v=MPDM_S(ptr);
+		v = MPDM_S(ptr);
 		mpdm_hset(lc, v, v);
 	}
 
@@ -131,20 +131,20 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 
 {INTEGER}	{
 			/* integers */
-			yylval.v=mpsl_lc(yytext);
+			yylval.v = mpsl_lc(yytext);
 			return(INTEGER);
 		}
 
 {REAL}		{
 			/* real numbers */
-			yylval.v=mpsl_lc(yytext);
+			yylval.v = mpsl_lc(yytext);
 			return(REAL);
 		}
 
 \'[^']*\'	{
 			/* single quoted string; return as is */
-			yytext[yyleng - 1]='\0';
-			yylval.v=mpsl_lc(yytext + 1);
+			yytext[yyleng - 1] = '\0';
+			yylval.v = mpsl_lc(yytext + 1);
 			return(STRING);
 		}
 
@@ -182,7 +182,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 
 {SYMBOL}	{
 			/* symbol name */
-			yylval.v=mpsl_lc(yytext);
+			yylval.v = mpsl_lc(yytext);
 			return(SYMBOL);
 		}
 
@@ -204,7 +204,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 <STR>\\\"	{ ds_poke(ds_v, '\"'); }
 <STR>\"		{
 			ds_poke(ds_v, '\0');
-			yylval.v=mpsl_lc(ds_v.d);
+			yylval.v = mpsl_lc(ds_v.d);
 			BEGIN 0;
 			return(STRING);
 		}
@@ -222,10 +222,10 @@ int yy_input_for_flex(char * buf, int max)
 	{
 		int c;
 
-		if((c=fgetc(mpsl_file)) == EOF)
+		if((c = fgetc(mpsl_file)) == EOF)
 			return(0);
 
-		buf[0]=c;
+		buf[0] = c;
 		return(1);
 	}
 	else
@@ -235,19 +235,19 @@ int yy_input_for_flex(char * buf, int max)
 
 		if(*mpsl_next_char == L'\0')
 		{
-			mpsl_next_char=NULL;
+			mpsl_next_char = NULL;
 			return(0);
 		}
 
 		if(wctomb(tmp, *mpsl_next_char) != 1)
 		{
-			mpsl_next_char=NULL;
+			mpsl_next_char = NULL;
 			return(0);
 		}
 
 		mpsl_next_char ++;
 
-		buf[0]=tmp[0];
+		buf[0] = tmp[0];
 		return(1);
 	}
 

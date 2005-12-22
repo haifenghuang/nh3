@@ -20,18 +20,18 @@ day="miercoles";
 print("English for ", day, " is ", days[day], "\n");
 
 /* multiple level structure */
-window={};
-window.ids={};
-wid={ 'x' => 640, 'y' => 400 };
-window.ids['main']=wid;
+window = {};
+window.ids = {};
+wid = { 'x' => 640, 'y' => 400 };
+window.ids['main'] = wid;
 
 print("x: ", window['ids']['main']['x'], "\n");
 print("x: ", window.ids.main.x, "\n");
 
 dump(window);
 
-content=glob("*.*");
-print("Current directory: ", ajoin(", ", content), "\n");
+content = glob("*.*");
+print("Current directory: ", join(", ", content), "\n");
 print("Number of files: ", size(content), "\n");
 
 foreach(a, content)
@@ -39,12 +39,12 @@ foreach(a, content)
 	print("Value for a: ", a, "\n");
 }
 
-a="hey!";
+a = "hey!";
 if(a eq "hey!")
 {
 	local a;
 
-	a="wow!";
+	a = "wow!";
 	print("Value for a: ", a, "\n");
 }
 print("Value for a: ", a, "\n");
@@ -58,13 +58,13 @@ else
 	print("Something weird happened to variable 'a'\n");
 }
 
-math={};
+math = {};
 
 sub math.sum(a, b) { return(a + b); }
 
 print(math.sum(5, 4), "\n");
 
-_sum=math.sum;
+_sum = math.sum;
 print(_sum(6, 7), "\n");
 
 ary = [ 0, 1, 2, 3 ];
@@ -122,9 +122,9 @@ print("avg(65536, 16384) == ", avg(65536, 16384), "\n");
 print("avg(123456, 654321) == ", avg(123456, 654321), "\n");
 
 on_exit_subs = [];
-apush(on_exit_subs, sub { print("Close files\n"); } );
-apush(on_exit_subs, sub { print("Clean up memory\n"); } );
-apush(on_exit_subs, sub { print("Other stuff\n"); } );
+push(on_exit_subs, sub { print("Close files\n"); } );
+push(on_exit_subs, sub { print("Clean up memory\n"); } );
+push(on_exit_subs, sub { print("Other stuff\n"); } );
 
 /* now exiting */
 foreach(f, on_exit_subs) f();
@@ -142,27 +142,27 @@ print("cmp('sunday','monday'): ", cmp('sunday','monday'), "\n");
 print("cmp('friday','monday'): ", cmp('friday','monday'), "\n");
 print("cmp('sunday','sunday'): ", cmp('sunday','sunday'), "\n");
 
-l=hkeys(days);
-print("\nUnsorted:\n", ajoin("\n", l), "\n");
+l = keys(days);
+print("\nUnsorted:\n", join("\n", l), "\n");
 
-l=asort(hkeys(days));
-print("\nSorted:\n", ajoin("\n", l),"\n");
+l = sort(keys(days));
+print("\nSorted:\n", join("\n", l),"\n");
 
-l=asort(hkeys(days), sub (a, b) { cmp(a, b); });
-print("\nSorted, with explicit callback function:\n", ajoin("\n", l),"\n");
+l = sort(keys(days), sub (a, b) { cmp(a, b); });
+print("\nSorted, with explicit callback function:\n", join("\n", l),"\n");
 
-l=asort(hkeys(days), sub (a, b) { cmp(b, a); });
-print("\nReverse-sorted:\n", ajoin("\n", l),"\n");
+l = sort(keys(days), sub (a, b) { cmp(b, a); });
+print("\nReverse-sorted:\n", join("\n", l),"\n");
 
-l = asort([ 1, 2, 10, 20, 100, 200 ]);
-print("\nASCII-sorted:\n", ajoin("\n", l),"\n");
+l = sort([ 1, 2, 10, 20, 100, 200 ]);
+print("\nASCII-sorted:\n", join("\n", l),"\n");
 
-l = asort([ 1, 2, 10, 20, 100, 200 ], sub (a, b) { a - b; });
-print("\nNumeric-sorted:\n", ajoin("\n", l),"\n");
+l = sort([ 1, 2, 10, 20, 100, 200 ], sub (a, b) { a - b; });
+print("\nNumeric-sorted:\n", join("\n", l),"\n");
 
 print("\nFile tests:\n");
 
-f=open("test.txt", "w");
+f = open("test.txt", "w");
 ls = [ "Strings\n", "to be written\n", "to a file.\n" ];
 
 if(f != NULL)
@@ -176,7 +176,7 @@ if(f != NULL)
 else
 	print("Error writing to test.txt\n");
 
-f=open("test.txt", "r");
+f = open("test.txt", "r");
 
 if(f != NULL)
 {
@@ -212,42 +212,42 @@ source = "#!/usr/bin/env mpsl\n\n/* I'm a mpsl script\n\tand I *feel* good! */ /
 print(source);
 
 /* taken from http://aspn.activestate.com/ASPN/Cookbook/Rx/Recipe/59811 */
-r="|/\*[^*]*\*+([^/*][^*]*\*+)*/|";
+r = "|/\*[^*]*\*+([^/*][^*]*\*+)*/|";
 
 sub substr(s, o, l) { local w=splice(s, NULL, o, l); return(w[1]); }
 
-v=regex(r, source);
+v = regex(r, source);
 dump(v);
 /* get last matching coords */
-c=regex();
+c = regex();
 
-v=regex(r, source, c[0] + c[1]);
+v = regex(r, source, c[0] + c[1]);
 dump(v);
 /* get last matching coords */
-c=regex();
+c = regex();
 
-v=regex(r, source, c[0] + c[1]);
+v = regex(r, source, c[0] + c[1]);
 dump(v);
 
 /* assignations as expressions */
 print("\nAssignations as expressions: cat file\n");
-if(f=open("config.h", "r"))
+if(f = open("config.h", "r"))
 {
 	/* again assignations as expressions */
-	while(v=read(f))
+	while(v = read(f))
 		print(v);
 
 	close(f);
 }
 
 print("\nAssignations as expressions: looped regex matching\n");
-c=0;
+c = 0;
 
-while(v=regex(r, source, c))
+while(v = regex(r, source, c))
 {
 	print(v, "\n");
-	c=regex();
-	c=c[0] + c[1];
+	c = regex();
+	c = c[0] + c[1];
 }
 
 print("Various encodings\n");
@@ -282,10 +282,10 @@ sub dumper(v, i)
 
 		ret = "{\n";
 
-		foreach(n, hkeys(v))
-			apush(w, dumper(n, i + 1) ~ " => " ~ dumper(v[n], i + 1));
+		foreach(n, keys(v))
+			push(w, dumper(n, i + 1) ~ " => " ~ dumper(v[n], i + 1));
 
-		ret = ret ~ ajoin(",\n", w) ~ "\n" ~ ind ~ "}";
+		ret = ret ~ join(",\n", w) ~ "\n" ~ ind ~ "}";
 	}
 	else
 	if (is_array(v))
@@ -295,9 +295,9 @@ sub dumper(v, i)
 		ret = "[\n";
 
 		foreach(n, v)
-			apush(w, dumper(n, i + 1));
+			push(w, dumper(n, i + 1));
 
-		ret = ret ~ ajoin(",\n", w) ~ "\n" ~ ind ~ "]";
+		ret = ret ~ join(",\n", w) ~ "\n" ~ ind ~ "]";
 	}
 	else
 	if(regex("/^[0-9\.]+$/", v))
@@ -314,29 +314,29 @@ foreach(v, [ "hola", 100, 5 + 4, 4.6, [ 1, 2, 3],
 
 print("More regex tests (matching words)\n");
 
-v="This 'is' a word, 'other5-w1th_1234' numb3r5\nseveral:'punctuation;marks!!!'s_func(100,23);";
+v = "This 'is' a word, 'other5-w1th_1234' numb3r5\nseveral:'punctuation;marks!!!'s_func(100,23);";
 print("Test phrase: ", v, "\n");
 
-r="/\w+/";
-c=0;
+r = "/\w+/";
+c = 0;
 
 print("Words:\n");
-while(w=regex(r, v, c))
+while(w = regex(r, v, c))
 {
 	print(w, "\n");
-	c=regex();
-	c=c[0] + c[1];
+	c = regex();
+	c = c[0] + c[1];
 }
 
-r="/'[^']*'/";
-c=0;
+r = "/'[^']*'/";
+c = 0;
 
 print("Quotes:\n");
-while(w=regex(r, v, c))
+while(w = regex(r, v, c))
 {
 	print(w, "\n");
-	c=regex();
-	c=c[0] + c[1];
+	c = regex();
+	c = c[0] + c[1];
 }
 
 print("Hexadecimal and octal numbers:\n");

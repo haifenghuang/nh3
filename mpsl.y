@@ -34,7 +34,7 @@
 ********************/
 
 /* the bytecode */
-static mpdm_t mpsl_bytecode=NULL;
+static mpdm_t mpsl_bytecode = NULL;
 
 int yylex(void);
 void yyerror(char * s);
@@ -104,7 +104,7 @@ program:
 
 function:
 	function stmt_list	{
-					mpsl_bytecode=$2;
+					mpsl_bytecode = $2;
 				}
 	| /* NULL */
 	;
@@ -219,7 +219,7 @@ list:
 	| list ',' expr		{
 					/* build list from list of
 					   instructions */
-					mpdm_apush($1, $3); $$ = $1;
+					mpdm_push($1, $3); $$ = $1;
 				}
 	;
 
@@ -230,7 +230,7 @@ sym_list:
 				}
 	| sym_list ',' SYMBOL	{
 					/* comma-separated list of symbols */
-					mpdm_apush($1,
+					mpdm_push($1,
 						INS1(L"LITERAL", $3));
 					$$ = $1;
 				}
@@ -244,8 +244,8 @@ hash:
 				{
 					/* build hash from list of
 					   instructions */
-					mpdm_apush($1, $3);
-					mpdm_apush($1, $5);
+					mpdm_push($1, $3);
+					mpdm_push($1, $5);
 					$$ = $1;
 				}
 	;
@@ -257,19 +257,19 @@ compsym:
 				}
 	| compsym '.' INTEGER	{
 					/* a.5 compound symbol */
-					mpdm_apush($1,
+					mpdm_push($1,
 				  		INS1(L"LITERAL", $3));
 				  	$$ = $1;
 				}
 	| compsym '.' SYMBOL	{
 					/* a.b compound symbol */
-					mpdm_apush($1,
+					mpdm_push($1,
 				  		INS1(L"LITERAL", $3));
 				  	$$ = $1;
 				}
 	| compsym '[' expr ']'	{
 					/* a["b"] or a[5] compound symbol */
-					mpdm_apush($1, $3);
+					mpdm_push($1, $3);
 					$$ = $1;
 				}
 	;
@@ -444,7 +444,7 @@ static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3
 {
 	mpdm_t v;
 
-	v=MPDM_A(args + 1);
+	v = MPDM_A(args + 1);
 
 	/* inserts the opcode */
 	mpdm_aset(v, mpsl_op(opcode), 0);
@@ -468,12 +468,12 @@ void mpsl_lib(void);
  */
 mpdm_t mpsl_compile(mpdm_t code)
 {
-	mpdm_t x=NULL;
+	mpdm_t x = NULL;
 
 	mpsl_lib();
 
 	/* point to code */
-	mpsl_next_char=(wchar_t *) code->data;
+	mpsl_next_char = (wchar_t *) code->data;
 
 	mpsl_line = 0;
 	mpsl_filename = "<INLINE>";
@@ -483,7 +483,7 @@ mpdm_t mpsl_compile(mpdm_t code)
 
 	/* compile! */
 	if(yyparse() == 0 && mpsl_bytecode != NULL)
-		x=mpsl_x(mpsl_bytecode, NULL);
+		x = mpsl_x(mpsl_bytecode, NULL);
 
 	mpdm_unref(code);
 
@@ -533,13 +533,13 @@ static FILE * inc_fopen(char * filename)
  */
 mpdm_t mpsl_compile_file(mpdm_t filename)
 {
-	mpdm_t x=NULL;
+	mpdm_t x = NULL;
 
-	filename=MPDM_2MBS(filename->data);
+	filename = MPDM_2MBS(filename->data);
 
 	mpsl_filename = filename->data;
 
-	if((mpsl_file=inc_fopen(mpsl_filename)) == NULL)
+	if((mpsl_file = inc_fopen(mpsl_filename)) == NULL)
 	{
 		char tmp[128];
 
@@ -557,10 +557,10 @@ mpdm_t mpsl_compile_file(mpdm_t filename)
 
 	/* compile! */
 	if(yyparse() == 0 && mpsl_bytecode != NULL)
-		x=mpsl_x(mpsl_bytecode, NULL);
+		x = mpsl_x(mpsl_bytecode, NULL);
 
 	fclose(mpsl_file);
-	mpsl_file=NULL;
+	mpsl_file = NULL;
 
 	return(x);
 }
