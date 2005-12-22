@@ -379,7 +379,7 @@ As in assignations, when you pass a multiple value (arrays and hashes) as
 an argument to a subroutine, it's always done by reference, so modifying
 it will change the original value:
 
- sub dequeue(queue) { local a = apop(queue); do_something_with(a); }
+ sub dequeue(queue) { local a = pop(queue); do_something_with(a); }
  
  my_q = [ 10, 20, 30 ];
  dequeue(my_q);		/* on exit, my_q will contain only [ 10, 20 ] */
@@ -418,9 +418,9 @@ The 'sub' directive can also be used as an rvalue to define anonymous
 subroutines. So, the following can be done:
 
  on_exit_subs = [];
- apush(on_exit_subs, sub { print("Close files\n"); } );
- apush(on_exit_subs, sub { print("Clean up memory\n"); } );
- apush(on_exit_subs, sub { print("Other stuff\n"); } );
+ push(on_exit_subs, sub { print("Close files\n"); } );
+ push(on_exit_subs, sub { print("Clean up memory\n"); } );
+ push(on_exit_subs, sub { print("Other stuff\n"); } );
  
  /* exiting; calling all functions stored in on_exit_subs */
  foreach(f, on_exit_subs) f();
@@ -441,10 +441,10 @@ following examples use the two-argument version of asort() to sort arrays
 in different ways:
 
  /* reverse-sort the array (comparing each element backwards) */
- sorted_ary = asort(unsorted_ary, sub (a, b) { cmp(b, a); } );
+ sorted_ary = sort(unsorted_ary, sub (a, b) { cmp(b, a); } );
  
  /* numeric sort (instead of plain ASCII) */
- sorted_ary = asort(unsorted_ary, sub (a, b) { a - b; } );
+ sorted_ary = sort(unsorted_ary, sub (a, b) { a - b; } );
 
 Subroutines are defined in execution time and *not* in compilation time.
 This means that you can redefine a subroutine whenever you want, but be
