@@ -61,6 +61,7 @@ static mpdm_t F_expand(mpdm_t a) { return(mpdm_expand(A0,IA1,IA2)); }
 static mpdm_t F_collapse(mpdm_t a) { return(mpdm_collapse(A0,IA1,IA2)); }
 static mpdm_t F_ins(mpdm_t a) { return(mpdm_ins(A0,A1,IA2)); }
 static mpdm_t F_adel(mpdm_t a) { return(mpdm_adel(A0,IA1)); }
+static mpdm_t F_shift(mpdm_t a) { return(mpdm_shift(A0)); }
 static mpdm_t F_push(mpdm_t a) { return(mpdm_push(A0,A1)); }
 static mpdm_t F_pop(mpdm_t a) { return(mpdm_pop(A0)); }
 static mpdm_t F_queue(mpdm_t a) { return(mpdm_queue(A0,A1,IA2)); }
@@ -115,6 +116,7 @@ static struct
 	{ L"collapse",	F_collapse },
 	{ L"ins",	F_ins },
 	{ L"adel",	F_adel },
+	{ L"shift",	F_shift },
 	{ L"push",	F_push },
 	{ L"pop",	F_pop },
 	{ L"queue",	F_queue },
