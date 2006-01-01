@@ -8,6 +8,8 @@ Release Critical Bugs
  * 1063: Create a sprintf()-like library function.
  * 1068: Implement a dumper function to dump an mpdm_t
    as mpsl source code.
+ * 1074: The mpsl command line tool should also search code in
+   the current directory.
 
 Open Bugs
 ---------
