@@ -354,3 +354,8 @@ if(v == 127)
 	print("Octal numbers work!!!\n");
 else
 	print("Octal numbers DON'T work!!!\n");
+
+
+s = "This is a %s and a %d and another %s and a %f";
+dict = { "%s" => "STRING", "%d" => "INTEGER", "%f" => "FLOAT" };
+print(sregex("/%\w/g", s, sub (a) { dict[a]; } ), "\n");
