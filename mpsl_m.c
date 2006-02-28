@@ -1,7 +1,7 @@
 /*
 
     mpsl - Minimum Profit Scripting Language
-    Copyright (C) 2003/2005 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2006 Angel Ortega <angel@triptico.com>
 
     mpsl_m.c - Minimum Profit Scripting Language main()
 
@@ -44,7 +44,7 @@ int mpsl_main(int argc, char * argv[])
 	if(argc == 1)
 	{
 		printf("mpsl %s - Minimum Profit Scripting Language\n", VERSION);
-		printf("Copyright (C) 2003-2005 Angel Ortega <angel@triptico.com>\n");
+		printf("Copyright (C) 2003-2006 Angel Ortega <angel@triptico.com>\n");
 		printf("This software is covered by the GPL license. NO WARRANTY.\n\n");
 
 		printf("Usage: mpsl [-e 'script' | script.mpsl ]\n\n");
@@ -61,7 +61,7 @@ int mpsl_main(int argc, char * argv[])
 	{
 		argv++; argc--;
 
-		immscript=argv[0];
+		immscript = argv[0];
 	}
 	else
 	{
@@ -72,10 +72,15 @@ int mpsl_main(int argc, char * argv[])
 	/* set arguments */
 	mpsl_argv(argc, argv);
 
+	/* add '.' to INC */
+	v = MPDM_A(1);
+	mpdm_aset(v, MPDM_LS(L"."), 0);
+	mpdm_hset_s(mpdm_root(), L"INC", v);
+
 	if(immscript != NULL)
-		v=mpsl_compile(MPDM_MBS(immscript));
+		v = mpsl_compile(MPDM_MBS(immscript));
 	else
-		v=mpsl_compile_file(MPDM_MBS(script));
+		v = mpsl_compile_file(MPDM_MBS(script));
 
 	if(v != NULL)
 		mpdm_exec(v, NULL);
