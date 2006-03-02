@@ -482,10 +482,89 @@ is_exec(), is_hash() and is_array(), as in the following example:
  else
  	print("v is a scalar\n");
 
-Regular expressions
--------------------
+Regular expression matching
+---------------------------
 
-To be written.
+Regular expression matching is done with the regex() function. In the simpler
+of its forms, it can be used to test if a string matches:
+
+ /* hours, minutes, seconds */
+ v = "07:55:35";
+ 
+ if(regex("/^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/", v))
+ 	print("The v variable contains a valid time\n");
+
+The regular expression can contain flags; those are 'i', for case
+insensitiveness, or 'm', to treat the string as a multiline one (i.e., one
+containing \n characters), where the special ^ and $ markup match beginning
+and end of lines and not the beginning or end of the string.
+
+Regex() returns the matched string.
+
+ v = "The value of PI is 3.1416, more or less";
+ 
+ pi = regex("/[0-9]+\.[0-9]+/", v);
+
+If regex() is called without arguments, it returns the last match as an array
+of two elements; the first contain the offset of the matched strings, and the
+second, the size in characters of it. If last match was unsuccessful, NULL is
+returned.
+
+ /* get the match of the previous example */
+ coords = regex();
+ 
+ /* prints 19:6 */
+ print(coords[0], ":", coords[1], "\n");
+
+Regex() can include an optional third argument, the offset where the regular
+expression matching must start (instead of 0, the beginning of the string).
+This can be used to extract many values from the same string:
+
+ /* lets extract all numbers in the following string: */
+ s = "There is 10 and 35 and 42 in the number 103542!";
+ offset = 0;
+ 
+ while(n = regex("/[0-9]+/", s, offset))
+ {
+ 	local c;
+ 
+ 	/* print result */
+ 	print(n, "\n");
+ 
+ 	/* get the coordinates */
+ 	c = regex();
+ 
+ 	/* start from there (previous match offset + size) */
+ 	offset += c[0] + c[1];
+ }
+
+For more complex situations, the first argument of regex() can be an array
+of regular expressions (instead of a string). Those expressions will tried
+one after the other on the string, each one using the offset returned by
+the previous one. If all of them are matched, an array with the matched strings
+is returned.
+
+ /* match pairs of key=value commands, with many variants */
+ v1 = "key1=value1";
+ v2 = " KEY2 = value2";
+ v3 = "key3=333  ";
+ 
+ /* array regex: a regex for each part */
+ r = regex([ "/\s*/",        /* possible leading blanks (0) */
+             "/[a-z0-9]+/i", /* the key (1) */
+             "/\s*=\s*/",    /* optional blanks, the = , more blanks (2) */
+             "/[a-z0-9]+/i"  /* the value (3) */
+           ], v1);
+ 
+ if(r != NULL)
+ {
+ 	/* the key is the element #1 and the value the #3 */
+ 	key = r[1];
+ 	value = r[3];
+ }
+
+Regular expression substitutions
+--------------------------------
 
 File I/O
 --------
