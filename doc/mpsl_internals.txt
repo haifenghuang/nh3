@@ -323,4 +323,4 @@ A BLKFRAME instruction creates a block frame, executes <ins1>,
 destroys the block frame and returns <ins1> exit value.
 
 ----
-Angel Ortega - http://www.triptico.com
+Angel Ortega <angel@triptico.com> - $Id$
