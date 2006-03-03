@@ -566,6 +566,8 @@ is returned.
 Regular expression substitutions
 --------------------------------
 
+To be written.
+
 File I/O
 --------
 
@@ -596,4 +598,4 @@ MPSL
 Stores the mpsl version as a string.
 
 ----
-Angel Ortega <angel@triptico.com> - $Id$
+Angel Ortega <angel@triptico.com> - $Date$
