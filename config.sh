@@ -51,7 +51,7 @@ if [ "$CONFIG_HELP" = "1" ] ; then
 	exit 1
 fi
 
-echo "Configuring mpsl..."
+echo "Configuring MPSL..."
 
 echo "/* automatically created by config.sh - do not modify */" > config.h
 echo "# automatically created by config.sh - do not modify" > makefile.opts
@@ -106,8 +106,8 @@ echo "#define CONFOPT_PREFIX \"$PREFIX\"" >> config.h
 
 # configuration directives
 
-# mpdm
-echo -n "Looking for mpdm... "
+# MPDM
+echo -n "Looking for MPDM... "
 
 for MPDM in ./mpdm ../mpdm NOTFOUND ; do
 	if [ -d $MPDM ] && [ -f $MPDM/mpdm.h ] ; then
@@ -124,7 +124,7 @@ else
 	exit 1
 fi
 
-# If mpdm is not configured, do it
+# If MPDM is not configured, do it
 if [ ! -f $MPDM/Makefile ] ; then
 	CONF_ARGS="--prefix=$PREFIX"
 	[ "$WITHOUT_WIN32" = 1 ] && CONF_ARGS="$CONF_ARGS --without-win32"
