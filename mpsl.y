@@ -1,8 +1,8 @@
 %{
 /*
 
-    mpsl - Minimum Profit Scripting Language
-    Copyright (C) 2003/2005 Angel Ortega <angel@triptico.com>
+    MPSL - Minimum Profit Scripting Language
+    Copyright (C) 2003/2006 Angel Ortega <angel@triptico.com>
 
     mpsl.y - Minimum Profit Scripting Language YACC parser
 
@@ -459,10 +459,10 @@ static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3
 void mpsl_lib(void);
 
 /**
- * mpsl_compile - Compiles a string of mpsl code.
- * @code: A value containing a string of mpsl code
+ * mpsl_compile - Compiles a string of MPSL code.
+ * @code: A value containing a string of MPSL code
  *
- * Compiles a string of mpsl code and returns an mpdm value executable
+ * Compiles a string of MPSL code and returns an mpdm value executable
  * by mpdm_exec(). If there is a syntax (or other type) error, NULL
  * is returned instead.
  */
@@ -522,12 +522,12 @@ static FILE * inc_fopen(char * filename)
 
 
 /**
- * mpsl_compile_file - Compiles a file of mpsl code.
- * @filename: Name of the mpsl source code.
+ * mpsl_compile_file - Compiles a file of MPSL code.
+ * @filename: Name of the MPSL source code.
  *
- * Compiles a source file of mpsl code and returns an mpdm value
+ * Compiles a source file of MPSL code and returns an mpdm value
  * executable by mpdm_exec(). The source file is searched in any of the
- * paths defined in the INC mpsl global array (take note that the current
+ * paths defined in the INC MPSL global array (take note that the current
  * directory is NOT searched by default). If the file cannot be found
  * or there is any other error, NULL is returned instead.
  */

@@ -1,9 +1,9 @@
 /*
 
-    mpsl - Minimum Profit Scripting Language
-    Copyright (C) 2003/2005 Angel Ortega <angel@triptico.com>
+    MPSL - Minimum Profit Scripting Language
+    Copyright (C) 2003/2006 Angel Ortega <angel@triptico.com>
 
-    stress.c - Stress tests for mpsl.
+    stress.c - Stress tests for MPSL.
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -105,12 +105,12 @@ void test_mpsl(void)
 {
 	mpdm_t v;
 
-	printf("mpsl (Minimum Profit Scripting Language)\n\n");
+	printf("MPSL (Minimum Profit Scripting Language)\n\n");
 
 	v = mpsl_compile(MPDM_LS(L"a=1;"));
 	do_test_exec(v, NULL);
 
-	printf("mpsl compilation tests-------------\n");
+	printf("MPSL compilation tests-------------\n");
 
 	do_test_mpsl("a=1;");
 	do_test_mpsl("a.b.c=1;");

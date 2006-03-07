@@ -1,14 +1,14 @@
-Mpsl internals
+MPSL internals
 ==============
 
  Angel Ortega <angel@triptico.com>
 
-This document describes some internal details of this mpsl implementation.
+This document describes some internal details of this MPSL implementation.
 
 The symbol table
 ----------------
 
-There are three different scopes for a symbol in mpsl: global (accesible
+There are three different scopes for a symbol in MPSL: global (accesible
 from everywhere), local to subroutine (accesible from the subroutine where
 it's defined) or local to block (accesible from the block where it's
 defined). The priority for symbols with the same name is, obviously,
@@ -22,7 +22,7 @@ The global symbol table
 The global symbol table is the simpler one: all global symbols are keys of
 the root hash (as returned from mpdm's function mpdm_root()). Once a
 global symbol is defined, it's stored there until explicit deletion or
-host program termination. Mpsl library functions are also global symbols,
+host program termination. MPSL library functions are also global symbols,
 and share the same namespace.
 
 The local symbol table
@@ -41,7 +41,7 @@ array.
 The array pushed on each subroutine is called a _subroutine frame_, and
 the hash pushed on each block is called a _block frame_.
 
-If the symbol table was to be defined in mpsl code, it could be as follows:
+If the symbol table was to be defined in MPSL code, it could be as follows:
 
  local_symbol_table = [
 	[ {}, {}, {} ],		/* caller subroutine frames (dormant) */
@@ -57,12 +57,12 @@ assumed to be a global one.
 The bytecode
 ------------
 
-When the compiler parses a mpsl source code file, it generates a bunch of
-mpsl instructions, each one stored in a mpdm array. This (usually small)
+When the compiler parses a MPSL source code file, it generates a bunch of
+MPSL instructions, each one stored in a mpdm array. This (usually small)
 array contains in the first element a scalar value, the _opcode_, and
-optionally other values, that are also mpsl instructions (unless in a very
+optionally other values, that are also MPSL instructions (unless in a very
 special case) and act as the opcode's arguments. All instructions return a
-value after execution. A mpsl compiled program is a chain of instructions
+value after execution. A MPSL compiled program is a chain of instructions
 that call each other.
 
 A description of each opcode follows:

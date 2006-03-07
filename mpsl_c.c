@@ -1,7 +1,7 @@
 /*
 
-    mpsl - Minimum Profit Scripting Language
-    Copyright (C) 2003/2005 Angel Ortega <angel@triptico.com>
+    MPSL - Minimum Profit Scripting Language
+    Copyright (C) 2003/2006 Angel Ortega <angel@triptico.com>
 
     mpsl_c.c - Minimum Profit Scripting Language Core
 
@@ -51,7 +51,7 @@ int mpsl_trace = 0;
  * mpsl_is_true - Tests if a value is true.
  * @v: the value
  *
- * If @v is a valid mpsl 'false' value (NULL, "" or the "0" string),
+ * If @v is a valid MPSL 'false' value (NULL, "" or the "0" string),
  * returns zero, or nonzero otherwise.
  */
 int mpsl_is_true(mpdm_t v)
@@ -76,10 +76,10 @@ int mpsl_is_true(mpdm_t v)
 
 
 /**
- * mpsl_boolean - Returns 'true' or 'false' mpsl stock values.
+ * mpsl_boolean - Returns 'true' or 'false' MPSL stock values.
  * @b: boolean selector
  *
- * Returns mpsl's 'false' or 'true' values depending on the value in @b.
+ * Returns MPSL's 'false' or 'true' values depending on the value in @b.
  */
 mpdm_t mpsl_boolean(int b)
 {
@@ -508,7 +508,7 @@ mpdm_t mpsl_op(wchar_t * opcode)
 
 
 O_TYPE mpsl_exec_i(O_ARGS)
-/* Executes one mpsl instruction in the mpsl virtual machine. Called
+/* Executes one MPSL instruction in the MPSL virtual machine. Called
    from mpsl_exec() (which holds the flow control status variable) */
 {
 	mpdm_t ret = NULL;
@@ -548,7 +548,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 
 
 mpdm_t mpsl_exec(mpdm_t c, mpdm_t a)
-/* executes an mpsl instruction stream */
+/* executes an MPSL instruction stream */
 {
 	int f = 0;
 	mpdm_t v;

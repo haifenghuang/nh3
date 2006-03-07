@@ -1,4 +1,4 @@
-Mpsl overview
+MPSL overview
 =============
 
  Angel Ortega <angel@triptico.com>
@@ -6,15 +6,15 @@ Mpsl overview
 Syntax
 ------
 
-Mpsl (Minimum Profit Scripting Language) is a programming language
+MPSL (Minimum Profit Scripting Language) is a programming language
 concieved as an scripting engine for the Minimum Profit Text Editor,
-though it can also be used as a general-purpose programming tool. An mpsl
+though it can also be used as a general-purpose programming tool. An MPSL
 program consists of a sequence of statements which run from top to bottom.
 Loops, subroutines and other control structures allow you to jump around
 within the code. It is a free-form language, meaning that you can format
 and indent it however you like, as whitespace serves to separate tokens.
 
-Mpsl borrows syntax and concepts from many languages: C, Perl, Java or
+MPSL borrows syntax and concepts from many languages: C, Perl, Java or
 JavaScript. Statements end in a semi-colon, blocks are enclosed between {
 and } (curly brackets).
 
@@ -57,7 +57,7 @@ values. Any other value is considered true.
 Variables and data types
 ------------------------
 
-Data types in mpsl match the mpdm (Minimum Profit Data Manager) single,
+Data types in MPSL match the mpdm (Minimum Profit Data Manager) single,
 array and hash values. They are very similar to Perl ones. However,
 variable names don't have a prefix indicating its type as in Perl; they
 can hold any type.
@@ -204,8 +204,8 @@ Conditional and looping constructs
 If
 ~~
 
-Mpsl has the usual 'if' conditional construct. The condition can be any
-mpsl expression, and the conditional code must be written between braces
+MPSL has the usual 'if' conditional construct. The condition can be any
+MPSL expression, and the conditional code must be written between braces
 if it's more than one instruction, just like in C.
 
  /* one instruction */
@@ -295,7 +295,7 @@ Strings
 The 'eq' operator is used for testing string equality, 'ne' for the
 opposite and ~ is used for concatenating strings.
 
-Mpsl's scalar values are used for both string and numerical values, so (as
+MPSL's scalar values are used for both string and numerical values, so (as
 in Perl) the string and numeric comparison operators must be different:
 
  a = 0; b = 0.0;
@@ -316,7 +316,7 @@ you can do:
  c = a || b;		/* c ends with a value of 50 */
  c = a && b;		/* c ends with a value of 100 */
 
-Mpsl lacks a ternary conditional operator (as the ? : one in C), but it
+MPSL lacks a ternary conditional operator (as the ? : one in C), but it
 can be easily simulated with && and || operators:
 
  /* assigns to c the greatest of a and b */
@@ -384,7 +384,7 @@ it will change the original value:
  my_q = [ 10, 20, 30 ];
  dequeue(my_q);		/* on exit, my_q will contain only [ 10, 20 ] */
 
-As every code fragment in mpsl, subroutines always return a value. By
+As every code fragment in MPSL, subroutines always return a value. By
 default, a subroutine returns the result of the last operation:
 
  sub avg(a, b) { a += b; a /= 2; }
@@ -595,7 +595,7 @@ Stores the last error message.
 MPSL
 ~~~~
 
-Stores the mpsl version as a string.
+Stores the MPSL version as a string.
 
 ----
 Angel Ortega <angel@triptico.com> - $Date$

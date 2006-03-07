@@ -1,7 +1,7 @@
 /*
 
-    mpsl - Minimum Profit Scripting Language
-    Copyright (C) 2003/2005 Angel Ortega <angel@triptico.com>
+    MPSL - Minimum Profit Scripting Language
+    Copyright (C) 2003/2006 Angel Ortega <angel@triptico.com>
 
     mpsl_f.c - Minimum Profit Scripting Language Function Library
 
@@ -145,7 +145,7 @@ static struct
 };
 
 void mpsl_lib(void)
-/* inits the mpsl library */
+/* inits the MPSL library */
 {
 	mpdm_t r;
 	int n;
@@ -174,7 +174,7 @@ void mpsl_lib(void)
  * @argc: number of arguments
  * @argv: array of string values
  *
- * Fills the ARGV global mpsl array with an array of arguments. These
+ * Fills the ARGV global MPSL array with an array of arguments. These
  * are usually the ones sent to main().
  */
 void mpsl_argv(int argc, char * argv[])
