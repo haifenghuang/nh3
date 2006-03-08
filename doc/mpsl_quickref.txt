@@ -25,6 +25,17 @@ y = clone(a);		y holds a clone of a
 y[0] = 9;		a[0] is NOT 9
 v = a[-1];		Last element of a ("yo!")
 w = [1 .. 100];		Range (array of 100 elements)
+push(a, 6543);		Add element to the end of a
+l = size(a);		It's now 5
+v = pop(a);		Deletes last element (and returns it)
+l = size(a);		Back to 4
+ains(a, 'heh', 1);	Inserts 'heh' at offset 1, all
+			existing elements moved up
+l = size(a);		It's again 5
+v = adel(a, 1);		Deletes element at offset 1 (and
+			returns it), all existing elements
+			moved down
+l = size(a);		It's again 4
 
 Hashes
 
@@ -39,6 +50,9 @@ i = h;			i holds the same hash as h
 i['key1'] = 4321;	h['key1'] is also 4321
 j = clone(h);		j holds a clone of h
 j['key1'] = 8765;	h['key1'] is NOT 8765
+v = h.key3.1;		Abridged mode (same as v = h['key3'][1])
+h.key3.1 = 10;		Abridged mode assignation
+a = keys(h);		Keys of h (['key1','key2','key3','key4'])
 
 Subroutines
 
