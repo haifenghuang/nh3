@@ -1,0 +1,76 @@
+MPSL Quick Reference
+
+Scalars
+
+v = 10000;		Integer assignation
+v = 3.1416;		Real numbers
+v = 'string1';		Verbatim strings
+w = "string2\n";	Strings with escape codes (see below)
+l = size(v);		Size of v (7)
+
+Arrays
+
+a = [];			Empty array
+a = [ 100, "hi!",	Array assignation (showing
+    3.1416, "yo!" ];	elements with assorted types)
+w = [ 1, [], a ];	Array elements can also be arrays,
+			hashes or anything (as non-scalar
+			values are always passed by reference)
+v = a[0];		First element of a (100)
+a[0] = 200;		Assignment of first element of a
+l = size(a);		Number of elements in a (4)
+x = a;			x holds the same array as a
+x[0] = 6;		a[0] is also 6
+y = clone(a);		y holds a clone of a
+y[0] = 9;		a[0] is NOT 9
+v = a[-1];		Last element of a ("yo!")
+w = [1 .. 100];		Range (array of 100 elements)
+
+Hashes
+
+h = {};			Empty hash
+h = { 'key1' => "val1",	Hash assignation (showing elements
+  'key2' => 1000,	with assorted types). Hash elements
+  'key3' => [ 1, 2 ] };	can be anything
+v = h['key1'];		Value for 'key1' ('val1')
+h['key4'] = 3000;	Assignment of key 'key4' with 3000
+p = hsize(h);		Number of pairs in h (5)
+i = h;			i holds the same hash as h
+i['key1'] = 4321;	h['key1'] is also 4321
+j = clone(h);		j holds a clone of h
+j['key1'] = 8765;	h['key1'] is NOT 8765
+
+Subroutines
+
+sub greeting {		Subroutine definition
+   print("Hello!\n");
+}
+greeting();		Subroutine call (prints Hello!)
+sub sum(a, b) {		Subroutine definition, with
+   return(a + b);	arguments.
+}
+v = sub(10, 20);	Subroutine call with arguments
+			(sets v to 30).
+s = sub { return 3; };	Anonymous subroutine (assigned
+			to s)
+s = sub(a) { print a;};	Anonymous subroutine, with
+			arguments
+s = greeting;		Without parenthesis, assigns
+			a pointer to the subroutine
+s();			Prints Hello!
+
+Control operators
+
+if(expr) {		If expr is true, execute list 1
+   statement list 1;	(braces can be omitted if
+}			list 1 is one statement)
+else {			otherwise, execute list 2
+   statement list 2;	(else is also optional)
+}
+while(expr) {		While expr is true, execute list
+   statement list;	(braces can be omitted if
+}			list is one statement)
+foreach(v, a) {		Iterate the array a, assigning
+   statement list;	each element to v and executing
+}			list
+break;			Exists loop in while and foreach
