@@ -597,5 +597,10 @@ MPSL
 
 Stores the MPSL version as a string.
 
+STDIN, STDOUT, STDERR
+~~~~~~~~~~~~~~~~~~~~~
+
+The famous standard file descriptors.
+
 ----
 Angel Ortega <angel@triptico.com> - $Date$

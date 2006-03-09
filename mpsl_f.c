@@ -166,6 +166,11 @@ void mpsl_lib(void)
 	/* creates INC, unless already defined */
 	if(mpdm_hget_s(r, L"INC") == NULL)
 		mpdm_hset_s(r, L"INC", MPDM_A(0));
+
+	/* standard file descriptors */
+	mpdm_hset_s(r, L"STDIN", MPDM_F(stdin));
+	mpdm_hset_s(r, L"STDOUT", MPDM_F(stdout));
+	mpdm_hset_s(r, L"STDERR", MPDM_F(stderr));
 }
 
 
