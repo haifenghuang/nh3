@@ -61,8 +61,8 @@ realclean: clean
 distclean: realclean docsclean
 	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile
 
-doc/mpsl_quickref.ps: doc/mpsl_quickref.txt scripts/mkquickref.mpsl $(TARGET)
-	./mpsl scripts/mkquickref.mpsl > $@
+doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
+	./mpsl scripts/mkquickref.mpsl < $< > $@
 
 docs: doc/mpsl_quickref.ps
 	mkdir -p doc

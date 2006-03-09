@@ -53,14 +53,10 @@ print("%%EndPageSetup\n");
 print("\n");
 print("qr_page\n");
 
-file = "./doc/mpsl_quickref.txt";
-
 n_lines = 0;
 n_pag = 1;
 
-f = open(file, "r");
-
-while(line = read(f))
+while(line = read(STDIN))
 {
 	local l;
 
@@ -98,8 +94,6 @@ while(line = read(f))
 		print("qr_page\n");
 	}
 }
-
-close(f);
 
 print("showpage\n");
 print("\n");
