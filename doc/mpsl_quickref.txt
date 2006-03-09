@@ -1,6 +1,6 @@
-MPSL Quick Reference
+ MPSL Quick Reference
 
-Scalars
+ Scalars
 
 v = 10000;		Integer assignation
 v = 3.1416;		Real numbers
@@ -8,7 +8,7 @@ v = 'string1';		Verbatim strings
 w = "string2\n";	Strings with escape codes (see below)
 l = size(v);		Size of v (7)
 
-Arrays
+ Arrays
 
 a = [];			Empty array
 a = [ 100, "hi!",	Array assignation (showing
@@ -37,7 +37,7 @@ v = adel(a, 1);		Deletes element at offset 1 (and
 			moved down
 l = size(a);		It's again 4
 
-Hashes
+ Hashes
 
 h = {};			Empty hash
 h = { 'key1' => "val1",	Hash assignation (showing elements
@@ -54,7 +54,7 @@ v = h.key3.1;		Abridged mode (same as v = h['key3'][1])
 h.key3.1 = 10;		Abridged mode assignation
 a = keys(h);		Keys of h (['key1','key2','key3','key4'])
 
-Subroutines
+ Subroutines
 
 sub greeting {		Subroutine definition
    print("Hello!\n");
@@ -73,7 +73,7 @@ s = greeting;		Without parenthesis, assigns
 			a pointer to the subroutine
 s();			Prints Hello!
 
-Control operators
+ Control operators
 
 if(expr) {		If expr is true, execute list 1
    statement list 1;	(braces can be omitted if
@@ -87,4 +87,13 @@ while(expr) {		While expr is true, execute list
 foreach(v, a) {		Iterate the array a, assigning
    statement list;	each element to v and executing
 }			list
-break;			Exists loop in while and foreach
+break;			Exits loop in while and foreach
+
+ String escapes for double quotes
+
+\n			Newline
+\t			Tab
+\r			Carriage return
+\e			Escape
+\"			Double quotes
+\\			Backslash
