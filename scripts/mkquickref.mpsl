@@ -106,5 +106,5 @@ print("\n");
 print("%%PageTrailer\n");
 print("\n");
 print("%Trailer\n");
-print("%%Pages: 1\n");
+print("%%Pages: ", n_pag, "\n");
 print("%%EOF\n");
