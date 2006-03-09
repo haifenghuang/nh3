@@ -61,7 +61,10 @@ realclean: clean
 distclean: realclean docsclean
 	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile
 
-docs:
+doc/mpsl_quickref.ps: doc/mpsl_quickref.txt scripts/mkquickref.mpsl $(TARGET)
+	./mpsl scripts/mkquickref.mpsl > $@
+
+docs: doc/mpsl_quickref.ps
 	mkdir -p doc
 	-mp_doccer mpsl_*.c mpsl.y -o doc/mpsl_api -f html1 \
 	-t "Mpsl C API ($(VERSION))" \
@@ -73,7 +76,7 @@ docs:
 docsclean:
 	rm -f doc/*.html
 
-dist: distclean ChangeLog y.tab.c y.tab.h lex.yy.c
+dist: doc/mpsl_quickref.ps distclean docs ChangeLog y.tab.c y.tab.h lex.yy.c
 	cd .. ; ln -s $(PROJ) $(PROJ)-$(VERSION); \
 	tar czvf $(PROJ)-$(VERSION)/$(PROJ)-$(VERSION).tar.gz --exclude=CVS $(PROJ)-$(VERSION)/* ; \
 	rm $(PROJ)-$(VERSION)
