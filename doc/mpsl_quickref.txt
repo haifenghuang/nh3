@@ -1,21 +1,22 @@
- MPSL Quick Reference
+*MPSL Quick Reference
 
- Scalars
+*Scalars
 
 v = 10000;		Integer assignation
 v = 3.1416;		Real numbers
 v = 'string1';		Verbatim strings
-w = "string2\n";	Strings with escape codes (see below)
+w = "string2\n";	Strings with escape codes
 l = size(v);		Size of v (7)
 
- Arrays
+*Arrays
 
 a = [];			Empty array
 a = [ 100, "hi!",	Array assignation (showing
     3.1416, "yo!" ];	elements with assorted types)
-w = [ 1, [], a ];	Array elements can also be arrays,
-			hashes or anything (as non-scalar
-			values are always passed by reference)
+w = [ 1, [], a ];	Array elements can also be
+			arrays,	hashes or anything
+			(as non-scalar values are
+			always passed by reference)
 v = a[0];		First element of a (100)
 a[0] = 200;		Assignment of first element of a
 l = size(a);		Number of elements in a (4)
@@ -27,69 +28,80 @@ v = a[-1];		Last element of a ("yo!")
 w = [1 .. 100];		Range (array of 100 elements)
 push(a, 6543);		Add element to the end of a
 l = size(a);		It's now 5
-v = pop(a);		Deletes last element (and returns it)
+v = pop(a);		Deletes last element
+			(and returns it)
 l = size(a);		Back to 4
 ains(a, 'heh', 1);	Inserts 'heh' at offset 1, all
 			existing elements moved up
 l = size(a);		It's again 5
-v = adel(a, 1);		Deletes element at offset 1 (and
-			returns it), all existing elements
-			moved down
+v = adel(a, 1);		Deletes element at offset 1
+			(and returns it), all existing
+			elements are moved down
 l = size(a);		It's again 4
 
- Hashes
+*Hashes
 
 h = {};			Empty hash
-h = { 'key1' => "val1",	Hash assignation (showing elements
-  'key2' => 1000,	with assorted types). Hash elements
-  'key3' => [ 1, 2 ] };	can be anything
+h = {			Hash assignation (showing
+  'key1' => "val1",	elements with assorted types).
+  'k2' => 1000,		Hash elements can be anything
+  'KEY3' => [ 1, 2 ]
+};
 v = h['key1'];		Value for 'key1' ('val1')
-h['key4'] = 3000;	Assignment of key 'key4' with 3000
+h['k4'] = 3000;		Assignment of key 'k4'
+			with value 3000
 p = hsize(h);		Number of pairs in h (5)
 i = h;			i holds the same hash as h
 i['key1'] = 4321;	h['key1'] is also 4321
 j = clone(h);		j holds a clone of h
 j['key1'] = 8765;	h['key1'] is NOT 8765
-v = h.key3.1;		Abridged mode (same as v = h['key3'][1])
-h.key3.1 = 10;		Abridged mode assignation
-a = keys(h);		Keys of h (['key1','key2','key3','key4'])
+v = h.KEY3.1;		Abridged mode
+			(same as v = h['KEY3'][1])
+h.KEY3.1 = 10;		Abridged mode assignation
+a = keys(h);		Keys of h
+			(['key1','k2','KEY3','k4'])
 
- Subroutines
+*Subroutines
 
 sub greeting {		Subroutine definition
    print("Hello!\n");
 }
-greeting();		Subroutine call (prints Hello!)
+greeting();		Subroutine call
+			(prints Hello!)
 sub sum(a, b) {		Subroutine definition, with
-   return(a + b);	arguments.
+   return(a + b);	arguments
 }
-v = sub(10, 20);	Subroutine call with arguments
-			(sets v to 30).
-s = sub { return 3; };	Anonymous subroutine (assigned
-			to s)
-s = sub(a) { print a;};	Anonymous subroutine, with
-			arguments
-s = greeting;		Without parenthesis, assigns
-			a pointer to the subroutine
+v = sub(10, 20);	Subroutine call with
+			arguments (sets v to 30)
+s = sub {		Anonymous subroutine
+   return(3); };	(assigned to s)
+s = sub(a) {		Anonymous subroutine,
+   print(a); };		with arguments
+s = greeting;		Without parenthesis,
+			assigns	a pointer to
+			the subroutine
 s();			Prints Hello!
 
- Control operators
+*Control operators
 
-if(expr) {		If expr is true, execute list 1
-   statement list 1;	(braces can be omitted if
-}			list 1 is one statement)
+if(expr) {		If expr is true, execute
+   statement list 1;	list 1 (braces can be omitted
+}			if list 1 is one statement);
 else {			otherwise, execute list 2
-   statement list 2;	(else is also optional)
+   statement list 2;
 }
-while(expr) {		While expr is true, execute list
-   statement list;	(braces can be omitted if
-}			list is one statement)
+
+while(expr) {		While expr is true, execute
+   statement list;	list (braces can be omitted
+}			if list is one statement)
+
 foreach(v, a) {		Iterate the array a, assigning
-   statement list;	each element to v and executing
-}			list
+   statement list;	each element to v and
+}			 executing list
+
 break;			Exits loop in while and foreach
 
- String escapes for double quotes
+*String escapes for double quotes
 
 \n			Newline
 \t			Tab

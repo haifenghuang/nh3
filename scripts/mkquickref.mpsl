@@ -1,0 +1,110 @@
+/* mkquickref.mpsl */
+/* builds a PostScript file from mpsl_quickref.txt */
+/* (C) Angel Ortega 2006 - GPL */
+
+print("%!PS-Adobe-1.0\n");
+print("%%BoundingBox: 0 0 594 841\n");
+print("%%Orientation: Landscape\n");
+print("%%Pages: (atend)\n");
+print("%%EndComments\n");
+print("\n");
+print("%%BeginProlog\n");
+print("%%EndProlog\n");
+print("\n");
+print("%%BeginSetup\n");
+print("\n");
+print("/qr_colw { 280 } def\n");
+print("/qr_tabsep { 130 } def\n");
+print("/qr_rmarg { 20 } def\n");
+print("/qr_tmarg { -20 } def\n");
+print("/qr_maxy { -580 } def\n");
+print("/qr_maxx { 600 } def\n");
+print("/qr_fsize { 10 } def\n");
+print("\n");
+print("/qr_prop { /Courier findfont qr_fsize 1 sub scalefont setfont } def\n");
+print("/qr_noprop { /Times findfont qr_fsize scalefont setfont } def\n");
+print("/qr_bold { /Times-Bold findfont qr_fsize scalefont setfont } def\n");
+print("/qr_page { 90 rotate /qr_xpos qr_rmarg def /qr_ypos qr_tmarg def } def\n");
+print("\n");
+print("/qr_newline {\n");
+print("	/qr_ypos qr_ypos qr_fsize sub def\n");
+print("	qr_ypos qr_maxy lt { /qr_ypos qr_tmarg def\n");
+print("		/qr_xpos qr_xpos qr_colw add def\n");
+print("		qr_xpos qr_maxx gt { /qr_xpos qr_rmarg def } if\n");
+print("	} if\n");
+print("} def\n");
+print("\n");
+print("/qr_2cols {\n");
+print("	exch qr_xpos qr_ypos moveto qr_prop show\n");
+print("	qr_xpos qr_tabsep add qr_ypos moveto qr_noprop show\n");
+print("	qr_newline\n");
+print("} def\n");
+print("\n");
+print("/qr_title {\n");
+print("	qr_xpos qr_ypos moveto qr_bold show\n");
+print("	qr_newline\n");
+print("} def\n");
+print("\n");
+print("%%EndSetup\n");
+
+print("%%Page 1 1\n");
+print("%%BeginPageSetup\n");
+print("%%EndPageSetup\n");
+print("\n");
+print("qr_page\n");
+
+file = "./doc/mpsl_quickref.txt";
+
+n_lines = 0;
+n_pag = 1;
+
+f = open(file, "r");
+
+while(line = read(f))
+{
+	local l;
+
+	/* strip \n */
+	line = sregex("/\n$/", line, NULL);
+
+	/* escape parens */
+	line = sregex("/\\/g", line, '\\');
+	line = sregex("/\(/g", line, '\(');
+	line = sregex("/\)/g", line, '\)');
+
+	/* leading asterisk? it's a title */
+	if(l = regex([ "/^\*/", "/.*$/" ], line))
+		print("(", l[1], ") qr_title\n");
+	else
+	/* text-tabs-text: two columns */
+	if(l = regex([ "/^[^\t]*/", "/\t+/", "/.*$/" ], line))
+		print("(", l[0], ") (", l[2], ") qr_2cols\n");
+	else
+	/* other: two columns, with empty second one */
+		print("(", line, ") () qr_2cols\n");
+
+	n_lines++;
+
+	if(n_lines >= 192) /* 64 * 3 */
+	{
+		n_pag++;
+		n_lines = 0;
+
+		print("showpage\n");
+		print("%%Page ", n_pag, " ", n_pag, "\n");
+		print("%%BeginPageSetup\n");
+		print("%%EndPageSetup\n");
+		print("\n");
+		print("qr_page\n");
+	}
+}
+
+close(f);
+
+print("showpage\n");
+print("\n");
+print("%%PageTrailer\n");
+print("\n");
+print("%Trailer\n");
+print("%%Pages: 1\n");
+print("%%EOF\n");
