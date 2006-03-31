@@ -22,6 +22,9 @@ Pending Enhancements
 
  * 1024: Implement the 'continue' directive in mpsl.
  * 1069: Implement a C-like for() instruction.
+ * 1076: Add a mpsl_died global variable to abort further execution.
+ * 1077: Add a die() function.
+ * 1078: Add an eval() function.
 
 Closed
 ------
