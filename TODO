@@ -10,6 +10,7 @@ Release Critical Bugs
    as mpsl source code.
  * 1074: The mpsl command line tool should also search code in
    the current directory.
+ * 1075: Finish the quick reference guide.
 
 Open Bugs
 ---------
