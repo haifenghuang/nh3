@@ -83,12 +83,18 @@ int mpsl_is_true(mpdm_t v)
  */
 mpdm_t mpsl_boolean(int b)
 {
-	static mpdm_t v_true = NULL;
+	mpdm_t v = NULL;
 
-	if(v_true == NULL)
-		v_true = mpdm_ref(MPDM_I(1));
+	if(b)
+	{
+		if((v = mpdm_hget_s(mpdm_root(), L"TRUE")) == NULL)
+		{
+			v = MPDM_I(1);
+			mpdm_hset_s(mpdm_root(), L"TRUE", v);
+		}
+	}
 
-	return(b ? v_true : NULL);
+	return(v);
 }
 
 
