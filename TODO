@@ -23,7 +23,6 @@ Pending Enhancements
  * 1024: Implement the 'continue' directive in mpsl.
  * 1069: Implement a C-like for() instruction.
  * 1077: Add a die() function.
- * 1078: Add an eval() function.
 
 Closed
 ------
@@ -103,5 +102,6 @@ Closed
    (Changed to mpsl_abort; Wed, 05 Apr 2006 13:11:33 +0200).
  * 1079: Add a unified way (a function) to set MPSL errors
    (Wed, 05 Apr 2006 13:33:51 +0200).
+ * 1078: Add an eval() function (Wed, 05 Apr 2006 17:19:15 +0200).
 
 Email bugs to angel@triptico.com
