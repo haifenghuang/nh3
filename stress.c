@@ -578,6 +578,7 @@ void test_abort_and_eval(void)
 {
 	mpdm_t v;
 
+	mpsl_abort = 0;
 	v = mpsl_compile(MPDM_LS(L"1000;"));
 	do_test("Abort 1", mpdm_ival(mpdm_exec(v, NULL)) == 1000);
 

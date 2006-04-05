@@ -240,6 +240,23 @@ mpdm_t mpsl_get_symbol(mpdm_t s)
 }
 
 
+/**
+ * mpsl_error - Generates an error.
+ * @err: the error message
+ *
+ * Generates an error. The @err error message is stored in the ERROR
+ * mpsl variable and the mpsl_abort global flag is set, so no further
+ * mpsl code can be executed until reset.
+ */
+mpdm_t mpsl_error(mpdm_t err)
+{
+	/* abort further execution */
+	mpsl_abort = 1;
+
+	/* set the error */
+	return(mpdm_hset_s(mpdm_root(), L"ERROR", err));
+}
+
 /** opcodes **/
 
 #define O_TYPE static mpdm_t
@@ -317,14 +334,17 @@ O_TYPE O_exec(O_ARGS)
 
 	/* gets the symbol value */
 	if ((v = GET(s)) == NULL) {
-		/* not found or NULL value? warn */
-		/* FIXME: This is a hack */
+		/* not found or NULL value? error */
 		mpdm_t t;
+		char tmp[128];
 
 		t = mpdm_join(MPDM_LS(L"."), s);
 		t = MPDM_2MBS((wchar_t *) t->data);
-		fprintf(stderr, "WARNING: Undefined function %s()\n",
+
+		snprintf(tmp, sizeof(tmp), "Undefined function %s()",
 			(char *)t->data);
+
+		mpsl_error(MPDM_MBS(tmp));
 	}
 
 	/* executes */

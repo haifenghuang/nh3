@@ -435,7 +435,7 @@ void yyerror(char * s)
 	snprintf(tmp, sizeof(tmp), "%s in %s, line %d",
 		s, mpsl_filename, mpsl_line + 1);
 
-	mpdm_hset_s(mpdm_root(), L"ERROR", MPDM_MBS(tmp));
+	mpsl_error(MPDM_MBS(tmp));
 }
 
 
@@ -545,7 +545,7 @@ mpdm_t mpsl_compile_file(mpdm_t filename)
 
 		snprintf(tmp, sizeof(tmp) - 1, "File '%s' not found in INC",
 			mpsl_filename);
-		mpdm_hset_s(mpdm_root(), L"ERROR", MPDM_MBS(tmp));
+		mpsl_error(MPDM_MBS(tmp));
 
 		return(NULL);
 	}

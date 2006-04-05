@@ -31,6 +31,8 @@ mpdm_t mpsl_boolean(int b);
 mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v);
 mpdm_t mpsl_get_symbol(mpdm_t s);
 
+mpdm_t mpsl_error(mpdm_t err);
+
 mpdm_t mpsl_exec(mpdm_t c, mpdm_t args);
 
 mpdm_t mpsl_compile(mpdm_t code);
