@@ -574,6 +574,22 @@ void test_mpsl_file(void)
 }
 
 
+void test_abort_and_eval(void)
+{
+	mpdm_t v;
+
+	v = mpsl_compile(MPDM_LS(L"1000;"));
+	do_test("Abort 1", mpdm_ival(mpdm_exec(v, NULL)) == 1000);
+
+	/* set global abort function */
+	mpsl_abort = 1;
+	do_test("Abort 2", mpdm_exec(v, NULL) == NULL);
+
+	mpsl_abort = 0;
+	do_test("Abort 3", mpdm_ival(mpdm_exec(v, NULL)) == 1000);
+}
+
+
 int main(void)
 {
 	mpdm_startup();
@@ -585,6 +601,7 @@ int main(void)
 	test_mpsl2();
 	test_mpsl3();
 	test_mpsl_file();
+	test_abort_and_eval();
 
 	printf("memory: %d\n", mpdm->memory_usage);
 	mpdm_sweep(-1);
