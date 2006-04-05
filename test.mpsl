@@ -257,11 +257,13 @@ foreach(enc, [ "UTF-8", NULL, "ISO-8859-1", "INVALID" ])
 	print("Encoding ", enc, ": ", encoding(enc), "\n");
 }
 
+/*
 ret = load("test2.mpsl");
 print("test2.mpsl returned ", ret, "\n");
 INC = [ "mpsl" ];
 ret = load("test2.mpsl");
 print("test2.mpsl returned ", ret, "\n");
+*/
 
 sub dumper(v, i)
 {

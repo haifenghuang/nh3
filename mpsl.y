@@ -69,7 +69,7 @@ mpdm_t mpsl_op(wchar_t * opcode);
 
 static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2)
 {
-	return(MPDM_X2(mpsl_exec,
+	return(MPDM_X2(mpsl_exec_p,
 		do_ins(L"SUBFRAME", a2 == NULL ? 1 : 2, a1, a2, NULL)));
 }
 
@@ -586,7 +586,7 @@ mpdm_t mpsl_eval(mpdm_t code, mpdm_t args)
 
 	/* compile and execute, if possible */
 	if((v = mpsl_compile(code)) != NULL)
-		v = mpsl_exec(v, args);
+		v = mpdm_exec(v, args);
 
 	/* reset the abort flag */
 	mpsl_abort = 0;

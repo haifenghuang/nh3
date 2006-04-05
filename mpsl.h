@@ -33,7 +33,7 @@ mpdm_t mpsl_get_symbol(mpdm_t s);
 
 mpdm_t mpsl_error(mpdm_t err);
 
-mpdm_t mpsl_exec(mpdm_t c, mpdm_t args);
+mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t args);
 
 mpdm_t mpsl_compile(mpdm_t code);
 mpdm_t mpsl_compile_file(mpdm_t filename);

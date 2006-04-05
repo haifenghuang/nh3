@@ -579,7 +579,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 }
 
 
-mpdm_t mpsl_exec(mpdm_t c, mpdm_t a)
+mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 /* executes an MPSL instruction stream */
 {
 	int f = 0;

@@ -577,6 +577,7 @@ void test_mpsl_file(void)
 void test_abort_and_eval(void)
 {
 	mpdm_t v;
+	mpdm_t e;
 
 	mpsl_abort = 0;
 	v = mpsl_compile(MPDM_LS(L"1000;"));
@@ -588,6 +589,18 @@ void test_abort_and_eval(void)
 
 	mpsl_abort = 0;
 	do_test("Abort 3", mpdm_ival(mpdm_exec(v, NULL)) == 1000);
+
+	mpsl_error(NULL);
+	v = mpsl_eval(MPDM_LS(L"invalid_code()"), NULL);
+	e = mpdm_hget_s(mpdm_root(), L"ERROR");
+	do_test("eval 1", v == NULL && e != NULL);
+
+	v = mpsl_compile(MPDM_LS(L"1500;"));
+	do_test("eval 1.5", mpdm_ival(mpdm_exec(v, NULL)) == 1500);
+
+	v = mpsl_eval(MPDM_LS(L"2000;"), NULL);
+	e = mpdm_hget_s(mpdm_root(), L"ERROR");
+	do_test("eval 2", mpdm_ival(v) == 2000 && e == NULL);
 }
 
 
