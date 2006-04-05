@@ -591,16 +591,28 @@ void test_abort_and_eval(void)
 	do_test("Abort 3", mpdm_ival(mpdm_exec(v, NULL)) == 1000);
 
 	mpsl_error(NULL);
+
 	v = mpsl_eval(MPDM_LS(L"invalid_code()"), NULL);
 	e = mpdm_hget_s(mpdm_root(), L"ERROR");
+	printf("The following error is OK:\n");
+	mpdm_dump(e);
 	do_test("eval 1", v == NULL && e != NULL);
 
-	v = mpsl_compile(MPDM_LS(L"1500;"));
-	do_test("eval 1.5", mpdm_ival(mpdm_exec(v, NULL)) == 1500);
+	v = mpsl_eval(MPDM_LS(L"undef_func();"), NULL);
+	e = mpdm_hget_s(mpdm_root(), L"ERROR");
+	printf("The following error is also OK:\n");
+	mpdm_dump(e);
+	do_test("eval 2", v == NULL && e != NULL);
+
+	v = mpsl_eval(MPDM_LS(L"load('unexistent_file.mpsl');"), NULL);
+	e = mpdm_hget_s(mpdm_root(), L"ERROR");
+	printf("The following error is also OK:\n");
+	mpdm_dump(e);
+	do_test("eval 3", v == NULL && e != NULL);
 
 	v = mpsl_eval(MPDM_LS(L"2000;"), NULL);
 	e = mpdm_hget_s(mpdm_root(), L"ERROR");
-	do_test("eval 2", mpdm_ival(v) == 2000 && e == NULL);
+	do_test("eval 4", mpdm_ival(v) == 2000 && e == NULL);
 }
 
 
