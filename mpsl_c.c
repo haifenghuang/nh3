@@ -43,6 +43,9 @@ mpdm_t mpsl_local = NULL;
 /* instruction execution tracing flag */
 int mpsl_trace = 0;
 
+/* global abort flag */
+int mpsl_abort = 0;
+
 /*******************
 	Code
 ********************/
@@ -518,6 +521,9 @@ O_TYPE mpsl_exec_i(O_ARGS)
    from mpsl_exec() (which holds the flow control status variable) */
 {
 	mpdm_t ret = NULL;
+
+	/* if aborted, do nothing */
+	if(mpsl_abort) return(NULL);
 
 	/* reference both code and arguments */
 	mpdm_ref(c); mpdm_ref(a);

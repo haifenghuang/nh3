@@ -23,6 +23,7 @@
 */
 
 extern int mpsl_trace;
+extern int mpsl_abort;
 
 int mpsl_is_true(mpdm_t v);
 mpdm_t mpsl_boolean(int b);
