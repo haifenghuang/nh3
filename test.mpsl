@@ -369,3 +369,13 @@ print("v is ", v, " (must be 3)\n");
 /* eval as an executable value */
 v = eval(sub { 3 + 4; });
 print("v is ", v, " (must be 7)\n");
+
+ERROR = NULL;
+eval("func(");
+print("Error is ", ERROR, " (it's ok)\n");
+
+eval("error('hey!');");
+print("Error is ", ERROR, " (it's ok)\n");
+
+eval("eval(\"error('you!');\");");
+print("Error is ", ERROR, " (it's ok)\n");
