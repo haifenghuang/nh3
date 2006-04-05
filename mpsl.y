@@ -564,3 +564,32 @@ mpdm_t mpsl_compile_file(mpdm_t filename)
 
 	return(x);
 }
+
+
+/**
+ * mpsl_eval - Compiles and executes a string of MSPL code.
+ * @code: A value containing a string of MPSL code
+ * @args: optional arguments for @code
+ *
+ * Compiles and executes a string of MPSL code. If the code can't be compiled
+ * or its execution fails with error, the ERROR variable will be set and NULL
+ * returned. Otherwise, the exit value from the code is returned and ERROR set
+ * to NULL. The abort flag is reset on exit.
+ */
+mpdm_t mpsl_eval(mpdm_t code, mpdm_t args)
+{
+	mpdm_t v;
+
+	/* reset error */
+	mpsl_error(NULL);
+	mpsl_abort = 0;
+
+	/* compile and execute, if possible */
+	if((v = mpsl_compile(code)) != NULL)
+		v = mpsl_exec(v, args);
+
+	/* reset the abort flag */
+	mpsl_abort = 0;
+
+	return(v);
+}

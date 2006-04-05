@@ -37,5 +37,6 @@ mpdm_t mpsl_exec(mpdm_t c, mpdm_t args);
 
 mpdm_t mpsl_compile(mpdm_t code);
 mpdm_t mpsl_compile_file(mpdm_t filename);
+mpdm_t mpsl_eval(mpdm_t code, mpdm_t args);
 
 void mpsl_argv(int argc, char * argv[]);
