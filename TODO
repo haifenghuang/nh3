@@ -11,6 +11,7 @@ Release Critical Bugs
  * 1074: The mpsl command line tool should also search code in
    the current directory.
  * 1075: Finish the quick reference guide.
+ * 1079: Add a unified way (a function) to set MPSL errors.
 
 Open Bugs
 ---------
