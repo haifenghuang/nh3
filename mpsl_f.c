@@ -87,6 +87,7 @@ static mpdm_t F_regex(mpdm_t a) { return(mpdm_regex(A0,A1,IA2)); }
 static mpdm_t F_sregex(mpdm_t a) { return(mpdm_sregex(A0,A1,A2,IA3)); }
 
 static mpdm_t F_load(mpdm_t a) { return(mpdm_exec(mpsl_compile_file(A0), NULL)); }
+static mpdm_t F_error(mpdm_t a) { return(mpsl_error(A0)); }
 
 static mpdm_t F_eval(mpdm_t a)
 {
@@ -148,6 +149,7 @@ static struct
 	{ L"regex",	F_regex },
 	{ L"sregex",	F_sregex },
 	{ L"load",	F_load },
+	{ L"error",	F_error },
 	{ L"eval",	F_eval },
 	{ L"print",	F_print },
 	{ NULL,		NULL }
