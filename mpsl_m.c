@@ -40,6 +40,7 @@ int mpsl_main(int argc, char * argv[])
 	mpdm_t v;
 	char * script = NULL;
 	char * immscript = NULL;
+	int ret = 0;
 
 	if(argc == 1)
 	{
@@ -77,27 +78,28 @@ int mpsl_main(int argc, char * argv[])
 	mpdm_aset(v, MPDM_LS(L"."), 0);
 	mpdm_hset_s(mpdm_root(), L"INC", v);
 
+	/* compile */
 	if(immscript != NULL)
 		v = mpsl_compile(MPDM_MBS(immscript));
 	else
 		v = mpsl_compile_file(MPDM_MBS(script));
 
+	/* execute, if possible */
 	if(v != NULL)
 		mpdm_exec(v, NULL);
-	else
-	{
-		mpdm_t e = mpdm_hget_s(mpdm_root(), L"ERROR");
 
-		if(e != NULL)
-		{
-			mpdm_write_wcs(stdout, mpdm_string(e));
-			printf("\n");
-		}
+	/* prints the error, if any */
+	if((v = mpsl_error(NULL)) != NULL)
+	{
+		mpdm_write_wcs(stderr, mpdm_string(v));
+		printf("\n");
+
+		ret = 1;
 	}
 
 	mpdm_shutdown();
 
-	return(0);
+	return(ret);
 }
 
 
