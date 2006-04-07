@@ -92,7 +92,7 @@ int mpsl_main(int argc, char * argv[])
 	if((v = mpsl_error(NULL)) != NULL)
 	{
 		mpdm_write_wcs(stderr, mpdm_string(v));
-		printf("\n");
+		fprintf(stderr, "\n");
 
 		ret = 1;
 	}
