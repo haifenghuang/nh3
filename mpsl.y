@@ -498,7 +498,7 @@ static FILE * inc_fopen(char * filename)
 	FILE * f = NULL;
 	char tmp[1024];
 
-	if((a = mpdm_hget_s(mpdm_root(), L"INC")) != NULL)
+	if((a = mpsl_get_symbol(MPDM_LS(L"INC"))) != NULL)
 	{
 		int n;
 

@@ -104,5 +104,7 @@ Closed
  * 1078: Add an eval() function (Wed, 05 Apr 2006 17:19:15 +0200).
  * 1077: Add a die() function (renamed to error();
    Wed, 05 Apr 2006 17:26:21 +0200)
+ * 1080: The INC array must be get using mpsl_get_symbol() instead
+   of mpdm_hget_s() (Tue, 11 Apr 2006 17:24:55 +0200).
 
 Email bugs to angel@triptico.com
