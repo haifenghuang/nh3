@@ -241,25 +241,6 @@ mpdm_t mpsl_get_symbol(mpdm_t s)
 
 
 /**
- * mpsl_get_symbol_s - Gets the value of a symbol, string version.
- * @s: symbol name
- *
- * Gets the value of a symbol. The symbol can be local or global
- * (if the symbol exists in both tables, the local value will be returned).
- */
-mpdm_t mpsl_get_symbol_s(wchar_t * s)
-{
-	mpdm_t v;
-
-	MPDM_ND_BEGIN();
-	v = mpsl_get_symbol(MPDM_ND_LS(s));
-	MPDM_ND_END();
-
-	return(v);
-}
-
-
-/**
  * mpsl_error - Generates an error.
  * @err: the error message
  *
