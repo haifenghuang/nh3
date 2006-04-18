@@ -53,12 +53,12 @@ stress: stress.c $(LIB) $(MPDM)/libmpdm.a
 		-L. -lmpsl `cat config.ldflags` -o $@
 
 clean:
-	rm -f $(TARGET) $(LIB) $(OBJS) *.o tags *.tar.gz stress
+	rm -f $(TARGET) $(LIB) $(OBJS) *.o tags *.tar.gz stress Changelog
 
 realclean: clean
 	rm -f y.tab.c y.tab.h lex.yy.c
 
-distclean: realclean docsclean
+distclean: realclean
 	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile
 
 doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
