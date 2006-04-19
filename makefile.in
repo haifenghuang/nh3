@@ -58,7 +58,7 @@ clean:
 realclean: clean
 	rm -f y.tab.c y.tab.h lex.yy.c
 
-distclean: realclean
+distclean: docs clean y.tab.c y.tab.h lex.yy.c
 	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile
 
 doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
@@ -76,7 +76,7 @@ docs: doc/mpsl_quickref.ps
 docsclean:
 	rm -f doc/*.html
 
-dist: doc/mpsl_quickref.ps distclean docs ChangeLog y.tab.c y.tab.h lex.yy.c
+dist: distclean ChangeLog
 	cd .. ; ln -s $(PROJ) $(PROJ)-$(VERSION); \
 	tar czvf $(PROJ)-$(VERSION)/$(PROJ)-$(VERSION).tar.gz --exclude=CVS $(PROJ)-$(VERSION)/* ; \
 	rm $(PROJ)-$(VERSION)
