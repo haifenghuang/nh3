@@ -327,13 +327,15 @@ O_TYPE O_return(O_ARGS) { mpdm_t v = M1; *f = -1; return(v); }
 O_TYPE O_exec(O_ARGS)
 /* executes the value of a symbol */
 {
-	mpdm_t s, v, r;
+	mpdm_t s, v, r = NULL;
 
 	/* gets the symbol name */
 	s = RF(M1);
 
 	/* gets the symbol value */
-	if ((v = GET(s)) == NULL) {
+	v = GET(s);
+
+	if (!MPDM_IS_EXEC(v)) {
 		/* not found or NULL value? error */
 		mpdm_t t;
 		char tmp[128];
@@ -346,9 +348,11 @@ O_TYPE O_exec(O_ARGS)
 
 		mpsl_error(MPDM_MBS(tmp));
 	}
-
-	/* executes */
-	r = mpdm_exec(v, M2);
+	else
+	{
+		/* executes */
+		r = mpdm_exec(v, M2);
+	}
 
 	UF(s);
 
