@@ -38,11 +38,23 @@
 int mpsl_main(int argc, char * argv[])
 {
 	mpdm_t v;
-	char * script = NULL;
 	char * immscript = NULL;
+	FILE * script = NULL;
 	int ret = 0;
 
-	if(argc == 1)
+	mpdm_startup();
+
+	/* skip the executable */
+	argv++;	argc--;
+
+	if(argc == 0)
+	{
+		/* no arguments; read from stdin */
+		script = stdin;
+	}
+	else
+	if(strcmp(argv[0], "-v") == 0 ||
+	   strcmp(argv[0], "--help") == 0)
 	{
 		printf("MPSL %s - Minimum Profit Scripting Language\n", VERSION);
 		printf("Copyright (C) 2003-2006 Angel Ortega <angel@triptico.com>\n");
@@ -52,12 +64,7 @@ int mpsl_main(int argc, char * argv[])
 
 		return(0);
 	}
-
-	mpdm_startup();
-
-	/* skip the executable */
-	argv++;	argc--;
-
+	else
 	if(strcmp(argv[0], "-e") == 0)
 	{
 		argv++; argc--;
@@ -66,23 +73,22 @@ int mpsl_main(int argc, char * argv[])
 	}
 	else
 	{
-		/* get the script name */
-		script = argv[0];
+		/* next argument is a script name; open it */
+		if((script = fopen(argv[0], "r")) == NULL)
+		{
+			fprintf(stderr, "Can't open '%s'\n", argv[0]);
+			return(1);
+		}
 	}
 
 	/* set arguments */
 	mpsl_argv(argc, argv);
 
-	/* add '.' to INC */
-	v = MPDM_A(1);
-	mpdm_aset(v, MPDM_LS(L"."), 0);
-	mpdm_hset_s(mpdm_root(), L"INC", v);
-
 	/* compile */
 	if(immscript != NULL)
 		v = mpsl_compile(MPDM_MBS(immscript));
 	else
-		v = mpsl_compile_file(MPDM_MBS(script));
+		v = mpsl_compile_file(MPDM_F(script));
 
 	/* execute, if possible */
 	if(v != NULL)
