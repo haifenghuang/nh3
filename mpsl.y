@@ -539,9 +539,14 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 
 	if(file->flags & MPDM_FILE)
 	{
+		FILE ** f;
+
 		/* it's an open file; just store the stream */
+		/* FIXME: this is a hack; there should exist
+		   a way to retrieve the FILE handle */
 		mpsl_filename = "<FILE>";
-		mpsl_file = (FILE *) file->data;
+		f = file->data;
+		mpsl_file = *f;
 	}
 	else
 	{
