@@ -26,6 +26,7 @@ Pending Enhancements
  * 1082: Implement a Perl-like map() function.
  * 1083: Implement a split() that uses regular expressions.
  * 1084: Implement the foreach(local var, list) construction.
+ * 1085: The mpsl interpreter program should accept a program from stdin.
 
 Closed
 ------
