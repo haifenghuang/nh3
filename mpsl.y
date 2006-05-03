@@ -523,31 +523,44 @@ static FILE * inc_fopen(char * filename)
 
 /**
  * mpsl_compile_file - Compiles a file of MPSL code.
- * @filename: Name of the MPSL source code.
+ * @file: File stream or file name.
  *
  * Compiles a source file of MPSL code and returns an mpdm value
- * executable by mpdm_exec(). The source file is searched in any of the
- * paths defined in the INC MPSL global array (take note that the current
+ * executable by mpdm_exec(). If @file is an MPSL file descriptor,
+ * it's read as is and compiled; otherwise, it's assumed to be a
+ * file name, that will be searched for in any of the paths defined
+ * in the INC MPSL global array (take note that the current
  * directory is NOT searched by default). If the file cannot be found
  * or there is any other error, NULL is returned instead.
  */
-mpdm_t mpsl_compile_file(mpdm_t filename)
+mpdm_t mpsl_compile_file(mpdm_t file)
 {
 	mpdm_t x = NULL;
 
-	filename = MPDM_2MBS(filename->data);
-
-	mpsl_filename = filename->data;
-
-	if((mpsl_file = inc_fopen(mpsl_filename)) == NULL)
+	if(file->flags & MPDM_FILE)
 	{
-		char tmp[128];
+		/* it's an open file; just store the stream */
+		mpsl_filename = "<FILE>";
+		mpsl_file = (FILE *) file->data;
+	}
+	else
+	{
+		/* it's a filename; open it */
+		file = MPDM_2MBS(file->data);
 
-		snprintf(tmp, sizeof(tmp) - 1, "File '%s' not found in INC",
-			mpsl_filename);
-		mpsl_error(MPDM_MBS(tmp));
+		mpsl_filename = file->data;
 
-		return(NULL);
+		if((mpsl_file = inc_fopen(mpsl_filename)) == NULL)
+		{
+			char tmp[128];
+
+			snprintf(tmp, sizeof(tmp) - 1,
+				"File '%s' not found in INC",
+				mpsl_filename);
+			mpsl_error(MPDM_MBS(tmp));
+
+			return(NULL);
+		}
 	}
 
 	mpsl_lib();
