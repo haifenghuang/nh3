@@ -20,8 +20,12 @@ Open Bugs
 Pending Enhancements
 --------------------
 
- * 1024: Implement the 'continue' directive in mpsl.
+ * 1024: Implement the 'continue' directive.
  * 1069: Implement a C-like for() instruction.
+ * 1081: Implement a Perl-like grep() function.
+ * 1082: Implement a Perl-like map() function.
+ * 1083: Implement a split() that uses regular expressions.
+ * 1084: Implement the foreach(local var, list) construction.
 
 Closed
 ------
