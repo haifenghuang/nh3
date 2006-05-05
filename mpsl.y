@@ -458,6 +458,28 @@ static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3
 
 void mpsl_lib(void);
 
+static mpdm_t do_parse(void)
+/* calls yyparse() after doing some initialisations, and returns
+   the compiled code as an executable value */
+{
+	mpdm_t x = NULL;
+
+	mpsl_lib();
+
+	/* first line */
+	mpsl_line = 0;
+
+	/* reset last bytecode */
+	mpsl_bytecode = NULL;
+
+	/* compile! */
+	if(yyparse() == 0 && mpsl_bytecode != NULL)
+		x = mpsl_x(mpsl_bytecode, NULL);
+
+	return(x);
+}
+
+
 /**
  * mpsl_compile - Compiles a string of MPSL code.
  * @code: A value containing a string of MPSL code
@@ -470,21 +492,14 @@ mpdm_t mpsl_compile(mpdm_t code)
 {
 	mpdm_t x = NULL;
 
-	mpsl_lib();
-
 	/* point to code */
 	mpsl_next_char = (wchar_t *) code->data;
 
-	mpsl_line = 0;
+	/* no real filename */
 	mpsl_filename = "<INLINE>";
-	mpsl_bytecode = NULL;
 
 	mpdm_ref(code);
-
-	/* compile! */
-	if(yyparse() == 0 && mpsl_bytecode != NULL)
-		x = mpsl_x(mpsl_bytecode, NULL);
-
+	x = do_parse();
 	mpdm_unref(code);
 
 	return(x);
@@ -568,14 +583,7 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 		}
 	}
 
-	mpsl_lib();
-
-	mpsl_line = 0;
-	mpsl_bytecode = NULL;
-
-	/* compile! */
-	if(yyparse() == 0 && mpsl_bytecode != NULL)
-		x = mpsl_x(mpsl_bytecode, NULL);
+	x = do_parse();
 
 	fclose(mpsl_file);
 	mpsl_file = NULL;
