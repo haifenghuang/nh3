@@ -160,35 +160,6 @@ static struct
 	{ NULL,		NULL }
 };
 
-void mpsl_lib(void)
-/* inits the MPSL library */
-{
-	mpdm_t r;
-	int n;
-
-	r = mpdm_root();
-
-	/* already done? */
-	if(mpdm_hget_s(r, L"MPSL") != NULL)
-		return;
-
-	mpdm_hset_s(r, L"MPSL", MPDM_MBS(VERSION));
-
-	/* creates all the symbols */
-	for(n = 0;mpsl_funcs[n].name != NULL;n++)
-		mpdm_hset_s(r, mpsl_funcs[n].name,
-			MPDM_X(mpsl_funcs[n].func));
-
-	/* creates INC, unless already defined */
-	if(mpdm_hget_s(r, L"INC") == NULL)
-		mpdm_hset_s(r, L"INC", MPDM_A(0));
-
-	/* standard file descriptors */
-	mpdm_hset_s(r, L"STDIN", MPDM_F(stdin));
-	mpdm_hset_s(r, L"STDOUT", MPDM_F(stdout));
-	mpdm_hset_s(r, L"STDERR", MPDM_F(stderr));
-}
-
 
 /**
  * mpsl_argv - Fills the ARGV global array.
@@ -210,4 +181,65 @@ void mpsl_argv(int argc, char * argv[])
 		mpdm_push(ARGV, MPDM_MBS(argv[n]));
 
 	mpdm_hset_s(mpdm_root(), L"ARGV", ARGV);
+}
+
+
+/* in mpsl_c.c */
+mpdm_t mpsl_build_opcodes(void);
+
+
+/**
+ * mpsl_startup - Initializes MPSL.
+ *
+ * Initializes the Minimum Profit Scripting Language. Returns 0 if
+ * everything went OK.
+ */
+int mpsl_startup(void)
+{
+	int n;
+	mpdm_t r;
+	mpdm_t m;
+
+	/* startup MPDM */
+	mpdm_startup();
+
+	r = mpdm_root();
+
+	/* creates all the symbols in the CORE library */
+	for(n = 0;mpsl_funcs[n].name != NULL;n++)
+		mpdm_hset_s(r, mpsl_funcs[n].name,
+			MPDM_X(mpsl_funcs[n].func));
+
+	/* creates INC, unless already defined */
+	if(mpdm_hget_s(r, L"INC") == NULL)
+		mpdm_hset_s(r, L"INC", MPDM_A(0));
+
+	/* the TRUE value */
+	mpdm_hset_s(r, L"TRUE", MPDM_I(1));
+
+	/* standard file descriptors */
+	mpdm_hset_s(r, L"STDIN", MPDM_F(stdin));
+	mpdm_hset_s(r, L"STDOUT", MPDM_F(stdout));
+	mpdm_hset_s(r, L"STDERR", MPDM_F(stderr));
+
+	/* fill now the MPSL hash */
+	m = MPDM_H(0);
+	mpdm_hset_s(r, L"MPSL", m);
+
+	/* store things there */
+	mpdm_hset_s(m, L"VERSION", MPDM_MBS(VERSION));
+	mpdm_hset_s(m, L"opcodes", mpsl_build_opcodes());
+
+	return(0);
+}
+
+
+/**
+ * mpsl_shutdown - Shuts down MPSL.
+ *
+ * Shuts down MPSL. No MPSL functions should be used from now on.
+ */
+void mpsl_shutdown(void)
+{
+	mpdm_shutdown();
 }

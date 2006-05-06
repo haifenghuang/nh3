@@ -42,8 +42,6 @@ int mpsl_main(int argc, char * argv[])
 	FILE * script = NULL;
 	int ret = 0;
 
-	mpdm_startup();
-
 	/* skip the executable */
 	argv++;	argc--;
 
@@ -81,6 +79,8 @@ int mpsl_main(int argc, char * argv[])
 		}
 	}
 
+	mpsl_startup();
+
 	/* set arguments */
 	mpsl_argv(argc, argv);
 
@@ -103,7 +103,7 @@ int mpsl_main(int argc, char * argv[])
 		ret = 1;
 	}
 
-	mpdm_shutdown();
+	mpsl_shutdown();
 
 	return(ret);
 }

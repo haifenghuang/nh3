@@ -618,7 +618,7 @@ void test_abort_and_eval(void)
 
 int main(void)
 {
-	mpdm_startup();
+	mpsl_startup();
 
 	mpdm->default_sweep = 64;
 
@@ -641,7 +641,7 @@ int main(void)
 	mpdm_sweep(-1);
 	printf("memory: %d\n", mpdm->memory_usage);
 
-	mpdm_shutdown();
+	mpsl_shutdown();
 
 	printf("\n*** Total tests passed: %d/%d\n", oks, tests);
 

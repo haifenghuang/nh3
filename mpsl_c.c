@@ -34,9 +34,6 @@
 	Data
 ********************/
 
-/* array containing the opcodes */
-mpdm_t mpsl_ops = NULL;
-
 /* local symbol table */
 mpdm_t mpsl_local = NULL;
 
@@ -45,6 +42,9 @@ int mpsl_trace = 0;
 
 /* global abort flag */
 int mpsl_abort = 0;
+
+/* nesting level of calls to mpsl_exec_p() */
+static int exec_level = 0;
 
 /*******************
 	Code
@@ -86,18 +86,7 @@ int mpsl_is_true(mpdm_t v)
  */
 mpdm_t mpsl_boolean(int b)
 {
-	mpdm_t v = NULL;
-
-	if(b)
-	{
-		if((v = mpdm_hget_s(mpdm_root(), L"TRUE")) == NULL)
-		{
-			v = MPDM_I(1);
-			mpdm_hset_s(mpdm_root(), L"TRUE", v);
-		}
-	}
-
-	return(v);
+	return(b ? mpdm_hget_s(mpdm_root(), L"TRUE") : NULL);
 }
 
 
@@ -516,30 +505,6 @@ static struct mpsl_op_s
 };
 
 
-mpdm_t mpsl_op(wchar_t * opcode)
-{
-	if(mpsl_ops == NULL)
-	{
-		int n;
-
-		/* first time; load opcodes */
-		mpsl_ops = mpdm_ref(MPDM_H(0));
-
-		for(n = 0;op_table[n].name != NULL;n++)
-		{
-			mpdm_t v = MPDM_LS(op_table[n].name);
-			v->ival = n;
-			v->flags |= MPDM_IVAL;
-
-			/* keys and values are the same */
-			mpdm_hset(mpsl_ops, v, v);
-		}
-	}
-
-	return(mpdm_hget_s(mpsl_ops, opcode));
-}
-
-
 O_TYPE mpsl_exec_i(O_ARGS)
 /* Executes one MPSL instruction in the MPSL virtual machine. Called
    from mpsl_exec() (which holds the flow control status variable) */
@@ -589,8 +554,32 @@ mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 	int f = 0;
 	mpdm_t v;
 
+	exec_level++;
+
 	/* execute first instruction */
 	v = mpsl_exec_i(c, a, &f);
 
+	exec_level--;
+
 	return(v);
+}
+
+
+mpdm_t mpsl_build_opcodes(void)
+/* builds the table of opcodes */
+{
+	int n;
+	mpdm_t r = MPDM_H(0);
+
+	for(n = 0;op_table[n].name != NULL;n++)
+	{
+		mpdm_t v = MPDM_LS(op_table[n].name);
+		v->ival = n;
+		v->flags |= MPDM_IVAL;
+
+		/* keys and values are the same */
+		mpdm_hset(r, v, v);
+	}
+
+	return(r);
 }

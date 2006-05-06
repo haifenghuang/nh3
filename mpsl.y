@@ -33,11 +33,14 @@
 	Data
 ********************/
 
-/* the bytecode */
-static mpdm_t mpsl_bytecode = NULL;
-
 int yylex(void);
 void yyerror(char * s);
+
+/* the bytecode being generated */
+static mpdm_t mpsl_bytecode = NULL;
+
+/* cached value with the hash of opcodes */
+static mpdm_t mpsl_opcodes = NULL;
 
 /* pointer to source code being compiled */
 extern wchar_t * mpsl_next_char;
@@ -59,9 +62,6 @@ extern FILE * mpsl_file;
 #define INS3(o,a1,a2,a3)	do_ins(o, 3, a1, a2, a3)
 
 static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3);
-
-/* defined in mpsl_c.c */
-mpdm_t mpsl_op(wchar_t * opcode);
 
 /*******************
 	Code
@@ -447,7 +447,8 @@ static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3
 	v = MPDM_A(args + 1);
 
 	/* inserts the opcode */
-	mpdm_aset(v, mpsl_op(opcode), 0);
+	mpdm_aset(v, mpdm_hget_s(mpsl_opcodes, opcode), 0);
+
 	if(args > 0) mpdm_aset(v, a1, 1);
 	if(args > 1) mpdm_aset(v, a2, 2);
 	if(args > 2) mpdm_aset(v, a3, 3);
@@ -456,21 +457,22 @@ static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3
 }
 
 
-void mpsl_lib(void);
-
 static mpdm_t do_parse(void)
 /* calls yyparse() after doing some initialisations, and returns
    the compiled code as an executable value */
 {
+	mpdm_t v;
 	mpdm_t x = NULL;
-
-	mpsl_lib();
 
 	/* first line */
 	mpsl_line = 0;
 
 	/* reset last bytecode */
 	mpsl_bytecode = NULL;
+
+	/* cache the opcodes */
+	v = mpdm_hget_s(mpdm_root(), L"MPSL");
+	mpsl_opcodes = mpdm_hget_s(v, L"opcodes");
 
 	/* compile! */
 	if(yyparse() == 0 && mpsl_bytecode != NULL)

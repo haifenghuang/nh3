@@ -40,3 +40,6 @@ mpdm_t mpsl_compile_file(mpdm_t filename);
 mpdm_t mpsl_eval(mpdm_t code, mpdm_t args);
 
 void mpsl_argv(int argc, char * argv[]);
+
+int mpsl_startup(void);
+void mpsl_shutdown(void);
