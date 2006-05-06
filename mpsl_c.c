@@ -34,9 +34,6 @@
 	Data
 ********************/
 
-/* local symbol table */
-static mpdm_t mpsl_local = NULL;
-
 /* instruction execution tracing flag */
 int mpsl_trace = 0;
 
@@ -46,6 +43,24 @@ int mpsl_abort = 0;
 /*******************
 	Code
 ********************/
+
+static mpdm_t get_local(void)
+/* returns the local symbol table */
+{
+	static mpdm_t root = NULL;
+	static mpdm_t local = NULL;
+
+	if(root != mpdm_root())
+	{
+		/* it's different or new; store a copy */
+		root = mpdm_root();
+		local = mpdm_hget_s(root, L"MPSL");
+		local = mpdm_hget_s(local, L"LOCAL");
+	}
+
+	return(local);
+}
+
 
 /**
  * mpsl_is_true - Tests if a value is true.
@@ -95,7 +110,7 @@ mpdm_t mpsl_boolean(int b)
 mpdm_t mpsl_local_add_blkframe(void)
 {
 	/* pushes a new hash onto the last subframe */
-	return(mpdm_push(mpdm_aget(mpsl_local, -1), MPDM_H(0)));
+	return(mpdm_push(mpdm_aget(get_local(), -1), MPDM_H(0)));
 }
 
 
@@ -108,7 +123,7 @@ mpdm_t mpsl_local_add_blkframe(void)
 void mpsl_local_del_blkframe(void)
 {
 	/* simply pops the blkframe */
-	mpdm_pop(mpdm_aget(mpsl_local, -1));
+	mpdm_pop(mpdm_aget(get_local(), -1));
 }
 
 
@@ -119,12 +134,8 @@ void mpsl_local_del_blkframe(void)
  */
 void mpsl_local_add_subframe(void)
 {
-	/* if local symbol table doesn't exist, create */
-	if(mpsl_local == NULL)
-		mpsl_local = mpdm_ref(MPDM_A(0));
-
 	/* creates a new array for holding the hashes */
-	mpdm_push(mpsl_local, MPDM_A(0));
+	mpdm_push(get_local(), MPDM_A(0));
 
 	mpsl_local_add_blkframe();
 }
@@ -141,7 +152,7 @@ void mpsl_local_del_subframe(void)
 	mpsl_local_del_blkframe();
 
 	/* simply pops the subframe */
-	mpdm_pop(mpsl_local);
+	mpdm_pop(get_local());
 }
 
 
@@ -156,7 +167,7 @@ static mpdm_t mpsl_local_find_symbol(mpdm_t s)
 	if(MPDM_IS_ARRAY(s))
 		s = mpdm_aget(s, 0);
 
-	l = mpdm_aget(mpsl_local, -1);
+	l = mpdm_aget(get_local(), -1);
 
 	/* travel the local symbol table trying to find it */
 	for(n = mpdm_size(l) - 1;n >= 0;n--)
@@ -183,7 +194,7 @@ static void mpsl_local_set_symbols(mpdm_t s, mpdm_t v)
 		return;
 
 	/* gets the top local variable frame */
-	l = mpdm_aget(mpdm_aget(mpsl_local, -1), -1);
+	l = mpdm_aget(mpdm_aget(get_local(), -1), -1);
 
 	if(MPDM_IS_ARRAY(s))
 	{

@@ -507,7 +507,7 @@ static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
 
 	/* cache the opcodes */
 	v = mpdm_hget_s(mpdm_root(), L"MPSL");
-	mpsl_opcodes = mpdm_hget_s(v, L"opcodes");
+	mpsl_opcodes = mpdm_hget_s(v, L"OPCODE");
 
 	/* compile! */
 	if(yyparse() == 0 && mpsl_bytecode != NULL)
