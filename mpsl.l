@@ -218,38 +218,41 @@ int yywrap(void) { return(1); }
 
 int yy_input_for_flex(char * buf, int max)
 {
+	int n = 0;
+
 	if(mpsl_file != NULL)
 	{
-		int c;
+		while(n < max)
+		{
+			int c;
 
-		if((c = fgetc(mpsl_file)) == EOF)
-			return(0);
+			if((c = fgetc(mpsl_file)) == EOF)
+			{
+				mpsl_file = NULL;
+				break;
+			}
 
-		buf[0] = c;
-		return(1);
+			buf[n++] = c;
+		}
 	}
 	else
 	if(mpsl_next_char != NULL)
 	{
-		char tmp[MB_CUR_MAX + 1];
-
-		if(*mpsl_next_char == L'\0')
+		while(n < max)
 		{
-			mpsl_next_char = NULL;
-			return(0);
+			char tmp[MB_CUR_MAX + 1];
+
+			if(*mpsl_next_char == L'\0' ||
+			   wctomb(tmp, *mpsl_next_char) != 1)
+			{
+				mpsl_next_char = NULL;
+				break;
+			}
+
+			mpsl_next_char ++;
+			buf[n++] = tmp[0];
 		}
-
-		if(wctomb(tmp, *mpsl_next_char) != 1)
-		{
-			mpsl_next_char = NULL;
-			return(0);
-		}
-
-		mpsl_next_char ++;
-
-		buf[0] = tmp[0];
-		return(1);
 	}
 
-	return(0);
+	return(n);
 }

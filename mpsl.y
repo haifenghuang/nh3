@@ -25,6 +25,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include <wchar.h>
 #include "mpdm.h"
 #include "mpsl.h"
@@ -49,7 +50,7 @@ extern wchar_t * mpsl_next_char;
 extern int mpsl_line;
 
 /* filename */
-char * mpsl_filename = NULL;
+static char * mpsl_filename = NULL;
 
 /* pointer to file being compiled */
 extern FILE * mpsl_file;
@@ -457,57 +458,6 @@ static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3
 }
 
 
-static mpdm_t do_parse(void)
-/* calls yyparse() after doing some initialisations, and returns
-   the compiled code as an executable value */
-{
-	mpdm_t v;
-	mpdm_t x = NULL;
-
-	/* first line */
-	mpsl_line = 0;
-
-	/* reset last bytecode */
-	mpsl_bytecode = NULL;
-
-	/* cache the opcodes */
-	v = mpdm_hget_s(mpdm_root(), L"MPSL");
-	mpsl_opcodes = mpdm_hget_s(v, L"opcodes");
-
-	/* compile! */
-	if(yyparse() == 0 && mpsl_bytecode != NULL)
-		x = mpsl_x(mpsl_bytecode, NULL);
-
-	return(x);
-}
-
-
-/**
- * mpsl_compile - Compiles a string of MPSL code.
- * @code: A value containing a string of MPSL code
- *
- * Compiles a string of MPSL code and returns an mpdm value executable
- * by mpdm_exec(). If there is a syntax (or other type) error, NULL
- * is returned instead.
- */
-mpdm_t mpsl_compile(mpdm_t code)
-{
-	mpdm_t x = NULL;
-
-	/* point to code */
-	mpsl_next_char = (wchar_t *) code->data;
-
-	/* no real filename */
-	mpsl_filename = "<INLINE>";
-
-	mpdm_ref(code);
-	x = do_parse();
-	mpdm_unref(code);
-
-	return(x);
-}
-
-
 static FILE * inc_fopen(char * filename)
 /* loads filename, searching in INC if not directly accesible */
 {
@@ -538,6 +488,58 @@ static FILE * inc_fopen(char * filename)
 }
 
 
+static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
+/* calls yyparse() after doing some initialisations, and returns
+   the compiled code as an executable value */
+{
+	mpdm_t v;
+	mpdm_t x = NULL;
+
+	/* first line */
+	mpsl_line = 0;
+
+	/* reset last bytecode */
+	mpsl_bytecode = NULL;
+
+	/* set globals */
+	mpsl_next_char = code;
+	mpsl_file = file;
+
+	if(mpsl_filename != NULL) free(mpsl_filename);
+	mpsl_filename = strdup(filename);
+
+	/* cache the opcodes */
+	v = mpdm_hget_s(mpdm_root(), L"MPSL");
+	mpsl_opcodes = mpdm_hget_s(v, L"opcodes");
+
+	/* compile! */
+	if(yyparse() == 0 && mpsl_bytecode != NULL)
+		x = mpsl_x(mpsl_bytecode, NULL);
+
+	return(x);
+}
+
+
+/**
+ * mpsl_compile - Compiles a string of MPSL code.
+ * @code: A value containing a string of MPSL code
+ *
+ * Compiles a string of MPSL code and returns an mpdm value executable
+ * by mpdm_exec(). If there is a syntax (or other type) error, NULL
+ * is returned instead.
+ */
+mpdm_t mpsl_compile(mpdm_t code)
+{
+	mpdm_t x = NULL;
+
+	mpdm_ref(code);
+	x = do_parse("<INLINE>", (wchar_t *) code->data, NULL);
+	mpdm_unref(code);
+
+	return(x);
+}
+
+
 /**
  * mpsl_compile_file - Compiles a file of MPSL code.
  * @file: File stream or file name.
@@ -553,42 +555,45 @@ static FILE * inc_fopen(char * filename)
 mpdm_t mpsl_compile_file(mpdm_t file)
 {
 	mpdm_t x = NULL;
+	FILE * f = NULL;
+	char * filename = NULL;
 
 	if(file->flags & MPDM_FILE)
 	{
-		FILE ** f;
+		FILE ** fp;
 
 		/* it's an open file; just store the stream */
 		/* FIXME: this is a hack; there should exist
 		   a way to retrieve the FILE handle */
-		mpsl_filename = "<FILE>";
-		f = file->data;
-		mpsl_file = *f;
+		filename = "<FILE>";
+		fp = file->data;
+		f = *fp;
 	}
 	else
 	{
 		/* it's a filename; open it */
 		file = MPDM_2MBS(file->data);
 
-		mpsl_filename = file->data;
+		filename = file->data;
 
-		if((mpsl_file = inc_fopen(mpsl_filename)) == NULL)
+		if((f = inc_fopen(filename)) == NULL)
 		{
 			char tmp[128];
 
 			snprintf(tmp, sizeof(tmp) - 1,
 				"File '%s' not found in INC",
-				mpsl_filename);
+				filename);
 			mpsl_error(MPDM_MBS(tmp));
 
 			return(NULL);
 		}
+
+		file = MPDM_F(f);
 	}
 
-	x = do_parse();
+	x = do_parse(filename, NULL, f);
 
-	fclose(mpsl_file);
-	mpsl_file = NULL;
+	mpdm_close(file);
 
 	return(x);
 }

@@ -43,9 +43,6 @@ int mpsl_trace = 0;
 /* global abort flag */
 int mpsl_abort = 0;
 
-/* nesting level of calls to mpsl_exec_p() */
-static int exec_level = 0;
-
 /*******************
 	Code
 ********************/
@@ -551,6 +548,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 /* executes an MPSL instruction stream */
 {
+	static int exec_level = 0;
 	int f = 0;
 	mpdm_t v;
 
