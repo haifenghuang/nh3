@@ -592,8 +592,8 @@ ERROR
 
 Stores the last error message.
 
-MPSL
-~~~~
+MPSL.VERSION
+~~~~~~~~~~~~
 
 Stores the MPSL version as a string.
 
