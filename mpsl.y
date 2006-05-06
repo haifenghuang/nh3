@@ -34,9 +34,6 @@
 	Data
 ********************/
 
-int yylex(void);
-void yyerror(char * s);
-
 /* the bytecode being generated */
 static mpdm_t mpsl_bytecode = NULL;
 
@@ -46,29 +43,47 @@ static mpdm_t mpsl_opcodes = NULL;
 /* pointer to source code being compiled */
 extern wchar_t * mpsl_next_char;
 
-/* line number */
-extern int mpsl_line;
-
-/* filename */
-static char * mpsl_filename = NULL;
-
 /* pointer to file being compiled */
 extern FILE * mpsl_file;
 
-/* shortcut macros to insert instructions */
+/* line number */
+extern int mpsl_line;
+
+/* compiled filename (for errors) */
+static char * mpsl_filename = NULL;
+
+/*******************
+	Code
+********************/
+
+int yylex(void);
+void yyerror(char * s);
+
+static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
+/* adds an instruction */
+{
+	mpdm_t v;
+
+	v = MPDM_A(args + 1);
+
+	/* inserts the opcode */
+	mpdm_aset(v, mpdm_hget_s(mpsl_opcodes, opcode), 0);
+
+	if(args > 0) mpdm_aset(v, a1, 1);
+	if(args > 1) mpdm_aset(v, a2, 2);
+	if(args > 2) mpdm_aset(v, a3, 3);
+
+	return(v);
+}
 
 #define INS0(o)			do_ins(o, 0, NULL, NULL, NULL)
 #define INS1(o,a1)		do_ins(o, 1, a1, NULL, NULL)
 #define INS2(o,a1,a2)		do_ins(o, 2, a1, a2, NULL)
 #define INS3(o,a1,a2,a3)	do_ins(o, 3, a1, a2, a3)
 
-static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3);
-
-/*******************
-	Code
-********************/
-
 static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2)
+/* creates an executable value with the MPSL executor as the first
+   argument and a compiled stream as the second */
 {
 	return(MPDM_X2(mpsl_exec_p,
 		do_ins(L"SUBFRAME", a2 == NULL ? 1 : 2, a1, a2, NULL)));
@@ -437,24 +452,6 @@ void yyerror(char * s)
 		s, mpsl_filename, mpsl_line + 1);
 
 	mpsl_error(MPDM_MBS(tmp));
-}
-
-
-static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
-/* adds an instruction */
-{
-	mpdm_t v;
-
-	v = MPDM_A(args + 1);
-
-	/* inserts the opcode */
-	mpdm_aset(v, mpdm_hget_s(mpsl_opcodes, opcode), 0);
-
-	if(args > 0) mpdm_aset(v, a1, 1);
-	if(args > 1) mpdm_aset(v, a2, 2);
-	if(args > 2) mpdm_aset(v, a3, 3);
-
-	return(v);
 }
 
 

@@ -35,7 +35,7 @@
 ********************/
 
 /* local symbol table */
-mpdm_t mpsl_local = NULL;
+static mpdm_t mpsl_local = NULL;
 
 /* instruction execution tracing flag */
 int mpsl_trace = 0;
