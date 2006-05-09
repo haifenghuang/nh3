@@ -82,6 +82,8 @@ static mpdm_t F_write(mpdm_t a) { return(mpsl_boolean(mpdm_write(A0,A1))); }
 static mpdm_t F_unlink(mpdm_t a) { return(mpsl_boolean(mpdm_unlink(A0))); }
 static mpdm_t F_glob(mpdm_t a) { return(mpdm_glob(A0)); }
 static mpdm_t F_encoding(mpdm_t a) { return(MPDM_I(mpdm_encoding(A0))); }
+static mpdm_t F_popen(mpdm_t a) { return(mpdm_popen(A0, A1)); }
+static mpdm_t F_pclose(mpdm_t a) { return(mpdm_pclose(A0)); }
 
 static mpdm_t F_regex(mpdm_t a) { return(mpdm_regex(A0,A1,IA2)); }
 static mpdm_t F_sregex(mpdm_t a) { return(mpdm_sregex(A0,A1,A2,IA3)); }
@@ -149,6 +151,8 @@ static struct
 	{ L"unlink",	F_unlink },
 	{ L"glob",	F_glob },
 	{ L"encoding",	F_encoding },
+	{ L"popen",	F_popen },
+	{ L"pclose",	F_pclose },
 	{ L"regex",	F_regex },
 	{ L"sregex",	F_sregex },
 	{ L"load",	F_load },
