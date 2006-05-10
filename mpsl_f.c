@@ -78,7 +78,7 @@ static mpdm_t F_keys(mpdm_t a) { return(mpdm_keys(A0)); }
 static mpdm_t F_open(mpdm_t a) { return(mpdm_open(A0, A1)); }
 static mpdm_t F_close(mpdm_t a) { return(mpdm_close(A0)); }
 static mpdm_t F_read(mpdm_t a) { return(mpdm_read(A0)); }
-static mpdm_t F_write(mpdm_t a) { return(mpsl_boolean(mpdm_write(A0,A1))); }
+static mpdm_t F_write(mpdm_t a) { return(MPDM_I(mpdm_write(A0,A1))); }
 static mpdm_t F_unlink(mpdm_t a) { return(mpsl_boolean(mpdm_unlink(A0))); }
 static mpdm_t F_glob(mpdm_t a) { return(mpdm_glob(A0)); }
 static mpdm_t F_encoding(mpdm_t a) { return(MPDM_I(mpdm_encoding(A0))); }
