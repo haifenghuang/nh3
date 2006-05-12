@@ -233,6 +233,10 @@ int mpsl_startup(void)
 	mpdm_hset_s(r, L"STDOUT", MPDM_F(stdout));
 	mpdm_hset_s(r, L"STDERR", MPDM_F(stderr));
 
+	/* home and application directories */
+	mpdm_hset_s(r, L"HOMEDIR", mpdm_home_dir());
+	mpdm_hset_s(r, L"APPDIR", mpdm_app_dir());
+
 	/* fill now the MPSL hash */
 	m = MPDM_H(0);
 	mpdm_hset_s(r, L"MPSL", m);
