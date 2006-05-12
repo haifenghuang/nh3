@@ -592,15 +592,26 @@ ERROR
 
 Stores the last error message.
 
-MPSL.VERSION
-~~~~~~~~~~~~
-
-Stores the MPSL version as a string.
-
 STDIN, STDOUT, STDERR
 ~~~~~~~~~~~~~~~~~~~~~
 
 The famous standard file descriptors.
+
+HOMEDIR
+~~~~~~~
+
+The home directory for the current user. It's supposed to be a writable
+directory where users can store their configuration and documents.
+
+APPDIR
+~~~~~~
+
+The application directory.
+
+MPSL.VERSION
+~~~~~~~~~~~~
+
+Stores the MPSL version as a string.
 
 ----
 Angel Ortega <angel@triptico.com> - $Date$
