@@ -9,6 +9,8 @@ Release Critical Bugs
  * 1068: Implement a dumper function to dump an mpdm_t
    as mpsl source code.
  * 1075: Finish the quick reference guide.
+ * 1087: Using return() with a value from inside a foreach() loop
+   fails
 
 Open Bugs
 ---------
@@ -114,5 +116,7 @@ Closed
    the current directory (Wed, 03 May 2006 13:28:31 +0200).
  * 1085: The mpsl interpreter program should accept a program from stdin
    (Wed, 03 May 2006 13:28:41 +0200).
+ * 1086: Using return() with a value from inside a while() loop
+   fails (Sat, 13 May 2006 13:58:42 +0200).
 
 Email bugs to angel@triptico.com
