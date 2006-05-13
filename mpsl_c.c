@@ -359,17 +359,17 @@ O_TYPE O_exec(O_ARGS)
 O_TYPE O_while(O_ARGS)
 /* while loop */
 {
-	mpdm_t v = NULL;
+	mpdm_t r = NULL;
 
 	while(! *f && ISTRU(M1))
 	{
-		UF(v);
-		v = RF(M2);
+		UF(r);
+		r = RF(M2);
 	}
 
 	if(*f == 1) *f = 0;
 
-	return(UF(v));
+	return(UF(r));
 }
 
 
@@ -378,19 +378,21 @@ O_TYPE O_foreach(O_ARGS)
 {
 	mpdm_t s = RF(M1);
 	mpdm_t v = RF(M2);
+	mpdm_t r = NULL;
 	int n;
 
 	for(n = 0;n < mpdm_size(v) && ! *f;n++)
 	{
 		SET(s, mpdm_aget(v, n));
-		M3;
+		UF(r);
+		r = RF(M3);
 	}
 
 	if(*f == 1) *f = 0;
 
 	UF(s); UF(v);
 
-	return(NULL);
+	return(UF(r));
 }
 
 
