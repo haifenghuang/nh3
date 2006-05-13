@@ -526,6 +526,12 @@ void test_mpsl3(void)
 	v = do_test_exec(v, NULL);
 	do_test("return 3", mpdm_ival(v) == 6);
 
+	v = do_test_mpsl("sub func() { foreach(a, [1 .. 10]) { return(6); 24; } 12; }");
+	v = do_test_exec(v, NULL);
+	v = do_test_mpsl("a=func();");
+	v = do_test_exec(v, NULL);
+	do_test("return 4", mpdm_ival(v) == 6);
+
 	v = do_test_mpsl("a=1; while(a < 10) { a++; } a;");
 	v = do_test_exec(v, NULL);
 	do_test("while", mpdm_ival(v) == 10);
