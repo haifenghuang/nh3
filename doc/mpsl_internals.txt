@@ -204,6 +204,15 @@ These instructions execute the equality, less-than, less-or-equal-than,
 greater-than and greater-or-equal-than numeric comparisons on the exit
 values of <ins1> and <ins2>, and return a boolean value.
 
+Bitwise operators
+~~~~~~~~~~~~~~~~~
+
+ BITAND <ins1> <ins2>
+ BITOR <ins1> <ins2>
+ BITXOR <ins1> <ins2>
+
+Returns the bitwise operation between the exit values of <ins1> and <ins2>.
+
 STRCAT
 ~~~~~~
 
