@@ -301,9 +301,9 @@ O_TYPE O_mod(O_ARGS) { return(MPDM_I(IM1 % IM2)); }
 O_TYPE O_not(O_ARGS) { return(BOOL(! ISTRU(M1))); }
 O_TYPE O_and(O_ARGS) { mpdm_t r = M1; return(ISTRU(r) ? M2 : r); }
 O_TYPE O_or(O_ARGS) { mpdm_t r = M1; return(ISTRU(r) ? r : M2); }
-O_TYPE O_bitand(O_ARGS) { return(MPDM_R(IM1 & IM2)); }
-O_TYPE O_bitor(O_ARGS) { return(MPDM_R(IM1 | IM2)); }
-O_TYPE O_bitxor(O_ARGS) { return(MPDM_R(IM1 ^ IM2)); }
+O_TYPE O_bitand(O_ARGS) { return(MPDM_I(IM1 & IM2)); }
+O_TYPE O_bitor(O_ARGS) { return(MPDM_I(IM1 | IM2)); }
+O_TYPE O_bitxor(O_ARGS) { return(MPDM_I(IM1 ^ IM2)); }
 O_TYPE O_numlt(O_ARGS) { return(BOOL(RM1 < RM2)); }
 O_TYPE O_numle(O_ARGS) { return(BOOL(RM1 <= RM2)); }
 O_TYPE O_numgt(O_ARGS) { return(BOOL(RM1 > RM2)); }
