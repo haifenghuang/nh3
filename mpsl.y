@@ -106,6 +106,8 @@ static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2)
 %left INC DEC IADD ISUB IMUL IDIV IMOD
 %left '!'
 %left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE HASHPAIR RANGE '>''<'
+%left BITAND
+%left BITOR BITXOR
 %left '+' '-'
 %left '*' '/' MOD
 %nonassoc UMINUS
@@ -323,6 +325,11 @@ expr:
 	| expr '*' expr		{ $$ = INS2(L"MUL", $1, $3); }
 	| expr '/' expr		{ $$ = INS2(L"DIV", $1, $3); }
 	| expr MOD expr		{ $$ = INS2(L"MOD", $1, $3); }
+
+				/* bit operations */
+	| expr BITAND expr	{ $$ = INS2(L"BITAND", $1, $3); }
+	| expr BITOR expr	{ $$ = INS2(L"BITOR", $1, $3); }
+	| expr BITXOR expr	{ $$ = INS2(L"BITXOR", $1, $3); }
 
 				/* immediate math operations */
 	| INC compsym		{ $$ = INS1(L"PINC", $2); }

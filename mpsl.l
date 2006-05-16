@@ -166,6 +166,9 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 "||"		return BOOLOR;
 "=>"		return HASHPAIR;
 ".."		return RANGE;
+"&"		return BITAND;
+"|"		return BITOR;
+"^"		return BITXOR;
 
 "eq"		return STREQ;
 "ne"		return STRNE;
