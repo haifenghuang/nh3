@@ -621,7 +621,7 @@ and tune some values for the MPDM (Minimum Profit Data Manager). If called
 without arguments, the current values are returned. A hash can be sent as
 argument to change some of them. These are the keys:
 
- * count: Number of values being managed (read only).
+ * count: Total number of values being managed (read only).
  * low_threshold: The minimum number of values to be managed to start
    doing garbage collection (read / write).
  * default_sweep: The number of values that will be tested for garbage
@@ -630,11 +630,11 @@ argument to change some of them. These are the keys:
    MPDM (read only).
  * hash_buckets: The default number of buckets a hash will use. It must
    be a prime number (read / write).
- * referenced: The number of values being managed that are referenced
-   (read only).
+ * referenced: The number of values being managed that are referenced. The
+   rest of them in count are candidate for garbage collection (read only).
 
 The default values are the best for normal usage. Of course, you only must
-change them if you know what you are doing.
+change any of them if you know what you are doing.
 
 Examples:
 
