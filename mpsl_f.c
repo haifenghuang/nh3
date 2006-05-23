@@ -107,6 +107,22 @@ static mpdm_t F_eval(mpdm_t a)
 	return(mpsl_eval(c, a));
 }
 
+static mpdm_t F_sprintf(mpdm_t a)
+{
+	mpdm_t f;
+	mpdm_t v;
+
+	a = mpdm_clone(a);
+	f = mpdm_adel(a, 0);
+
+	/* if the first argument is an array, take it as the arguments */
+	if((v = mpdm_aget(a, 0)) != NULL && MPDM_IS_ARRAY(v))
+		a = v;
+
+	return(mpdm_sprintf(f, a));
+}
+
+
 static mpdm_t F_print(mpdm_t a)
 {
 	int n;
@@ -167,6 +183,7 @@ static struct
 	{ L"print",	F_print },
 	{ L"gettext",	F_gettext },
 	{ L"gettext_domain", F_gettext_domain },
+	{ L"sprintf",	F_sprintf },
 	{ NULL,		NULL }
 };
 
