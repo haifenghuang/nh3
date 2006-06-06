@@ -43,6 +43,7 @@
 #define A1 A(1)
 #define A2 A(2)
 #define IA(n) mpdm_ival(A(n))
+#define IA0 IA(0)
 #define IA1 IA(1)
 #define IA2 IA(2)
 #define IA3 IA(3)
@@ -96,6 +97,7 @@ static mpdm_t F_gettext_domain(mpdm_t a) { return(MPDM_I(mpdm_gettext_domain(A0,
 
 static mpdm_t F_load(mpdm_t a) { return(mpdm_exec(mpsl_compile_file(A0), NULL)); }
 static mpdm_t F_error(mpdm_t a) { return(mpsl_error(A0)); }
+static mpdm_t F_sweep(mpdm_t a) { mpdm_sweep(IA0); return(NULL); }
 
 static mpdm_t F_eval(mpdm_t a)
 {
@@ -184,6 +186,7 @@ static struct
 	{ L"gettext",	F_gettext },
 	{ L"gettext_domain", F_gettext_domain },
 	{ L"sprintf",	F_sprintf },
+	{ L"sweep",	F_sweep },
 	{ NULL,		NULL }
 };
 
