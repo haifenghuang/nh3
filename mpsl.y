@@ -462,30 +462,25 @@ void yyerror(char * s)
 }
 
 
-static FILE * inc_fopen(char * filename)
+static FILE * inc_fopen(char * filename, mpdm_t inc)
 /* loads filename, searching in INC if not directly accesible */
 {
-	mpdm_t a;
 	FILE * f = NULL;
 	char tmp[1024];
+	int n;
 
-	if((a = mpsl_get_symbol(MPDM_LS(L"INC"))) != NULL)
+	/* loop through INC, prepending each path
+	   to the filename */
+	for (n = 0;n < mpdm_size(inc);n++)
 	{
-		int n;
+		mpdm_t v = mpdm_aget(inc, n);
 
-		/* loop through INC, prepending each path
-		   to the filename */
-		for (n = 0;n < mpdm_size(a);n++)
-		{
-			mpdm_t v = mpdm_aget(a, n);
+		v = MPDM_2MBS(v->data);
+		snprintf(tmp, sizeof(tmp), "%s/%s",
+			(char *)v->data, filename);
 
-			v = MPDM_2MBS(v->data);
-			snprintf(tmp, sizeof(tmp), "%s/%s",
-				(char *)v->data, filename);
-
-			if ((f = fopen(tmp, "r")) != NULL)
-				break;
-		}
+		if ((f = fopen(tmp, "r")) != NULL)
+			break;
 	}
 
 	return(f);
@@ -575,12 +570,14 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 	}
 	else
 	{
+		mpdm_t inc = mpsl_get_symbol(MPDM_LS(L"INC"));
+
 		/* it's a filename; open it */
 		file = MPDM_2MBS(file->data);
 
 		filename = file->data;
 
-		if((f = inc_fopen(filename)) == NULL)
+		if((f = inc_fopen(filename, inc)) == NULL)
 		{
 			char tmp[128];
 
