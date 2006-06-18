@@ -147,6 +147,9 @@ static mpdm_t find_local_symbol(mpdm_t s, mpdm_t l)
 	int n;
 	mpdm_t v = NULL;
 
+	/* no local symbol table? nothing to find */
+	if(l == NULL) return(NULL);
+
 	/* if s is multiple, take just the first element */
 	if(MPDM_IS_ARRAY(s))
 		s = mpdm_aget(s, 0);
@@ -172,7 +175,7 @@ static mpdm_t find_local_symbol(mpdm_t s, mpdm_t l)
 static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
 /* sets (or creates) a list of local symbols with a list of values */
 {
-	if(s == NULL)
+	if(s == NULL || l == NULL)
 		return;
 
 	/* gets the top local variable frame */
