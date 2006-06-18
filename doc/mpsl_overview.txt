@@ -590,7 +590,12 @@ for by the load() command.
 ERROR
 ~~~~~
 
-Stores the last error message.
+Stores the last severe error message (compilation errors, etc.).
+
+ERRNO
+~~~~~
+
+Stores the last error message from the system (file not found, etc.).
 
 STDIN, STDOUT, STDERR
 ~~~~~~~~~~~~~~~~~~~~~
