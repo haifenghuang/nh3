@@ -40,6 +40,9 @@ int mpsl_trace = 0;
 /* global abort flag */
 int mpsl_abort = 0;
 
+/* temporary storage for the local symbol table */
+static mpdm_t local_symbol_table = NULL;
+
 /*******************
 	Code
 ********************/
@@ -328,8 +331,12 @@ O_TYPE O_exec(O_ARGS)
 	}
 	else
 	{
+		local_symbol_table = l;
+
 		/* executes */
 		r = mpdm_exec(v, M2);
+
+		local_symbol_table = NULL;
 	}
 
 	UF(s);
