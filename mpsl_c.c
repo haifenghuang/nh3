@@ -440,6 +440,8 @@ O_TYPE O_subframe(O_ARGS)
 {
 	mpdm_t ret;
 
+	l = MPDM_A(0);
+
 	/* creates a subroutine frame */
 	add_local_subframe(l);
 
@@ -580,7 +582,7 @@ mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 	exec_level++;
 
 	/* execute first instruction */
-	v = mpsl_exec_i(c, a, MPDM_A(0), &f);
+	v = mpsl_exec_i(c, a, NULL, &f);
 
 	exec_level--;
 
