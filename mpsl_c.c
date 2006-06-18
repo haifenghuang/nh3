@@ -236,7 +236,7 @@ mpdm_t mpsl_error(mpdm_t err)
 /** opcodes **/
 
 #define O_TYPE static mpdm_t
-#define O_ARGS mpdm_t c, mpdm_t a, int * f
+#define O_ARGS mpdm_t c, mpdm_t a, mpdm_t l, int * f
 
 O_TYPE mpsl_exec_i(O_ARGS);
 
@@ -244,7 +244,7 @@ O_TYPE mpsl_exec_i(O_ARGS);
 #define C0 C(0)
 #define C1 C(1)
 
-#define M(n) mpsl_exec_i(C(n), a, f)
+#define M(n) mpsl_exec_i(C(n), a, l, f)
 #define M1 M(1)
 #define M2 M(2)
 #define M3 M(3)
@@ -433,19 +433,19 @@ O_TYPE O_subframe(O_ARGS)
 /* runs an instruction inside a subroutine frame */
 {
 	mpdm_t ret;
-	mpdm_t l = get_local();
+	mpdm_t _l = get_local();
 
 	/* creates a subroutine frame */
-	add_local_subframe(l);
+	add_local_subframe(_l);
 
 	/* creates the arguments (if any) as local variables */
-	set_local_symbols(M2, a, l);
+	set_local_symbols(M2, a, _l);
 
 	/* execute instruction */
 	ret = M1;
 
 	/* destroys the frame */
-	del_local_subframe(l);
+	del_local_subframe(_l);
 
 	return(ret);
 }
@@ -455,11 +455,11 @@ O_TYPE O_blkframe(O_ARGS)
 /* runs an instruction under a block frame */
 {
 	mpdm_t ret;
-	mpdm_t l = get_local();
+	mpdm_t _l = get_local();
 
-	add_local_blkframe(l);
+	add_local_blkframe(_l);
 	ret = M1;
-	del_local_blkframe(l);
+	del_local_blkframe(_l);
 
 	return(ret);
 }
@@ -528,8 +528,10 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	/* if aborted, do nothing */
 	if(mpsl_abort) return(NULL);
 
-	/* reference both code and arguments */
-	mpdm_ref(c); mpdm_ref(a);
+	/* reference code, arguments and local symbol table */
+	mpdm_ref(c);
+	mpdm_ref(a);
+	mpdm_ref(l);
 
 	if(c != NULL)
 	{
@@ -545,7 +547,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 
 			/* and call it if existent */
 			if(o->func != NULL)
-				ret = mpdm_ref(o->func(c, a, f));
+				ret = mpdm_ref(o->func(c, a, l, f));
 		}
 	}
 
@@ -553,7 +555,9 @@ O_TYPE mpsl_exec_i(O_ARGS)
 		printf("** %ls: %ls\n", mpdm_string(C0), mpdm_string(ret));
 
 	/* unreference */
-	mpdm_unref(a); mpdm_unref(c);
+	mpdm_unref(l);
+	mpdm_unref(a);
+	mpdm_unref(c);
 
 	/* sweep some values */
 	mpdm_sweep(0);
@@ -572,7 +576,7 @@ mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 	exec_level++;
 
 	/* execute first instruction */
-	v = mpsl_exec_i(c, a, &f);
+	v = mpsl_exec_i(c, a, MPDM_H(0), &f);
 
 	exec_level--;
 
