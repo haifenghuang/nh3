@@ -102,61 +102,43 @@ mpdm_t mpsl_boolean(int b)
 }
 
 
-/**
- * mpsl_local_add_blkframe - Creates a block frame.
- *
- * Creates a block frame in the local variable symbol table.
- */
-mpdm_t mpsl_local_add_blkframe(void)
+static mpdm_t add_local_blkframe(void)
+/* creates a block frame */
 {
 	/* pushes a new hash onto the last subframe */
 	return(mpdm_push(mpdm_aget(get_local(), -1), MPDM_H(0)));
 }
 
 
-/**
- * mpsl_local_del_blkframe - Deletes a block frame.
- *
- * Deletes a block frame previously created by
- * mpsl_local_add_blkframe().
- */
-void mpsl_local_del_blkframe(void)
+static void del_local_blkframe(void)
+/* deletes a block frame */
 {
 	/* simply pops the blkframe */
 	mpdm_pop(mpdm_aget(get_local(), -1));
 }
 
 
-/**
- * mpsl_local_add_subframe - Creates a subroutine frame.
- *
- * Creates a subroutine frame in the local variable symbol table.
- */
-void mpsl_local_add_subframe(void)
+static void add_local_subframe(void)
+/* creates a subroutine frame */
 {
 	/* creates a new array for holding the hashes */
 	mpdm_push(get_local(), MPDM_A(0));
 
-	mpsl_local_add_blkframe();
+	add_local_blkframe();
 }
 
 
-/**
- * mpsl_local_del_subframe - Deletes a subroutine frame.
- *
- * Deletes a subroutine frame previously created by
- * mpsl_local_add_subframe().
- */
-void mpsl_local_del_subframe(void)
+static void del_local_subframe(void)
+/* deletes a subroutine frame */
 {
-	mpsl_local_del_blkframe();
+	del_local_blkframe();
 
 	/* simply pops the subframe */
 	mpdm_pop(get_local());
 }
 
 
-static mpdm_t mpsl_local_find_symbol(mpdm_t s)
+static mpdm_t find_local_symbol(mpdm_t s)
 /* finds a symbol in the local symbol table */
 {
 	int n;
@@ -185,7 +167,7 @@ static mpdm_t mpsl_local_find_symbol(mpdm_t s)
 }
 
 
-static void mpsl_local_set_symbols(mpdm_t s, mpdm_t v)
+static void set_local_symbols(mpdm_t s, mpdm_t v)
 /* sets (or creates) a list of local symbols with a list of values */
 {
 	mpdm_t l;
@@ -219,7 +201,7 @@ static void mpsl_local_set_symbols(mpdm_t s, mpdm_t v)
  */
 mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v)
 {
-	mpdm_sset(mpsl_local_find_symbol(s), s, v);
+	mpdm_sset(find_local_symbol(s), s, v);
 	return(v);
 }
 
@@ -233,7 +215,7 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v)
  */
 mpdm_t mpsl_get_symbol(mpdm_t s)
 {
-	return(mpdm_sget(mpsl_local_find_symbol(s), s));
+	return(mpdm_sget(find_local_symbol(s), s));
 }
 
 
@@ -291,7 +273,7 @@ O_TYPE O_literal(O_ARGS) { return(mpdm_clone(C1)); }
 O_TYPE O_symval(O_ARGS) { return(GET(M1)); }
 O_TYPE O_assign(O_ARGS) { mpdm_t v = RF(M1); mpdm_t r = SET(v, M2); UF(v); return(r); }
 O_TYPE O_if(O_ARGS) { return(ISTRU(M1) ? M2 : M3); }
-O_TYPE O_local(O_ARGS) { mpsl_local_set_symbols(M1, NULL); return(NULL); }
+O_TYPE O_local(O_ARGS) { set_local_symbols(M1, NULL); return(NULL); }
 O_TYPE O_uminus(O_ARGS) { return(MPDM_R(-RM1)); }
 O_TYPE O_add(O_ARGS) { return(MPDM_R(RM1 + RM2)); }
 O_TYPE O_sub(O_ARGS) { return(MPDM_R(RM1 - RM2)); }
@@ -456,16 +438,16 @@ O_TYPE O_subframe(O_ARGS)
 	mpdm_t ret;
 
 	/* creates a subroutine frame */
-	mpsl_local_add_subframe();
+	add_local_subframe();
 
 	/* creates the arguments (if any) as local variables */
-	mpsl_local_set_symbols(M2, a);
+	set_local_symbols(M2, a);
 
 	/* execute instruction */
 	ret = M1;
 
 	/* destroys the frame */
-	mpsl_local_del_subframe();
+	del_local_subframe();
 
 	return(ret);
 }
@@ -476,9 +458,9 @@ O_TYPE O_blkframe(O_ARGS)
 {
 	mpdm_t ret;
 
-	mpsl_local_add_blkframe();
+	add_local_blkframe();
 	ret = M1;
-	mpsl_local_del_blkframe();
+	del_local_blkframe();
 
 	return(ret);
 }
