@@ -586,7 +586,7 @@ mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 	exec_level++;
 
 	/* execute first instruction */
-	v = mpsl_exec_i(c, a, MPDM_H(0), &f);
+	v = mpsl_exec_i(c, a, MPDM_A(0), &f);
 
 	exec_level--;
 
