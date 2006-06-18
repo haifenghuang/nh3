@@ -87,42 +87,6 @@ mpdm_t mpsl_boolean(int b)
 }
 
 
-static mpdm_t add_local_blkframe(mpdm_t l)
-/* creates a block frame */
-{
-	/* pushes a new hash onto the last subframe */
-	return(mpdm_push(mpdm_aget(l, -1), MPDM_H(0)));
-}
-
-
-static void del_local_blkframe(mpdm_t l)
-/* deletes a block frame */
-{
-	/* simply pops the blkframe */
-	mpdm_pop(mpdm_aget(l, -1));
-}
-
-
-static void add_local_subframe(mpdm_t l)
-/* creates a subroutine frame */
-{
-	/* creates a new array for holding the hashes */
-	mpdm_push(l, MPDM_A(0));
-
-	add_local_blkframe(l);
-}
-
-
-static void del_local_subframe(mpdm_t l)
-/* deletes a subroutine frame */
-{
-	del_local_blkframe(l);
-
-	/* simply pops the subframe */
-	mpdm_pop(l);
-}
-
-
 static mpdm_t find_local_symbol(mpdm_t s, mpdm_t l)
 /* finds a symbol in the local symbol table */
 {
@@ -135,8 +99,6 @@ static mpdm_t find_local_symbol(mpdm_t s, mpdm_t l)
 	/* if s is multiple, take just the first element */
 	if(MPDM_IS_ARRAY(s))
 		s = mpdm_aget(s, 0);
-
-	l = mpdm_aget(l, -1);
 
 	/* travel the local symbol table trying to find it */
 	for(n = mpdm_size(l) - 1;n >= 0;n--)
@@ -157,21 +119,23 @@ static mpdm_t find_local_symbol(mpdm_t s, mpdm_t l)
 static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
 /* sets (or creates) a list of local symbols with a list of values */
 {
+	mpdm_t h;
+
 	if(s == NULL || l == NULL)
 		return;
 
 	/* gets the top local variable frame */
-	l = mpdm_aget(mpdm_aget(l, -1), -1);
+	h = mpdm_aget(l, -1);
 
 	if(MPDM_IS_ARRAY(s))
 	{
 		int n;
 
 		for(n = 0;n < mpdm_size(s);n++)
-			mpdm_hset(l, mpdm_aget(s, n), mpdm_aget(v, n));
+			mpdm_hset(h, mpdm_aget(s, n), mpdm_aget(v, n));
 	}
 	else
-		mpdm_hset(l, s, v);
+		mpdm_hset(h, s, v);
 }
 
 
@@ -198,6 +162,10 @@ static mpdm_t set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
  * Assigns the value @v to the @s symbol. If the value exists as
  * a local symbol, it's assigned to it; otherwise, it's set as a global
  * symbol (and created if it does not exist).
+ *
+ * This function is only meant to be executed from inside an MPSL
+ * program; from outside, it's exactly the same as calling mpdm_sset()
+ * (as the local symbol table won't exist).
  */
 mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v)
 {
@@ -211,6 +179,10 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v)
  *
  * Gets the value of a symbol. The symbol can be local or global
  * (if the symbol exists in both tables, the local value will be returned).
+ *
+ * This function is only meant to be executed from inside an MPSL
+ * program; from outside, it's exactly the same as calling mpdm_sget()
+ * (as the local symbol table won't exist).
  */
 mpdm_t mpsl_get_symbol(mpdm_t s)
 {
@@ -440,10 +412,9 @@ O_TYPE O_subframe(O_ARGS)
 {
 	mpdm_t ret;
 
-	l = MPDM_A(0);
-
-	/* creates a subroutine frame */
-	add_local_subframe(l);
+	/* create a new local symbol table */
+	l = mpdm_ref(MPDM_A(1));
+	mpdm_aset(l, MPDM_H(0), 0);
 
 	/* creates the arguments (if any) as local variables */
 	set_local_symbols(M2, a, l);
@@ -451,8 +422,8 @@ O_TYPE O_subframe(O_ARGS)
 	/* execute instruction */
 	ret = M1;
 
-	/* destroys the frame */
-	del_local_subframe(l);
+	/* this local symbol table is no longer needed */
+	mpdm_unref(l);
 
 	return(ret);
 }
@@ -463,9 +434,9 @@ O_TYPE O_blkframe(O_ARGS)
 {
 	mpdm_t ret;
 
-	add_local_blkframe(l);
+	mpdm_push(l, MPDM_H(0));
 	ret = M1;
-	del_local_blkframe(l);
+	mpdm_pop(l);
 
 	return(ret);
 }
