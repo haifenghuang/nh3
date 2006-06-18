@@ -8,6 +8,11 @@ Release Critical Bugs
  * 1068: Implement a dumper function to dump an mpdm_t
    as mpsl source code.
  * 1075: Finish the quick reference guide.
+ * 1089: Change the load() function from a function library to an opcode.
+ * 1090: Change mpsl_compile_file() to accept the INC as argument instead
+   of using mpsl_get_symbol() (needs #1089 closed).
+ * 1091: Change mpsl_get_symbol() and mpsl_set_symbol() to be static, so
+   only opcodes can manipulate it (needs #1090 closed).
 
 Open Bugs
 ---------
