@@ -8,11 +8,8 @@ Release Critical Bugs
  * 1068: Implement a dumper function to dump an mpdm_t
    as mpsl source code.
  * 1075: Finish the quick reference guide.
- * 1089: Change the load() function from a function library to an opcode.
- * 1090: Change mpsl_compile_file() to accept the INC as argument instead
-   of using mpsl_get_symbol() (needs #1089 closed).
- * 1091: Change mpsl_get_symbol() and mpsl_set_symbol() to be static, so
-   only opcodes can manipulate it (needs #1090 closed).
+ * 1092: The local symbol table description in the internals document
+   is outdated.
 
 Open Bugs
 ---------
@@ -28,8 +25,6 @@ Pending Enhancements
  * 1082: Implement a Perl-like map() function.
  * 1083: Implement a split() that uses regular expressions.
  * 1084: Implement the foreach(local var, list) construction.
- * 1088: Change the virtual machine to propagate the local symbol table
-   in an argument instead of being a global list.
 
 Closed
 ------
@@ -126,5 +121,16 @@ Closed
    fails (Sat, 13 May 2006 14:00:19 +0200).
  * 1063: Create a sprintf()-like library function
    (Implemented in mpsl; Tue, 23 May 2006 18:17:05 +0200).
+ * 1089: Change the load() function from a function library to an opcode.
+   (Not necessary; Sun, 18 Jun 2006 21:17:41 +0200).
+ * 1090: Change mpsl_compile_file() to accept the INC as argument instead
+   of using mpsl_get_symbol() (needs #1089 closed)
+   (Not done; Sun, 18 Jun 2006 21:18:24 +0200).
+ * 1091: Change mpsl_get_symbol() and mpsl_set_symbol() to be static, so
+   only opcodes can manipulate it (needs #1090 closed)
+   (Not done; Sun, 18 Jun 2006 21:18:56 +0200).
+ * 1088: Change the virtual machine to propagate the local symbol table
+   in an argument instead of being a global list
+   (Sun, 18 Jun 2006 21:19:13 +0200).
 
 Email bugs to angel@triptico.com
