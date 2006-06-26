@@ -90,8 +90,8 @@ dist: distclean ChangeLog
 	tar czvf $(PROJ)-$(VERSION)/$(PROJ)-$(VERSION).tar.gz --exclude=CVS $(PROJ)-$(VERSION)/* ; \
 	rm $(PROJ)-$(VERSION)
 
-install:
+install: installdoc
 	install $(TARGET) $(PREFIX)/bin
-	mkdir -p $(PREFIX)/share/doc/$(PROJ)
-	cp $(DOCS) $(PREFIX)/share/doc/$(PROJ)
 
+installdoc:
+	install -m 644 $(DOCS) $(DOCDIR)

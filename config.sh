@@ -10,6 +10,9 @@ VERSION=`cut -f2 -d\" VERSION`
 # default installation prefix
 PREFIX=/usr/local
 
+# installation directory for documents
+DOCDIR=""
+
 # parse arguments
 while [ $# -gt 0 ] ; do
 
@@ -25,6 +28,10 @@ while [ $# -gt 0 ] ; do
 
 	--prefix)		PREFIX=$2 ; shift ;;
 	--prefix=*)		PREFIX=`echo $1 | sed -e 's/--prefix=//'` ;;
+
+	--docdir)		DOCDIR=$2 ; shift ;;
+	--docdir=*)		DOCDIR=`echo $1 | sed -e 's/--docdir=//'` ;;
+
 	esac
 
 	shift
@@ -34,6 +41,7 @@ if [ "$CONFIG_HELP" = "1" ] ; then
 
 	echo "Available options:"
 	echo "--prefix=PREFIX       Installation prefix ($PREFIX)."
+	echo "--docdir=DOCDIR       Instalation directory for documentation."
 	echo "--without-win32       Disable win32 interface detection."
 	echo "--without-unix-glob   Disable glob.h usage (use workaround)."
 	echo "--with-included-regex Use included regex code (gnu_regex.c)."
@@ -49,6 +57,10 @@ if [ "$CONFIG_HELP" = "1" ] ; then
 	echo "YACC                  Parser."
 
 	exit 1
+fi
+
+if [ "$DOCDIR" = "" ] ; then
+	DOCDIR=$PREFIX/share/doc/mpsl
 fi
 
 echo "Configuring MPSL..."
@@ -148,7 +160,8 @@ grep CONFOPT_WIN32 ${MPDM}/config.h >/dev/null && TARGET=mpsl.exe
 
 echo "MPDM=$MPDM" >> makefile.opts
 echo "VERSION=$VERSION" >> makefile.opts
-echo "PREFIX=$PREFIX" >> makefile.opts
+echo "PREFIX=\$(DESTDIR)$PREFIX" >> makefile.opts
+echo "DOCDIR=\$(DESTDIR)$DOCDIR" >> makefile.opts
 echo "TARGET=$TARGET" >> makefile.opts
 echo >> makefile.opts
 
