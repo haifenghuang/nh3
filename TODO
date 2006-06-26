@@ -5,8 +5,6 @@ Release Critical Bugs
 ---------------------
 
  * 1051: Document the scripting language.
- * 1068: Implement a dumper function to dump an mpdm_t
-   as mpsl source code.
  * 1075: Finish the quick reference guide.
  * 1092: The local symbol table description in the internals document
    is outdated.
@@ -20,11 +18,15 @@ Pending Enhancements
 --------------------
 
  * 1024: Implement the 'continue' directive.
+ * 1068: Implement a dumper function to dump an mpdm_t as mpsl source code.
  * 1069: Implement a C-like for() instruction.
  * 1081: Implement a Perl-like grep() function.
  * 1082: Implement a Perl-like map() function.
  * 1083: Implement a split() that uses regular expressions.
  * 1084: Implement the foreach(local var, list) construction.
+ * 1093: Change the parser to directly create wide char strings.
+ * 1094: Implement chars (\x1b) and wide chars (\x{1234}) in strings
+   (needs #1094 closed).
 
 Closed
 ------
