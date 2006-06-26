@@ -72,7 +72,7 @@ doc/mpsl_internals.html: doc/mpsl_internals.txt
 	-grutatxt -i $< -o $@
 
 doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
-	./mpsl scripts/mkquickref.mpsl < $< > $@
+	-./mpsl scripts/mkquickref.mpsl < $< > $@
 
 doc/mpsl_api.html: mpsl_*.c mpsl.y
 	mkdir -p doc
@@ -94,4 +94,4 @@ install: installdoc
 	install $(TARGET) $(PREFIX)/bin
 
 installdoc:
-	install -m 644 $(DOCS) $(DOCDIR)
+	-install -m 644 $(DOCS) $(DOCDIR)
