@@ -2,7 +2,7 @@
 
 LIB=libmpsl.a
 
-all: $(TARGET)
+all: $(TARGET) docs
 
 PROJ=mpsl
 DOCS=doc/index.html doc/mpsl_overview.html doc/mpsl_internals.html \
@@ -71,7 +71,7 @@ doc/mpsl_overview.html: doc/mpsl_overview.txt
 doc/mpsl_internals.html: doc/mpsl_internals.txt
 	-grutatxt -i $< -o $@
 
-doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
+doc/mpsl_quickref.ps: ./mpsl doc/mpsl_quickref.txt
 	-./mpsl scripts/mkquickref.mpsl < $< > $@
 
 doc/mpsl_api.html: mpsl_*.c mpsl.y
