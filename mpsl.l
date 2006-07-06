@@ -112,7 +112,7 @@ static mpdm_t mpsl_lc(char * str)
 
 DIGIT		[0-9]
 LETTER		[a-zA-Z_]
-WSPACE		[ \t]+
+WSPACE		[ \t\r]+
 OCTDIGIT	[0-7]
 HEXDIGIT	[0-9a-fA-F]
 
