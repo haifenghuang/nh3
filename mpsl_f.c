@@ -146,6 +146,21 @@ static mpdm_t F_chr(mpdm_t a)
 }
 
 
+static mpdm_t F_ord(mpdm_t a)
+{
+	int ret = 0;
+	mpdm_t v = mpdm_aget(a, 0);
+
+	if(v != NULL)
+	{
+		wchar_t * ptr = mpdm_string(v);
+		ret = (int) *ptr;
+	}
+
+	return(MPDM_I(ret));
+}
+
+
 static struct
 {
 	wchar_t * name;
@@ -199,6 +214,7 @@ static struct
 	{ L"sprintf",	F_sprintf },
 	{ L"sweep",	F_sweep },
 	{ L"chr",	F_chr },
+	{ L"ord",	F_ord },
 	{ NULL,		NULL }
 };
 
