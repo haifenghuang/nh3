@@ -135,6 +135,17 @@ static mpdm_t F_print(mpdm_t a)
 }
 
 
+static mpdm_t F_chr(mpdm_t a)
+{
+	wchar_t tmp[2];
+
+	tmp[0] = (wchar_t) mpdm_ival(mpdm_aget(a, 0));
+	tmp[1] = L'\0';
+
+	return(MPDM_S(tmp));
+}
+
+
 static struct
 {
 	wchar_t * name;
@@ -187,6 +198,7 @@ static struct
 	{ L"gettext_domain", F_gettext_domain },
 	{ L"sprintf",	F_sprintf },
 	{ L"sweep",	F_sweep },
+	{ L"chr",	F_chr },
 	{ NULL,		NULL }
 };
 
