@@ -80,6 +80,9 @@ static mpdm_t F_open(mpdm_t a) { return(mpdm_open(A0, A1)); }
 static mpdm_t F_close(mpdm_t a) { return(mpdm_close(A0)); }
 static mpdm_t F_read(mpdm_t a) { return(mpdm_read(A0)); }
 static mpdm_t F_write(mpdm_t a) { return(MPDM_I(mpdm_write(A0,A1))); }
+static mpdm_t F_getchar(mpdm_t a) { return(mpdm_getchar(A0)); }
+static mpdm_t F_putchar(mpdm_t a) { return(mpdm_putchar(A0, A1)); }
+
 static mpdm_t F_unlink(mpdm_t a) { return(mpsl_boolean(mpdm_unlink(A0))); }
 static mpdm_t F_stat(mpdm_t a) { return(mpdm_stat(A0)); }
 static mpdm_t F_chmod(mpdm_t a) { return(MPDM_I(mpdm_chmod(A0,A1))); }
@@ -195,6 +198,8 @@ static struct
 	{ L"close",	F_close },
 	{ L"read",	F_read },
 	{ L"write",	F_write },
+	{ L"getchar",	F_getchar },
+	{ L"putchar",	F_putchar },
 	{ L"unlink",	F_unlink },
 	{ L"stat",	F_stat },
 	{ L"chmod",	F_chmod },
