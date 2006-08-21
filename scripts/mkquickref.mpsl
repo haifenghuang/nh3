@@ -15,7 +15,7 @@ print("%!PS-Adobe-1.0\n",
 	"\n",
 	"/qr_colw { 280 } def\n",
 	"/qr_tabsep { 130 } def\n",
-	"/qr_rmarg { 20 } def\n",
+	"/qr_rmarg { 12 } def\n",
 	"/qr_tmarg { -20 } def\n",
 	"/qr_maxy { -580 } def\n",
 	"/qr_maxx { 600 } def\n",
@@ -83,7 +83,7 @@ while(line = read(STDIN))
 
 	n_lines++;
 
-	if(n_lines >= 192) /* 64 * 3 */
+	if(n_lines > 170) /* 64 * 3 */
 	{
 		n_pag++;
 		n_lines = 0;
