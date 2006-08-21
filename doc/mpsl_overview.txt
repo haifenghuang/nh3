@@ -473,6 +473,7 @@ String functions
  * splice()
  * split()
  * join()
+ * sprintf()
  * chr()
  * ord()
 
@@ -487,9 +488,31 @@ Array functions
  * queue()
  * seek()
  * sort()
- * map()
  * expand()
  * collapse()
+
+Whenever a change must be done on every element of an array, the map()
+function can be useful and much faster than iterating the array using
+foreach() and storing the changes in another one. Map() can use an
+anonymous subroutine or a hash to make the translations.
+
+ /* an array of values */
+ a = [ 1, 5, 3, 7, 30, 20 ];
+ 
+ /* when the first argument of map() is executable,
+    it's executed with each element as the only argument
+    and its return value used as the new element;
+    a_by_10 contains [ 10, 50, 30, 70, 300, 200 ] */
+ a_by_10 = map( sub(e) { e * 10; }, a);
+ 
+ /* another example: returns a zero-filled
+    version of the numbers in a */
+ a_zero_filled = map( sub(e) { sprintf("%04d", e); }, a);
+ 
+ /* map() can also use a hash to directly map keys to values */
+ english_nums = { 1 => "one", 2 => "two", 3 => "three" };
+ 
+ translated_nums = map(english_nums, [ 1, 2, 3 ]);
 
 Hash functions
 ~~~~~~~~~~~~~~
