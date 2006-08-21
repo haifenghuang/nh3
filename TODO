@@ -5,7 +5,6 @@ Release Critical Bugs
 ---------------------
 
  * 1051: Document the scripting language.
- * 1075: Finish the quick reference guide.
  * 1092: The local symbol table description in the internals document
    is outdated.
 
@@ -134,5 +133,6 @@ Closed
    in an argument instead of being a global list
    (Sun, 18 Jun 2006 21:19:13 +0200).
  * 1082: Implement a Perl-like map() function (Mon, 21 Aug 2006 18:15:26 +0200).
+ * 1075: Finish the quick reference guide (Tue, 22 Aug 2006 00:45:38 +0200).
 
 Email bugs to angel@triptico.com
