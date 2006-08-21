@@ -463,8 +463,44 @@ It's easier to see subroutine definitions as an assignation of a code
 block to a variable: you would never access a variable before assigning a
 value to it.
 
+Builtin functions
+-----------------
+
+String functions
+~~~~~~~~~~~~~~~~
+
+ * cmp()
+ * splice()
+ * split()
+ * join()
+ * chr()
+ * ord()
+
+Array functions
+~~~~~~~~~~~~~~~
+
+ * ins()
+ * adel()
+ * shift()
+ * push()
+ * pop()
+ * queue()
+ * seek()
+ * sort()
+ * map()
+ * expand()
+ * collapse()
+
+Hash functions
+~~~~~~~~~~~~~~
+
+ * hsize()
+ * exists()
+ * hdel()
+ * keys()
+
 Type-checking functions
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 There are three functions to test a type of a value: is_exec(), is_hash()
 and is_array(). They return true if the tested value is executable, a hash
@@ -568,10 +604,26 @@ Regular expression substitutions
 
 To be written.
 
-File I/O
---------
+Input/Output operations
+-----------------------
 
 To be written.
+
+ * open()
+ * close()
+ * read()
+ * write()
+ * getchar()
+ * putchar()
+ * unlink()
+ * stat()
+ * chmod()
+ * chown()
+ * glob()
+ * encoding()
+ * popen()
+ * pclose()
+ * load()
 
 Special symbols
 ---------------

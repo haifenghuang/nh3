@@ -164,6 +164,35 @@ static mpdm_t F_ord(mpdm_t a)
 }
 
 
+static mpdm_t F_map(mpdm_t a)
+{
+	mpdm_t key = mpdm_aget(a, 0);
+	mpdm_t set = mpdm_aget(a, 1);
+	mpdm_t out = mpdm_ref(MPDM_A(mpdm_size(set)));
+
+	if(MPDM_IS_EXEC(key))
+	{
+		int n;
+
+		/* executes the code using the element as argument
+		   and stores the result in the output array */
+		for(n = 0;n < mpdm_size(set);n++)
+			mpdm_aset(out, mpdm_exec_1(key, mpdm_aget(set, n)), n);
+	}
+	else
+	if(MPDM_IS_HASH(key))
+	{
+		int n;
+
+		/* maps each value using the element as key */
+		for(n = 0;n < mpdm_size(set);n++)
+			mpdm_aset(out, mpdm_hget(key, mpdm_aget(set, n)), n);
+	}
+
+	return(mpdm_unref(out));
+}
+
+
 static struct
 {
 	wchar_t * name;
@@ -220,6 +249,7 @@ static struct
 	{ L"sweep",	F_sweep },
 	{ L"chr",	F_chr },
 	{ L"ord",	F_ord },
+	{ L"map",	F_map },
 	{ NULL,		NULL }
 };
 

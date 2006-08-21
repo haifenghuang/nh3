@@ -101,6 +101,21 @@ foreach(v, a) {		Iterate the array a, assigning
 
 break;			Exits loop in while and foreach
 
+*String functions
+
+*Array functions
+
+a = [ 1, 2, 3 ];	Executes an anonymous subroutine
+b = map(sub(e)		on each element of the array a
+   { e * 10; }, a);	(b is [ 10, 20, 30 ])
+
+h = { 1 => "one",	Maps each value of h using the
+      2 => "two",	elements in a as keys
+      3 => "three" };	(c is [ "one", "two", "three" ])
+c = map(h, a);
+
+*Hash functions
+
 *String escapes for double quotes
 
 \n			Newline

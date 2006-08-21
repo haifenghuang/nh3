@@ -21,7 +21,6 @@ Pending Enhancements
  * 1068: Implement a dumper function to dump an mpdm_t as mpsl source code.
  * 1069: Implement a C-like for() instruction.
  * 1081: Implement a Perl-like grep() function.
- * 1082: Implement a Perl-like map() function.
  * 1083: Implement a split() that uses regular expressions.
  * 1084: Implement the foreach(local var, list) construction.
  * 1093: Change the parser to directly create wide char strings.
@@ -134,5 +133,6 @@ Closed
  * 1088: Change the virtual machine to propagate the local symbol table
    in an argument instead of being a global list
    (Sun, 18 Jun 2006 21:19:13 +0200).
+ * 1082: Implement a Perl-like map() function (Mon, 21 Aug 2006 18:15:26 +0200).
 
 Email bugs to angel@triptico.com
