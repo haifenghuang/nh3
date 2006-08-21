@@ -437,7 +437,7 @@ Anonymous functions can also accept arguments:
  foreach(f, math_ops) f(10, 20);
 
 This kind of anonymous subroutines are commonly used as callbacks. The
-following examples use the two-argument version of asort() to sort arrays
+following examples use the two-argument version of sort() to sort arrays
 in different ways:
 
  /* reverse-sort the array (comparing each element backwards) */
@@ -480,47 +480,125 @@ String functions
 Array functions
 ~~~~~~~~~~~~~~~
 
- * ins()
- * adel()
- * shift()
- * push()
- * pop()
- * queue()
- * seek()
- * sort()
- * expand()
- * collapse()
+Arrays can be easily manipulated by using push(), pop(), shift(), adel()
+and ins():
+
+ /* an empty array */
+ ary = [];
+ 
+ /* add three values: ary will contain [ 10, 20, 30, 40 ] */
+ push(ary, 10); push(ary, 20); push(ary, 30); push(ary, 40);
+ 
+ /* delete and return last value; ary contains now [ 10, 20, 30 ]
+    and top contains 40 */
+ top = pop(ary);
+ 
+ /* shift() deletes from the beginning; ary contains now [ 10, 20 ] */
+ first = shift(ary);
+ 
+ /* ins() inserts an element in an array; ary contains now [ 10, 5, 20 ] */
+ ins(ary, 5, 1);
+ 
+ */ adel() does the opposite, delete values; ary is back [ 10, 20 ] */
+ deleted_item = adel(ary, 1);
+
+The seek() function searches sequentially for an exact value in an array,
+returning its offset if found, or -1 otherwise:
+
+ weekdays = [ 'monday', 'tuesday', 'wednesday', 'thurday', 'friday' ];
+ 
+ /* returns 2 */
+ seek(weekdays, 'wednesday');
+
+The sort() function returns a sorted copy of the array sent as argument:
+
+ sorted_weekdays = sort(weekdays);
+
+The sorting is alphabetical; if another kind of sort is wanted, the
+2-argument version must be used, as mentioned previously in the
+_subroutines_ section.
 
 Whenever a change must be done on every element of an array, the map()
 function can be useful and much faster than iterating the array using
-foreach() and storing the changes in another one. Map() can use an
-anonymous subroutine or a hash to make the translations.
+foreach() and storing the changes in another one.
 
+The first argument of map() can be an executable value accepting one
+argument, that will be set to each element of the array. The return
+value will be used as the new value:
+
+ /* a function to multiply by 10 its unique argument */
+ sub multiply_by_10(val)
+ {
+ 	val * 10;
+ }
+ 
  /* an array of values */
  a = [ 1, 5, 3, 7, 30, 20 ];
  
- /* when the first argument of map() is executable,
-    it's executed with each element as the only argument
-    and its return value used as the new element;
-    a_by_10 contains [ 10, 50, 30, 70, 300, 200 ] */
- a_by_10 = map( sub(e) { e * 10; }, a);
- 
- /* another example: returns a zero-filled
-    version of the numbers in a */
+ /* a_by_10 will contain [10, 50, 30, 70, 300, 200 ] */
+ a_by_10 = map(multiply_by_10, a);
+
+Of course, the executable value can be an anonymous subroutine:
+
+ /* Creates a zero-filled version of the numbers in a */
  a_zero_filled = map( sub(e) { sprintf("%04d", e); }, a);
- 
- /* map() can also use a hash to directly map keys to values */
+
+The first argument of map() can also be a hash to directly
+map keys to values:
+
+ /* numerals as keys, names as values */
  english_nums = { 1 => "one", 2 => "two", 3 => "three" };
  
+ /* translated_nums will have [ "one", "two", "three" ] */
  translated_nums = map(english_nums, [ 1, 2, 3 ]);
+
+The expand() function opens space in an array:
+
+ ary = [ 1, 2, 3, 4 ];
+ 
+ /* ary will have two more elements at offset 3,
+    containing [ 1, 2, 3, NULL, NULL, 4 ] */
+ expand(ary, 3, 2);
+
+On the opposite, collapse() deletes space:
+
+ /* deletes 3 elements at offset 1: ary is now [ 1, NULL, 4 ] */
+ collapse(ary, 1, 3);
+
+Take note that expand() and collapse() manipulate the array
+directly (i.e. they don't return a new array).
 
 Hash functions
 ~~~~~~~~~~~~~~
 
- * hsize()
- * exists()
- * hdel()
- * keys()
+The hsize() function returns the number of pairs in a hash:
+
+ /* returns three */
+ num = hsize( { 1 => 'one', 2 => 'two', 3 => 'three' });
+
+Take note that size() cannot be used for this purpose, as it returns the
+number of buckets in the hash (which is probably of no use for you).
+
+If the existence of a pair must be tested, the exists() function is handy:
+
+ h = { 'a' => 1000, 'b' => 0, 'c' => 3000 };
+ 
+ /* this is true */
+ if(exists(h, 'b')) print("B exists\n");
+ 
+ /* this is not, as 0 does not evaluates as true */
+ if(h['b']) print("B is true\n");
+
+The keys() function returns an array with the keys of a hash:
+
+ /* will contain [ 'a', 'b', 'c' ] */
+ h_keys = keys(h);
+
+The hdel() function deletes a pair given its key. The deleted value is
+returned:
+
+ /* deletes 'c' and returns its value (3000) */
+ c_value = hdel(h, 'c');
 
 Type-checking functions
 ~~~~~~~~~~~~~~~~~~~~~~~
