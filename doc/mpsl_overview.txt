@@ -493,13 +493,13 @@ and ins():
     and top contains 40 */
  top = pop(ary);
  
- /* shift() deletes from the beginning; ary contains now [ 10, 20 ] */
+ /* shift() deletes from the beginning; ary contains now [ 20, 30 ] */
  first = shift(ary);
  
- /* ins() inserts an element in an array; ary contains now [ 10, 5, 20 ] */
+ /* ins() inserts an element in an array; ary contains now [ 20, 5, 30 ] */
  ins(ary, 5, 1);
  
- */ adel() does the opposite, delete values; ary is back [ 10, 20 ] */
+ */ adel() does the opposite, delete values; ary is back [ 20, 30 ] */
  deleted_item = adel(ary, 1);
 
 The seek() function searches sequentially for an exact value in an array,
