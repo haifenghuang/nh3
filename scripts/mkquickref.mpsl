@@ -48,7 +48,7 @@ print("%!PS-Adobe-1.0\n",
 	"%%EndSetup\n"
 );
 
-print("%%Page 1 1\n",
+print("%%Page: 1 1\n",
 	"%%BeginPageSetup\n",
 	"%%EndPageSetup\n",
 	"\n",
@@ -89,7 +89,7 @@ while(line = read(STDIN))
 		n_lines = 0;
 
 		print("showpage\n",
-			"%%Page ", n_pag, " ", n_pag, "\n",
+			"%%Page: ", n_pag, " ", n_pag, "\n",
 			"%%BeginPageSetup\n",
 			"%%EndPageSetup\n",
 			"\n",
@@ -102,7 +102,7 @@ print("showpage\n",
 	"\n",
 	"%%PageTrailer\n",
 	"\n",
-	"%Trailer\n",
+	"%%Trailer\n",
 	"%%Pages: ", n_pag, "\n",
 	"%%EOF\n"
 );
