@@ -146,6 +146,13 @@ sub func(a) { ... }	of ary and returns an array
 ary2 = map(hash, ary);	Uses the elements of ary as
 			keys of hash and returns an
 			array with the values
+ary2 = grep(rx, ary);	Matches the regex on all
+			elements in ary and returns
+			all the matching ones
+ary2 = grep(func, ary);	Executes func on all elements
+sub func(a) { ... }	of ary and returns a new array
+			with all elements on which
+			func returned true
 expand(ary, offs, n);	Opens room in ary of n
 			elements at offset
 collapse(ary, offs, n);	Deletes n elements from ary
