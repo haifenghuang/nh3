@@ -193,6 +193,43 @@ static mpdm_t F_map(mpdm_t a)
 }
 
 
+static mpdm_t F_grep(mpdm_t a)
+{
+	mpdm_t key = mpdm_aget(a, 0);
+	mpdm_t set = mpdm_aget(a, 1);
+	mpdm_t out = mpdm_ref(MPDM_A(0));
+
+	if(MPDM_IS_EXEC(key))
+	{
+		int n;
+
+		/* it's executable */
+		for(n = 0;n < mpdm_size(set);n++)
+		{
+			mpdm_t v = mpdm_aget(set, n);
+
+			if(mpsl_is_true(mpdm_exec_1(key, v)))
+				mpdm_push(out, v);
+		}
+	}
+	else
+	if(key->flags & MPDM_STRING)
+	{
+		int n;
+
+		/* it's a string; use it as a regular expression */
+		for(n = 0;n < mpdm_size(set);n++)
+		{
+			mpdm_t v = mpdm_aget(set, n);
+
+			if(mpdm_regex(key, v, 0))
+				mpdm_push(out, v);
+		}
+	}
+
+	return(mpdm_size(mpdm_unref(out)) == 0 ? NULL : out);
+}
+
 static struct
 {
 	wchar_t * name;
@@ -250,6 +287,7 @@ static struct
 	{ L"chr",	F_chr },
 	{ L"ord",	F_ord },
 	{ L"map",	F_map },
+	{ L"grep",	F_grep },
 	{ NULL,		NULL }
 };
 
