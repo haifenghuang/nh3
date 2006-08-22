@@ -168,7 +168,12 @@ static mpdm_t F_map(mpdm_t a)
 {
 	mpdm_t key = mpdm_aget(a, 0);
 	mpdm_t set = mpdm_aget(a, 1);
-	mpdm_t out = mpdm_ref(MPDM_A(mpdm_size(set)));
+	mpdm_t out;
+
+	/* map NULL to NULL */
+	if(set == NULL) return(NULL);
+
+	out = mpdm_ref(MPDM_A(mpdm_size(set)));
 
 	if(MPDM_IS_EXEC(key))
 	{
