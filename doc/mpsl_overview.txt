@@ -552,6 +552,30 @@ map keys to values:
  /* translated_nums will have [ "one", "two", "three" ] */
  translated_nums = map(english_nums, [ 1, 2, 3 ]);
 
+Another powerful array function is grep(); it matches a regular
+expression on an array and returns a new one containing all
+elements that matched:
+
+ a = [ 1, 9, "mix190", 4, "foo", 9000 ];
+ 
+ /* b is [ 9, "mix190", 9000 ] */
+ b = grep('/9/', a);
+
+The first argument of grep() can also be an executable value,
+that will accept each element of the array on each call. The
+output array will contain all elements for which the function
+call returned true:
+
+ /* return all elements greater than 10 */
+ a = [ 1, 45, 20, 4, 0, 1000 ];
+ 
+ /* b is [ 45, 20, 1000 ] */
+ b = grep( sub(e) { e > 10; }, a);
+
+If no element were generated, NULL is returned (instead of
+an empty array).
+
+Other lower level array functions are expand() and collapse().
 The expand() function opens space in an array:
 
  ary = [ 1, 2, 3, 4 ];
