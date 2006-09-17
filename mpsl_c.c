@@ -56,8 +56,8 @@ static mpdm_t local_symbol_table = NULL;
  */
 int mpsl_is_true(mpdm_t v)
 {
-	/* if value or its data is NULL, it's false */
-	if(v == NULL || v->data == NULL)
+	/* if value is NULL, it's false */
+	if(v == NULL)
 		return(0);
 
 	/* if it's a printable string... */
