@@ -186,6 +186,17 @@ stmt:
 					/* foreach construction */
 					$$ = INS3(L"FOREACH", $3, $5, $7);
 				}
+	| FOREACH '(' LOCAL compsym ',' expr ')' stmt
+				{
+					/* foreach construction with local
+					   definition of the iterator variable */
+					$$ = INS1(L"BLKFRAME",
+						INS2(L"MULTI",
+							INS1(L"LOCAL", $4),
+							INS3(L"FOREACH", $4, $6, $8)
+						)
+					);
+				}
 
 	| '{' stmt_list '}'	{
 					/* block of instructions,
