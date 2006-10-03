@@ -577,18 +577,14 @@ static mpdm_t flatten(mpdm_t i)
 		{
 			mpdm_t t = mpdm_aget(i, n);
 
-			/* if this opcode is not 0 (LITERAL), break */
+			/* if it's not LITERAL, abort immediately */
 			if(mpdm_ival(mpdm_aget(t, 0)) != 0)
-				break;
+				return(i);
 		}
 
-		/* if got to the end, it's flattable */
-		if(n == mpdm_size(i))
-		{
-			printf("flattable!\n");
-			i = mpsl_exec_p(i, NULL);
-			i = mpsl_mkins(L"LITERAL", 1, i, NULL, NULL);
-		}
+		/* flatten! */
+		i = mpsl_exec_p(i, NULL);
+		i = mpsl_mkins(L"LITERAL", 1, i, NULL, NULL);
 	}
 
 	return(i);
@@ -615,7 +611,7 @@ mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 	if(args > 1) mpdm_aset(v, a2, 2);
 	if(args > 2) mpdm_aset(v, a3, 3);
 
-/*	v = flatten(v);*/
+	v = flatten(v);
 
 	return(v);
 }
