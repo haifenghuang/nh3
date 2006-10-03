@@ -39,44 +39,46 @@ int mpsl_main(int argc, char * argv[])
 {
 	mpdm_t v;
 	char * immscript = NULL;
-	FILE * script = NULL;
+	FILE * script = stdin;
 	int ret = 0;
+	int dump_only = 0;
 
 	/* skip the executable */
 	argv++;	argc--;
 
-	if(argc == 0)
+	while(argc > 0)
 	{
-		/* no arguments; read from stdin */
-		script = stdin;
-	}
-	else
-	if(strcmp(argv[0], "-v") == 0 ||
-	   strcmp(argv[0], "--help") == 0)
-	{
-		printf("MPSL %s - Minimum Profit Scripting Language\n", VERSION);
-		printf("Copyright (C) 2003-2006 Angel Ortega <angel@triptico.com>\n");
-		printf("This software is covered by the GPL license. NO WARRANTY.\n\n");
-
-		printf("Usage: mpsl [-e 'script' | script.mpsl ]\n\n");
-
-		return(0);
-	}
-	else
-	if(strcmp(argv[0], "-e") == 0)
-	{
-		argv++; argc--;
-
-		immscript = argv[0];
-	}
-	else
-	{
-		/* next argument is a script name; open it */
-		if((script = fopen(argv[0], "r")) == NULL)
+		if(strcmp(argv[0], "-v") == 0 ||
+		   strcmp(argv[0], "--help") == 0)
 		{
-			fprintf(stderr, "Can't open '%s'\n", argv[0]);
-			return(1);
+			printf("MPSL %s - Minimum Profit Scripting Language\n", VERSION);
+			printf("Copyright (C) 2003-2006 Angel Ortega <angel@triptico.com>\n");
+			printf("This software is covered by the GPL license. NO WARRANTY.\n\n");
+
+			printf("Usage: mpsl [-d] [-e 'script' | script.mpsl ]\n\n");
+
+			return(0);
 		}
+		else
+		if(strcmp(argv[0], "-d") == 0)
+			dump_only = 1;
+		else
+		if(strcmp(argv[0], "-e") == 0)
+		{
+			argv++; argc--;
+			immscript = argv[0];
+		}
+		else
+		{
+			/* next argument is a script name; open it */
+			if((script = fopen(argv[0], "r")) == NULL)
+			{
+				fprintf(stderr, "Can't open '%s'\n", argv[0]);
+				return(1);
+			}
+		}
+
+		argv++; argc--;
 	}
 
 	mpsl_startup();
@@ -90,9 +92,13 @@ int mpsl_main(int argc, char * argv[])
 	else
 		v = mpsl_compile_file(MPDM_F(script));
 
-	/* execute, if possible */
 	if(v != NULL)
-		mpdm_exec(v, NULL);
+	{
+		if(dump_only)
+			mpdm_dump(v);
+		else
+			mpdm_exec(v, NULL);
+	}
 
 	/* prints the error, if any */
 	if((v = mpsl_error(NULL)) != NULL)
