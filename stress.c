@@ -335,6 +335,7 @@ void test_mpsl2(void)
 	do_test("symval 1", mpdm_ival(v) == 16384);
 
 	v = do_test_mpsl("variable2=1 + ((3 - 5) * 8); variable2;");
+	mpdm_dump(v);
 	v = do_test_exec(v, NULL);
 	do_test("symval 2", mpdm_rval(v) == -15);
 

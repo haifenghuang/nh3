@@ -239,8 +239,8 @@ O_TYPE mpsl_exec_i(O_ARGS);
 #define RF(v) mpdm_ref(v)
 #define UF(v) mpdm_unref(v)
 
-O_TYPE O_multi(O_ARGS) { mpdm_t v = RF(M1); if(!*f) v = M2; else UF(v); return(v); }
 O_TYPE O_literal(O_ARGS) { return(mpdm_clone(C1)); }
+O_TYPE O_multi(O_ARGS) { mpdm_t v = RF(M1); if(!*f) v = M2; else UF(v); return(v); }
 O_TYPE O_symval(O_ARGS) { return(GET(M1)); }
 O_TYPE O_assign(O_ARGS) { mpdm_t v = RF(M1); mpdm_t r = SET(v, M2); UF(v); return(r); }
 O_TYPE O_if(O_ARGS) { return(ISTRU(M1) ? M2 : M3); }
@@ -445,54 +445,55 @@ O_TYPE O_blkframe(O_ARGS)
 static struct mpsl_op_s
 {
 	wchar_t * name;
+	int flattable;
 	mpdm_t (* func)(O_ARGS);
 } op_table[]=
 {
-	{ L"MULTI",	O_multi },
-	{ L"LITERAL",	O_literal },
-	{ L"SYMVAL",	O_symval },
-	{ L"ASSIGN",	O_assign },
-	{ L"EXEC",	O_exec },
-	{ L"IF",	O_if },
-	{ L"WHILE",	O_while },
-	{ L"FOREACH",	O_foreach },
-	{ L"SUBFRAME",	O_subframe },
-	{ L"BLKFRAME",	O_blkframe },
-	{ L"BREAK",	O_break },
-	{ L"RETURN",	O_return },
-	{ L"LOCAL",	O_local },
-	{ L"LIST",	O_list },
-	{ L"HASH",	O_hash },
-	{ L"RANGE",	O_range },
-	{ L"UMINUS",	O_uminus },
-	{ L"ADD",	O_add },
-	{ L"SUB",	O_sub },
-	{ L"MUL",	O_mul },
-	{ L"DIV",	O_div },
-	{ L"MOD",	O_mod },
-	{ L"SINC",	O_immsinc },
-	{ L"SDEC",	O_immsdec },
-	{ L"PINC",	O_immpinc },
-	{ L"PDEC",	O_immpdec },
-	{ L"IADD",	O_immadd },
-	{ L"ISUB",	O_immsub },
-	{ L"IMUL",	O_immmul },
-	{ L"IDIV",	O_immdiv },
-	{ L"IMOD",	O_immmod },
-	{ L"NOT",	O_not },
-	{ L"AND",	O_and },
-	{ L"OR",	O_or },
-	{ L"NUMEQ",	O_numeq },
-	{ L"NUMLT",	O_numlt },
-	{ L"NUMLE",	O_numle },
-	{ L"NUMGT",	O_numgt },
-	{ L"NUMGE",	O_numge },
-	{ L"STRCAT",	O_strcat },
-	{ L"STREQ",	O_streq },
-	{ L"BITAND",	O_bitand },
-	{ L"BITOR",	O_bitor },
-	{ L"BITXOR",	O_bitxor },
-	{ NULL,		NULL }
+	{ L"LITERAL",	0,	O_literal },	/* 0 */
+	{ L"MULTI",	0,	O_multi },
+	{ L"SYMVAL",	0,	O_symval },
+	{ L"ASSIGN",	0,	O_assign },
+	{ L"EXEC",	0,	O_exec },
+	{ L"IF",	0,	O_if },
+	{ L"WHILE",	0,	O_while },
+	{ L"FOREACH",	0,	O_foreach },
+	{ L"SUBFRAME",	0,	O_subframe },
+	{ L"BLKFRAME",	0,	O_blkframe },
+	{ L"BREAK",	0,	O_break },
+	{ L"RETURN",	0,	O_return },
+	{ L"LOCAL",	0,	O_local },
+	{ L"LIST",	0,	O_list },	/* should be */
+	{ L"HASH",	0,	O_hash },	/* should be */
+	{ L"RANGE",	1,	O_range },
+	{ L"UMINUS",	1,	O_uminus },
+	{ L"ADD",	1,	O_add },
+	{ L"SUB",	1,	O_sub },
+	{ L"MUL",	1,	O_mul },
+	{ L"DIV",	1,	O_div },
+	{ L"MOD",	1,	O_mod },
+	{ L"SINC",	0,	O_immsinc },
+	{ L"SDEC",	0,	O_immsdec },
+	{ L"PINC",	0,	O_immpinc },
+	{ L"PDEC",	0,	O_immpdec },
+	{ L"IADD",	0,	O_immadd },
+	{ L"ISUB",	0,	O_immsub },
+	{ L"IMUL",	0,	O_immmul },
+	{ L"IDIV",	0,	O_immdiv },
+	{ L"IMOD",	0,	O_immmod },
+	{ L"NOT",	1,	O_not },
+	{ L"AND",	1,	O_and },
+	{ L"OR",	1,	O_or },
+	{ L"NUMEQ",	1,	O_numeq },
+	{ L"NUMLT",	1,	O_numlt },
+	{ L"NUMLE",	1,	O_numle },
+	{ L"NUMGT",	1,	O_numgt },
+	{ L"NUMGE",	1,	O_numge },
+	{ L"STRCAT",	1,	O_strcat },
+	{ L"STREQ",	1,	O_streq },
+	{ L"BITAND",	1,	O_bitand },
+	{ L"BITOR",	1,	O_bitor },
+	{ L"BITXOR",	1,	O_bitxor },
+	{ NULL,		0,	NULL }
 };
 
 
@@ -561,6 +562,39 @@ mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 }
 
 
+static mpdm_t flatten(mpdm_t i)
+/* tries to flatten complex but constant expressions into a literal */
+{
+	int n;
+
+	/* get the number opcode */
+	n = mpdm_ival(mpdm_aget(i, 0));
+
+	if(op_table[n].flattable)
+	{
+		/* test if all arguments are literal (opcode 0) */
+		for(n = 1;n < mpdm_size(i);n++)
+		{
+			mpdm_t t = mpdm_aget(i, n);
+
+			/* if this opcode is not 0 (LITERAL), break */
+			if(mpdm_ival(mpdm_aget(t, 0)) != 0)
+				break;
+		}
+
+		/* if got to the end, it's flattable */
+		if(n == mpdm_size(i))
+		{
+			printf("flattable!\n");
+			i = mpsl_exec_p(i, NULL);
+			i = mpsl_mkins(L"LITERAL", 1, i, NULL, NULL);
+		}
+	}
+
+	return(i);
+}
+
+
 mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 /* creates an instruction */
 {
@@ -580,6 +614,8 @@ mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 	if(args > 0) mpdm_aset(v, a1, 1);
 	if(args > 1) mpdm_aset(v, a2, 2);
 	if(args > 2) mpdm_aset(v, a3, 3);
+
+/*	v = flatten(v);*/
 
 	return(v);
 }
