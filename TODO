@@ -20,10 +20,10 @@ Pending Enhancements
  * 1068: Implement a dumper function to dump an mpdm_t as mpsl source code.
  * 1069: Implement a C-like for() instruction.
  * 1083: Implement a split() that uses regular expressions.
- * 1084: Implement the foreach(local var, list) construction.
  * 1093: Change the parser to directly create wide char strings.
  * 1094: Implement chars (\x1b) and wide chars (\x{1234}) in strings
    (needs #1094 closed).
+ * 1095: Accept "local var" everywhere a symbol name is accepted.
 
 Closed
 ------
@@ -134,5 +134,7 @@ Closed
  * 1082: Implement a Perl-like map() function (Mon, 21 Aug 2006 18:15:26 +0200).
  * 1075: Finish the quick reference guide (Tue, 22 Aug 2006 00:45:38 +0200).
  * 1081: Implement a Perl-like grep() function (Tue, 22 Aug 2006 16:49:53 +0200).
+ * 1084: Implement the foreach(local var, list) construction
+   (Closed by #1095; Tue, 03 Oct 2006 13:05:07 +0200).
 
 Email bugs to angel@triptico.com
