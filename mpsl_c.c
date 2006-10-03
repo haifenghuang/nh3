@@ -561,6 +561,30 @@ mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 }
 
 
+mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
+/* creates an instruction */
+{
+	mpdm_t o;
+	mpdm_t v;
+
+	/* get the opcode (this should be optimized) */
+	o = mpdm_hget_s(mpdm_root(), L"MPSL");
+	o = mpdm_hget_s(o, L"OPCODE");
+	o = mpdm_hget_s(o, opcode);
+
+	v = MPDM_A(args + 1);
+
+	/* inserts the opcode */
+	mpdm_aset(v, o, 0);
+
+	if(args > 0) mpdm_aset(v, a1, 1);
+	if(args > 1) mpdm_aset(v, a2, 2);
+	if(args > 2) mpdm_aset(v, a3, 3);
+
+	return(v);
+}
+
+
 mpdm_t mpsl_build_opcodes(void)
 /* builds the table of opcodes */
 {

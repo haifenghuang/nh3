@@ -37,9 +37,6 @@
 /* the bytecode being generated */
 static mpdm_t mpsl_bytecode = NULL;
 
-/* cached value with the hash of opcodes */
-static mpdm_t mpsl_opcodes = NULL;
-
 /* pointer to source code being compiled */
 extern wchar_t * mpsl_next_char;
 
@@ -59,34 +56,17 @@ static char * mpsl_filename = NULL;
 int yylex(void);
 void yyerror(char * s);
 
-static mpdm_t do_ins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
-/* adds an instruction */
-{
-	mpdm_t v;
-
-	v = MPDM_A(args + 1);
-
-	/* inserts the opcode */
-	mpdm_aset(v, mpdm_hget_s(mpsl_opcodes, opcode), 0);
-
-	if(args > 0) mpdm_aset(v, a1, 1);
-	if(args > 1) mpdm_aset(v, a2, 2);
-	if(args > 2) mpdm_aset(v, a3, 3);
-
-	return(v);
-}
-
-#define INS0(o)			do_ins(o, 0, NULL, NULL, NULL)
-#define INS1(o,a1)		do_ins(o, 1, a1, NULL, NULL)
-#define INS2(o,a1,a2)		do_ins(o, 2, a1, a2, NULL)
-#define INS3(o,a1,a2,a3)	do_ins(o, 3, a1, a2, a3)
+#define INS0(o)			mpsl_mkins(o, 0, NULL, NULL, NULL)
+#define INS1(o,a1)		mpsl_mkins(o, 1, a1, NULL, NULL)
+#define INS2(o,a1,a2)		mpsl_mkins(o, 2, a1, a2, NULL)
+#define INS3(o,a1,a2,a3)	mpsl_mkins(o, 3, a1, a2, a3)
 
 static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2)
 /* creates an executable value with the MPSL executor as the first
    argument and a compiled stream as the second */
 {
 	return(MPDM_X2(mpsl_exec_p,
-		do_ins(L"SUBFRAME", a2 == NULL ? 1 : 2, a1, a2, NULL)));
+		mpsl_mkins(L"SUBFRAME", a2 == NULL ? 1 : 2, a1, a2, NULL)));
 }
 
 
@@ -502,7 +482,6 @@ static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
 /* calls yyparse() after doing some initialisations, and returns
    the compiled code as an executable value */
 {
-	mpdm_t v;
 	mpdm_t x = NULL;
 
 	/* first line */
@@ -517,10 +496,6 @@ static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
 
 	if(mpsl_filename != NULL) free(mpsl_filename);
 	mpsl_filename = strdup(filename);
-
-	/* cache the opcodes */
-	v = mpdm_hget_s(mpdm_root(), L"MPSL");
-	mpsl_opcodes = mpdm_hget_s(v, L"OPCODE");
 
 	/* compile! */
 	if(yyparse() == 0 && mpsl_bytecode != NULL)
