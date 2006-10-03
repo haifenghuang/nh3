@@ -24,6 +24,9 @@ Pending Enhancements
  * 1094: Implement chars (\x1b) and wide chars (\x{1234}) in strings
    (needs #1094 closed).
  * 1095: Accept "local var" everywhere a symbol name is accepted.
+ * 1096: Implement an optimizer that 'executes' all MPSL core instructions
+   and converts to LITERAL all the LIST and HASH instructions that have only
+   LITERAL instructions as arguments.
 
 Closed
 ------
