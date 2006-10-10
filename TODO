@@ -20,8 +20,6 @@ Pending Enhancements
  * 1068: Implement a dumper function to dump an mpdm_t as mpsl source code.
  * 1069: Implement a C-like for() instruction.
  * 1083: Implement a split() that uses regular expressions.
- * 1094: Implement chars (\x1b) and wide chars (\x{1234}) in strings
-   (needs #1094 closed).
  * 1095: Accept "local var" everywhere a symbol name is accepted.
  * 1098: Change the 'LIST' and 'HASH' parser so that the opcode is inserted
    when it's completed (all list elements pushed) and not at the beginning,
@@ -150,5 +148,7 @@ Closed
    (renamed to constant_fold(); Tue, 10 Oct 2006 17:26:05 +0200).
  * 1093: Change the parser to directly create wide char strings
    (Tue, 10 Oct 2006 18:44:00 +0200).
+ * 1094: Implement chars (\x1b) and wide chars (\x{1234}) in strings
+   (needs #1093 closed) (Tue, 10 Oct 2006 18:56:16 +0200).
 
 Email bugs to angel@triptico.com

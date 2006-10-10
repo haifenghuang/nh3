@@ -113,6 +113,7 @@ LETTER		[a-zA-Z_]
 WSPACE		[ \t\r]+
 OCTDIGIT	[0-7]
 HEXDIGIT	[0-9a-fA-F]
+HEXQUAD		{HEXDIGIT}{4}
 
 DECINTEGER	{DIGIT}+
 OCTINTEGER	0{OCTDIGIT}+
@@ -208,6 +209,12 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 			yylval.v = literal_cache(NULL, ds_v.d);
 			BEGIN 0;
 			return(STRING);
+		}
+<STR>\\x\{{HEXQUAD}\} {
+			int c;
+
+			sscanf(yytext, "\\x{%x}", &c);
+			ds_poke(ds_v, (wchar_t) c);
 		}
 <STR>.		{ wchar_t wc; if(mbtowc(&wc, yytext, 1) > 0) ds_poke(ds_v, wc); }
 
