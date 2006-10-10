@@ -24,12 +24,9 @@ Pending Enhancements
  * 1094: Implement chars (\x1b) and wide chars (\x{1234}) in strings
    (needs #1094 closed).
  * 1095: Accept "local var" everywhere a symbol name is accepted.
- * 1097: Investigate why flatten() makes the 'symval 2' stress test fails
-   and fix it.
  * 1098: Change the 'LIST' and 'HASH' parser so that the opcode is inserted
    when it's completed (all list elements pushed) and not at the beginning,
    as both opcodes are the best to benefit from flatten().
- * 1099: Enable flatten() (needs #1097 fixed).
 
 Closed
 ------
@@ -147,5 +144,10 @@ Closed
    LITERAL instructions as arguments (Sat, 07 Oct 2006 12:45:03 +0200).
  * 1100: Fix yy_input_for_flex() to not fail if wctomb() returns > 1
    (Tue, 10 Oct 2006 13:49:46 +0200).
+ * 1097: Investigate why flatten() makes the 'symval 2' stress test fails
+   and fix it (mpsl_exec_i() was sweeping values still in use;
+   Tue, 10 Oct 2006 17:25:41 +0200).
+ * 1099: Enable flatten() (needs #1097 fixed)
+   (renamed to constant_fold(); Tue, 10 Oct 2006 17:26:05 +0200).
 
 Email bugs to angel@triptico.com

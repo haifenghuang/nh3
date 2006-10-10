@@ -43,6 +43,9 @@ int mpsl_abort = 0;
 /* temporary storage for the local symbol table */
 static mpdm_t local_symbol_table = NULL;
 
+/* flag to control calls to mpdm_sweep() from inside mpsl_exec_i() */
+static int sweep_on_exec_i = 1;
+
 /*******************
 	Code
 ********************/
@@ -445,7 +448,7 @@ O_TYPE O_blkframe(O_ARGS)
 static struct mpsl_op_s
 {
 	wchar_t * name;
-	int flattable;
+	int foldable;
 	mpdm_t (* func)(O_ARGS);
 } op_table[]=
 {
@@ -538,7 +541,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	mpdm_unref(c);
 
 	/* sweep some values */
-	mpdm_sweep(0);
+	if(sweep_on_exec_i) mpdm_sweep(0);
 
 	return(mpdm_unref(ret));
 }
@@ -562,15 +565,15 @@ mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 }
 
 
-static mpdm_t flatten(mpdm_t i)
-/* tries to flatten complex but constant expressions into a literal */
+static mpdm_t constant_fold(mpdm_t i)
+/* tries to fold complex but constant expressions into a literal */
 {
 	int n;
 
 	/* get the number opcode */
 	n = mpdm_ival(mpdm_aget(i, 0));
 
-	if(op_table[n].flattable)
+	if(op_table[n].foldable)
 	{
 		/* test if all arguments are literal (opcode 0) */
 		for(n = 1;n < mpdm_size(i);n++)
@@ -582,9 +585,15 @@ static mpdm_t flatten(mpdm_t i)
 				return(i);
 		}
 
-		/* flatten! */
+		/* avoid sweeping */
+		sweep_on_exec_i = 0;
+
+		/* execute the instruction and convert to LITERAL */
 		i = mpsl_exec_p(i, NULL);
 		i = mpsl_mkins(L"LITERAL", 1, i, NULL, NULL);
+
+		/* sweep again */
+		sweep_on_exec_i = 1;
 	}
 
 	return(i);
@@ -611,7 +620,7 @@ mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 	if(args > 1) mpdm_aset(v, a2, 2);
 	if(args > 2) mpdm_aset(v, a3, 3);
 
-	v = flatten(v);
+	v = constant_fold(v);
 
 	return(v);
 }
