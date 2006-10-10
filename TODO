@@ -7,6 +7,7 @@ Release Critical Bugs
  * 1051: Document the scripting language.
  * 1092: The local symbol table description in the internals document
    is outdated.
+ * 1101: Document the \x{HHHH} syntax for strings.
 
 Open Bugs
 ---------
