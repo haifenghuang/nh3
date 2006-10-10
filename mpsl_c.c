@@ -611,9 +611,7 @@ mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 	if(args > 1) mpdm_aset(v, a2, 2);
 	if(args > 2) mpdm_aset(v, a3, 3);
 
-#ifdef CONFOPT_FLATTEN
 	v = flatten(v);
-#endif
 
 	return(v);
 }
