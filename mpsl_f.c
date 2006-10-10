@@ -376,6 +376,7 @@ int mpsl_startup(void)
 	/* store things there */
 	mpdm_hset_s(m, L"VERSION", MPDM_MBS(VERSION));
 	mpdm_hset_s(m, L"OPCODE", mpsl_build_opcodes());
+	mpdm_hset_s(m, L"LC", MPDM_H(0));
 	mpdm_hset_s(m, L"CORE", c);
 
 	return(0);

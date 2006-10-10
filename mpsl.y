@@ -52,6 +52,9 @@ static char * mpsl_filename = NULL;
 /* cached value MPSL.OPCODE */
 extern mpdm_t mpsl_opcodes;
 
+/* cached value MPSL.LC */
+extern mpdm_t mpsl_lc;
+
 /*******************
 	Code
 ********************/
@@ -504,6 +507,7 @@ static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
 	/* cache some values */
 	v = mpdm_hget_s(mpdm_root(), L"MPSL");
 	mpsl_opcodes = mpdm_hget_s(v, L"OPCODE");
+	mpsl_lc = mpdm_hget_s(v, L"LC");
 
 	/* compile! */
 	if(yyparse() == 0 && mpsl_bytecode != NULL)
@@ -511,6 +515,7 @@ static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
 
 	/* clean back cached values */
 	mpsl_opcodes = NULL;
+	mpsl_lc = NULL;
 
 	return(x);
 }

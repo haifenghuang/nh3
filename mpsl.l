@@ -47,6 +47,9 @@ FILE * mpsl_file = NULL;
 /* line number */
 int mpsl_line = 0;
 
+/* cached value MPSL.LC */
+mpdm_t mpsl_lc = NULL;
+
 /* dynamic string manipulation macros */
 #ifndef ds_init
 struct ds { char * d; int p; int s; };
@@ -86,22 +89,17 @@ static wchar_t * s_mbstowcs(char * str)
 static mpdm_t literal_cache(char * str)
 /* the cache of literal values */
 {
-	static mpdm_t lc = NULL;
 	mpdm_t v;
 	wchar_t * ptr;
-
-	/* creates the cache, if it doesn't exist */
-	if(lc == NULL)
-		lc = mpdm_ref(MPDM_H(0));
 
 	/* convert to wchar_t */
 	ptr = s_mbstowcs(str);
 
 	/* search in cache */
-	if((v = mpdm_hget_s(lc, ptr)) == NULL)
+	if((v = mpdm_hget_s(mpsl_lc, ptr)) == NULL)
 	{
 		v = MPDM_S(ptr);
-		mpdm_hset(lc, v, v);
+		mpdm_hset(mpsl_lc, v, v);
 	}
 
 	return(v);
