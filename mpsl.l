@@ -241,19 +241,27 @@ int yy_input_for_flex(char * buf, int max)
 	else
 	if(mpsl_next_char != NULL)
 	{
-		while(n < max)
+		for(;;)
 		{
 			char tmp[MB_CUR_MAX + 1];
+			int c, i;
 
 			if(*mpsl_next_char == L'\0' ||
-			   wctomb(tmp, *mpsl_next_char) != 1)
+			   (c = wctomb(tmp, *mpsl_next_char)) < 0)
 			{
 				mpsl_next_char = NULL;
 				break;
 			}
 
-			mpsl_next_char ++;
-			buf[n++] = tmp[0];
+			/* no room? try next time */
+			if(n + c >= max)
+				break;
+
+			mpsl_next_char++;
+
+			/* transfer */
+			for(i = 0;i < c;i++)
+				buf[n++] = tmp[i];
 		}
 	}
 

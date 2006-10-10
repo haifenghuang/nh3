@@ -7,7 +7,6 @@ Release Critical Bugs
  * 1051: Document the scripting language.
  * 1092: The local symbol table description in the internals document
    is outdated.
- * 1100: Fix yy_input_for_flex() to not fail if wctomb() returns > 1.
 
 Open Bugs
 ---------
@@ -146,5 +145,7 @@ Closed
  * 1096: Implement an optimizer that 'executes' all MPSL core instructions
    and converts to LITERAL all the LIST and HASH instructions that have only
    LITERAL instructions as arguments (Sat, 07 Oct 2006 12:45:03 +0200).
+ * 1100: Fix yy_input_for_flex() to not fail if wctomb() returns > 1
+   (Tue, 10 Oct 2006 13:49:46 +0200).
 
 Email bugs to angel@triptico.com
