@@ -49,6 +49,9 @@ extern int mpsl_line;
 /* compiled filename (for errors) */
 static char * mpsl_filename = NULL;
 
+/* cached value MPSL.OPCODE */
+extern mpdm_t mpsl_opcodes;
+
 /*******************
 	Code
 ********************/
@@ -482,6 +485,7 @@ static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
 /* calls yyparse() after doing some initialisations, and returns
    the compiled code as an executable value */
 {
+	mpdm_t v;
 	mpdm_t x = NULL;
 
 	/* first line */
@@ -497,9 +501,16 @@ static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
 	if(mpsl_filename != NULL) free(mpsl_filename);
 	mpsl_filename = strdup(filename);
 
+	/* cache some values */
+	v = mpdm_hget_s(mpdm_root(), L"MPSL");
+	mpsl_opcodes = mpdm_hget_s(v, L"OPCODE");
+
 	/* compile! */
 	if(yyparse() == 0 && mpsl_bytecode != NULL)
 		x = mpsl_x(mpsl_bytecode, NULL);
+
+	/* clean back cached values */
+	mpsl_opcodes = NULL;
 
 	return(x);
 }

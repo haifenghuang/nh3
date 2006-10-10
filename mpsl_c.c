@@ -43,6 +43,10 @@ int mpsl_abort = 0;
 /* temporary storage for the local symbol table */
 static mpdm_t local_symbol_table = NULL;
 
+/* temporary storage for the opcode table
+   (only usable while compiling) */
+mpdm_t mpsl_opcodes = NULL;
+
 /* flag to control calls to mpdm_sweep() from inside mpsl_exec_i() */
 static int sweep_on_exec_i = 1;
 
@@ -606,14 +610,10 @@ mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 	mpdm_t o;
 	mpdm_t v;
 
-	/* get the opcode (this should be optimized) */
-	o = mpdm_hget_s(mpdm_root(), L"MPSL");
-	o = mpdm_hget_s(o, L"OPCODE");
-	o = mpdm_hget_s(o, opcode);
-
 	v = MPDM_A(args + 1);
 
 	/* inserts the opcode */
+	o = mpdm_hget_s(mpsl_opcodes, opcode);
 	mpdm_aset(v, o, 0);
 
 	if(args > 0) mpdm_aset(v, a1, 1);
