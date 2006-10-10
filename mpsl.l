@@ -86,19 +86,19 @@ static wchar_t * s_mbstowcs(char * str)
 }
 
 
-static mpdm_t literal_cache(char * str)
+static mpdm_t literal_cache(char * ptr, wchar_t * wptr)
 /* the cache of literal values */
 {
 	mpdm_t v;
-	wchar_t * ptr;
 
 	/* convert to wchar_t */
-	ptr = s_mbstowcs(str);
+	if(ptr != NULL)
+		wptr = s_mbstowcs(ptr);
 
 	/* search in cache */
-	if((v = mpdm_hget_s(mpsl_lc, ptr)) == NULL)
+	if((v = mpdm_hget_s(mpsl_lc, wptr)) == NULL)
 	{
-		v = MPDM_S(ptr);
+		v = MPDM_S(wptr);
 		mpdm_hset(mpsl_lc, v, v);
 	}
 
@@ -129,20 +129,20 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 
 {INTEGER}	{
 			/* integers */
-			yylval.v = literal_cache(yytext);
+			yylval.v = literal_cache(yytext, NULL);
 			return(INTEGER);
 		}
 
 {REAL}		{
 			/* real numbers */
-			yylval.v = literal_cache(yytext);
+			yylval.v = literal_cache(yytext, NULL);
 			return(REAL);
 		}
 
 \'[^']*\'	{
 			/* single quoted string; return as is */
 			yytext[yyleng - 1] = '\0';
-			yylval.v = literal_cache(yytext + 1);
+			yylval.v = literal_cache(yytext + 1, NULL);
 			return(STRING);
 		}
 
@@ -183,7 +183,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 
 {SYMBOL}	{
 			/* symbol name */
-			yylval.v = literal_cache(yytext);
+			yylval.v = literal_cache(yytext, NULL);
 			return(SYMBOL);
 		}
 
@@ -205,7 +205,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 <STR>\\\"	{ ds_poke(ds_v, '\"'); }
 <STR>\"		{
 			ds_poke(ds_v, '\0');
-			yylval.v = literal_cache(ds_v.d);
+			yylval.v = literal_cache(ds_v.d, NULL);
 			BEGIN 0;
 			return(STRING);
 		}
