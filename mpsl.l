@@ -209,7 +209,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 			BEGIN 0;
 			return(STRING);
 		}
-<STR>.		{ wchar_t wc; mbtowc(&wc, yytext, 1); ds_poke(ds_v, wc); }
+<STR>.		{ wchar_t wc; if(mbtowc(&wc, yytext, 1) > 0) ds_poke(ds_v, wc); }
 
 .		{ return(*yytext); }
 
