@@ -83,7 +83,7 @@ static wchar_t * s_mbstowcs(char * str)
 }
 
 
-static mpdm_t mpsl_lc(char * str)
+static mpdm_t literal_cache(char * str)
 /* the cache of literal values */
 {
 	static mpdm_t lc = NULL;
@@ -131,20 +131,20 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 
 {INTEGER}	{
 			/* integers */
-			yylval.v = mpsl_lc(yytext);
+			yylval.v = literal_cache(yytext);
 			return(INTEGER);
 		}
 
 {REAL}		{
 			/* real numbers */
-			yylval.v = mpsl_lc(yytext);
+			yylval.v = literal_cache(yytext);
 			return(REAL);
 		}
 
 \'[^']*\'	{
 			/* single quoted string; return as is */
 			yytext[yyleng - 1] = '\0';
-			yylval.v = mpsl_lc(yytext + 1);
+			yylval.v = literal_cache(yytext + 1);
 			return(STRING);
 		}
 
@@ -185,7 +185,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 
 {SYMBOL}	{
 			/* symbol name */
-			yylval.v = mpsl_lc(yytext);
+			yylval.v = literal_cache(yytext);
 			return(SYMBOL);
 		}
 
@@ -207,7 +207,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 <STR>\\\"	{ ds_poke(ds_v, '\"'); }
 <STR>\"		{
 			ds_poke(ds_v, '\0');
-			yylval.v = mpsl_lc(ds_v.d);
+			yylval.v = literal_cache(ds_v.d);
 			BEGIN 0;
 			return(STRING);
 		}
