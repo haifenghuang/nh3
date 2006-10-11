@@ -385,18 +385,6 @@ O_TYPE O_range(O_ARGS)
 O_TYPE O_list(O_ARGS)
 /* build list from instructions */
 {
-	int n;
-	mpdm_t ret = RF(MPDM_A(mpdm_size(c) - 1));
-
-	for(n = 1;n < mpdm_size(c);n++)
-		mpdm_aset(ret, M(n), n - 1);
-
-	return(UF(ret));
-}
-
-
-O_TYPE O_list2(O_ARGS)
-{
 	mpdm_t ret = RF(mpdm_size(c) == 2 ? MPDM_A(0) : M(2));
 
 	mpdm_push(ret, M(1));
@@ -406,24 +394,6 @@ O_TYPE O_list2(O_ARGS)
 
 O_TYPE O_hash(O_ARGS)
 /* build hash from instructions */
-{
-	int n;
-	mpdm_t ret = RF(MPDM_H(0));
-
-	for(n = 1;n < mpdm_size(c);n += 2)
-	{
-		mpdm_t v = RF(M(n));
-
-		mpdm_hset(ret, v, M(n + 1));
-
-		UF(v);
-	}
-
-	return(UF(ret));
-}
-
-
-O_TYPE O_hash2(O_ARGS)
 {	
 	mpdm_t k, v;
 	mpdm_t ret = RF(mpdm_size(c) == 3 ? MPDM_H(0) : M(3));
@@ -488,10 +458,8 @@ static struct mpsl_op_s
 	{ L"BREAK",	0,	O_break },
 	{ L"RETURN",	0,	O_return },
 	{ L"LOCAL",	0,	O_local },
-	{ L"LIST",	0,	O_list },	/* should be */
-	{ L"LIST2",	1,	O_list2 },	/* should be */
-	{ L"HASH",	0,	O_hash },	/* should be */
-	{ L"HASH2",	1,	O_hash2 },	/* should be */
+	{ L"LIST",	1,	O_list },
+	{ L"HASH",	1,	O_hash },
 	{ L"RANGE",	1,	O_range },
 	{ L"UMINUS",	1,	O_uminus },
 	{ L"ADD",	1,	O_add },

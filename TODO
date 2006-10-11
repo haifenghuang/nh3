@@ -4,10 +4,12 @@ Minimum Profit Scripting Language (mpsl) TODO / Bug List
 Release Critical Bugs
 ---------------------
 
- * 1051: Document the scripting language.
+ * 1051: Finish documentation for the scripting language.
  * 1092: The local symbol table description in the internals document
    is outdated.
  * 1101: Document the \x{HHHH} syntax for strings.
+ * 1102: Document the changes to the LIST and HASH opcodes in the
+   internals document.
 
 Open Bugs
 ---------
@@ -22,9 +24,6 @@ Pending Enhancements
  * 1069: Implement a C-like for() instruction.
  * 1083: Implement a split() that uses regular expressions.
  * 1095: Accept "local var" everywhere a symbol name is accepted.
- * 1098: Change the 'LIST' and 'HASH' parser so that the opcode is inserted
-   when it's completed (all list elements pushed) and not at the beginning,
-   as both opcodes are the best to benefit from flatten().
 
 Closed
 ------
@@ -151,5 +150,9 @@ Closed
    (Tue, 10 Oct 2006 18:44:00 +0200).
  * 1094: Implement chars (\x1b) and wide chars (\x{1234}) in strings
    (needs #1093 closed) (Tue, 10 Oct 2006 18:56:16 +0200).
+ * 1098: Change the 'LIST' and 'HASH' parser so that the opcode is inserted
+   when it's completed (all list elements pushed) and not at the beginning,
+   as both opcodes are the best to benefit from constant_fold()
+   (Wed, 11 Oct 2006 18:03:12 +0200).
 
 Email bugs to angel@triptico.com

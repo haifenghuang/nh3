@@ -229,73 +229,57 @@ stmt_list:
 
 list:
 	expr			{
-					/*$$ = INS1(L"LIST", $1);*/
-					$$ = INS1(L"LIST2", $1);
+					$$ = INS1(L"LIST", $1);
 				}
 	| list ',' expr		{
 					/* build list from list of
 					   instructions */
-					/*mpdm_push($1, $3); $$ = $1;*/
-					$$ = INS2(L"LIST2", $3, $1);
+					$$ = INS2(L"LIST", $3, $1);
 				}
 	;
 
 sym_list:
 	SYMBOL			{
-					$$ = INS1(L"LIST2",
+					$$ = INS1(L"LIST",
 						INS1(L"LITERAL", $1));
 				}
 	| sym_list ',' SYMBOL	{
 					/* comma-separated list of symbols */
-/*					mpdm_push($1,
-						INS1(L"LITERAL", $3));
-					$$ = $1;*/
-					$$ = INS2(L"LIST2",
+					$$ = INS2(L"LIST",
 						INS1(L"LITERAL", $3), $1);
 				}
 	;
 
 hash:
 	expr HASHPAIR expr	{
-					$$ = INS2(L"HASH2", $1, $3);
+					$$ = INS2(L"HASH", $1, $3);
 				}
 	| hash ',' expr HASHPAIR expr
 				{
 					/* build hash from list of
 					   instructions */
-					/*mpdm_push($1, $3);
-					mpdm_push($1, $5);
-					$$ = $1;*/
-					$$ = INS3(L"HASH2", $3, $5, $1);
+					$$ = INS3(L"HASH", $3, $5, $1);
 				}
 	;
 
 compsym:
 	SYMBOL			{
-					$$ = INS1(L"LIST2",
+					$$ = INS1(L"LIST",
 						INS1(L"LITERAL", $1));
 				}
 	| compsym '.' INTEGER	{
 					/* a.5 compound symbol */
-					/*mpdm_push($1,
-				  		INS1(L"LITERAL", $3));
-				  	$$ = $1;*/
-					$$ = INS2(L"LIST2",
+					$$ = INS2(L"LIST",
 						INS1(L"LITERAL", $3), $1);
 				}
 	| compsym '.' SYMBOL	{
 					/* a.b compound symbol */
-					/*mpdm_push($1,
-				  		INS1(L"LITERAL", $3));
-				  	$$ = $1;*/
-					$$ = INS2(L"LIST2",
+					$$ = INS2(L"LIST",
 						INS1(L"LITERAL", $3), $1);
 				}
 	| compsym '[' expr ']'	{
 					/* a["b"] or a[5] compound symbol */
-					/*mpdm_push($1, $3);
-					$$ = $1;*/
-					$$ = INS2(L"LIST2", $3, $1);
+					$$ = INS2(L"LIST", $3, $1);
 				}
 	;
 
