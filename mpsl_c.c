@@ -423,6 +423,16 @@ O_TYPE O_hash(O_ARGS)
 }
 
 
+O_TYPE O_hash2(O_ARGS)
+{	
+	mpdm_t k, v;
+	mpdm_t ret = RF(mpdm_size(c) == 3 ? MPDM_H(0) : M(3));
+
+	k = RF(M(1)); v = RF(M(2));
+	mpdm_hset(ret, UF(k), UF(v));
+	return(UF(ret));
+}
+
 O_TYPE O_subframe(O_ARGS)
 /* runs an instruction inside a subroutine frame */
 {
@@ -479,8 +489,9 @@ static struct mpsl_op_s
 	{ L"RETURN",	0,	O_return },
 	{ L"LOCAL",	0,	O_local },
 	{ L"LIST",	0,	O_list },	/* should be */
-	{ L"LIST2",	0,	O_list2 },	/* should be */
+	{ L"LIST2",	1,	O_list2 },	/* should be */
 	{ L"HASH",	0,	O_hash },	/* should be */
+	{ L"HASH2",	1,	O_hash2 },	/* should be */
 	{ L"RANGE",	1,	O_range },
 	{ L"UMINUS",	1,	O_uminus },
 	{ L"ADD",	1,	O_add },

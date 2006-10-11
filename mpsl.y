@@ -257,15 +257,16 @@ sym_list:
 
 hash:
 	expr HASHPAIR expr	{
-					$$ = INS2(L"HASH", $1, $3);
+					$$ = INS2(L"HASH2", $1, $3);
 				}
 	| hash ',' expr HASHPAIR expr
 				{
 					/* build hash from list of
 					   instructions */
-					mpdm_push($1, $3);
+					/*mpdm_push($1, $3);
 					mpdm_push($1, $5);
-					$$ = $1;
+					$$ = $1;*/
+					$$ = INS3(L"HASH2", $3, $5, $1);
 				}
 	;
 
