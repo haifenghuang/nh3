@@ -229,25 +229,29 @@ stmt_list:
 
 list:
 	expr			{
-					$$ = INS1(L"LIST", $1);
+					/*$$ = INS1(L"LIST", $1);*/
+					$$ = INS1(L"LIST2", $1);
 				}
 	| list ',' expr		{
 					/* build list from list of
 					   instructions */
-					mpdm_push($1, $3); $$ = $1;
+					/*mpdm_push($1, $3); $$ = $1;*/
+					$$ = INS2(L"LIST2", $3, $1);
 				}
 	;
 
 sym_list:
 	SYMBOL			{
-					$$ = INS1(L"LIST",
+					$$ = INS1(L"LIST2",
 						INS1(L"LITERAL", $1));
 				}
 	| sym_list ',' SYMBOL	{
 					/* comma-separated list of symbols */
-					mpdm_push($1,
+/*					mpdm_push($1,
 						INS1(L"LITERAL", $3));
-					$$ = $1;
+					$$ = $1;*/
+					$$ = INS2(L"LIST2",
+						INS1(L"LITERAL", $3), $1);
 				}
 	;
 
@@ -267,25 +271,30 @@ hash:
 
 compsym:
 	SYMBOL			{
-					$$ = INS1(L"LIST",
+					$$ = INS1(L"LIST2",
 						INS1(L"LITERAL", $1));
 				}
 	| compsym '.' INTEGER	{
 					/* a.5 compound symbol */
-					mpdm_push($1,
+					/*mpdm_push($1,
 				  		INS1(L"LITERAL", $3));
-				  	$$ = $1;
+				  	$$ = $1;*/
+					$$ = INS2(L"LIST2",
+						INS1(L"LITERAL", $3), $1);
 				}
 	| compsym '.' SYMBOL	{
 					/* a.b compound symbol */
-					mpdm_push($1,
+					/*mpdm_push($1,
 				  		INS1(L"LITERAL", $3));
-				  	$$ = $1;
+				  	$$ = $1;*/
+					$$ = INS2(L"LIST2",
+						INS1(L"LITERAL", $3), $1);
 				}
 	| compsym '[' expr ']'	{
 					/* a["b"] or a[5] compound symbol */
-					mpdm_push($1, $3);
-					$$ = $1;
+					/*mpdm_push($1, $3);
+					$$ = $1;*/
+					$$ = INS2(L"LIST2", $3, $1);
 				}
 	;
 
