@@ -420,7 +420,7 @@ expr:
 
 	| '[' ']'		{
 					/* empty list */
-					$$ = INS0(L"LIST");
+					$$ = INS1(L"LITERAL", MPDM_A(0));
 				}
 	| '[' list ']'		{
 					/* non-empty list */
@@ -434,7 +434,7 @@ expr:
 
 	| '{' '}'		{
 					/* empty hash */
-					$$ = INS0(L"HASH");
+					$$ = INS1(L"LITERAL", MPDM_H(0));
 				}
 	| '{' hash '}'		{
 					/* non-empty hash */
