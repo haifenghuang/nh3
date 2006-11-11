@@ -51,6 +51,7 @@
 static mpdm_t F_size(mpdm_t a) { return(MPDM_I(mpdm_size(A0))); }
 static mpdm_t F_clone(mpdm_t a) { return(mpdm_clone(A0)); }
 static mpdm_t F_dump(mpdm_t a) { mpdm_dump(A0); return(NULL); }
+static mpdm_t F_dumper(mpdm_t a) { return(mpdm_dumper(A0)); }
 static mpdm_t F_cmp(mpdm_t a) { return(MPDM_I(mpdm_cmp(A0, A1))); }
 
 static mpdm_t F_is_array(mpdm_t a) { return(mpsl_boolean(MPDM_IS_ARRAY(A0))); }
@@ -246,6 +247,7 @@ static struct
 	{ L"size",	F_size },
 	{ L"clone",	F_clone },
 	{ L"dump",	F_dump },
+	{ L"dumper",	F_dumper },
 	{ L"cmp",	F_cmp },
 	{ L"is_array",	F_is_array },
 	{ L"is_hash",	F_is_hash },
