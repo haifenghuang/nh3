@@ -26,6 +26,7 @@
 #include "config.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <wchar.h>
 #include "mpdm.h"
 #include "mpsl.h"
@@ -238,6 +239,17 @@ static mpdm_t F_grep(mpdm_t a)
 	return(mpdm_size(mpdm_unref(out)) == 0 ? NULL : out);
 }
 
+static mpdm_t F_getenv(mpdm_t a)
+{
+	char * ptr = mpdm_wcstombs(mpdm_string(mpdm_aget(a, 0)), NULL);
+
+	if(ptr != NULL)
+		ptr = getenv(ptr);
+
+	return(MPDM_MBS(ptr));
+}
+
+
 static struct
 {
 	wchar_t * name;
@@ -299,6 +311,7 @@ static struct
 	{ L"ord",	F_ord },
 	{ L"map",	F_map },
 	{ L"grep",	F_grep },
+	{ L"getenv",	F_getenv },
 	{ NULL,		NULL }
 };
 
