@@ -106,6 +106,9 @@ static mpdm_t F_load(mpdm_t a) { return(mpdm_exec(mpsl_compile_file(A0), NULL));
 static mpdm_t F_error(mpdm_t a) { return(mpsl_error(A0)); }
 static mpdm_t F_sweep(mpdm_t a) { mpdm_sweep(IA0); return(NULL); }
 
+static mpdm_t F_uc(mpdm_t a) { return(mpdm_ulc(A0, 1)); }
+static mpdm_t F_lc(mpdm_t a) { return(mpdm_ulc(A0, 0)); }
+
 static mpdm_t F_eval(mpdm_t a)
 {
 	mpdm_t c;
@@ -312,6 +315,8 @@ static struct
 	{ L"map",	F_map },
 	{ L"grep",	F_grep },
 	{ L"getenv",	F_getenv },
+	{ L"uc",	F_uc },
+	{ L"lc",	F_lc },
 	{ NULL,		NULL }
 };
 
