@@ -25,7 +25,6 @@ Pending Enhancements
  * 1069: Implement a C-like for() instruction.
  * 1083: Implement a split() that uses regular expressions.
  * 1095: Accept "local var" everywhere a symbol name is accepted.
- * 1104: Implement strings separated by backslash plus newline.
 
 Closed
 ------
@@ -156,5 +155,7 @@ Closed
    when it's completed (all list elements pushed) and not at the beginning,
    as both opcodes are the best to benefit from constant_fold()
    (Wed, 11 Oct 2006 18:03:12 +0200).
+ * 1104: Implement strings separated by backslash plus newline
+   (Wed, 18 Apr 2007 14:20:19 +0200).
 
 Email bugs to angel@triptico.com

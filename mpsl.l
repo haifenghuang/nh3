@@ -204,6 +204,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 <STR>\\r	{ ds_poke(ds_v, L'\r'); }
 <STR>\\e	{ ds_poke(ds_v, 27); }
 <STR>\\\"	{ ds_poke(ds_v, L'\"'); }
+<STR>\"\\\n[ \t]+\"	;
 <STR>\"		{
 			ds_poke(ds_v, L'\0');
 			yylval.v = literal_cache(NULL, ds_v.d);
