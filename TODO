@@ -11,6 +11,7 @@ Release Critical Bugs
  * 1102: Document the changes to the LIST and HASH opcodes in the
    internals document.
  * 1103: Document the 'l' flag in regex().
+ * 1105: Document the backslash + newline separation of strings.
 
 Open Bugs
 ---------
