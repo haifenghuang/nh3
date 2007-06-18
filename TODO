@@ -10,7 +10,6 @@ Release Critical Bugs
  * 1101: Document the \x{HHHH} syntax for strings.
  * 1102: Document the changes to the LIST and HASH opcodes in the
    internals document.
- * 1103: Document the 'l' flag in regex().
  * 1105: Document the backslash + newline separation of strings.
 
 Open Bugs
@@ -158,5 +157,7 @@ Closed
    (Wed, 11 Oct 2006 18:03:12 +0200).
  * 1104: Implement strings separated by backslash plus newline
    (Wed, 18 Apr 2007 14:20:19 +0200).
+ * 1103: Document the 'l' flag in regex()
+   (Mon, 18 Jun 2007 14:25:52 +0200).
 
 Email bugs to angel@triptico.com

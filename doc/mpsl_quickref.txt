@@ -236,6 +236,11 @@ tstr = gettext(str);	Translates str
 gettext_domain(dom,	Sets the gettext domain
     directory);		and directory
 sweep(num);		Forces a garbage collection
+getenv(envvar);		Returns the value of
+			an environment variable
+uc(str);		Returns str to uppercase
+lc(str);		Returns str to lowercase
+time();			Returns the time in seconds
 
 *String escapes for double quotes
 
@@ -251,3 +256,5 @@ sweep(num);		Forces a garbage collection
 i			Ignore case
 m			Value is multiline
 g			Global change (sregex)
+l			Match last occurrence
+			instead of first
