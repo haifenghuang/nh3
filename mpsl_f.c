@@ -28,6 +28,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <wchar.h>
+
+#include <time.h>
+
 #include "mpdm.h"
 #include "mpsl.h"
 
@@ -108,6 +111,8 @@ static mpdm_t F_sweep(mpdm_t a) { mpdm_sweep(IA0); return(NULL); }
 
 static mpdm_t F_uc(mpdm_t a) { return(mpdm_ulc(A0, 1)); }
 static mpdm_t F_lc(mpdm_t a) { return(mpdm_ulc(A0, 0)); }
+
+static mpdm_t F_time(mpdm_t a) { return(MPDM_I(time(NULL))); }
 
 static mpdm_t F_eval(mpdm_t a)
 {
@@ -317,6 +322,7 @@ static struct
 	{ L"getenv",	F_getenv },
 	{ L"uc",	F_uc },
 	{ L"lc",	F_lc },
+	{ L"time",	F_time },
 	{ NULL,		NULL }
 };
 
