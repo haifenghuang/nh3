@@ -86,7 +86,7 @@ docsclean:
 
 distcopy: distclean
 	mkdir -p $(DIST_TARGET) ; \
-	tar cf - --exclude=.svn . | (cd $(DIST_TARGET) ; tar xf -)
+	tar cf - * | (cd $(DIST_TARGET) ; tar xf -)
 
 dist: distcopy
 	(cd /tmp ; tar czf - $(PROJ)-$(VERSION)/* ) > $(PROJ)-$(VERSION).tar.gz ; \
