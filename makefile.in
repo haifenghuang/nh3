@@ -17,9 +17,6 @@ DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
 version:
 	@echo $(VERSION)
 
-ChangeLog:
-	svk log -x > Changelog
-
 .c.o:
 	$(CC) $(CFLAGS) `cat config.cflags` -c $<
 
@@ -56,7 +53,7 @@ stress: stress.c $(LIB) $(MPDM)/libmpdm.a
 		-L. -lmpsl `cat config.ldflags` -o $@
 
 clean:
-	rm -f $(TARGET) $(LIB) $(OBJS) *.o tags *.tar.gz stress Changelog
+	rm -f $(TARGET) $(LIB) $(OBJS) *.o tags *.tar.gz stress
 
 realclean: clean
 	rm -f y.tab.c y.tab.h lex.yy.c
@@ -87,11 +84,11 @@ docs: $(DOCS)
 docsclean:
 	rm -f doc/*.html
 
-distcopy: distclean ChangeLog
+distcopy: distclean
 	mkdir -p $(DIST_TARGET) ; \
 	tar cf - --exclude=.svn . | (cd $(DIST_TARGET) ; tar xf -)
 
-dist: distcopy ChangeLog
+dist: distcopy
 	(cd /tmp ; tar czf - $(PROJ)-$(VERSION)/* ) > $(PROJ)-$(VERSION).tar.gz ; \
 	rm -rf $(DIST_TARGET)
 
