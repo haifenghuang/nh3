@@ -28,31 +28,8 @@ and share the same namespace.
 The local symbol table
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The local symbol table is more complicated and is defined as an array of
-arrays of hashes. All arrays are managed as stacks. The main array has
-one element for each subroutine entered; the leaf hashes are small symbol
-tables, having the symbol names as keys. Everytime a subroutine is
-executed, a new array is pushed onto the top of the main array, and
-everytime a block is entered, a new hash is pushed onto the subroutine
-array. On exit, the created values are popped. Local symbols created with
-the _local_ directive are stored in the last hash defined in the last
-array.
-
-The array pushed on each subroutine is called a _subroutine frame_, and
-the hash pushed on each block is called a _block frame_.
-
-If the symbol table was to be defined in MPSL code, it could be as follows:
-
- local_symbol_table = [
-	[ {}, {}, {} ],		/* caller subroutine frames (dormant) */
-	[ {}, {} ],
-	[ {} ],
-	[ {}, {}, {}, {} ]	/* current subroutine frame */
- ];
-
-For locating a symbol, only the block frames stored in the top subroutine
-frame are scanned, from last to first. If it's not found there, it's
-assumed to be a global one.
+The local symbol table is an array of hashes. The array is used as a stack,
+and symbols are searched in the stacked hashes from top to bottom.
 
 The bytecode
 ------------

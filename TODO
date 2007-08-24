@@ -5,8 +5,6 @@ Release Critical Bugs
 ---------------------
 
  * 1051: Finish documentation for the scripting language.
- * 1092: The local symbol table description in the internals document
-   is outdated.
  * 1101: Document the \x{HHHH} syntax for strings.
  * 1105: Document the backslash + newline separation of strings.
 
@@ -159,5 +157,7 @@ Closed
    (Mon, 18 Jun 2007 14:25:52 +0200).
  * 1102: Document the changes to the LIST and HASH opcodes in the
    internals document (Fri, 24 Aug 2007 08:50:57 +0200).
+ * 1092: The local symbol table description in the internals document
+   is outdated (Fri, 24 Aug 2007 09:00:12 +0200).
 
 Email bugs to angel@triptico.com
