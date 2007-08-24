@@ -302,18 +302,22 @@ all the values in between (including them).
 LIST
 ~~~~
 
- LIST <ins1> <ins2> ...
+ LIST <ins>
+ LIST <ins> <array_value>
 
-A LIST instruction executes all the instructions and returns an array with
-all their return values.
+A LIST instruction returns an array. If <array_value> does not exist, a
+new one is created. The return value of <ins> is pushed into the array,
+which is returned.
 
 HASH
 ~~~~
 
- HASH <ins1> <ins2> ...
+ HASH <ins1> <ins2>
+ HASH <ins1> <ins2> <hash_value>
 
-A HASH instruction executes all the instructions and returns a hash with
-all their return values used as key / value pairs.
+A HASH instruction returns a hash. If <hash_value> does not exist, a
+new one is created. The return values of <ins1> and <ins2> are used as
+a key, value pair that is inserted into the hash, which is returned.
 
 SUBFRAME
 ~~~~~~~~
