@@ -49,7 +49,7 @@ MULTI
 
  MULTI <ins1> <ins2>
 
-A MULTI instruction executes <ins1>, then <ins2>, and returns the exit
+A MULTI instruction executes `ins1', then `ins2', and returns the exit
 value of the latter.
 
 LITERAL
@@ -66,7 +66,7 @@ SYMVAL
 
  SYMVAL <ins1>
 
-A SYMVAL instruction executes <ins1> and accepts its return value as a
+A SYMVAL instruction executes `ins1' and accepts its return value as a
 symbol name, that is looked up in the symbol table and its assigned value
 (if any) returned.
 
@@ -75,8 +75,8 @@ ASSIGN
 
  ASSIGN <ins1> <ins2>
 
-An ASSIGN instruction executes <ins1> and accepts its return value as a
-symbol name; then <ins2> is executed and its return value assigned to that
+An ASSIGN instruction executes `ins1' and accepts its return value as a
+symbol name; then `ins2' is executed and its return value assigned to that
 symbol. The new value is returned.
 
 EXEC
@@ -85,8 +85,8 @@ EXEC
  EXEC <ins1>
  EXEC <ins1> <ins2>
 
-An EXEC instruction takes the value of the symbol returned by <ins1> and
-accepts its return value as an executable one; if exists, executes <ins2>
+An EXEC instruction takes the value of the symbol returned by `ins1' and
+accepts its return value as an executable one; if exists, executes `ins2'
 and accepts its return value as a list of arguments for the executable
 value; then it's executed and its exit value returned.
 
@@ -96,17 +96,17 @@ IF
  IF <ins1> <ins2>
  IF <ins1> <ins2> <ins3>
 
-An IF instruction executes <ins1> and, if it returns a true value,
-executes <ins2> and returns its value. If it's not true, returns NULL or,
-if <ins3> is defined, executes it and returns its value.
+An IF instruction executes `ins1' and, if it returns a true value,
+executes `ins2' and returns its value. If it's not true, returns NULL or,
+if `ins3' is defined, executes it and returns its value.
 
 WHILE
 ~~~~~
 
  WHILE <ins1> <ins2>
 
-A WHILE instruction executes <ins1> and, if it's a true value, executes
-<ins2>. This operation is repeated until <ins1> returns a non-true value.
+A WHILE instruction executes `ins1' and, if it's a true value, executes
+`ins2'. This operation is repeated until `ins1' returns a non-true value.
 It always returns NULL.
 
 LOCAL
@@ -114,7 +114,7 @@ LOCAL
 
  LOCAL <ins1>
 
-A LOCAL instruction executes <ins1> and takes its return value as an array
+A LOCAL instruction executes `ins1' and takes its return value as an array
 of symbol names to be created in the local symbol table. It always returns
 NULL.
 
@@ -123,7 +123,7 @@ UMINUS
 
  UMINUS <ins1>
 
-An UMINUS instruction executes <ins1>, gets its value as a real number and
+An UMINUS instruction executes `ins1', gets its value as a real number and
 returns the unary minus operation on it (effectively multiplying it by -1).
 
 Math operations
@@ -145,7 +145,7 @@ NOT
 
  NOT <ins1>
 
-A NOT instruction executes <ins1>, takes its return value as a boolean
+A NOT instruction executes `ins1', takes its return value as a boolean
 one, and returns its negation.
 
 AND
@@ -153,9 +153,9 @@ AND
 
  AND <ins1> <ins2>
 
-An AND instruction executes <ins1>. If its return value is accepted as a
-non-true value, returns it; otherwise, executes <ins2> and returns its
-value. This is a short-circuiting operation; if <ins1> is non-true, <ins2>
+An AND instruction executes `ins1'. If its return value is accepted as a
+non-true value, returns it; otherwise, executes `ins2' and returns its
+value. This is a short-circuiting operation; if `ins1' is non-true, `ins2'
 is never executed.
 
 OR
@@ -163,9 +163,9 @@ OR
 
  OR <ins1> <ins2>
 
-An OR instruction executes <ins1>. If its return value is accepted as a
-true value, returns it; otherwise, executes <ins2> and returns its value.
-This is a short-circuiting operation; if <ins1> is true, <ins2> is never
+An OR instruction executes `ins1'. If its return value is accepted as a
+true value, returns it; otherwise, executes `ins2' and returns its value.
+This is a short-circuiting operation; if `ins1' is true, `ins2' is never
 executed.
 
 Numeric comparisons
@@ -179,7 +179,7 @@ Numeric comparisons
 
 These instructions execute the equality, less-than, less-or-equal-than,
 greater-than and greater-or-equal-than numeric comparisons on the exit
-values of <ins1> and <ins2>, and return a boolean value.
+values of `ins1' and `ins2', and return a boolean value.
 
 Bitwise operators
 ~~~~~~~~~~~~~~~~~
@@ -188,14 +188,14 @@ Bitwise operators
  BITOR <ins1> <ins2>
  BITXOR <ins1> <ins2>
 
-Returns the bitwise operation between the exit values of <ins1> and <ins2>.
+Returns the bitwise operation between the exit values of `ins1' and `ins2'.
 
 STRCAT
 ~~~~~~
 
  STRCAT <ins1> <ins2>
 
-A STRCAT instruction executes both <ins1> and <ins2>, and concatenates the
+A STRCAT instruction executes both `ins1' and `ins2', and concatenates the
 two (accepted as strings) exit values.
 
 STREQ
@@ -203,7 +203,7 @@ STREQ
 
  STREQ <ins1> <ins2>
 
-A STREQ instruction executes both <ins1> and <ins2>, tests for string equality
+A STREQ instruction executes both `ins1' and `ins2', tests for string equality
 of both values, and returns a boolean value.
 
 Postfix immediate unary operations
@@ -212,7 +212,7 @@ Postfix immediate unary operations
  PINC <ins1>
  PDEC <ins1>
 
-These instructions execute <ins1> and accept its return value as a symbol
+These instructions execute `ins1' and accept its return value as a symbol
 name. Its value is incremented or decremented, and then reassigned to it.
 The new value for the symbol is returned.
 
@@ -222,7 +222,7 @@ Suffix immediate unary operations
  SINC <ins1>
  SDEC <ins1>
 
-These instructions execute <ins1> and accept its return value as a symbol
+These instructions execute `ins1' and accept its return value as a symbol
 value. Its value is incremented or decremented, and then reassigned to it.
 The old value for the symbol is returned.
 
@@ -235,8 +235,8 @@ Immediate math operations
  IDIV <ins1> <ins2>
  IMOD <ins1> <ins2>
 
-These instructions execute <ins1> and accept its return value as a symbol
-name. Then <ins2> is executed, and its return value added, substracted,
+These instructions execute `ins1' and accept its return value as a symbol
+name. Then `ins2' is executed, and its return value added, substracted,
 multiplied, divided or modulo'ed by the value of the symbol, and then
 reassigned to it. The new value is returned.
 
@@ -254,7 +254,7 @@ RETURN
  RETURN
  RETURN <ins1>
 
-A RETURN instruction forces the exit of the current subroutine. If <ins1>
+A RETURN instruction forces the exit of the current subroutine. If `ins1'
 is defined, it's executed and its value returned, or NULL otherwise.
 
 FOREACH
@@ -262,17 +262,17 @@ FOREACH
 
  FOREACH <ins1> <ins2> <ins3>
 
-A FOREACH instruction executes <ins1> and accepts its return value as a
-symbol name, and executes <ins2> and accepts its return value as an array
-to be iterated onto. Then, in a loop, each element in <ins2> is assigned
-to <ins1> and <ins3> executed. NULL is always returned.
+A FOREACH instruction executes `ins1' and accepts its return value as a
+symbol name, and executes `ins2' and accepts its return value as an array
+to be iterated onto. Then, in a loop, each element in `ins2' is assigned
+to `ins1' and `ins3' executed. NULL is always returned.
 
 RANGE
 ~~~~~
 
  RANGE <ins1> <ins2>
 
-A RANGE instruction executes both <ins1> and <ins2> and, taken their
+A RANGE instruction executes both `ins1' and `ins2' and, taken their
 return values as real numbers, returns an array containing a sequence of
 all the values in between (including them).
 
@@ -282,8 +282,8 @@ LIST
  LIST <ins>
  LIST <ins> <array_value>
 
-A LIST instruction returns an array. If <array_value> does not exist, a
-new one is created. The return value of <ins> is pushed into the array,
+A LIST instruction returns an array. If `array_value' does not exist, a
+new one is created. The return value of `ins' is pushed into the array,
 which is returned.
 
 HASH
@@ -292,8 +292,8 @@ HASH
  HASH <ins1> <ins2>
  HASH <ins1> <ins2> <hash_value>
 
-A HASH instruction returns a hash. If <hash_value> does not exist, a
-new one is created. The return values of <ins1> and <ins2> are used as
+A HASH instruction returns a hash. If `hash_value' does not exist, a
+new one is created. The return values of `ins1' and `ins2' are used as
 a key, value pair that is inserted into the hash, which is returned.
 
 SUBFRAME
@@ -301,16 +301,16 @@ SUBFRAME
 
  SUBFRAME <ins1>
 
-A SUBFRAME instruction creates a subroutine frame, executes <ins1>,
-destroys the subroutine frame and returns <ins1> exit value.
+A SUBFRAME instruction creates a subroutine frame, executes `ins1',
+destroys the subroutine frame and returns `ins1' exit value.
 
 BLKFRAME
 ~~~~~~~~
 
  BLKFRAME <ins1>
 
-A BLKFRAME instruction creates a block frame, executes <ins1>,
-destroys the block frame and returns <ins1> exit value.
+A BLKFRAME instruction creates a block frame, executes `ins1',
+destroys the block frame and returns `ins1' exit value.
 
 ----
-Angel Ortega <angel@triptico.com> - $Date$
+Angel Ortega <angel@triptico.com>
