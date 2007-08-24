@@ -249,7 +249,7 @@ int yy_input_for_flex(char * buf, int max)
 	{
 		for(;;)
 		{
-			char tmp[MB_CUR_MAX + 1];
+			char tmp[64];	/* really MB_CUR_MAX + 1 */
 			int c, i;
 
 			if(*mpsl_next_char == L'\0' ||
