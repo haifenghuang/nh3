@@ -51,6 +51,11 @@
 #define IA1 IA(1)
 #define IA2 IA(2)
 #define IA3 IA(3)
+#define RA(n) mpdm_rval(A(n))
+#define RA0 RA(0)
+#define RA1 RA(1)
+#define RA2 RA(2)
+#define RA3 RA(3)
 
 static mpdm_t F_size(mpdm_t a) { return(MPDM_I(mpdm_size(A0))); }
 static mpdm_t F_clone(mpdm_t a) { return(mpdm_clone(A0)); }
