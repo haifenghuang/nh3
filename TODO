@@ -21,6 +21,7 @@ Pending Enhancements
  * 1069: Implement a C-like for() instruction.
  * 1083: Implement a split() that uses regular expressions.
  * 1095: Accept "local var" everywhere a symbol name is accepted.
+ * 1106: Implement the sscanf() function (similar to the one in filp).
 
 Closed
 ------
