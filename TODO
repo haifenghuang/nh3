@@ -4,14 +4,14 @@ Minimum Profit Scripting Language (mpsl) TODO / Bug List
 Release Critical Bugs
 ---------------------
 
- * 1051: Finish documentation for the scripting language.
- * 1101: Document the \x{HHHH} syntax for strings.
- * 1105: Document the backslash + newline separation of strings.
+None!
 
 Open Bugs
 ---------
 
-None!
+ * 1051: Finish documentation for the scripting language.
+ * 1101: Document the \x{HHHH} syntax for strings.
+ * 1105: Document the backslash + newline separation of strings.
 
 Pending Enhancements
 --------------------
