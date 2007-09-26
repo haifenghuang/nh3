@@ -14,6 +14,9 @@ Open Bugs
  * 1105: Document the backslash + newline separation of strings.
  * 1107: Anonymous code in functions (as in map()) should have the
    same local symbol context as the subroutine/block that calls it.
+   Currently doesn't work because anonymous subs have its own
+   subroutine frame instead of the caller's (they are subroutines,
+   after all).
  * 1108: Document the 'executable component in compact symbols'
    feature.
 
