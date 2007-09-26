@@ -26,6 +26,8 @@ Pending Enhancements
  * 1083: Implement a split() that uses regular expressions.
  * 1095: Accept "local var" everywhere a symbol name is accepted.
  * 1106: Implement the sscanf() function (similar to the one in filp).
+ * 1109: There must be possible to have executable components with
+   arguments in compact symbols (as in 'h.code(a1,a2).other').
 
 Closed
 ------
