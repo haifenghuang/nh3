@@ -403,14 +403,20 @@ O_TYPE O_hash(O_ARGS)
 	return(UF(ret));
 }
 
-O_TYPE O_subframe(O_ARGS)
-/* runs an instruction inside a subroutine frame */
+
+O_TYPE execute_in_frame(O_ARGS, int sf)
+/* generic function for executing code inside a frame (sub or blk) */
+/* NOT really an opcode: called from O_subframe() or O_blkframe() */
 {
 	mpdm_t ret;
 
+	/* if it's a subroutine frame or l is NULL,
+	   create a new array for holding local symbol tables */
+	if (sf || l == NULL)
+		l = MPDM_A(0);
+
 	/* create a new local symbol table */
-	l = mpdm_ref(MPDM_A(1));
-	mpdm_aset(l, MPDM_H(0), 0);
+	mpdm_push(l, MPDM_H(0));
 
 	/* creates the arguments (if any) as local variables */
 	set_local_symbols(M2, a, l);
@@ -418,23 +424,24 @@ O_TYPE O_subframe(O_ARGS)
 	/* execute instruction */
 	ret = M1;
 
-	/* this local symbol table is no longer needed */
-	mpdm_unref(l);
+	/* destroy the local symbol table */
+	mpdm_pop(l);
 
 	return(ret);
+}
+
+
+O_TYPE O_subframe(O_ARGS)
+/* runs an instruction inside a subroutine frame */
+{
+	return execute_in_frame(c, a, l, f, 1);
 }
 
 
 O_TYPE O_blkframe(O_ARGS)
 /* runs an instruction under a block frame */
 {
-	mpdm_t ret;
-
-	mpdm_push(l, MPDM_H(0));
-	ret = M1;
-	mpdm_pop(l);
-
-	return(ret);
+	return execute_in_frame(c, a, l, f, 0);
 }
 
 
