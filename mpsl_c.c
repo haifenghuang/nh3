@@ -543,18 +543,10 @@ O_TYPE mpsl_exec_i(O_ARGS)
 mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 /* executes an MPSL instruction stream */
 {
-	static int exec_level = 0;
 	int f = 0;
-	mpdm_t v;
 
-	exec_level++;
-
-	/* execute first instruction */
-	v = mpsl_exec_i(c, a, NULL, &f);
-
-	exec_level--;
-
-	return(v);
+	/* execute first instruction with a new flow control variable */
+	return mpsl_exec_i(c, a, NULL, &f);
 }
 
 
