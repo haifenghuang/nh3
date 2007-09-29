@@ -94,8 +94,8 @@ mpdm_t mpsl_boolean(int b)
 }
 
 
-static mpdm_t find_local_symbol(mpdm_t s, mpdm_t l)
-/* finds a symbol in the local symbol table */
+static mpdm_t find_local_symbol_table(mpdm_t s, mpdm_t l)
+/* finds the local symbol table hash that holds l */
 {
 	int n;
 	mpdm_t v = NULL;
@@ -149,14 +149,14 @@ static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
 static mpdm_t get_symbol(mpdm_t s, mpdm_t l)
 /* gets a symbol from a local symbol table, or the global */
 {
-	return(mpdm_sget(find_local_symbol(s, l), s));
+	return(mpdm_sget(find_local_symbol_table(s, l), s));
 }
 
 
 static mpdm_t set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
 /* sets a symbol in a local symbol table, or the global */
 {
-	mpdm_sset(find_local_symbol(s, l), s, v);
+	mpdm_sset(find_local_symbol_table(s, l), s, v);
 	return(v);
 }
 
