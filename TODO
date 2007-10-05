@@ -31,6 +31,8 @@ Pending Enhancements
  * 1106: Implement the sscanf() function (similar to the one in filp).
  * 1109: There must be possible to have executable components with
    arguments in compact symbols (as in 'h.code(a1,a2).other').
+ * 1110: Change the trace system to an executable mpdm_t value.
+ * 1111: Change write() to include a variable argument length.
 
 Closed
 ------

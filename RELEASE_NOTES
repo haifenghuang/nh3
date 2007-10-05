@@ -1,0 +1,12 @@
+MPSL Release Notes
+==================
+
+1.0.2
+-----
+
+ * Small internal refactoring regarding subroutine and
+   block frames. Frame creation code has been unified,
+   so block frames don't crash when a NULL local symbol
+   table is sent as argument, and can have arguments.
+   This change is not visible from outside; only a step
+   towards closing bug #1107.
