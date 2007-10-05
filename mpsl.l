@@ -72,8 +72,7 @@ static wchar_t * s_mbstowcs(char * str)
 	int n;
 
 	/* allocs wchar_t space, if needed */
-	if((n = mbstowcs(NULL, str, 0)) > wc_s)
-	{
+	if ((n = mbstowcs(NULL, str, 0)) > wc_s) {
 		wc_s = n;
 		wc = realloc(wc, (wc_s + 1) * sizeof(wchar_t));
 	}
@@ -82,7 +81,7 @@ static wchar_t * s_mbstowcs(char * str)
 	mbstowcs(wc, str, n);
 	wc[n] = L'\0';
 
-	return(wc);
+	return (wc);
 }
 
 
@@ -92,12 +91,11 @@ static mpdm_t literal_cache(char * ptr, wchar_t * wptr)
 	mpdm_t v;
 
 	/* convert to wchar_t */
-	if(ptr != NULL)
+	if (ptr != NULL)
 		wptr = s_mbstowcs(ptr);
 
 	/* search in cache */
-	if((v = mpdm_hget_s(mpsl_lc, wptr)) == NULL)
-	{
+	if ((v = mpdm_hget_s(mpsl_lc, wptr)) == NULL) {
 		v = MPDM_S(wptr);
 		mpdm_hset(mpsl_lc, v, v);
 	}
@@ -131,20 +129,20 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 {INTEGER}	{
 			/* integers */
 			yylval.v = literal_cache(yytext, NULL);
-			return(INTEGER);
+			return (INTEGER);
 		}
 
 {REAL}		{
 			/* real numbers */
 			yylval.v = literal_cache(yytext, NULL);
-			return(REAL);
+			return (REAL);
 		}
 
 \'[^']*\'	{
 			/* single quoted string; return as is */
 			yytext[yyleng - 1] = '\0';
 			yylval.v = literal_cache(yytext + 1, NULL);
-			return(STRING);
+			return (STRING);
 		}
 
 "NULL"		return NULLV;
@@ -185,7 +183,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 {SYMBOL}	{
 			/* symbol name */
 			yylval.v = literal_cache(yytext, NULL);
-			return(SYMBOL);
+			return (SYMBOL);
 		}
 
 {WSPACE}	;	/* ignore spaces */
@@ -209,7 +207,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 			ds_poke(ds_v, L'\0');
 			yylval.v = literal_cache(NULL, ds_v.d);
 			BEGIN 0;
-			return(STRING);
+			return (STRING);
 		}
 <STR>\\x\{{HEXQUAD}\} {
 			int c;
@@ -217,7 +215,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 			sscanf(yytext, "\\x{%x}", &c);
 			ds_poke(ds_v, (wchar_t) c);
 		}
-<STR>.		{ wchar_t wc; if(mbtowc(&wc, yytext, 1) > 0) ds_poke(ds_v, wc); }
+<STR>.		{ wchar_t wc; if (mbtowc(&wc, yytext, 1) > 0) ds_poke(ds_v, wc); }
 
 .		{ return(*yytext); }
 
@@ -229,14 +227,11 @@ int yy_input_for_flex(char * buf, int max)
 {
 	int n = 0;
 
-	if(mpsl_file != NULL)
-	{
-		while(n < max)
-		{
+	if (mpsl_file != NULL) {
+		while (n < max) {
 			int c;
 
-			if((c = fgetc(mpsl_file)) == EOF)
-			{
+			if ((c = fgetc(mpsl_file)) == EOF) {
 				mpsl_file = NULL;
 				break;
 			}
@@ -245,31 +240,28 @@ int yy_input_for_flex(char * buf, int max)
 		}
 	}
 	else
-	if(mpsl_next_char != NULL)
-	{
-		for(;;)
-		{
+	if (mpsl_next_char != NULL) {
+		for (;;) {
 			char tmp[64];	/* really MB_CUR_MAX + 1 */
 			int c, i;
 
-			if(*mpsl_next_char == L'\0' ||
-			   (c = wctomb(tmp, *mpsl_next_char)) < 0)
-			{
+			if (*mpsl_next_char == L'\0' ||
+			   (c = wctomb(tmp, *mpsl_next_char)) < 0) {
 				mpsl_next_char = NULL;
 				break;
 			}
 
 			/* no room? try next time */
-			if(n + c >= max)
+			if (n + c >= max)
 				break;
 
 			mpsl_next_char++;
 
 			/* transfer */
-			for(i = 0;i < c;i++)
+			for (i = 0; i < c; i++)
 				buf[n++] = tmp[i];
 		}
 	}
 
-	return(n);
+	return (n);
 }

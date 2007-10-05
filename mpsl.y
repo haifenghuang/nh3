@@ -462,8 +462,7 @@ static FILE * inc_fopen(char * filename, mpdm_t inc)
 
 	/* loop through INC, prepending each path
 	   to the filename */
-	for (n = 0;n < mpdm_size(inc);n++)
-	{
+	for (n = 0; n < mpdm_size(inc); n++) {
 		mpdm_t v = mpdm_aget(inc, n);
 
 		v = MPDM_2MBS(v->data);
@@ -474,7 +473,7 @@ static FILE * inc_fopen(char * filename, mpdm_t inc)
 			break;
 	}
 
-	return(f);
+	return (f);
 }
 
 
@@ -495,7 +494,9 @@ static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
 	mpsl_next_char = code;
 	mpsl_file = file;
 
-	if(mpsl_filename != NULL) free(mpsl_filename);
+	if (mpsl_filename != NULL)
+		free(mpsl_filename);
+
 	mpsl_filename = strdup(filename);
 
 	/* cache some values */
@@ -504,14 +505,14 @@ static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
 	mpsl_lc = mpdm_hget_s(v, L"LC");
 
 	/* compile! */
-	if(yyparse() == 0 && mpsl_bytecode != NULL)
+	if (yyparse() == 0 && mpsl_bytecode != NULL)
 		x = mpsl_x(mpsl_bytecode, NULL);
 
 	/* clean back cached values */
 	mpsl_opcodes = NULL;
 	mpsl_lc = NULL;
 
-	return(x);
+	return (x);
 }
 
 
@@ -531,7 +532,7 @@ mpdm_t mpsl_compile(mpdm_t code)
 	x = do_parse("<INLINE>", (wchar_t *) code->data, NULL);
 	mpdm_unref(code);
 
-	return(x);
+	return (x);
 }
 
 
@@ -553,8 +554,7 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 	FILE * f = NULL;
 	char * filename = NULL;
 
-	if(file->flags & MPDM_FILE)
-	{
+	if (file->flags & MPDM_FILE) {
 		FILE ** fp;
 
 		/* it's an open file; just store the stream */
@@ -564,8 +564,7 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 		fp = file->data;
 		f = *fp;
 	}
-	else
-	{
+	else {
 		mpdm_t inc = mpsl_get_symbol(MPDM_LS(L"INC"));
 
 		/* it's a filename; open it */
@@ -573,8 +572,7 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 
 		filename = file->data;
 
-		if((f = inc_fopen(filename, inc)) == NULL)
-		{
+		if ((f = inc_fopen(filename, inc)) == NULL) {
 			char tmp[128];
 
 			snprintf(tmp, sizeof(tmp) - 1,
@@ -582,7 +580,7 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 				filename);
 			mpsl_error(MPDM_MBS(tmp));
 
-			return(NULL);
+			return (NULL);
 		}
 
 		file = MPDM_F(f);
@@ -592,7 +590,7 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 
 	mpdm_close(file);
 
-	return(x);
+	return (x);
 }
 
 
@@ -616,15 +614,15 @@ mpdm_t mpsl_eval(mpdm_t code, mpdm_t args)
 	mpsl_abort = 0;
 
 	/* if code is not executable, try to compile */
-	if(!MPDM_IS_EXEC(code))
+	if (!MPDM_IS_EXEC(code))
 		code = mpsl_compile(code);
 
 	/* execute, if possible */
-	if(MPDM_IS_EXEC(code))
+	if (MPDM_IS_EXEC(code))
 		v = mpdm_exec(code, args);
 
 	/* reset the abort flag */
 	mpsl_abort = 0;
 
-	return(v);
+	return (v);
 }
