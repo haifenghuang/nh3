@@ -35,50 +35,48 @@
 	Code
 ********************/
 
-int mpsl_main(int argc, char * argv[])
+int mpsl_main(int argc, char *argv[])
 {
 	mpdm_t v;
-	char * immscript = NULL;
-	FILE * script = stdin;
+	char *immscript = NULL;
+	FILE *script = stdin;
 	int ret = 0;
 	int dump_only = 0;
 
 	/* skip the executable */
-	argv++;	argc--;
+	argv++;
+	argc--;
 
-	while(argc > 0)
-	{
-		if(strcmp(argv[0], "-v") == 0 ||
-		   strcmp(argv[0], "--help") == 0)
-		{
+	while (argc > 0) {
+		if (strcmp(argv[0], "-v") == 0 || strcmp(argv[0], "--help") == 0) {
 			printf("MPSL %s - Minimum Profit Scripting Language\n", VERSION);
 			printf("Copyright (C) 2003-2007 Angel Ortega <angel@triptico.com>\n");
-			printf("This software is covered by the GPL license. NO WARRANTY.\n\n");
+			printf
+			    ("This software is covered by the GPL license. NO WARRANTY.\n\n");
 
 			printf("Usage: mpsl [-d] [-e 'script' | script.mpsl ]\n\n");
 
-			return(0);
+			return (0);
 		}
 		else
-		if(strcmp(argv[0], "-d") == 0)
+		if (strcmp(argv[0], "-d") == 0)
 			dump_only = 1;
 		else
-		if(strcmp(argv[0], "-e") == 0)
-		{
-			argv++; argc--;
+		if (strcmp(argv[0], "-e") == 0) {
+			argv++;
+			argc--;
 			immscript = argv[0];
 		}
-		else
-		{
+		else {
 			/* next argument is a script name; open it */
-			if((script = fopen(argv[0], "r")) == NULL)
-			{
+			if ((script = fopen(argv[0], "r")) == NULL) {
 				fprintf(stderr, "Can't open '%s'\n", argv[0]);
-				return(1);
+				return (1);
 			}
 		}
 
-		argv++; argc--;
+		argv++;
+		argc--;
 	}
 
 	mpsl_startup();
@@ -87,22 +85,20 @@ int mpsl_main(int argc, char * argv[])
 	mpsl_argv(argc, argv);
 
 	/* compile */
-	if(immscript != NULL)
+	if (immscript != NULL)
 		v = mpsl_compile(MPDM_MBS(immscript));
 	else
 		v = mpsl_compile_file(MPDM_F(script));
 
-	if(v != NULL)
-	{
-		if(dump_only)
+	if (v != NULL) {
+		if (dump_only)
 			mpdm_dump(v);
 		else
 			mpdm_exec(v, NULL);
 	}
 
 	/* prints the error, if any */
-	if((v = mpsl_error(NULL)) != NULL)
-	{
+	if ((v = mpsl_error(NULL)) != NULL) {
 		mpdm_write_wcs(stderr, mpdm_string(v));
 		fprintf(stderr, "\n");
 
@@ -111,11 +107,11 @@ int mpsl_main(int argc, char * argv[])
 
 	mpsl_shutdown();
 
-	return(ret);
+	return (ret);
 }
 
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
-	return(mpsl_main(argc, argv));
+	return (mpsl_main(argc, argv));
 }

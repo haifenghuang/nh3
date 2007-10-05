@@ -35,14 +35,14 @@ int tests = 0;
 int oks = 0;
 
 /* failed tests messages */
-char * failed_msgs[5000];
+char *failed_msgs[5000];
 int i_failed_msgs = 0;
 
 /*******************
 	Code
 ********************/
 
-void do_test(char * str, int ok)
+void do_test(char *str, int ok)
 {
 	char tmp[1024];
 
@@ -51,10 +51,10 @@ void do_test(char * str, int ok)
 
 	tests++;
 
-	if(ok)
+	if (ok)
 		oks++;
 	else
-		failed_msgs[i_failed_msgs ++]=strdup(tmp);
+		failed_msgs[i_failed_msgs++] = strdup(tmp);
 }
 
 
@@ -67,7 +67,7 @@ void do_set(mpdm_t * v1, mpdm_t v2)
 }
 
 
-mpdm_t do_test_mpsl(char * code)
+mpdm_t do_test_mpsl(char *code)
 {
 	static mpdm_t v = NULL;
 
@@ -75,11 +75,11 @@ mpdm_t do_test_mpsl(char * code)
 
 	printf("Compile: ");
 	do_test(code, v != NULL);
-	return(v);
+	return (v);
 }
 
 
-mpdm_t do_test_mpsl_file(char * file)
+mpdm_t do_test_mpsl_file(char *file)
 {
 	static mpdm_t v = NULL;
 
@@ -87,7 +87,7 @@ mpdm_t do_test_mpsl_file(char * file)
 
 	printf("Compile file: ");
 	do_test(file, v != NULL);
-	return(v);
+	return (v);
 }
 
 
@@ -97,7 +97,7 @@ mpdm_t do_test_exec(mpdm_t x, mpdm_t a)
 
 	do_set(&v, mpdm_exec(x, a));
 
-	return(v);
+	return (v);
 }
 
 
@@ -132,7 +132,8 @@ void test_mpsl(void)
 	do_test_mpsl("/* hash */ y={ 'enero' => 'january', 'febrero' => 'february' };");
 	do_test_mpsl("/* array */ a=[\"this\", \"one\", \"is\", 666, \"cool\"];");
 
-	do_test_mpsl("/* greatest common divisor (Euclid's algorithm) */ sub gcd(m, n) { while (m > 0) { if(n > m) { local t = m; m = n; n = t; } m -= n; } n; }");
+	do_test_mpsl
+	    ("/* greatest common divisor (Euclid's algorithm) */ sub gcd(m, n) { while (m > 0) { if(n > m) { local t = m; m = n; n = t; } m -= n; } n; }");
 
 	do_test_mpsl("/* range assign */ a = [ 1 .. 1000 ];");
 
@@ -193,8 +194,7 @@ void test_mpsl2(void)
 	   as rounding errors will manifest */
 	v = do_test_mpsl("1.5 + ((3.1 - 5.8) * 8.0);");
 	v = do_test_exec(v, NULL);
-	do_test("mpsl calculator 3",
-		mpdm_rval(v) < -20.0 && mpdm_rval(v) > -21.0);
+	do_test("mpsl calculator 3", mpdm_rval(v) < -20.0 && mpdm_rval(v) > -21.0);
 
 	v = do_test_mpsl("2 + 3 * 4;");
 	v = do_test_exec(v, NULL);
@@ -217,11 +217,13 @@ void test_mpsl2(void)
 	mpdm_dump(v);
 	do_test("mpsl array", mpdm_ival(mpdm_aget(v, 3)) == 666);
 
-	v = do_test_mpsl("/* hash */ { \"enero\" => \"january\", \"febrero\" => \"february\" };");
+	v = do_test_mpsl
+	    ("/* hash */ { \"enero\" => \"january\", \"febrero\" => \"february\" };");
 	v = do_test_exec(v, NULL);
 	mpdm_dump(v);
 	do_test("mpsl hash", mpdm_cmp(mpdm_hget(v,
-		MPDM_LS(L"febrero")), MPDM_LS(L"february")) == 0);
+						MPDM_LS(L"febrero")),
+				      MPDM_LS(L"february")) == 0);
 
 	v = do_test_mpsl("! 1;");
 	v = do_test_exec(v, NULL);
@@ -390,7 +392,7 @@ void test_mpsl2(void)
 
 	v = do_test_mpsl("\"test\" eq \"prueba\";");
 	v = do_test_exec(v, NULL);
-	do_test("streq 1", ! mpsl_is_true(v));
+	do_test("streq 1", !mpsl_is_true(v));
 
 	v = do_test_mpsl("a = 6; ++ a;");
 	v = do_test_exec(v, NULL);
@@ -443,7 +445,8 @@ void test_mpsl2(void)
 	do_test("mysum 4", mpdm_ival(do_test_exec(v, w)) == 175);
 
 	/* compiles (and executes) the definition of gcd() */
-	v = do_test_mpsl("/* greatest common divisor (Euclid's algorithm) */ sub gcd(m, n) { while (m > 0) { if(n > m) { local t = m; m = n; n = t; } m -= n; } n; }");
+	v = do_test_mpsl
+	    ("/* greatest common divisor (Euclid's algorithm) */ sub gcd(m, n) { while (m > 0) { if(n > m) { local t = m; m = n; n = t; } m -= n; } n; }");
 	do_test_exec(v, NULL);
 
 	/* gets a pointer to gcd() */
@@ -658,18 +661,17 @@ int main(void)
 
 	printf("\n*** Total tests passed: %d/%d\n", oks, tests);
 
-	if(oks == tests)
+	if (oks == tests)
 		printf("*** ALL TESTS PASSED\n");
-	else
-	{
+	else {
 		int n;
 
 		printf("*** %d %s\n", tests - oks, "TESTS ---FAILED---");
 
 		printf("\nFailed tests:\n\n");
-		for(n = 0;n < i_failed_msgs;n++)
+		for (n = 0; n < i_failed_msgs; n++)
 			printf("%s", failed_msgs[n]);
 	}
 
-	return(0);
+	return (0);
 }
