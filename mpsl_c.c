@@ -404,13 +404,12 @@ O_TYPE O_hash(O_ARGS)
 }
 
 
-O_TYPE execute_in_frame(O_ARGS)
-/* generic function for executing code inside a frame (sub or blk) */
-/* NOT really an opcode: called from O_subframe() or O_blkframe() */
+O_TYPE O_blkframe(O_ARGS)
+/* runs an instruction under a (block) frame */
 {
 	mpdm_t ret;
 
-	/* if it's a subroutine frame or l is NULL,
+	/* if l is NULL (usually for subroutine frames),
 	   create a new array for holding local symbol tables */
 	if (l == NULL)
 		l = MPDM_A(0);
@@ -434,14 +433,9 @@ O_TYPE execute_in_frame(O_ARGS)
 O_TYPE O_subframe(O_ARGS)
 /* runs an instruction inside a subroutine frame */
 {
-	return execute_in_frame(c, a, NULL, f);
-}
-
-
-O_TYPE O_blkframe(O_ARGS)
-/* runs an instruction under a block frame */
-{
-	return execute_in_frame(c, a, l, f);
+	/* don't propagate the local symbol table,
+	   triggering a new subroutine frame */
+	return O_blkframe(c, a, NULL, f);
 }
 
 
