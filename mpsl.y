@@ -67,12 +67,13 @@ void yyerror(char * s);
 #define INS2(o,a1,a2)		mpsl_mkins(o, 2, a1, a2, NULL)
 #define INS3(o,a1,a2,a3)	mpsl_mkins(o, 3, a1, a2, a3)
 
-static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2)
+static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2, int sf)
 /* creates an executable value with the MPSL executor as the first
    argument and a compiled stream as the second */
 {
 	return(MPDM_X2(mpsl_exec_p,
-		mpsl_mkins(L"SUBFRAME", a2 == NULL ? 1 : 2, a1, a2, NULL)));
+		mpsl_mkins(sf ? L"SUBFRAME" : L"BLKFRAME",
+			a2 == NULL ? 1 : 2, a1, a2, NULL)));
 }
 
 
@@ -145,7 +146,7 @@ stmt:
 					   without arguments */
 					$$ = INS2(L"ASSIGN", $2,
 						INS1(L"LITERAL",
-							mpsl_x($4, NULL)));
+							mpsl_x($4, NULL, 1)));
 				}
 
 	| SUB compsym '(' ')' '{' stmt_list '}'
@@ -155,7 +156,7 @@ stmt:
 					   syntax, including parens) */
 					$$ = INS2(L"ASSIGN", $2,
 						INS1(L"LITERAL",
-							mpsl_x($6, NULL)));
+							mpsl_x($6, NULL, 1)));
 				}
 
 	| SUB compsym '(' sym_list ')' '{' stmt_list '}'
@@ -164,7 +165,7 @@ stmt:
 					   with arguments */
 					$$ = INS2(L"ASSIGN", $2,
 						INS1(L"LITERAL",
-							mpsl_x($7, $4)));
+							mpsl_x($7, $4, 1)));
 				}
 
 	| FOREACH '(' compsym ',' expr ')' stmt
@@ -388,13 +389,13 @@ expr:
  
 	| SUB '{' stmt_list '}'	{
 					/* anonymous subroutine (without args) */
-					$$ = INS1(L"LITERAL", mpsl_x($3, NULL));
+					$$ = INS1(L"LITERAL", mpsl_x($3, NULL, 0));
 				}
 
 	| SUB '(' sym_list ')' '{' stmt_list '}'
 				{
 					/* anonymous subroutine (with args) */
-					$$ = INS1(L"LITERAL", mpsl_x($6, $3));
+					$$ = INS1(L"LITERAL", mpsl_x($6, $3, 0));
 				}
 
 	| '(' expr ')'		{
@@ -506,7 +507,7 @@ static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
 
 	/* compile! */
 	if (yyparse() == 0 && mpsl_bytecode != NULL)
-		x = mpsl_x(mpsl_bytecode, NULL);
+		x = mpsl_x(mpsl_bytecode, NULL, 1);
 
 	/* clean back cached values */
 	mpsl_opcodes = NULL;
