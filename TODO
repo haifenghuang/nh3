@@ -14,6 +14,8 @@ Open Bugs
  * 1105: Document the backslash + newline separation of strings.
  * 1108: Document the 'executable component in compact symbols'
    feature.
+ * 1112: Document the difference regarding local variable access in
+   named and anonymous subroutines.
 
 Pending Enhancements
 --------------------
