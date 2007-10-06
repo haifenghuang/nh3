@@ -1,6 +1,16 @@
 MPSL Release Notes
 ==================
 
+1.0.3
+-----
+
+ * Anonymous subroutines now run inside a block frame
+   instead of a subroutine frame. This way, they can have
+   access to local variables defined in the subroutine
+   they are called from. So, for example, if you run
+   map() inside a subroutine, its anonymous code block
+   can access the local variables defined there.
+
 1.0.2
 -----
 
