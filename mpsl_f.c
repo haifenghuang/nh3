@@ -253,7 +253,7 @@ static mpdm_t F_getenv(mpdm_t a)
 	if (ptr != NULL)
 		ptr = getenv(ptr);
 
-	return MPDM_MBS(ptr);
+	return ptr == NULL ? NULL : MPDM_MBS(ptr);
 }
 
 

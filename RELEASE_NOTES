@@ -10,6 +10,8 @@ MPSL Release Notes
    they are called from. So, for example, if you run
    map() inside a subroutine, its anonymous code block
    can access the local variables defined there.
+ * getenv() doesn't crash if the environment variable
+   does not exist.
 
 1.0.2
 -----
