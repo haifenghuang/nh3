@@ -492,10 +492,12 @@ O_TYPE mpsl_exec_i(O_ARGS)
 /* Executes one MPSL instruction in the MPSL virtual machine. Called
    from mpsl_exec() (which holds the flow control status variable) */
 {
+	int op;
+	struct mpsl_op_s * o;
 	mpdm_t ret = NULL;
 
 	/* if aborted, do nothing */
-	if (mpsl_abort)
+	if (mpsl_abort || c == NULL)
 		return NULL;
 
 	/* reference code, arguments and local symbol table */
@@ -503,21 +505,12 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	mpdm_ref(a);
 	mpdm_ref(l);
 
-	if (c != NULL) {
-		int op;
+	/* gets the opcode */
+	op = mpdm_ival(C0);
+	o = &op_table[op];
 
-		/* gets the opcode */
-		op = mpdm_ival(C0);
-
-		/* if it's a valid opcode... */
-		if (op >= 0 && op < sizeof(op_table) / sizeof(struct mpsl_op_s)) {
-			struct mpsl_op_s * o = &op_table[op];
-
-			/* and call it if existent */
-			if (o->func != NULL)
-				ret = mpdm_ref(o->func(c, a, l, f));
-		}
-	}
+	/* blindly call it, or crash */
+	ret = o->func(c, a, l, f);
 
 	if(mpsl_trace)
 		printf("** %ls: %ls\n", mpdm_string(C0), mpdm_string(ret));
@@ -528,10 +521,13 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	mpdm_unref(c);
 
 	/* sweep some values */
-	if (sweep_on_exec_i)
+	if (sweep_on_exec_i) {
+		mpdm_ref(ret);
 		mpdm_sweep(0);
+		mpdm_unref(ret);
+	}
 
-	return mpdm_unref(ret);
+	return ret;
 }
 
 
