@@ -16,6 +16,8 @@ Open Bugs
    feature.
  * 1112: Document the difference regarding local variable access in
    named and anonymous subroutines.
+ * 1113: Anonymous subroutines still can't access the local subroutine
+   frame, even when created as block frames.
 
 Pending Enhancements
 --------------------
