@@ -590,12 +590,11 @@ mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 	o = mpdm_hget_s(mpsl_opcodes, opcode);
 	mpdm_aset(v, o, 0);
 
-	if (args > 0)
-		mpdm_aset(v, a1, 1);
-	if (args > 1)
-		mpdm_aset(v, a2, 2);
-	if (args > 2)
-		mpdm_aset(v, a3, 3);
+	switch (args) {
+	case 3:		mpdm_aset(v, a3, 3);
+	case 2:		mpdm_aset(v, a2, 2);
+	case 1:		mpdm_aset(v, a1, 1);
+	}
 
 	v = constant_fold(v);
 
