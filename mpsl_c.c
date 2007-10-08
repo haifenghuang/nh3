@@ -500,9 +500,9 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	if (mpsl_abort || c == NULL)
 		return NULL;
 
-	/* reference code, arguments and local symbol table */
-	mpdm_ref(c);
-	mpdm_ref(a);
+	/* reference the local symbol table; the code and
+	   arguments are (hopefully) always referenced,
+	   as they are in a code array */
 	mpdm_ref(l);
 
 	/* gets the opcode */
@@ -517,8 +517,6 @@ O_TYPE mpsl_exec_i(O_ARGS)
 
 	/* unreference */
 	mpdm_unref(l);
-	mpdm_unref(a);
-	mpdm_unref(c);
 
 	/* sweep some values */
 	if (sweep_on_exec_i) {
