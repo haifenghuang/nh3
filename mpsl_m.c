@@ -56,7 +56,7 @@ int mpsl_main(int argc, char *argv[])
 
 			printf("Usage: mpsl [-d] [-e 'script' | script.mpsl ]\n\n");
 
-			return (0);
+			return 0;
 		}
 		else
 		if (strcmp(argv[0], "-d") == 0)
@@ -71,7 +71,7 @@ int mpsl_main(int argc, char *argv[])
 			/* next argument is a script name; open it */
 			if ((script = fopen(argv[0], "r")) == NULL) {
 				fprintf(stderr, "Can't open '%s'\n", argv[0]);
-				return (1);
+				return 1;
 			}
 		}
 
@@ -107,11 +107,11 @@ int mpsl_main(int argc, char *argv[])
 
 	mpsl_shutdown();
 
-	return (ret);
+	return ret;
 }
 
 
 int main(int argc, char *argv[])
 {
-	return (mpsl_main(argc, argv));
+	return mpsl_main(argc, argv);
 }

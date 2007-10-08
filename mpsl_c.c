@@ -496,7 +496,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 
 	/* if aborted, do nothing */
 	if (mpsl_abort)
-		return(NULL);
+		return NULL;
 
 	/* reference code, arguments and local symbol table */
 	mpdm_ref(c);
