@@ -541,7 +541,7 @@ mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
 	int f = 0;
 
 	/* execute first instruction with a new flow control variable */
-	return mpsl_exec_i(c, a, NULL, &f);
+	return mpsl_exec_i(c, a, local_symbol_table, &f);
 }
 
 
