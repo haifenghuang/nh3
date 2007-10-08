@@ -490,13 +490,13 @@ static struct mpsl_op_s {
 
 O_TYPE mpsl_exec_i(O_ARGS)
 /* Executes one MPSL instruction in the MPSL virtual machine. Called
-   from mpsl_exec() (which holds the flow control status variable) */
+   from mpsl_exec_p() (which holds the flow control status variable) */
 {
 	int op;
 	struct mpsl_op_s * o;
 	mpdm_t ret = NULL;
 
-	/* if aborted, do nothing */
+	/* if aborted or NULL, do nothing */
 	if (mpsl_abort || c == NULL)
 		return NULL;
 
