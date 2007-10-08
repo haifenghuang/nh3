@@ -280,7 +280,7 @@ O_TYPE O_numeq(O_ARGS) { mpdm_t v1 = RF(M1); mpdm_t v2 = M2; UF(v1); return (BOO
 O_TYPE O_break(O_ARGS) { *f = 1; return (NULL); }
 O_TYPE O_return(O_ARGS) { mpdm_t v = M1; *f = -1; return (v); }
 
-O_TYPE O_exec(O_ARGS)
+O_TYPE O_execsym(O_ARGS)
 /* executes the value of a symbol */
 {
 	mpdm_t s, v, r = NULL;
@@ -444,7 +444,7 @@ static struct mpsl_op_s {
 	{ L"MULTI",	0,	O_multi },
 	{ L"SYMVAL",	0,	O_symval },
 	{ L"ASSIGN",	0,	O_assign },
-	{ L"EXEC",	0,	O_exec },
+	{ L"EXECSYM",	0,	O_execsym },
 	{ L"IF",	0,	O_if },
 	{ L"WHILE",	0,	O_while },
 	{ L"FOREACH",	0,	O_foreach },
