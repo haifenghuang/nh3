@@ -492,7 +492,6 @@ O_TYPE mpsl_exec_i(O_ARGS)
 /* Executes one MPSL instruction in the MPSL virtual machine. Called
    from mpsl_exec_p() (which holds the flow control status variable) */
 {
-	int op;
 	struct mpsl_op_s * o;
 	mpdm_t ret = NULL;
 
@@ -506,8 +505,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	mpdm_ref(l);
 
 	/* gets the opcode */
-	op = mpdm_ival(C0);
-	o = &op_table[op];
+	o = &op_table[mpdm_ival(C0)];
 
 	/* blindly call it, or crash */
 	ret = o->func(c, a, l, f);
