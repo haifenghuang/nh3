@@ -487,6 +487,10 @@ compare arrays and hashes:
  cmp( [ 1, 'a', 3 ],
  	[ 1, "a", 3 ]);	/* 0 (both arrays are equal) */
 
+Arrays are first tested for number of elements (so bigger arrays are
+greater than arrays with fewer elements), and if both are equal, then each
+element is tested sequentially.
+
 The split() and join() functions can be used to convert strings into
 arrays and vice-versa. Examples:
 
@@ -563,9 +567,9 @@ The sort() function returns a sorted copy of the array sent as argument:
 
  sorted_weekdays = sort(weekdays);
 
-The sorting is alphabetical; if another kind of sort is wanted, the
-2-argument version must be used, as mentioned previously in the
-_subroutines_ section.
+The sorting is done with the cmp() function (see above); if another kind of
+sort is wanted, the 2-argument version must be used, as mentioned
+previously in the _Subroutines_ section.
 
 Whenever a change must be done on every element of an array, the map()
 function can be useful and much faster than iterating the array using
@@ -705,9 +709,10 @@ of its forms, it can be used to test if a string matches:
  	print("The v variable contains a valid time\n");
 
 The regular expression can contain flags; those are 'i', for case
-insensitiveness, or 'm', to treat the string as a multiline one (i.e., one
-containing \n characters), where the special ^ and $ markup match beginning
-and end of lines and not the beginning or end of the string.
+insensitiveness, 'l', to select the last matching instead of the first,
+or 'm', to treat the string as a multiline one (i.e., one containing \n
+characters), where the special ^ and $ markup match beginning and end of
+lines and not the beginning or end of the string.
 
 Regex() returns the matched string.
 
@@ -774,28 +779,131 @@ is returned.
 Regular expression substitutions
 --------------------------------
 
-To be written.
+The sregex() function can be used to substitute the matching part of a
+string with another string. The simplest form:
+
+ /* substitute all characters in password with asterisks */
+ sregex('/./g', password, '*');
+
+The substitution part can also be a hash:
+
+ /* substitute \n, \r, etc with their equivalents */
+ sregex("/[\r\n\t]/g", var, {
+	'\r'	=>	"\r",
+	'\n'	=>	"\n",
+	'\t'	=>	"\t"
+	});
+
+Or even a function:
+
+ /* zero-pad all numbers in var */
+ sregex('/[0-9]+/g', var, sub (m) {
+	sprintf("%04d", m);
+	});
+
+The regular expression can contain flags; those are 'i', for
+case-insensitive matching, and 'g', for global replacements (all ocurrences
+in the string will be replaced, instead of just the first found).
 
 Input/Output operations
 -----------------------
 
-To be written.
+File operations are done by opening files with the open() call. It accepts
+two arguments: the file and the mode:
 
- * open()
- * close()
- * read()
- * write()
- * getchar()
- * putchar()
- * unlink()
- * stat()
- * chmod()
- * chown()
- * glob()
- * encoding()
- * popen()
- * pclose()
- * load()
+ /* open in read mode */
+ local i = open('existingdata.dat', 'r');
+ 
+ /* open in write mode (create) */
+ local o = open('newdata.dat', 'w');
+
+If the file cannot be open or created, NULL is returned.
+
+The read() function returns a line read from a file descriptor, or NULL if
+no more lines can be read (i.e. on EOF). A line is considered from the
+current file position until an end of line mark (\n or \r\n). All files
+under MPSL are considered as text ones; before the read() call returns, the
+string is converted to wide chars (the internal representation of strings
+in MPSL) by using the current locale definitions, unless a explicit
+encoding is set by calling encoding() (see below).
+
+The opposite of read() is write(); it accepts a file descriptor and a
+string to be written. As read(), the string is converted from wide chars by
+using the current locale definitions unless a different encoding() was set.
+The write() function does not write an end of line, though.
+
+Similar functions getchar() and putchar() exist to read and write
+characters instead of lines. This functions don't do any locale nor
+encoding conversions.
+
+The unlink() function can be used to delete files, chmod() to set the mode
+and chown() to set the owner.
+
+The stat() function returns an array containing information about a file,
+similar to the C library function of the same name. The returned values
+are: device number, inode, mode, number of links, uid, gid, rdev, size,
+atime, mtime and ctime. Take note that not all values has meaning depending
+on the filesystem or the architecture. The `mode' argument can be used in
+chmod() and `uid' and `gid' in chown(). If the file does not exist, stat()
+returns NULL (which is a good way to test for file existence).
+
+The glob() function accepts a file spec as the only argument and returns
+an array of filenames matching it. Directories have a / as the last
+character.
+
+The popen() and pclose() function calls are used for piping from / to
+programs. Pipes can be for reading ('r' mode), for writing ('w' mode), or
+bidirectional (the 'r+' or 'w+' modes). Once open, the read() and write()
+functions can be used the same as in plain files.
+
+As mentioned above, the encoding() function can be used to force the
+reading or writing conversions to be done when doing IO. By default, the
+current locale is used, and it's the same as calling encoding() without
+arguments. If an encoding is forced, reading and writing is done by using
+the selected converter. Take note that support for the iconv library must
+be compiled in; if iconv is not available, a special, ad-hoc converter
+called "utf-8" is available.
+
+Each file can have a different encoding converter and is selected at open()
+time.
+
+A snippet to convert a file from current locale to iso8859-1 can be:
+
+ sub convert_to_iso8859_1(fromfile, tofile)
+ {
+ 	local i, o, l;
+ 	local ret = 0;
+ 
+ 	/* open the file first */
+ 	if ((i = open(fromfile, 'r')) == NULL)
+ 		return -1;
+ 
+ 	/* is iso8859-1 supported? */
+ 	if (encoding("iso8859-1") < 0)
+ 		return -2;
+ 
+ 	/* create the new file now; it will have iso8859-1
+ 	   encoding as it's the last one set. The input
+ 	   file keeps its original encoding */
+ 	if ((o = open(tofile, 'w')) != NULL) {
+ 		while (l = read(i))
+ 			write(o, l);
+ 
+ 		close(o);
+ 	}
+ 	else
+ 		ret = -3;
+ 
+ 	/* close input and revert to default encoding */
+ 	close(i);
+ 	encoding();
+ 
+ 	return ret;
+ }
+
+The load() function can be used to load, compile and execute an MPSL
+source file. The file will be searched for using the paths in the INC
+array.
 
 Special symbols
 ---------------
