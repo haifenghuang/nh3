@@ -38,6 +38,11 @@ characters, also as in C:
  print("Hello, world\n");	/* ends with a new line */
  print('Hello, World\n');	/* prints Hello, World\n literally */
 
+Strings can be broken between lines by using backslashes:
+
+ print("Hello, "\
+ "world\n");
+
 Subroutine calls
 ~~~~~~~~~~~~~~~~
 
