@@ -472,16 +472,59 @@ value to it.
 Builtin functions
 -----------------
 
-String functions
-~~~~~~~~~~~~~~~~
+General functions
+~~~~~~~~~~~~~~~~~
 
- * cmp()
- * splice()
- * split()
- * join()
- * sprintf()
- * chr()
- * ord()
+The cmp() function can be used to compare two values. It returns a signed
+number, negative if the first value is lesser than the second, positive
+on the contrary or zero if they are the equal. It also can be used to
+compare arrays and hashes:
+
+ cmp('a', 'b');		/* < 0 ('a' is lesser than 'b') */
+ cmp('aaa', 'aab');	/* < 0 ('aaa' is lesser than 'aab') */
+ cmp( [ 1, 2, 3 ],
+ 	[ 1, 2 ]);	/* > 0 ([1,2,3] is greater than [1,2]) */
+ cmp( [ 1, 'a', 3 ],
+ 	[ 1, "a", 3 ]);	/* 0 (both arrays are equal) */
+
+The split() and join() functions can be used to convert strings into
+arrays and vice-versa. Examples:
+
+ /* sets a to [ 12, 'abcd', 356, '', 'xxx' ] */
+ local a = split(':', '12:abcd:356::xxx');
+ 
+ /* sets b to 12->abcd->356->->xxx */
+ local b = join('->', a);
+
+The split() function can have a special separator, NULL, that makes it
+explode the string in characters:
+
+ /* sets c to [ 't', 'h', 'i', 's' ] */
+ local c = split(NULL, "this");
+
+The splice() function can be used to delete, insert or replace a subset of
+a string with another one. It returns a two element array: one with the
+newly created string, and another with the deleted part. Examples:
+
+ local a = "This is a string";
+ 
+ /* original string, string to be inserted, position, chars to delete */
+ splice(a, 'not', 8, 0);	/* [ 'This is not a string', NULL ] */
+ splice(a, '', 5, 3);		/* [ 'This a string', 'is ' ] */
+ splice(a, 'can be', 5, 3);	/* [ 'This can be a string', 'is ' ] */
+
+The chr() and ord() functions return the character represented by a Unicode
+number and vice-versa:
+
+ ord('A');	/* returns 65 (ASCII or Unicode for A) */
+ chr(65);	/* return 'A' */
+
+The sprintf() function works like any other sprintf() implementation in
+the world: accepts a format string (with special, %-prefixed placeholders)
+and a list of arguments, and substitutes them.
+
+ sprintf("%s: %d", 'ERROR', 10);	/* returns 'ERROR: 10' */
+ sprintf("%04X", 16384);		/* return '4000' */
 
 Array functions
 ~~~~~~~~~~~~~~~
