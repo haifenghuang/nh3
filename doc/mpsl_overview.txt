@@ -127,7 +127,7 @@ usually scalar values, in particular strings.
  en2es_workdays = {
 	'monday'	=>	'lunes',
 	'tuesday'	=>	'martes',
-	'wednesday'	=>	'miércoles',
+	'wednesday'	=>	'mi?rcoles',
 	'thursday'	=>	'jueves',
 	'friday'	=>	'viernes'
 	};
@@ -209,19 +209,18 @@ MPSL expression, and the conditional code must be written between braces
 if it's more than one instruction, just like in C.
 
  /* one instruction */
- if(a > b)
+ if (a > b)
 	do_something();
  
  /* more than one instruction (braces needed) */
- if(c == d)
- {
+ if (c == d) {
 	do_this();
 	do_that();
  }
 
 'If' conditionals can also include an else instruction or block:
 
- if(tab_size == 8)
+ if (tab_size == 8)
 	print("You are sane\n");
  else
 	print("Weirdo!\n");
@@ -231,8 +230,7 @@ While
 
 'While' conditionals are exactly as you suppose they are:
 
- while(player_is_alive)
- {
+ while (player_is_alive) {
 	/* game loop */
 	move_player();
 	move_baddies();
@@ -250,7 +248,7 @@ array. The usual construction is as follows:
  /* week days */
  weekdays = [ 'monday', 'tuesday', 'wednesday', 'thurday', 'friday' ];
  
- foreach(w, weekdays)
+ foreach (w, weekdays)
 	print("I hate ", w, "s\n");
 
 Each value of the array will be assigned to the variable and the loop body
@@ -299,8 +297,8 @@ MPSL's scalar values are used for both string and numerical values, so (as
 in Perl) the string and numeric comparison operators must be different:
 
  a = 0; b = 0.0;
- if(a == b) { /* this is truth */ }
- if(a eq b) { /* this is false */ }
+ if (a == b) { /* this is truth */ }
+ if (a eq b) { /* this is false */ }
 
 Boolean logic
 ~~~~~~~~~~~~~
@@ -352,8 +350,7 @@ Subroutines (also called functions) are created with the 'sub' keyword:
 
  sub main_loop
  {
-	while(!exit_requested)
-	{
+	while (!exit_requested) {
 		local o;
  
 		o = get_option();
@@ -366,7 +363,7 @@ Subroutines can also accept arguments:
 
  sub process_option(o)
  {
-	if(o == -1)
+	if (o == -1)
 		exit_requested=1;
 	else
 		print("Option is ", o, "\n");
@@ -394,20 +391,19 @@ keyword, that can also be used to break execution flow:
 
  sub div(a, b)
  {
-	if(b == 0)
-	{
+	if (b == 0) {
 		print("Invalid value for b.\n");
 		return(0);
 	}
  
-	return(a / b);
+	return a / b;
  }
 
 When calling a subroutine, parentheses are always mandatory, even if it
 has no arguments. If a subroutine is referenced without its arguments,
 it's not called, but a pointer to it returned instead:
 
- sub sum(a, b) { return(a + b); }
+ sub sum(a, b) { return a + b; }
  
  a = sum(10, 20);	/* a == 30 */
  b = sum;		/* b has a pointer to the sum subroutine */
@@ -423,7 +419,7 @@ subroutines. So, the following can be done:
  push(on_exit_subs, sub { print("Other stuff\n"); } );
  
  /* exiting; calling all functions stored in on_exit_subs */
- foreach(f, on_exit_subs) f();
+ foreach (f, on_exit_subs) f();
 
 Anonymous functions can also accept arguments:
 
@@ -434,7 +430,7 @@ Anonymous functions can also accept arguments:
  	sub (a, b) { print(a, " / ", b, ": ", a / b, "\n"); }
  ];
  
- foreach(f, math_ops) f(10, 20);
+ foreach (f, math_ops) f(10, 20);
 
 This kind of anonymous subroutines are commonly used as callbacks. The
 following examples use the two-argument version of sort() to sort arrays
@@ -608,10 +604,10 @@ If the existence of a pair must be tested, the exists() function is handy:
  h = { 'a' => 1000, 'b' => 0, 'c' => 3000 };
  
  /* this is true */
- if(exists(h, 'b')) print("B exists\n");
+ if (exists(h, 'b')) print("B exists\n");
  
  /* this is not, as 0 does not evaluates as true */
- if(h['b']) print("B is true\n");
+ if (h['b']) print("B is true\n");
 
 The keys() function returns an array with the keys of a hash:
 
@@ -635,11 +631,11 @@ On this implementation, executable and hash values are also arrays, so if
 you need to act differently on the type of a value, the correct order is
 is_exec(), is_hash() and is_array(), as in the following example:
 
- if(is_exec(v)) { print("v is executable\n"); }
+ if (is_exec(v)) { print("v is executable\n"); }
  else
- if(is_hash(v)) { print("v is a hash with ", hsize(v), " pairs\n"); }
+ if (is_hash(v)) { print("v is a hash with ", hsize(v), " pairs\n"); }
  else
- if(is_array(v) { print("v is an array with ", size(v), " elements\n"); }
+ if (is_array(v) { print("v is an array with ", size(v), " elements\n"); }
  else
  	print("v is a scalar\n");
 
@@ -652,7 +648,7 @@ of its forms, it can be used to test if a string matches:
  /* hours, minutes, seconds */
  v = "07:55:35";
  
- if(regex("/^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/", v))
+ if (regex("/^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/", v))
  	print("The v variable contains a valid time\n");
 
 The regular expression can contain flags; those are 'i', for case
@@ -685,8 +681,7 @@ This can be used to extract many values from the same string:
  s = "There is 10 and 35 and 42 in the number 103542!";
  offset = 0;
  
- while(n = regex("/[0-9]+/", s, offset))
- {
+ while (n = regex("/[0-9]+/", s, offset)) {
  	local c;
  
  	/* print result */
@@ -717,8 +712,7 @@ is returned.
              "/[a-z0-9]+/i"  /* the value (3) */
            ], v1);
  
- if(r != NULL)
- {
+ if (r != NULL) {
  	/* the key is the element #1 and the value the #3 */
  	key = r[1];
  	value = r[3];
@@ -827,4 +821,4 @@ Examples:
  dump(MPDM());
 
 ----
-Angel Ortega <angel@triptico.com> - $Date$
+Angel Ortega <angel@triptico.com>
