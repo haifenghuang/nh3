@@ -43,6 +43,11 @@ Strings can be broken between lines by using backslashes:
  print("Hello, "\
  "world\n");
 
+Non-ASCII characters (Unicode) can be included in strings using the
+following syntax:
+
+ print("Hello, world \x{263A}\n"); /* prints a smiley */
+
 Subroutine calls
 ~~~~~~~~~~~~~~~~
 
