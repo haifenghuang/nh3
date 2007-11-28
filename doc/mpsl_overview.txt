@@ -809,13 +809,16 @@ Input/Output operations
 -----------------------
 
 File operations are done by opening files with the open() call. It accepts
-two arguments: the file and the mode:
+two arguments, the file and the mode:
 
  /* open in read mode */
  local i = open('existingdata.dat', 'r');
  
  /* open in write mode (create) */
  local o = open('newdata.dat', 'w');
+
+The opening mode is the same as the one in the fopen() C library call, so
+other combinations exist.
 
 If the file cannot be open or created, NULL is returned.
 
@@ -853,18 +856,19 @@ character. The file spec and the returned files are system-dependent, but
 always usable by open().
 
 The popen() and pclose() function calls are used for piping from / to
-programs. Pipes can be for reading ('r' mode), for writing ('w' mode), or
-bidirectional (the 'r+' or 'w+' modes, which can be used to communicate
-two-way with programs like ispell, smtp servers and such). Once open, the
-read() and write() functions can be used the same as in plain files.
+programs. Pipes can be open for reading ('r' mode), for writing ('w' mode),
+or bidirectional (by appending '+' to the mode, which can be used to
+communicate two-way with programs like ispell, smtp servers and such). Once
+open, the read() and write() functions can be used the same as in plain
+files.
 
 As mentioned above, the encoding() function can be used to force the
 reading or writing conversions to be done when doing IO. By default, the
 current locale is used, and it's the same as calling encoding() without
 arguments. If an encoding is forced, reading and writing is done by using
-the selected converter. Take note that support for the iconv library must
-be compiled in; if iconv is not available, a special, ad-hoc converter
-called "utf-8" is available.
+the selected converter. Take note that support for the `iconv' library must
+be compiled in; if it's not, a special, ad-hoc converter called "utf-8"
+is always available.
 
 Each file can have a different encoding converter and is selected at open()
 time.
@@ -880,12 +884,14 @@ A snippet to convert a file from current locale to iso8859-1 can be:
  	if ((i = open(fromfile, 'r')) == NULL)
  		return -1;
  
- 	/* is iso8859-1 supported? */
- 	if (encoding("iso8859-1") < 0)
+ 	/* set encoding to iso8859-1 (can fail) */
+ 	if (encoding("iso8859-1") < 0) {
+ 		close(i);
  		return -2;
+ 	}
  
  	/* create the new file now; it will have iso8859-1
- 	   encoding as it's the last one set. The input
+ 	   encoding as it's the last encoding set. The input
  	   file keeps its original encoding */
  	if ((o = open(tofile, 'w')) != NULL) {
  		while (l = read(i))
@@ -934,7 +940,8 @@ Stores the last error message from the system (file not found, etc.).
 STDIN, STDOUT, STDERR
 ~~~~~~~~~~~~~~~~~~~~~
 
-The famous standard file descriptors.
+The famous standard file descriptors. Can be used in read(), write()
+and related functions.
 
 HOMEDIR
 ~~~~~~~
