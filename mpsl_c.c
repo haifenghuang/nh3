@@ -602,6 +602,9 @@ mpdm_t mpsl_build_opcodes(void)
 
 	for (n = 0; op_table[n].name != NULL; n++) {
 		mpdm_t v = MPDM_LS(op_table[n].name);
+
+		/* FIXME: there should exist an MPDM
+		   function to do this */
 		v->ival = n;
 		v->flags |= MPDM_IVAL;
 
