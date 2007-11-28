@@ -41,12 +41,12 @@ characters, also as in C:
 Strings can be broken between lines by using backslashes:
 
  print("Hello, "\
- "world\n");
+ 	"world\n");
 
 Non-ASCII characters (Unicode) can be included in strings using the
 following syntax:
 
- print("Hello, world \x{263A}\n"); /* prints a smiley */
+ print("Hello, world \x{263A}\n"); /* a smiley follows the greeting */
 
 Subroutine calls
 ~~~~~~~~~~~~~~~~
@@ -137,7 +137,7 @@ usually scalar values, in particular strings.
  en2es_workdays = {
 	'monday'	=>	'lunes',
 	'tuesday'	=>	'martes',
-	'wednesday'	=>	'mi?rcoles',
+	'wednesday'	=>	'miercoles',
 	'thursday'	=>	'jueves',
 	'friday'	=>	'viernes'
 	};
@@ -374,7 +374,7 @@ Subroutines can also accept arguments:
  sub process_option(o)
  {
 	if (o == -1)
-		exit_requested=1;
+		exit_requested = 1;
 	else
 		print("Option is ", o, "\n");
  }
@@ -403,7 +403,7 @@ keyword, that can also be used to break execution flow:
  {
 	if (b == 0) {
 		print("Invalid value for b.\n");
-		return(0);
+		return 0;
 	}
  
 	return a / b;
@@ -788,7 +788,7 @@ string with another string. The simplest form:
 The substitution part can also be a hash:
 
  /* substitute \n, \r, etc with their equivalents */
- sregex("/[\r\n\t]/g", var, {
+ sregex("/\\[rnt]/g", var, {
 	'\r'	=>	"\r",
 	'\n'	=>	"\n",
 	'\t'	=>	"\t"
@@ -849,12 +849,14 @@ returns NULL (which is a good way to test for file existence).
 
 The glob() function accepts a file spec as the only argument and returns
 an array of filenames matching it. Directories have a / as the last
-character.
+character. The file spec and the returned files are system-dependent, but
+always usable by open().
 
 The popen() and pclose() function calls are used for piping from / to
 programs. Pipes can be for reading ('r' mode), for writing ('w' mode), or
-bidirectional (the 'r+' or 'w+' modes). Once open, the read() and write()
-functions can be used the same as in plain files.
+bidirectional (the 'r+' or 'w+' modes, which can be used to communicate
+two-way with programs like ispell, smtp servers and such). Once open, the
+read() and write() functions can be used the same as in plain files.
 
 As mentioned above, the encoding() function can be used to force the
 reading or writing conversions to be done when doing IO. By default, the
