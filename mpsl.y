@@ -555,15 +555,8 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 	FILE * f = NULL;
 	char * filename = NULL;
 
-	if (file->flags & MPDM_FILE) {
-		FILE ** fp;
-
-		/* it's an open file; just store the stream */
-		/* FIXME: this is a hack; there should exist
-		   a way to retrieve the FILE handle */
+	if ((f = mpdm_get_filehandle(file)) != NULL) {
 		filename = "<FILE>";
-		fp = file->data;
-		f = *fp;
 	}
 	else {
 		mpdm_t inc = mpsl_get_symbol(MPDM_LS(L"INC"));
