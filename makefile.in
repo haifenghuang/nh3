@@ -61,13 +61,9 @@ realclean: clean
 distclean: clean y.tab.c y.tab.h lex.yy.c
 	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile
 
-doc/mpsl_index.html: doc/mpsl_index.txt
-	-grutatxt -i $< -o $@
+.SUFFIXES: .txt .html
 
-doc/mpsl_overview.html: doc/mpsl_overview.txt
-	-grutatxt -i $< -o $@
-
-doc/mpsl_internals.html: doc/mpsl_internals.txt
+.txt.html:
 	-grutatxt -i $< -o $@
 
 doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
