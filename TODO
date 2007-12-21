@@ -28,6 +28,8 @@ Pending Enhancements
  * 1110: Change the trace system to an executable mpdm_t value.
  * 1111: Change write() to include a variable argument length.
  * 1115: Add C++ style comments.
+ * 1116: Changed foreach() to _always_ create the iterator variable
+   as local.
 
 Closed
 ------
