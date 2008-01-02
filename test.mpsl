@@ -379,3 +379,11 @@ print("Error is ", ERROR, " (it's ok)\n");
 
 eval("eval(\"error('you!');\");");
 print("Error is ", ERROR, " (it's ok)\n");
+
+local n = 1;
+
+foreach(n, [ 1, 2, 3 ]) {
+	print("Iterator: ", n, "\n");
+}
+
+print("n should still be 1: ", n, "\n");
