@@ -64,7 +64,7 @@ distclean: clean y.tab.c y.tab.h lex.yy.c
 .SUFFIXES: .txt .html
 
 .txt.html:
-	-grutatxt -i $< -o $@
+	$(GRUTATXT) < $< > $@
 
 doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
 	-./mpsl scripts/mkquickref.mpsl < $< > $@

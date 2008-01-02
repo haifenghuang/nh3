@@ -159,6 +159,7 @@ grep CONFOPT_WIN32 ${MPDM}/config.h >/dev/null && TARGET=mpsl.exe
 # final setup
 
 echo "MPDM=$MPDM" >> makefile.opts
+grep GRUTATXT $MPDM/makefile.opts >> makefile.opts
 echo "VERSION=$VERSION" >> makefile.opts
 echo "PREFIX=\$(DESTDIR)$PREFIX" >> makefile.opts
 echo "DOCDIR=\$(DESTDIR)$DOCDIR" >> makefile.opts
