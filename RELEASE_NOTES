@@ -5,7 +5,9 @@ MPSL Release Notes
 -----
 
  * The iterator variable in foreach() is _always_ created
-   as a local variable inside the block.
+   as a local variable inside the block. Also, the old
+   construction foreach(local v, ...) issues a warning,
+   as it's redundant.
 
 1.0.3
 -----
