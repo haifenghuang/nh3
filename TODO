@@ -28,8 +28,6 @@ Pending Enhancements
  * 1110: Change the trace system to an executable mpdm_t value.
  * 1111: Change write() to include a variable argument length.
  * 1115: Add C++ style comments.
- * 1116: Changed foreach() to _always_ create the iterator variable
-   as local.
 
 Closed
 ------
@@ -184,5 +182,7 @@ Closed
    (Tue, 27 Nov 2007 13:40:59 +0100).
  * 1051: Finish documentation for the scripting language
    (Wed, 28 Nov 2007 09:49:00 +0100).
+ * 1116: Changed foreach() to _always_ create the iterator variable
+   as local (Wed, 02 Jan 2008 10:10:48 +0100).
 
 Email bugs to angel@triptico.com

@@ -171,12 +171,18 @@ stmt:
 	| FOREACH '(' compsym ',' expr ')' stmt
 				{
 					/* foreach construction */
-					$$ = INS3(L"FOREACH", $3, $5, $7);
+					/* a block frame is created, the iterator
+					   created as local, and the foreach executed */
+					$$ = INS1(L"BLKFRAME",
+						INS2(L"MULTI",
+							INS1(L"LOCAL", $3),
+							INS3(L"FOREACH", $3, $5, $7)
+						)
+					);
 				}
 	| FOREACH '(' LOCAL compsym ',' expr ')' stmt
 				{
-					/* foreach construction with local
-					   definition of the iterator variable */
+					/* alias for foreach() */
 					$$ = INS1(L"BLKFRAME",
 						INS2(L"MULTI",
 							INS1(L"LOCAL", $4),
