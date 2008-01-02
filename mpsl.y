@@ -77,6 +77,12 @@ static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2, int sf)
 }
 
 
+static void compiler_warning(char * str)
+{
+	fprintf(stderr, "WARNING: %s.\n", str);
+}
+
+
 %}
 
 %union {
@@ -182,7 +188,8 @@ stmt:
 				}
 	| FOREACH '(' LOCAL compsym ',' expr ')' stmt
 				{
-					/* alias for foreach() */
+					compiler_warning("useless use of local in foreach loop");
+
 					$$ = INS1(L"BLKFRAME",
 						INS2(L"MULTI",
 							INS1(L"LOCAL", $4),
