@@ -71,7 +71,7 @@ doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
 
 doc/mpsl_api.html: mpsl_*.c mpsl.y
 	mkdir -p doc
-	-mp_doccer mpsl_*.c mpsl.y -o doc/mpsl_api -f html1 \
+	$(MP_DOCCER) mpsl_*.c mpsl.y -o doc/mpsl_api -f html1 \
 	-t "MPSL C API ($(VERSION))" \
 	-a 'Angel Ortega - angel@triptico.com'
 
