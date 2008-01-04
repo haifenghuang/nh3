@@ -61,6 +61,8 @@ realclean: clean
 distclean: clean y.tab.c y.tab.h lex.yy.c
 	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile
 
+realdistclean: distclean docsclean
+
 .SUFFIXES: .txt .html
 
 .txt.html:
