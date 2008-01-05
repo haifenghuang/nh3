@@ -5,8 +5,10 @@ LIB=libmpsl.a
 all: $(TARGET) docs
 
 PROJ=mpsl
-DOCS=doc/mpsl_index.html doc/mpsl_overview.html doc/mpsl_internals.html \
-	doc/mpsl_quickref.ps doc/mpsl_api.html
+
+ADD_DOCS=doc/mpsl_quickref.ps
+GRUTATXT_DOCS=doc/mpsl_index.html doc/mpsl_overview.html doc/mpsl_internals.html
+MP_DOCCER_DOCS=doc/mpsl_api.html
 
 OBJS=mpsl_c.o mpsl_l.o mpsl_m.o mpsl_y.o mpsl_f.o
 
@@ -66,14 +68,14 @@ realdistclean: distclean docsclean
 .SUFFIXES: .txt .html
 
 .txt.html:
-	$(GRUTATXT) < $< > $@
+	grutatxt < $< > $@
 
 doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
 	-./mpsl scripts/mkquickref.mpsl < $< > $@
 
 doc/mpsl_api.html: mpsl_*.c mpsl.y
 	mkdir -p doc
-	$(MP_DOCCER) mpsl_*.c mpsl.y -o doc/mpsl_api -f html1 \
+	mp_doccer mpsl_*.c mpsl.y -o doc/mpsl_api -f html1 \
 	-t "MPSL C API ($(VERSION))" \
 	-a 'Angel Ortega - angel@triptico.com'
 
