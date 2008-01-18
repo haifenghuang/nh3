@@ -467,7 +467,7 @@ void yyerror(char * s)
 }
 
 
-static FILE * inc_fopen(char * filename, mpdm_t inc)
+static FILE * inc_fopen(const char * filename, mpdm_t inc)
 /* loads filename, searching in INC if not directly accesible */
 {
 	FILE * f = NULL;
@@ -491,7 +491,7 @@ static FILE * inc_fopen(char * filename, mpdm_t inc)
 }
 
 
-static mpdm_t do_parse(char * filename, wchar_t * code, FILE * file)
+static mpdm_t do_parse(const char * filename, wchar_t * code, FILE * file)
 /* calls yyparse() after doing some initialisations, and returns
    the compiled code as an executable value */
 {
@@ -566,7 +566,7 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 {
 	mpdm_t x = NULL;
 	FILE * f = NULL;
-	char * filename = NULL;
+	const char * filename = NULL;
 
 	if ((f = mpdm_get_filehandle(file)) != NULL) {
 		filename = "<FILE>";
