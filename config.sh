@@ -13,17 +13,13 @@ PREFIX=/usr/local
 # installation directory for documents
 DOCDIR=""
 
+# store command line args for configuring the libraries
+CONF_ARGS="$*"
+
 # parse arguments
 while [ $# -gt 0 ] ; do
 
 	case $1 in
-	--without-win32)	WITHOUT_WIN32=1 ;;
-	--without-unix-glob)	WITHOUT_UNIX_GLOB=1 ;;
-	--with-included-regex)	WITH_INCLUDED_REGEX=1 ;;
-	--with-pcre)		WITH_PCRE=1 ;;
-	--without-gettext)	WITHOUT_GETTEXT=1 ;;
-	--without-iconv)	WITHOUT_ICONV=1 ;;
-	--without-wcwidth)	WITHOUT_WCWIDTH=1 ;;
 	--help)			CONFIG_HELP=1 ;;
 
 	--mingw32)		CC=i586-mingw32msvc-cc
@@ -144,14 +140,6 @@ fi
 
 # If MPDM is not configured, do it
 if [ ! -f $MPDM/Makefile ] ; then
-	CONF_ARGS="--prefix=$PREFIX"
-	[ "$WITHOUT_WIN32" = 1 ] && CONF_ARGS="$CONF_ARGS --without-win32"
-	[ "$WITHOUT_UNIX_GLOB" = 1 ] && CONF_ARGS="$CONF_ARGS --without-unix-glob"
-	[ "$WITH_INCLUDED_REGEX" = 1 ] && CONF_ARGS="$CONF_ARGS --with-included-regex"
-	[ "$WITH_PCRE" = 1 ] && CONF_ARGS="$CONF_ARGS --with-pcre"
-	[ "$WITHOUT_GETTEXT" = 1 ] && CONF_ARGS="$CONF_ARGS --without-gettext"
-	[ "$WITHOUT_ICONV" = 1 ] && CONF_ARGS="$CONF_ARGS --without-iconv"
-	[ "$WITHOUT_WCWIDTH" = 1 ] && CONF_ARGS="$CONF_ARGS --without-wcwidth"
 	( echo ; cd $MPDM ; ./config.sh $CONF_ARGS ; echo )
 fi
 
