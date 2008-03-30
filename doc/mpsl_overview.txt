@@ -708,13 +708,16 @@ of its forms, it can be used to test if a string matches:
  if (regex("/^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/", v))
  	print("The v variable contains a valid time\n");
 
-The regular expression can contain flags; those are 'i', for case
-insensitiveness, 'l', to select the last matching instead of the first,
-or 'm', to treat the string as a multiline one (i.e., one containing \n
+The regular expression can contain flags; those are `i', for case
+insensitiveness, `l', to select the last matching instead of the first,
+`m', to treat the string as a multiline one (i.e., one containing \n
 characters), where the special ^ and $ markup match beginning and end of
-lines and not the beginning or end of the string.
+lines and not the beginning or end of the string, or `g', to do a global
+matching (return _all_ matching strings). Flags are written after the
+final slash.
 
-Regex() returns the matched string.
+Regex() returns the matched string, or an array of matched strings if
+the `g' flag is used. If no match is found, NULL is returned.
 
  v = "The value of PI is 3.1416, more or less";
  
@@ -751,6 +754,12 @@ This can be used to extract many values from the same string:
  	/* start from there (previous match offset + size) */
  	offset += c[0] + c[1];
  }
+
+Though, for this particular example, the `g' flag could be more suitable:
+
+ /* return all numbers in one step */
+ foreach (s, regex('/[0-9]+/g', s))
+ 	print(s, "\n");
 
 For more complex situations, the first argument of regex() can be an array
 of regular expressions (instead of a string). Those expressions will tried
@@ -801,8 +810,8 @@ Or even a function:
 	sprintf("%04d", m);
 	});
 
-The regular expression can contain flags; those are 'i', for
-case-insensitive matching, and 'g', for global replacements (all ocurrences
+The regular expression can contain flags; those are `i', for
+case-insensitive matching, and `g', for global replacements (all ocurrences
 in the string will be replaced, instead of just the first found).
 
 Input/Output operations
