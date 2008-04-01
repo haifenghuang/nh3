@@ -71,9 +71,9 @@ static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2, int sf)
 /* creates an executable value with the MPSL executor as the first
    argument and a compiled stream as the second */
 {
-	return(MPDM_X2(mpsl_exec_p,
+	return MPDM_X2(mpsl_exec_p,
 		mpsl_mkins(sf ? L"SUBFRAME" : L"BLKFRAME",
-			a2 == NULL ? 1 : 2, a1, a2, NULL)));
+			a2 == NULL ? 1 : 2, a1, a2, NULL));
 }
 
 
@@ -487,7 +487,7 @@ static FILE * inc_fopen(const char * filename, mpdm_t inc)
 			break;
 	}
 
-	return (f);
+	return f;
 }
 
 
@@ -526,7 +526,7 @@ static mpdm_t do_parse(const char * filename, wchar_t * code, FILE * file)
 	mpsl_opcodes = NULL;
 	mpsl_lc = NULL;
 
-	return (x);
+	return x;
 }
 
 
@@ -546,7 +546,7 @@ mpdm_t mpsl_compile(mpdm_t code)
 	x = do_parse("<INLINE>", (wchar_t *) code->data, NULL);
 	mpdm_unref(code);
 
-	return (x);
+	return x;
 }
 
 
@@ -597,7 +597,7 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 
 	mpdm_close(file);
 
-	return (x);
+	return x;
 }
 
 
@@ -631,5 +631,5 @@ mpdm_t mpsl_eval(mpdm_t code, mpdm_t args)
 	/* reset the abort flag */
 	mpsl_abort = 0;
 
-	return (v);
+	return v;
 }
