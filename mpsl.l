@@ -81,7 +81,7 @@ static wchar_t * s_mbstowcs(char * str)
 	mbstowcs(wc, str, n);
 	wc[n] = L'\0';
 
-	return (wc);
+	return wc;
 }
 
 
@@ -100,7 +100,7 @@ static mpdm_t literal_cache(char * ptr, wchar_t * wptr)
 		mpdm_hset(mpsl_lc, v, v);
 	}
 
-	return(v);
+	return v;
 }
 
 
@@ -129,20 +129,20 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 {INTEGER}	{
 			/* integers */
 			yylval.v = literal_cache(yytext, NULL);
-			return (INTEGER);
+			return INTEGER;
 		}
 
 {REAL}		{
 			/* real numbers */
 			yylval.v = literal_cache(yytext, NULL);
-			return (REAL);
+			return REAL;
 		}
 
 \'[^']*\'	{
 			/* single quoted string; return as is */
 			yytext[yyleng - 1] = '\0';
 			yylval.v = literal_cache(yytext + 1, NULL);
-			return (STRING);
+			return STRING;
 		}
 
 "NULL"		return NULLV;
@@ -183,7 +183,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 {SYMBOL}	{
 			/* symbol name */
 			yylval.v = literal_cache(yytext, NULL);
-			return (SYMBOL);
+			return SYMBOL;
 		}
 
 {WSPACE}	;	/* ignore spaces */
@@ -207,7 +207,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 			ds_poke(ds_v, L'\0');
 			yylval.v = literal_cache(NULL, ds_v.d);
 			BEGIN 0;
-			return (STRING);
+			return STRING;
 		}
 <STR>\\x\{{HEXQUAD}\} {
 			int c;
@@ -217,11 +217,11 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 		}
 <STR>.		{ wchar_t wc; if (mbtowc(&wc, yytext, 1) > 0) ds_poke(ds_v, wc); }
 
-.		{ return(*yytext); }
+.		{ return *yytext; }
 
 %%
 
-int yywrap(void) { return(1); }
+int yywrap(void) { return 1; }
 
 int yy_input_for_flex(char * buf, int max)
 {
@@ -263,5 +263,5 @@ int yy_input_for_flex(char * buf, int max)
 		}
 	}
 
-	return (n);
+	return n;
 }
