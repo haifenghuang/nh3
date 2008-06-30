@@ -567,6 +567,7 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 	mpdm_t x = NULL;
 	FILE * f = NULL;
 	const char * filename = NULL;
+	int c;
 
 	if ((f = mpdm_get_filehandle(file)) != NULL) {
 		filename = "<FILE>";
@@ -592,6 +593,14 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 
 		file = MPDM_F(f);
 	}
+
+	if ((c = fgetc(f)) == '#') {
+		if ((c = fgetc(f)) == '!') {
+			while ((c = fgetc(f)) != EOF && c != '\n');
+		}
+	}
+	else
+		ungetc(c, f);
 
 	x = do_parse(filename, NULL, f);
 
