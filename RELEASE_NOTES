@@ -1,6 +1,12 @@
 MPSL Release Notes
 ==================
 
+1.0.5
+-----
+
+ * New `g' flag in regex().
+ * Fix backslash parsing in strings.
+
 1.0.4
 -----
 
