@@ -22,6 +22,10 @@
 
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int mpsl_trace;
 extern int mpsl_abort;
 
@@ -44,3 +48,7 @@ void mpsl_argv(int argc, char * argv[]);
 
 int mpsl_startup(void);
 void mpsl_shutdown(void);
+
+#ifdef __cplusplus
+}
+#endif
