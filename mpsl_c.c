@@ -510,6 +510,10 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	if (mpsl_abort || c == NULL)
 		return NULL;
 
+	/* sweep some values */
+	if (sweep_on_exec_i)
+		mpdm_sweep(0);
+
 	/* gets the opcode */
 	o = &op_table[mpdm_ival(C0)];
 
@@ -518,13 +522,6 @@ O_TYPE mpsl_exec_i(O_ARGS)
 
 	if(mpsl_trace)
 		printf("** %ls: %ls\n", mpdm_string(C0), mpdm_string(ret));
-
-	/* sweep some values */
-	if (sweep_on_exec_i) {
-		mpdm_ref(ret);
-		mpdm_sweep(0);
-		mpdm_unref(ret);
-	}
 
 	return ret;
 }
