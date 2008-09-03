@@ -410,6 +410,8 @@ O_TYPE O_blkframe(O_ARGS)
 	if (l == NULL)
 		l = MPDM_A(0);
 
+	RF(l);
+
 	/* create a new local symbol table */
 	mpdm_push(l, MPDM_H(0));
 
@@ -419,10 +421,12 @@ O_TYPE O_blkframe(O_ARGS)
 	/* execute instruction */
 	ret = M1;
 
+	UF(l);
+
 	/* destroy the local symbol table */
 	mpdm_pop(l);
 
-	return(ret);
+	return ret;
 }
 
 
@@ -499,11 +503,6 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	if (mpsl_abort || c == NULL)
 		return NULL;
 
-	/* reference the local symbol table; the code and
-	   arguments are (hopefully) always referenced,
-	   as they are in a code array */
-	mpdm_ref(l);
-
 	/* gets the opcode */
 	o = &op_table[mpdm_ival(C0)];
 
@@ -512,9 +511,6 @@ O_TYPE mpsl_exec_i(O_ARGS)
 
 	if(mpsl_trace)
 		printf("** %ls: %ls\n", mpdm_string(C0), mpdm_string(ret));
-
-	/* unreference */
-	mpdm_unref(l);
 
 	/* sweep some values */
 	if (sweep_on_exec_i) {
