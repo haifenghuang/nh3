@@ -305,12 +305,17 @@ O_TYPE O_execsym(O_ARGS)
 		mpsl_error(MPDM_MBS(tmp));
 	}
 	else {
+		/* save current local symbol table */
+		mpdm_t t = local_symtbl;
+
+		/* substitute with this one */
 		local_symtbl = l;
 
-		/* executes */
+		/* execute */
 		r = mpdm_exec(v, M2);
 
-		local_symtbl = NULL;
+		/* and get back to the original one */
+		local_symtbl = t;
 	}
 
 	UF(s);
