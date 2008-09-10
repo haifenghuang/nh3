@@ -1,6 +1,12 @@
 MPSL Release Notes
 ==================
 
+1.0.6
+-----
+
+ * Fixed a strange but annoying bug regarding local variables
+   losing their values in anonymous subroutines.
+
 1.0.5
 -----
 
