@@ -248,12 +248,9 @@ static mpdm_t F_grep(mpdm_t a)
 
 static mpdm_t F_getenv(mpdm_t a)
 {
-	char * ptr = mpdm_wcstombs(mpdm_string(mpdm_aget(a, 0)), NULL);
+	mpdm_t e = mpdm_hget_s(mpdm_root(), L"ENV");
 
-	if (ptr != NULL)
-		ptr = getenv(ptr);
-
-	return ptr == NULL ? NULL : MPDM_MBS(ptr);
+	return mpdm_hget(e, mpdm_aget(a, 0));
 }
 
 
