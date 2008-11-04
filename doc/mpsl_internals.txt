@@ -1,8 +1,6 @@
 MPSL internals
 ==============
 
- Angel Ortega <angel@triptico.com>
-
 This document describes some internal details of this MPSL implementation.
 
 The symbol table

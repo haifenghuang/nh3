@@ -12,4 +12,4 @@ Minimum Profit Scripting Language
  * ./mpsl_api.html (C API). Reference for using MPSL from inside C programs.
 
 ---
-Angel Ortega <angel@triptico.com> - $Date$
+Angel Ortega <angel@triptico.com>
