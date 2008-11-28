@@ -7,8 +7,9 @@ all: $(TARGET) docs
 PROJ=mpsl
 
 ADD_DOCS=doc/mpsl_quickref.ps
-GRUTATXT_DOCS=doc/mpsl_index.html doc/mpsl_overview.html doc/mpsl_internals.html doc/mpsl_api.html
+GRUTATXT_DOCS=doc/mpsl_index.html doc/mpsl_overview.html doc/mpsl_internals.html
 MP_DOCCER_DOCS=doc/mpsl_api.txt
+G_AND_MP_DOCS=doc/mpsl_api.html
 
 OBJS=mpsl_c.o mpsl_l.o mpsl_m.o mpsl_y.o mpsl_f.o
 
@@ -84,7 +85,7 @@ doc/mpsl_api.txt: mpsl_*.c mpsl.y
 docs: $(DOCS)
 
 docsclean:
-	rm -f doc/mpsl_api.txt doc/*.html
+	rm -f $(MP_DOCCER_DOCS) doc/*.html
 
 distcopy: distclean
 	mkdir -p $(DIST_TARGET) ; \
