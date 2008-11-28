@@ -84,7 +84,7 @@ doc/mpsl_api.txt: mpsl_*.c mpsl.y
 docs: $(DOCS)
 
 docsclean:
-	rm -f doc/*.html
+	rm -f doc/mpsl_api.txt doc/*.html
 
 distcopy: distclean
 	mkdir -p $(DIST_TARGET) ; \
