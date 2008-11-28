@@ -77,9 +77,9 @@ doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
 	-./mpsl scripts/mkquickref.mpsl < $< > $@
 
 doc/mpsl_api.txt: mpsl_*.c mpsl.y
-	mkdir -p doc
 	mp_doccer mpsl_*.c mpsl.y -o doc/mpsl_api -f grutatxt \
-	-t "MPSL C API ($(VERSION))" \
+	-t "MPSL C API" \
+	-b "This reference documents the version $(VERSION) of the C API." \
 	-a 'Angel Ortega - angel@triptico.com'
 
 docs: $(DOCS)
