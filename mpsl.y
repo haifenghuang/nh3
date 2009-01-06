@@ -336,12 +336,25 @@ expr:
 	| expr BITOR expr	{ $$ = INS2(L"BITOR", $1, $3); }
 	| expr BITXOR expr	{ $$ = INS2(L"BITXOR", $1, $3); }
 
-				/* immediate math operations */
-	| INC compsym		{ $$ = INS1(L"PINC", $2); }
+				/* increment and decrement symbol */
+	| INC compsym		{ $$ = INS2(L"ASSIGN", $2,
+					INS2(L"ADD",
+						INS1(L"SYMVAL", $2),
+						INS1(L"LITERAL", MPDM_I(1))
+						)
+					);
+				}
+	| DEC compsym		{ $$ = INS2(L"ASSIGN", $2,
+					INS2(L"SUB",
+						INS1(L"SYMVAL", $2),
+						INS1(L"LITERAL", MPDM_I(1))
+						)
+					);
+				}
 	| compsym INC		{ $$ = INS1(L"SINC", $1); }
-	| DEC compsym		{ $$ = INS1(L"PDEC", $2); }
 	| compsym DEC		{ $$ = INS1(L"SDEC", $1); }
 
+				/* immediate math operations */
 	| compsym IADD expr	{ $$ = INS2(L"ASSIGN", $1,
 					INS2(L"ADD",
 						INS1(L"SYMVAL", $1),
