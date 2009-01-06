@@ -336,7 +336,7 @@ expr:
 	| expr BITOR expr	{ $$ = INS2(L"BITOR", $1, $3); }
 	| expr BITXOR expr	{ $$ = INS2(L"BITXOR", $1, $3); }
 
-				/* increment and decrement symbol */
+				/* increment and decrement (prefix) */
 	| INC compsym		{ $$ = INS2(L"ASSIGN", $2,
 					INS2(L"ADD",
 						INS1(L"SYMVAL", $2),
@@ -351,8 +351,28 @@ expr:
 						)
 					);
 				}
-	| compsym INC		{ $$ = INS1(L"SINC", $1); }
-	| compsym DEC		{ $$ = INS1(L"SDEC", $1); }
+
+				/* increment and decrement (suffix) */
+	| compsym INC		{ $$ = INS2(L"IMULTI",
+					INS1(L"SYMVAL", $1),
+					INS2(L"ASSIGN", $1,
+						INS2(L"ADD",
+							INS1(L"SYMVAL", $1),
+							INS1(L"LITERAL", MPDM_I(1))
+							)
+						)
+					);
+				}
+	| compsym DEC		{ $$ = INS2(L"IMULTI",
+					INS1(L"SYMVAL", $1),
+					INS2(L"ASSIGN", $1,
+						INS2(L"SUB",
+							INS1(L"SYMVAL", $1),
+							INS1(L"LITERAL", MPDM_I(1))
+							)
+						)
+					);
+				}
 
 				/* immediate math operations */
 	| compsym IADD expr	{ $$ = INS2(L"ASSIGN", $1,
