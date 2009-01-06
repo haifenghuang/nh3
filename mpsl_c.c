@@ -1,7 +1,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2007 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2009 Angel Ortega <angel@triptico.com>
 
     mpsl_c.c - Minimum Profit Scripting Language Core
 
@@ -268,15 +268,6 @@ O_TYPE O_numgt(O_ARGS) { return BOOL(RM1 > RM2); }
 O_TYPE O_numge(O_ARGS) { return BOOL(RM1 >= RM2); }
 O_TYPE O_strcat(O_ARGS) { mpdm_t v = RF(M1); mpdm_t r = mpdm_strcat(v, M2); UF(v); return r; }
 O_TYPE O_streq(O_ARGS) { mpdm_t v = RF(M1); mpdm_t r = BOOL(mpdm_cmp(v, M2) == 0); UF(v); return r; }
-O_TYPE O_immpinc(O_ARGS) { mpdm_t s=M1; return SET(s, MPDM_R(R(GET(s)) + 1)); }
-O_TYPE O_immpdec(O_ARGS) { mpdm_t s=M1; return SET(s, MPDM_R(R(GET(s)) - 1)); }
-O_TYPE O_immadd(O_ARGS) { mpdm_t s = RF(M1); mpdm_t r = SET(s, MPDM_R(R(GET(s)) + RM2)); UF(s); return r; }
-O_TYPE O_immsub(O_ARGS) { mpdm_t s = RF(M1); mpdm_t r = SET(s, MPDM_R(R(GET(s)) - RM2)); UF(s); return r; }
-O_TYPE O_immmul(O_ARGS) { mpdm_t s = RF(M1); mpdm_t r = SET(s, MPDM_R(R(GET(s)) * RM2)); UF(s); return r; }
-O_TYPE O_immdiv(O_ARGS) { mpdm_t s = RF(M1); mpdm_t r = SET(s, MPDM_R(R(GET(s)) / RM2)); UF(s); return r; }
-O_TYPE O_immmod(O_ARGS) { mpdm_t s = RF(M1); mpdm_t r = SET(s, MPDM_R(I(GET(s)) % IM2)); UF(s); return r; }
-O_TYPE O_immsinc(O_ARGS) { mpdm_t s = M1; mpdm_t v = GET(s); SET(s, MPDM_R(R(v) + 1)); return v; }
-O_TYPE O_immsdec(O_ARGS) { mpdm_t s = M1; mpdm_t v = GET(s); SET(s, MPDM_R(R(v) - 1)); return v; }
 O_TYPE O_numeq(O_ARGS) { mpdm_t v1 = RF(M1); mpdm_t v2 = M2; UF(v1); return BOOL((v1 == NULL || v2 == NULL) ? (v1 == v2) : (R(v1) == R(v2))); }
 O_TYPE O_break(O_ARGS) { *f = 1; return NULL; }
 O_TYPE O_return(O_ARGS) { mpdm_t v = M1; *f = -1; return v; }
@@ -480,15 +471,6 @@ static struct mpsl_op_s {
 	{ L"MUL",	1,	O_mul },
 	{ L"DIV",	1,	O_div },
 	{ L"MOD",	1,	O_mod },
-	{ L"SINC",	0,	O_immsinc },
-	{ L"SDEC",	0,	O_immsdec },
-	{ L"PINC",	0,	O_immpinc },
-	{ L"PDEC",	0,	O_immpdec },
-	{ L"IADD",	0,	O_immadd },
-	{ L"ISUB",	0,	O_immsub },
-	{ L"IMUL",	0,	O_immmul },
-	{ L"IDIV",	0,	O_immdiv },
-	{ L"IMOD",	0,	O_immmod },
 	{ L"NOT",	1,	O_not },
 	{ L"AND",	1,	O_and },
 	{ L"OR",	1,	O_or },

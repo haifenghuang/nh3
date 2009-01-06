@@ -212,40 +212,6 @@ STREQ
 A STREQ instruction executes both `ins1' and `ins2', tests for string equality
 of both values, and returns a boolean value.
 
-Postfix immediate unary operations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
- PINC <ins1>
- PDEC <ins1>
-
-These instructions execute `ins1' and accept its return value as a symbol
-name. Its value is incremented or decremented, and then reassigned to it.
-The new value for the symbol is returned.
-
-Suffix immediate unary operations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
- SINC <ins1>
- SDEC <ins1>
-
-These instructions execute `ins1' and accept its return value as a symbol
-value. Its value is incremented or decremented, and then reassigned to it.
-The old value for the symbol is returned.
-
-Immediate math operations
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
- IADD <ins1> <ins2>
- ISUB <ins1> <ins2>
- IMUL <ins1> <ins2>
- IDIV <ins1> <ins2>
- IMOD <ins1> <ins2>
-
-These instructions execute `ins1' and accept its return value as a symbol
-name. Then `ins2' is executed, and its return value added, substracted,
-multiplied, divided or modulo'ed by the value of the symbol, and then
-reassigned to it. The new value is returned.
-
 BREAK
 ~~~~~
 
