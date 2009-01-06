@@ -245,6 +245,7 @@ O_TYPE mpsl_exec_i(O_ARGS);
 
 O_TYPE O_literal(O_ARGS) { return mpdm_clone(C1); }
 O_TYPE O_multi(O_ARGS) { mpdm_t v = RF(M1); if (!*f) v = M2; else UF(v); return v; }
+O_TYPE O_imulti(O_ARGS) { mpdm_t v = RF(M1); if (!*f) M2; return UF(v); }
 O_TYPE O_symval(O_ARGS) { return GET(M1); }
 O_TYPE O_assign(O_ARGS) { mpdm_t v = RF(M1); mpdm_t r = SET(v, M2); UF(v); return r; }
 O_TYPE O_if(O_ARGS) { return ISTRU(M1) ? M2 : M3; }
@@ -458,6 +459,7 @@ static struct mpsl_op_s {
 } op_table[] = {
 	{ L"LITERAL",	0,	O_literal },	/* *must* be the zeroth */
 	{ L"MULTI",	0,	O_multi },
+	{ L"IMULTI",	0,	O_imulti },
 	{ L"SYMVAL",	0,	O_symval },
 	{ L"ASSIGN",	0,	O_assign },
 	{ L"EXECSYM",	0,	O_execsym },

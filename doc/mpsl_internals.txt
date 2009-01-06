@@ -42,14 +42,6 @@ that call each other.
 
 A description of each opcode follows:
 
-MULTI
-~~~~~
-
- MULTI <ins1> <ins2>
-
-A MULTI instruction executes `ins1', then `ins2', and returns the exit
-value of the latter.
-
 LITERAL
 ~~~~~~~
 
@@ -58,6 +50,22 @@ LITERAL
 A LITERAL instruction clones (using mpdm_clone()) and returns the stored
 value. This is the special case described in the introduction paragraph;
 the arguments for all other instructions are themselves instructions.
+
+MULTI
+~~~~~
+
+ MULTI <ins1> <ins2>
+
+A MULTI instruction executes `ins1', then `ins2', and returns the exit
+value of the second one.
+
+IMULTI
+~~~~~~
+
+ IMULTI <ins1> <ins2>
+
+An IMULTI instruction executes `ins1', then `ins2', and returns the exit
+value of the first one.
 
 SYMVAL
 ~~~~~~
