@@ -341,11 +341,37 @@ expr:
 	| compsym INC		{ $$ = INS1(L"SINC", $1); }
 	| DEC compsym		{ $$ = INS1(L"PDEC", $2); }
 	| compsym DEC		{ $$ = INS1(L"SDEC", $1); }
-	| compsym IADD expr	{ $$ = INS2(L"IADD", $1, $3); }
-	| compsym ISUB expr	{ $$ = INS2(L"ISUB", $1, $3); }
-	| compsym IMUL expr	{ $$ = INS2(L"IMUL", $1, $3); }
-	| compsym IDIV expr	{ $$ = INS2(L"IDIV", $1, $3); }
-	| compsym IMOD expr	{ $$ = INS2(L"IMOD", $1, $3); }
+
+	| compsym IADD expr	{ $$ = INS2(L"ASSIGN", $1,
+					INS2(L"ADD",
+						INS1(L"SYMVAL", $1),
+						$3)
+					);
+				}
+	| compsym ISUB expr	{ $$ = INS2(L"ASSIGN", $1,
+					INS2(L"SUB",
+						INS1(L"SYMVAL", $1),
+						$3)
+					);
+				}
+	| compsym IMUL expr	{ $$ = INS2(L"ASSIGN", $1,
+					INS2(L"MUL",
+						INS1(L"SYMVAL", $1),
+						$3)
+					);
+				}
+	| compsym IDIV expr	{ $$ = INS2(L"ASSIGN", $1,
+					INS2(L"DIV",
+						INS1(L"SYMVAL", $1),
+						$3)
+					);
+				}
+	| compsym IMOD expr	{ $$ = INS2(L"ASSIGN", $1,
+					INS2(L"MOD",
+						INS1(L"SYMVAL", $1),
+						$3)
+					);
+				}
 
 	| '!' expr		{
 					/* boolean not */
