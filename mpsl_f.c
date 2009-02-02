@@ -89,7 +89,6 @@ static mpdm_t F_keys(mpdm_t a) { return mpdm_keys(A0); }
 static mpdm_t F_open(mpdm_t a) { return mpdm_open(A0, A1); }
 static mpdm_t F_close(mpdm_t a) { return mpdm_close(A0); }
 static mpdm_t F_read(mpdm_t a) { return mpdm_read(A0); }
-static mpdm_t F_write(mpdm_t a) { return MPDM_I(mpdm_write(A0,A1)); }
 static mpdm_t F_getchar(mpdm_t a) { return mpdm_getchar(A0); }
 static mpdm_t F_putchar(mpdm_t a) { return mpdm_putchar(A0, A1); }
 static mpdm_t F_fseek(mpdm_t a) { return MPDM_I(mpdm_fseek(A0, IA1, IA2)); }
@@ -152,6 +151,17 @@ static mpdm_t F_print(mpdm_t a)
 	for (n = 0; n < mpdm_size(a); n++)
 		mpdm_write_wcs(stdout, mpdm_string(A(n)));
 	return NULL;
+}
+
+
+static mpdm_t F_write(mpdm_t a)
+{
+	int n, r = 0;
+
+	for (n = 1; n < mpdm_size(a); n++)
+		r += mpdm_write(A0, A(n));
+
+	return MPDM_I(r);
 }
 
 

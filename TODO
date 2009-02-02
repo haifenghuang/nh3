@@ -26,7 +26,6 @@ Pending Enhancements
  * 1109: There must be possible to have executable components with
    arguments in compact symbols (as in 'h.code(a1,a2).other').
  * 1110: Change the trace system to an executable mpdm_t value.
- * 1111: Change write() to include a variable argument length.
  * 1115: Add C++ style comments.
 
 Closed
@@ -186,5 +185,7 @@ Closed
    as local (Wed, 02 Jan 2008 10:10:48 +0100).
  * 1117: Double backslashes in strings fail
    (Fri, 04 Apr 2008 09:46:15 +0200).
+ * 1111: Change write() to include a variable argument length
+   (Mon, 02 Feb 2009 16:20:03 +0100).
 
 Email bugs to angel@triptico.com

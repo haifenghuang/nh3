@@ -1,6 +1,11 @@
 MPSL Release Notes
 ==================
 
+1.0.7
+-----
+
+ * The `write()' allows a variable argument of values to write.
+
 1.0.6
 -----
 
