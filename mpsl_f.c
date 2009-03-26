@@ -98,7 +98,7 @@ static mpdm_t F_unlink(mpdm_t a) { return mpsl_boolean(mpdm_unlink(A0)); }
 static mpdm_t F_stat(mpdm_t a) { return mpdm_stat(A0); }
 static mpdm_t F_chmod(mpdm_t a) { return MPDM_I(mpdm_chmod(A0,A1)); }
 static mpdm_t F_chown(mpdm_t a) { return MPDM_I(mpdm_chown(A0,A1,A2)); }
-static mpdm_t F_glob(mpdm_t a) { return mpdm_glob(A0); }
+static mpdm_t F_glob(mpdm_t a) { return mpdm_glob(A0, A1); }
 static mpdm_t F_encoding(mpdm_t a) { return MPDM_I(mpdm_encoding(A0)); }
 static mpdm_t F_popen(mpdm_t a) { return mpdm_popen(A0, A1); }
 static mpdm_t F_pclose(mpdm_t a) { return mpdm_pclose(A0); }
