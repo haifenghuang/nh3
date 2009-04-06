@@ -145,6 +145,8 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 	else
 	if (MPDM_IS_STRING(v))
 		ptr = dump_string(v, ptr, size);
+	else
+		ptr = mpdm_pokews(ptr, size, L"NULL /* non-printable value */");
 
 	if (l == 0)
 		ptr = mpdm_pokews(ptr, size, L";\n");
