@@ -25,6 +25,7 @@
 
 #include "config.h"
 
+#include <stdio.h>
 #include <wchar.h>
 
 #include "mpdm.h"
