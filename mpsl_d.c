@@ -142,5 +142,8 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 	if (MPDM_IS_STRING(v))
 		ptr = dump_string(v, ptr, size);
 
+	if (l == 0)
+		ptr = mpdm_poke(ptr, size, L";\n", 2, sizeof(wchar_t));
+
 	return ptr;
 }
