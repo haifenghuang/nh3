@@ -25,9 +25,13 @@
 
 #include "config.h"
 
+#include <wchar.h>
+
+#include "mpdm.h"
+
 /** code **/
 
-wchar_t *mpdm_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
+wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 {
 	return ptr;
 }
