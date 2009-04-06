@@ -49,6 +49,8 @@ void mpsl_argv(int argc, char * argv[]);
 int mpsl_startup(void);
 void mpsl_shutdown(void);
 
+wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size);
+
 #ifdef __cplusplus
 }
 #endif

@@ -412,6 +412,8 @@ int mpsl_startup(void)
 	mpdm_hset_s(m, L"LC", MPDM_H(0));
 	mpdm_hset_s(m, L"CORE", c);
 
+	mpdm_dump_1 = mpsl_dump_1;
+
 	return 0;
 }
 
