@@ -84,7 +84,10 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 {
 	int n;
 
-	/* indent */
+	/* indent (if negative, don't prepend indentation) */
+	if (l < 0)
+		l = -l;
+	else
 	for (n = 0; n < l; n++)
 		ptr = mpdm_pokews(ptr, size, L"  ");
 
@@ -106,7 +109,7 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 
 			ptr = mpsl_dump_1(k, l + 1, ptr, size);
 			ptr = mpdm_pokews(ptr, size, L" => ");
-			ptr = mpsl_dump_1(w, l + 1, ptr, size);
+			ptr = mpsl_dump_1(w, -(l + 1), ptr, size);
 
 			if (n < mpdm_size(a) - 1)
 				ptr = mpdm_pokews(ptr, size, L",");
