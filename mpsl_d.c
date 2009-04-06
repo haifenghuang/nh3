@@ -95,6 +95,29 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 	}
 	else
 	if (MPDM_IS_HASH(v)) {
+		mpdm_t a = mpdm_keys(v);
+
+		ptr = mpdm_poke(ptr, size, L"{\n", 2, sizeof(wchar_t));
+
+		for (n = 0; n < mpdm_size(a); n++) {
+			mpdm_t k = mpdm_aget(a, n);
+			mpdm_t w = mpdm_hget(v, k);
+
+			ptr = mpsl_dump_1(k, l + 1, ptr, size);
+			ptr = mpdm_poke(ptr, size, L" => ", 4, sizeof(wchar_t));
+			ptr = mpsl_dump_1(w, 0, ptr, size);
+
+			if (n < mpdm_size(a) - 1)
+				ptr = mpdm_poke(ptr, size, L",", 1, sizeof(wchar_t));
+
+			ptr = mpdm_poke(ptr, size, L"\n", 1, sizeof(wchar_t));
+		}
+
+		/* re-indent */
+		for (n = 0; n < l; n++)
+			ptr = mpdm_poke(ptr, size, L"  ", 2, sizeof(wchar_t));
+
+		ptr = mpdm_poke(ptr, size, L"}", 1, sizeof(wchar_t));
 	}
 	else
 	if (MPDM_IS_ARRAY(v)) {
@@ -105,6 +128,7 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 
 			if (n < mpdm_size(v) - 1)
 				ptr = mpdm_poke(ptr, size, L",", 1, sizeof(wchar_t));
+
 			ptr = mpdm_poke(ptr, size, L"\n", 1, sizeof(wchar_t));
 		}
 
