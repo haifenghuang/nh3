@@ -105,7 +105,7 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 
 			ptr = mpsl_dump_1(k, l + 1, ptr, size);
 			ptr = mpdm_poke(ptr, size, L" => ", 4, sizeof(wchar_t));
-			ptr = mpsl_dump_1(w, 0, ptr, size);
+			ptr = mpsl_dump_1(w, l + 1, ptr, size);
 
 			if (n < mpdm_size(a) - 1)
 				ptr = mpdm_poke(ptr, size, L",", 1, sizeof(wchar_t));
