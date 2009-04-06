@@ -104,10 +104,15 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 			ptr = mpsl_dump_1(mpdm_aget(v, n), l + 1, ptr, size);
 
 			if (n < mpdm_size(v) - 1)
-				ptr = mpdm_poke(ptr, size, L",\n", 2, sizeof(wchar_t));
+				ptr = mpdm_poke(ptr, size, L",", 1, sizeof(wchar_t));
+			ptr = mpdm_poke(ptr, size, L"\n", 1, sizeof(wchar_t));
 		}
 
-		ptr = mpdm_poke(ptr, size, L" ]", 2, sizeof(wchar_t));
+		/* re-indent */
+		for (n = 0; n < l; n++)
+			ptr = mpdm_poke(ptr, size, L"  ", 2, sizeof(wchar_t));
+
+		ptr = mpdm_poke(ptr, size, L"]", 1, sizeof(wchar_t));
 	}
 	else
 	if (MPDM_IS_STRING(v))
