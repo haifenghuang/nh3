@@ -1,7 +1,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2007 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2009 Angel Ortega <angel@triptico.com>
 
     mpsl_f.c - Minimum Profit Scripting Language Function Library
 
@@ -117,6 +117,7 @@ static mpdm_t F_uc(mpdm_t a) { return mpdm_ulc(A0, 1); }
 static mpdm_t F_lc(mpdm_t a) { return mpdm_ulc(A0, 0); }
 
 static mpdm_t F_time(mpdm_t a) { return MPDM_I(time(NULL)); }
+static mpdm_t F_chdir(mpdm_t a) { return MPDM_I(mpdm_chdir(A0)); }
 
 static mpdm_t F_eval(mpdm_t a)
 {
@@ -327,6 +328,7 @@ static struct {
 	{ L"uc",	F_uc },
 	{ L"lc",	F_lc },
 	{ L"time",	F_time },
+	{ L"chdir",	F_chdir },
 	{ NULL,		NULL }
 };
 

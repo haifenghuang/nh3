@@ -6,6 +6,7 @@ MPSL Release Notes
 
  * The `write()' allows a variable argument of values to write.
  * Values are dumped as MPSL instead of MPDM's low-level format.
+ * New function `chdir()'.
 
 1.0.6
 -----
