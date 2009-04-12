@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 #include <wchar.h>
+#include <malloc.h>
 
 #include "mpdm.h"
 #include "mpsl.h"
@@ -67,7 +68,18 @@ static wchar_t *dump_string(const mpdm_t v, wchar_t *ptr, int *size)
 			break;
 
 		default:
-			ptr = mpdm_poke(ptr, size, iptr, 1, sizeof(wchar_t));
+			if (*iptr > 127) {
+				char tmp[16];
+				wchar_t *wptr;
+
+				sprintf(tmp, "\\x{%04x}", *iptr);
+				wptr = mpdm_mbstowcs(tmp, NULL, -1);
+				ptr = mpdm_pokews(ptr, size, wptr);
+				free(wptr);
+			}
+			else
+				ptr = mpdm_poke(ptr, size, iptr, 1, sizeof(wchar_t));
+
 			break;
 		}
 		iptr++;
