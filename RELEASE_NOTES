@@ -4,6 +4,7 @@ MPSL Release Notes
 1.0.7
 -----
 
+ * New function `scanf()'.
  * The `write()' allows a variable argument of values to write.
  * Values are dumped as MPSL instead of MPDM's low-level format.
  * New function `chdir()'.
