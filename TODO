@@ -4,7 +4,7 @@ Minimum Profit Scripting Language (mpsl) TODO / Bug List
 Release Critical Bugs
 ---------------------
 
-None!
+ * 1118: Document the scanf() function.
 
 Open Bugs
 ---------
@@ -21,7 +21,6 @@ Pending Enhancements
  * 1069: Implement a C-like for() instruction.
  * 1083: Implement a split() that uses regular expressions.
  * 1095: Accept "local var" everywhere a symbol name is accepted.
- * 1106: Implement the sscanf() function (similar to the one in filp).
  * 1109: There must be possible to have executable components with
    arguments in compact symbols (as in 'h.code(a1,a2).other').
  * 1110: Change the trace system to an executable mpdm_t value.
@@ -188,5 +187,7 @@ Closed
    (Mon, 02 Feb 2009 16:20:03 +0100).
  * 1068: Implement a dumper function to dump an mpdm_t as mpsl source code
    (Mon, 06 Apr 2009 14:13:28 +0200).
+ * 1106: Implement the sscanf() function (similar to the one in filp)
+   (Sat, 25 Apr 2009 09:51:54 +0200).
 
 Email bugs to angel@triptico.com
