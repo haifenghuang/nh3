@@ -119,6 +119,8 @@ static mpdm_t F_lc(mpdm_t a) { return mpdm_ulc(A0, 0); }
 static mpdm_t F_time(mpdm_t a) { return MPDM_I(time(NULL)); }
 static mpdm_t F_chdir(mpdm_t a) { return MPDM_I(mpdm_chdir(A0)); }
 
+static mpdm_t F_scanf(mpdm_t a) { return mpdm_scanf(A0, A1, IA2); }
+
 static mpdm_t F_eval(mpdm_t a)
 {
 	mpdm_t c;
@@ -329,6 +331,7 @@ static struct {
 	{ L"lc",	F_lc },
 	{ L"time",	F_time },
 	{ L"chdir",	F_chdir },
+	{ L"scanf",	F_scanf },
 	{ NULL,		NULL }
 };
 
