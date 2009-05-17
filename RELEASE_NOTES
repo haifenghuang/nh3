@@ -4,7 +4,7 @@ MPSL Release Notes
 1.0.8
 -----
 
- * New function `scanf()'.
+ * New function `sscanf()'.
 
 1.0.7
 -----
