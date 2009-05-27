@@ -106,10 +106,6 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 	if (v == NULL)
 		ptr = mpdm_pokews(ptr, size, L"NULL");
 	else
-	if (MPDM_IS_EXEC(v)) {
-		ptr = mpdm_pokews(ptr, size, L"sub { 1; }");
-	}
-	else
 	if (MPDM_IS_HASH(v)) {
 		mpdm_t a = mpdm_keys(v);
 
@@ -153,6 +149,10 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 			ptr = mpdm_pokews(ptr, size, L"  ");
 
 		ptr = mpdm_pokews(ptr, size, L"]");
+	}
+	else
+	if (MPDM_IS_EXEC(v)) {
+		ptr = mpdm_pokews(ptr, size, L"sub { 1; }");
 	}
 	else
 	if (MPDM_IS_STRING(v))
