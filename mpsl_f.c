@@ -110,6 +110,8 @@ static mpdm_t F_gettext(mpdm_t a) { return mpdm_gettext(A0); }
 static mpdm_t F_gettext_domain(mpdm_t a) { return MPDM_I(mpdm_gettext_domain(A0, A1)); }
 
 static mpdm_t F_load(mpdm_t a) { return mpdm_exec(mpsl_compile_file(A0), NULL); }
+static mpdm_t F_compile(mpdm_t a) { return mpsl_compile(A0); }
+
 static mpdm_t F_error(mpdm_t a) { return mpsl_error(A0); }
 static mpdm_t F_sweep(mpdm_t a) { mpdm_sweep(IA0); return NULL; }
 
@@ -315,6 +317,7 @@ static struct {
 	{ L"regex",	F_regex },
 	{ L"sregex",	F_sregex },
 	{ L"load",	F_load },
+	{ L"compile",	F_compile },
 	{ L"error",	F_error },
 	{ L"eval",	F_eval },
 	{ L"print",	F_print },

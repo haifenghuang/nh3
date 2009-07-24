@@ -5,6 +5,8 @@ MPSL Release Notes
 -----
 
  * New function `sscanf()'.
+ * New function `compile()', to compile a string of MPSL code
+   to an executable value.
 
 1.0.7
 -----
