@@ -2,18 +2,19 @@ MPSL Overview
 =============
 
 MPSL (Minimum Profit Scripting Language) is a programming language
-concieved as an scripting engine for the Minimum Profit Text Editor,
-though it can also be used as a general-purpose programming tool. An MPSL
-program consists of a sequence of statements which run from top to bottom.
-Loops, subroutines and other control structures allow you to jump around
-within the code. It is a free-form language, meaning that you can format
-and indent it however you like, as whitespace serves to separate tokens.
-MPSL borrows syntax and concepts from many languages: C, Perl, Java or
-JavaScript. Statements end in a semi-colon, blocks are enclosed between {
-and } (curly brackets).
+concieved as a scripting engine for the Minimum Profit Text Editor,
+though it can also be used as a general-purpose programming tool.
 
 Basic Syntax
 ------------
+
+An MPSL program consists of a sequence of statements which run from top to
+bottom. Loops, subroutines and other control structures allow you to jump
+around within the code. It is a free-form language, meaning that you can
+format and indent it however you like, as whitespace serves to separate
+tokens. MPSL borrows syntax and concepts from many languages: C, Perl, Java
+or JavaScript. Statements end in a semi-colon, blocks are enclosed between {
+and } (curly brackets).
 
 Comments
 ~~~~~~~~
