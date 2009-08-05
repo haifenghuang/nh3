@@ -1,4 +1,4 @@
-MPSL overview
+MPSL Overview
 =============
 
 MPSL (Minimum Profit Scripting Language) is a programming language
@@ -8,10 +8,12 @@ program consists of a sequence of statements which run from top to bottom.
 Loops, subroutines and other control structures allow you to jump around
 within the code. It is a free-form language, meaning that you can format
 and indent it however you like, as whitespace serves to separate tokens.
-
 MPSL borrows syntax and concepts from many languages: C, Perl, Java or
 JavaScript. Statements end in a semi-colon, blocks are enclosed between {
 and } (curly brackets).
+
+Basic Syntax
+------------
 
 Comments
 ~~~~~~~~
