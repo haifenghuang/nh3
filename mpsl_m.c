@@ -87,8 +87,17 @@ int mpsl_main(int argc, char *argv[])
 	/* compile */
 	if (immscript != NULL)
 		v = mpsl_compile(MPDM_MBS(immscript));
-	else
+	else {
+		int c;
+
+		/* if line starts with #!, discard it */
+		if ((c = getc(script)) == '#' && (c = getc(script)) == '!')
+			while ((c = getc(script)) != EOF && c != '\n');
+		else
+			ungetc(c, script);
+
 		v = mpsl_compile_file(MPDM_F(script));
+	}
 
 	if (v != NULL) {
 		if (dump_only)
