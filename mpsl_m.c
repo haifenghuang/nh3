@@ -96,7 +96,8 @@ int mpsl_main(int argc, char *argv[])
 		else
 			ungetc(c, script);
 
-		v = mpsl_compile_file(MPDM_F(script));
+		if (c != EOF)
+			v = mpsl_compile_file(MPDM_F(script));
 	}
 
 	if (v != NULL) {
