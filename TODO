@@ -4,7 +4,7 @@ Minimum Profit Scripting Language (mpsl) TODO / Bug List
 Release Critical Bugs
 ---------------------
 
- * 1118: Document the scanf() function.
+None!
 
 Open Bugs
 ---------
@@ -189,5 +189,7 @@ Closed
    (Mon, 06 Apr 2009 14:13:28 +0200).
  * 1106: Implement the sscanf() function (similar to the one in filp)
    (Sat, 25 Apr 2009 09:51:54 +0200).
+ * 1118: Document the sscanf() function
+   (Wed, 26 Aug 2009 17:41:01 +0200).
 
 Email bugs to angel@triptico.com

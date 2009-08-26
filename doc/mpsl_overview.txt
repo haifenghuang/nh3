@@ -212,7 +212,7 @@ Conditional and looping constructs
 If
 ~~
 
-MPSL has the usual 'if' conditional construct. The condition can be any
+MPSL has the usual `if' conditional construct. The condition can be any
 MPSL expression, and the conditional code must be written between braces
 if it's more than one instruction, just like in C.
 
@@ -226,7 +226,7 @@ if it's more than one instruction, just like in C.
 	do_that();
  }
 
-'If' conditionals can also include an else instruction or block:
+`If' conditionals can also include an else instruction or block:
 
  if (tab_size == 8)
 	print("You are sane\n");
@@ -236,7 +236,7 @@ if it's more than one instruction, just like in C.
 While
 ~~~~~
 
-'While' conditionals are exactly as you suppose they are:
+`While' conditionals are exactly as you suppose they are:
 
  while (player_is_alive) {
 	/* game loop */
@@ -245,12 +245,12 @@ While
 	update_counter();
  }
 
-As in 'if', the loop body needs braces if it has more than one instruction.
+As in `if', the loop body needs braces if it has more than one instruction.
 
 Foreach
 ~~~~~~~
 
-'Foreach' is a special conditional to do something with all elements of an
+`Foreach' is a special statement to do something with all elements of an
 array. The usual construction is as follows:
 
  /* week days */
@@ -260,12 +260,12 @@ array. The usual construction is as follows:
 	print("I hate ", w, "s\n");
 
 Each value of the array will be assigned to the variable and the loop body
-executed. As always, the variable is created if it doesn't exist.
+executed. The variable is local to the loop body.
 
 Break
 ~~~~~
 
-Exit from 'while' and 'foreach' loops can be forced by using 'break', just
+Exit from `while' and `foreach' loops can be forced by using `break', just
 as in C.
 
 Builtin operators
@@ -345,7 +345,7 @@ the following result:
 
  a = 100;
  b = a++;	/* b's value is 100, a's value is 101 */
- c = ++a;	/* c's and a's value is both 102 */
+ c = ++a;	/* c's and a's value are both 102 */
 
 The well known binary +=, -=, *=, /= and %= also exist:
 
@@ -362,7 +362,7 @@ Subroutines (also called functions) are created with the 'sub' keyword:
 		local o;
  
 		o = get_option();
-		process_option(k);
+		process_option(o);
 		draw_screen();
 	}
  }
@@ -418,7 +418,7 @@ it's not called, but a pointer to it returned instead:
  
  c = b(20, 30);		/* c == 50, same as calling sum(20, 30) */
 
-The 'sub' directive can also be used as an rvalue to define anonymous
+The `sub' directive can also be used as an rvalue to define anonymous
 subroutines. So, the following can be done:
 
  on_exit_subs = [];
@@ -452,7 +452,7 @@ in different ways:
 
 Subroutines are defined in execution time and *not* in compilation time.
 This means that you can redefine a subroutine whenever you want, but be
-aware that you can't use it before the 'sub' instruction has been
+aware that you can't use it before the `sub' instruction has been
 executed. This is a common pitfall:
 
  /* call a function before it exists: error */
@@ -527,6 +527,26 @@ and a list of arguments, and substitutes them.
 
  sprintf("%s: %d", 'ERROR', 10);	/* returns 'ERROR: 10' */
  sprintf("%04X", 16384);		/* return '4000' */
+
+The sscanf() function can be seen as the opposite of sprintf(): given a
+format string and a scanning string, extracts a set of strings and returns
+them as an array.
+
+ sscanf("%s %d", "name 100");		/* returns [ 'name', 100 ] */
+
+The standard %-commands can be used, as %d, %i, %u, %f and %x, for decimal,
+unsigned, floating point or hexadecimal numbers, %n, to return a matching
+offset, and %[, to match an explicit set of matching characters, than can
+be negated by adding a ^ after the bracket. As a non-standard extension, a
+special command %S is also implemented, that match a string upto the
+following substring in the format string. For example:
+
+ sscanf("*S: *S", "key: value"); 	/* returns [ 'key', 'value' ] */
+ sscanf("*S%d", "text words 1");	/* returns [ 'text words', 1 ] */
+
+As in the standard, the format can include an optional number of maximum
+characters and a * to mark the matched string as non-interesting (so it's
+not returned).
 
 Array functions
 ~~~~~~~~~~~~~~~
@@ -960,6 +980,23 @@ APPDIR
 ~~~~~~
 
 The application directory.
+
+ENCODING
+~~~~~~~~
+
+The last successful charset encoding set by the encoding() function.
+
+TEMP_ENCODING
+~~~~~~~~~~~~~
+
+Similar to ENCODING, but used only when opening a file for writing and
+if ENCODING is not set. After opening, its content is destroyed.
+
+DETECTED_ENCODING
+~~~~~~~~~~~~~~~~~
+
+Filled after each file opening in read mode, if a specific charset
+encoding could be found. Can be copied onto ENCODING or TEMP_ENCODING.
 
 MPSL.VERSION
 ~~~~~~~~~~~~
