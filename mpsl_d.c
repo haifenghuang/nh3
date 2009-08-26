@@ -152,7 +152,13 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 	}
 	else
 	if (MPDM_IS_EXEC(v)) {
-		ptr = mpdm_pokews(ptr, size, L"sub { 1; }");
+		char tmp[256];
+		wchar_t *wptr;
+
+		sprintf(tmp, "bincall(%p)", v->data);
+		wptr = mpdm_mbstowcs(tmp, NULL, -1);
+		ptr = mpdm_pokews(ptr, size, wptr);
+		free(wptr);
 	}
 	else
 	if (MPDM_IS_STRING(v))

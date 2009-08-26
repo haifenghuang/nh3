@@ -268,6 +268,8 @@ static mpdm_t F_getenv(mpdm_t a)
 	return mpdm_hget(e, mpdm_aget(a, 0));
 }
 
+static mpdm_t F_bincall(mpdm_t a) { return MPDM_X(mpdm_ival(mpdm_aget(a, 0))); }
+
 
 static struct {
 	wchar_t * name;
@@ -335,6 +337,7 @@ static struct {
 	{ L"time",	F_time },
 	{ L"chdir",	F_chdir },
 	{ L"sscanf",	F_sscanf },
+	{ L"bincall",	F_bincall },
 	{ NULL,		NULL }
 };
 

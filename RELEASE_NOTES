@@ -7,6 +7,8 @@ MPSL Release Notes
  * New function `sscanf()'.
  * New function `compile()', to compile a string of MPSL code
    to an executable value.
+ * New function `bincall()', to create an executable value
+   given a pointer to binary code.
 
 1.0.7
 -----
