@@ -9,6 +9,8 @@ MPSL Release Notes
    to an executable value.
  * New function `bincall()', to create an executable value
    given a pointer to binary code.
+ * The `mpsl' executable now ignores the first line of an MPSL
+   script if it starts with #!.
 
 1.0.7
 -----
