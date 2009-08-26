@@ -541,12 +541,15 @@ be negated by adding a ^ after the bracket. As a non-standard extension, a
 special command %S is also implemented, that match a string upto the
 following substring in the format string. For example:
 
- sscanf("*S: *S", "key: value"); 	/* returns [ 'key', 'value' ] */
- sscanf("*S%d", "text words 1");	/* returns [ 'text words', 1 ] */
+ sscanf("%S: %S", "key: value"); 	/* returns [ 'key', 'value' ] */
+ sscanf("%S%d", "text words 1");	/* returns [ 'text words ', 1 ] */
 
 As in the standard, the format can include an optional number of maximum
 characters and a * to mark the matched string as non-interesting (so it's
 not returned).
+
+The sscanf() function also accepts an optional third argument with an
+offset to start scanning.
 
 Array functions
 ~~~~~~~~~~~~~~~
