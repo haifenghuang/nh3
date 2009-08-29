@@ -39,10 +39,10 @@ int yy_input_for_flex(char * buf, int max);
 #define YY_INPUT(b,r,m) (r = yy_input_for_flex(b,m))
 
 /* internal pointer to next character in code */
-wchar_t * mpsl_next_char = NULL;
+wchar_t *mpsl_next_char = NULL;
 
 /* file stream for compiling from file */
-FILE * mpsl_file = NULL;
+FILE *mpsl_file = NULL;
 
 /* line number */
 int mpsl_line = 0;
@@ -64,7 +64,7 @@ struct ds { wchar_t * d; int p; int s; };
 /* a dynamic string */
 struct ds ds_v;
 
-static wchar_t * s_mbstowcs(char * str)
+static wchar_t *s_mbstowcs(char *str)
 /* converts from mbs to wcs, using a static buffer */
 {
 	static wchar_t * wc = NULL;
@@ -85,7 +85,7 @@ static wchar_t * s_mbstowcs(char * str)
 }
 
 
-static mpdm_t literal_cache(char * ptr, wchar_t * wptr)
+static mpdm_t literal_cache(char *ptr, wchar_t *wptr)
 /* the cache of literal values */
 {
 	mpdm_t v;
@@ -224,7 +224,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 
 int yywrap(void) { return 1; }
 
-int yy_input_for_flex(char * buf, int max)
+int yy_input_for_flex(char *buf, int max)
 {
 	int n = 0;
 
