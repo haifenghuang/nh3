@@ -11,6 +11,7 @@ MPSL Release Notes
    given a pointer to binary code.
  * The `mpsl' executable now ignores the first line of an MPSL
    script if it starts with #!.
+ * Real numbers can be expressed in scientific notation.
 
 1.0.7
 -----

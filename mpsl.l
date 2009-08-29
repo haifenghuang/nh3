@@ -118,6 +118,7 @@ OCTINTEGER	0{OCTDIGIT}+
 HEXINTEGER	0[xX]{HEXDIGIT}+
 
 REAL		{DIGIT}*[\.]?{DIGIT}+
+SCIENT		{DIGIT}+(\.{DIGIT}+)?[eE][-+]?{DIGIT}+
 SYMBOL		{LETTER}({LETTER}|{DIGIT})*
 INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 
@@ -132,7 +133,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 			return INTEGER;
 		}
 
-{REAL}		{
+({REAL}|{SCIENT})	{
 			/* real numbers */
 			yylval.v = literal_cache(yytext, NULL);
 			return REAL;
