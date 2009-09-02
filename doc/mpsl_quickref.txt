@@ -1,4 +1,4 @@
-*MPSL Quick Reference
+*MPSL Quick Reference Sheet
 
 *Scalars
 
@@ -120,6 +120,8 @@ char = chr(number);	Returns the character
 			represented by number
 number = ord(str);	Returns the numeric value of
 			the first character in str
+ary = sscanf(fmt, str);	Extracts values from a
+			string using a format
 
 *Array functions
 
@@ -193,6 +195,7 @@ fd = popen(cmd, mode);	Opens a pipe (mode is "r","w",
 			"r+"...), can be read/write
 pclose(fd);		Closes a pipe
 load(mpslfile);		Loads and executes MPSL code
+chdir(dir);		Change current directory
 
 *Regular expression functions
 
@@ -241,20 +244,22 @@ getenv(envvar);		Returns the value of
 uc(str);		Returns str to uppercase
 lc(str);		Returns str to lowercase
 time();			Returns the time in seconds
+x = compile(str);	Compiles a str of MPSL code
 
 *String escapes for double quotes
 
-\n			Newline
-\t			Tab
-\r			Carriage return
-\e			Escape
-\"			Double quotes
-\\			Backslash
+\\n			Newline
+\\t			Tab
+\\r			Carriage return
+\\e			Escape
+\\"			Double quotes
+\\\\			Backslash
+\\x{NNNN}		Unicode character (N: hex)
 
 *Regular expression flags
 
 i			Ignore case
 m			Value is multiline
-g			Global change (sregex)
+g			Global match or change
 l			Match last occurrence
 			instead of first
