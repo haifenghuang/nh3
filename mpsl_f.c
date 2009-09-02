@@ -368,6 +368,25 @@ void mpsl_argv(int argc, char * argv[])
 /* in mpsl_c.c */
 mpdm_t mpsl_build_opcodes(void);
 
+mpdm_t mpsl_build_funcs(void)
+/* build all functions */
+{
+	mpdm_t c;
+	int n;
+
+	/* creates all the symbols in the CORE library */
+	c = MPDM_H(0);
+	for (n = 0; mpsl_funcs[n].name != NULL; n++) {
+		mpdm_t f = MPDM_S(mpsl_funcs[n].name);
+		mpdm_t x = MPDM_X(mpsl_funcs[n].func);
+
+		mpdm_hset(mpdm_root(), f, x);
+		mpdm_hset(c, f, x);
+	}
+
+	return c;
+}
+
 
 /**
  * mpsl_startup - Initializes MPSL.
@@ -377,25 +396,13 @@ mpdm_t mpsl_build_opcodes(void);
  */
 int mpsl_startup(void)
 {
-	int n;
 	mpdm_t r;
 	mpdm_t m;
-	mpdm_t c;
 
 	/* startup MPDM */
 	mpdm_startup();
 
 	r = mpdm_root();
-
-	/* creates all the symbols in the CORE library */
-	c = MPDM_H(0);
-	for (n = 0; mpsl_funcs[n].name != NULL; n++) {
-		mpdm_t f = MPDM_S(mpsl_funcs[n].name);
-		mpdm_t x = MPDM_X(mpsl_funcs[n].func);
-
-		mpdm_hset(r, f, x);
-		mpdm_hset(c, f, x);
-	}
 
 	/* creates INC, unless already defined */
 	if (mpdm_hget_s(r, L"INC") == NULL)
@@ -421,7 +428,7 @@ int mpsl_startup(void)
 	mpdm_hset_s(m, L"VERSION", MPDM_MBS(VERSION));
 	mpdm_hset_s(m, L"OPCODE", mpsl_build_opcodes());
 	mpdm_hset_s(m, L"LC", MPDM_H(0));
-	mpdm_hset_s(m, L"CORE", c);
+	mpdm_hset_s(m, L"CORE", mpsl_build_funcs());
 
 	mpdm_dump_1 = mpsl_dump_1;
 
