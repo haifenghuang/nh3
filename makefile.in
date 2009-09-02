@@ -8,8 +8,8 @@ PROJ=mpsl
 
 ADD_DOCS=doc/mpsl_quickref.ps
 GRUTATXT_DOCS=doc/mpsl_index.html doc/mpsl_overview.html doc/mpsl_internals.html
-MP_DOCCER_DOCS=doc/mpsl_api.txt
-G_AND_MP_DOCS=doc/mpsl_api.html
+MP_DOCCER_DOCS=doc/mpsl_api.txt doc/mpsl_reference.txt
+G_AND_MP_DOCS=doc/mpsl_api.html doc/mpsl_reference.html
 
 OBJS=mpsl_c.o mpsl_l.o mpsl_m.o mpsl_y.o mpsl_f.o mpsl_d.o
 
@@ -80,6 +80,12 @@ doc/mpsl_api.txt: mpsl_c.c mpsl.y
 	mp_doccer mpsl_c.c mpsl.y -o doc/mpsl_api -f grutatxt \
 	-t "MPSL C API" \
 	-b "This reference documents version $(VERSION) of the C API." \
+	-a 'Angel Ortega - angel@triptico.com'
+
+doc/mpsl_reference.txt: mpsl_f.c
+	mp_doccer mpsl_f.c -o doc/mpsl_reference -f grutatxt \
+	-t "MPSL Function Library Reference" \
+	-b "This reference documents version $(VERSION) of the Function Library." \
 	-a 'Angel Ortega - angel@triptico.com'
 
 docs: $(DOCS)
