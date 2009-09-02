@@ -113,8 +113,8 @@ static mpdm_t F_dumper(mpdm_t a) {
  * @v1: the first value
  * @v2: the second value
  *
- * Compares two values. If both has the MPDM_STRING flag set,
- * a comparison using wcscmp() is returned; if both are arrays,
+ * Compares two values. If both are strings, a standard string
+ * comparison (using wcscmp()) is returned; if both are arrays,
  * the size is compared first and, if they have the same number
  * elements, each one is compared; otherwise, a simple pointer
  * comparison is done.
@@ -451,12 +451,12 @@ static mpdm_t F_keys(mpdm_t a) {
  *
  * If the file is open for reading, some charset detection methods are
  * used. If any of them is successful, its name is stored in the
- * DETECTED_ENCODING element of the mpdm_root() hash. This value is
- * suitable to be copied over ENCODING or TEMP_ENCODING.
+ * `DETECTED_ENCODING' global variable. This value is
+ * suitable to be copied over `ENCODING' or `TEMP_ENCODING'.
  *
  * If the file is open for writing, the encoding to be used is read from
- * the ENCODING element of mpdm_root() and, if not set, from the
- * TEMP_ENCODING one. The latter will always be deleted afterwards.
+ * the `ENCODING' global variable and, if not set, from the
+ * `TEMP_ENCODING' one. The latter will always be deleted afterwards.
  * [Input-Output]
  * [Character Set Conversion]
  */
@@ -641,7 +641,7 @@ static mpdm_t F_glob(mpdm_t a) {
  * is reverted to default charset conversion (i.e. the one defined
  * in the locale).
  *
- * This function stores the @charset value into the ENCODING global
+ * This function stores the @charset value into the `ENCODING' global
  * variable.
  *
  * Returns a negative number if @charset is unsupported, or zero
@@ -826,7 +826,7 @@ static mpdm_t F_compile(mpdm_t a) {
  * error - Simulates an error.
  * @err: the error message
  *
- * Simulates an error. The @err error message is stored in the ERROR
+ * Simulates an error. The @err error message is stored in the `ERROR'
  * global variable and an internal abort global flag is set, so no further
  * MPSL code can be executed until reset.
  */
@@ -927,9 +927,9 @@ static mpdm_t F_sscanf(mpdm_t a) {
  *
  * Evaluates a piece of code. The @code can be a string containing MPSL
  * source code (that will be compiled) or a direct executable value. If
- * the compilation or the execution gives an error, the ERROR variable
+ * the compilation or the execution gives an error, the `ERROR' variable
  * will be set to a printable value and NULL returned. Otherwise, the
- * exit value from the code is returned and ERROR set to NULL. The 
+ * exit value from the code is returned and `ERROR' set to NULL. The 
  * internal abort flag is reset on exit.
  *
  * [Code Control]
