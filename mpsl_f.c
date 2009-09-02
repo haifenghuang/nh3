@@ -560,86 +560,381 @@ static mpdm_t F_unlink(mpdm_t a) {
 	return mpsl_boolean(mpdm_unlink(A0));
 }
 
+/**
+ * stat - Gives status from a file.
+ * @filename: file name to get the status from
+ *
+ * Returns a 14 element array of the status (permissions, onwer, etc.)
+ * from the desired @filename, or NULL if the file cannot be accessed.
+ * (man 2 stat).
+ *
+ * The values are: 0, device number of filesystem; 1, inode number;
+ * 2, file mode; 3, number of hard links to the file; 4, uid; 5, gid;
+ * 6, device identifier; 7, total size of file in bytes; 8, atime;
+ * 9, mtime; 10, ctime; 11, preferred block size for system I/O;
+ * 12, number of blocks allocated and 13, canonicalized file name.
+ * Not all elements have necesarily meaningful values, as most are
+ * system-dependent.
+ * [Input / Output]
+ */
+/** array = stat(filename); */
 static mpdm_t F_stat(mpdm_t a) {
 	return mpdm_stat(A0);
 }
 
+/**
+ * chmod - Changes a file's permissions.
+ * @filename: the file name
+ * @perms: permissions (element 2 from stat())
+ *
+ * Changes the permissions for a file.
+ * [Input / Output]
+ */
+/** integer = chmod(filename, perms); */
 static mpdm_t F_chmod(mpdm_t a) {
 	return MPDM_I(mpdm_chmod(A0,A1));
 }
 
+/**
+ * chown - Changes a file's owner.
+ * @filename: the file name
+ * @uid: user id (element 4 from stat())
+ * @gid: group id (element 5 from stat())
+ *
+ * Changes the owner and group id's for a file.
+ * [Input / Output]
+ */
+/** integer = chown(filename, uid, gid); */
 static mpdm_t F_chown(mpdm_t a) {
 	return MPDM_I(mpdm_chown(A0,A1,A2));
 }
 
+/**
+ * glob - Executes a file globbing.
+ * @spec: Globbing spec
+ * @base: Optional base directory
+ *
+ * Executes a file globbing. @spec is system-dependent, but usually
+ * the * and ? metacharacters work everywhere. @base can contain a
+ * directory; if that's the case, the output strings will include it.
+ * In any case, each returned value will be suitable for a call to
+ * open().
+ *
+ * Returns an array of files that match the globbing (can be an empty
+ * array if no file matches), or NULL if globbing is unsupported.
+ * Directories are returned first and their names end with a slash.
+ * [Input / Output]
+ */
+/** array = glob(spec, base); */
 static mpdm_t F_glob(mpdm_t a) {
 	return mpdm_glob(A0, A1);
 }
 
+/**
+ * encoding - Sets the current charset encoding for files.
+ * @charset: the charset name.
+ *
+ * Sets the current charset encoding for files. Future opened
+ * files will be assumed to be encoded with @charset, which can
+ * be any of the supported charset names (utf-8, iso-8859-1, etc.),
+ * and converted on each read / write. If charset is NULL, it
+ * is reverted to default charset conversion (i.e. the one defined
+ * in the locale).
+ *
+ * This function stores the @charset value into the ENCODING global
+ * variable.
+ *
+ * Returns a negative number if @charset is unsupported, or zero
+ * if no errors were found.
+ * [Input / Output]
+ * [Character Set Conversion]
+ */
+/** integer = encoding(charset); */
 static mpdm_t F_encoding(mpdm_t a) {
 	return MPDM_I(mpdm_encoding(A0));
 }
 
+/**
+ * popen - Opens a pipe.
+ * @prg: the program to pipe
+ * @mode: an fopen-like mode string
+ *
+ * Opens a pipe to a program. If @prg can be open in the specified @mode,
+ * return file descriptor, or NULL otherwise.
+ *
+ * The @mode can be `r' (for reading), `w' (for writing), or `r+' or `w+'
+ * for a special double pipe reading-writing mode.
+ * [Input / Output]
+ */
+/** fd = popen(prg, mode); */
 static mpdm_t F_popen(mpdm_t a) {
 	return mpdm_popen(A0, A1);
 }
 
+/**
+ * pclose - Closes a pipe.
+ * @fd: the value containing the file descriptor
+ *
+ * Closes a pipe.
+ * [Input / Output]
+ */
+/** pclose(fd); */
 static mpdm_t F_pclose(mpdm_t a) {
 	return mpdm_pclose(A0);
 }
 
+/**
+ * regex - Matches a regular expression.
+ * @r: the regular expression
+ * @ra: an array of regular expressions
+ * @v: the value to be matched
+ * @offset: offset from the start of the value
+ *
+ * Matches a regular expression against a value. Valid flags are `i',
+ * for case-insensitive matching, `m', to treat the string as a
+ * multiline string (i.e., one containing newline characters), so
+ * that ^ and $ match the boundaries of each line instead of the
+ * whole string, `l', to return the last matching instead of the
+ * first one, or `g', to match globally; in that last case, an array
+ * containing all matches is returned instead of a string scalar.
+ *
+ * If @r is a string, an ordinary regular expression matching is tried
+ * over the @v string. If the matching is possible, the match result
+ * is returned, or NULL otherwise.
+ *
+ * If @r is an array (of strings), each element is tried sequentially
+ * as an individual regular expression over the @v string, each one using
+ * the offset returned by the previous match. All regular expressions
+ * must match to be successful. If this is the case, an array (with
+ * the same number of arguments) is returned containing the matched
+ * strings, or NULL otherwise.
+ *
+ * If @r is NULL, the result of the previous regex matching
+ * is returned as a two element array. The first element will contain
+ * the character offset of the matching and the second the number of
+ * characters matched. If the previous regex was unsuccessful, NULL
+ * is returned.
+ * [Regular Expressions]
+ */
+/** string = regex(r, v); */
+/** string = regex(r, v, offset); */
+/** array = regex(ra, v); */
+/** array = regex(); */
 static mpdm_t F_regex(mpdm_t a) {
 	return mpdm_regex(A0,A1,IA2);
 }
 
+/**
+ * sregex - Matches and substitutes a regular expression.
+ * @r: the regular expression
+ * @v: the value to be matched
+ * @s: the substitution string, hash or code
+ * @offset: offset from the start of v
+ *
+ * Matches a regular expression against a value, and substitutes the
+ * found substring with @s. Valid flags are `i', for case-insensitive
+ * matching, and `g', for global replacements (all ocurrences in @v
+ * will be replaced, instead of just the first found one).
+ *
+ * If @s is executable, it's executed with the matched part as
+ * the only argument and its return value is used as the
+ * substitution string.
+ *
+ * If @s is a hash, the matched string is used as a key to it and
+ * its value used as the substitution. If this value itself is
+ * executable, it's executed with the matched string as its only
+ * argument and its return value used as the substitution.
+ *
+ * If @r is NULL, returns the number of substitutions made in the
+ * previous call to sregex() (can be zero if none was done).
+ *
+ * Returns the modified string, or the original one if no substitutions
+ * were done.
+ * [Regular Expressions]
+ */
+/** string = sregex(r, v, s); */
+/** string = sregex(r, v, s, offset); */
+/** integer = sregex(); */
 static mpdm_t F_sregex(mpdm_t a) {
 	return mpdm_sregex(A0,A1,A2,IA3);
 }
 
+/**
+ * gettext - Translates a string to the current language.
+ * @str: the string
+ *
+ * Translates the @str string to the current language.
+ *
+ * This function can still be used even if there is no real gettext
+ * support by manually filling the __I18N__ hash.
+ *
+ * If the string is found in the current table, the translation is
+ * returned; otherwise, the same @str value is returned.
+ * [Strings]
+ * [Localization]
+ */
+/** string = gettext(str); */
 static mpdm_t F_gettext(mpdm_t a) {
 	return mpdm_gettext(A0);
 }
 
+/**
+ * gettext_domain - Sets domain and data directory for translations.
+ * @dom: the domain (application name)
+ * @data: directory contaning the .mo files
+ *
+ * Sets the domain (application name) and translation data for translating
+ * strings that will be returned by gettext(). @data must point to a
+ * directory containing the .mo (compiled .po) files.
+ *
+ * If there is no gettext support, returns 0, or 1 otherwise.
+ * [Strings]
+ * [Localization]
+ */
+/** bool = gettext_domain(dom, data); */
 static mpdm_t F_gettext_domain(mpdm_t a) {
 	return MPDM_I(mpdm_gettext_domain(A0, A1));
 }
 
+/**
+ * load - Loads an MPSL source code file.
+ * @source_file: the source code file
+ *
+ * Loads and executes an MPSL source code file and returns
+ * its value.
+ * [Code Control]
+ */
+/** load(source_file); */
 static mpdm_t F_load(mpdm_t a) {
 	return mpdm_exec(mpsl_compile_file(A0), NULL);
 }
 
+/**
+ * compile - Compiles a string of MSPL source code file.
+ * @source: the source code string
+ *
+ * Compiles a string of MPSL source code and returns an
+ * executable value.
+ * [Code Control]
+ */
+/** func = compile(source); */
 static mpdm_t F_compile(mpdm_t a) {
 	return mpsl_compile(A0);
 }
 
+/**
+ * error - Simulates an error.
+ * @err: the error message
+ *
+ * Simulates an error. The @err error message is stored in the ERROR
+ * global variable and an internal abort global flag is set, so no further
+ * MPSL code can be executed until reset.
+ */
+/** error(err); */
 static mpdm_t F_error(mpdm_t a) {
 	return mpsl_error(A0);
 }
 
+/**
+ * sweep - Sweeps unreferenced values.
+ * @count: number of values to be swept
+ *
+ * Destroys values with a reference count of 0. @count is the
+ * number of values to be checked for deletion; special values of
+ * @count are -1, that forces a check of all currently known values
+ * (can be time-consuming) and 0, which tells sweep() to check a
+ * small group of them on each call.
+ * [Value Management]
+ */
+/** sweep(count); */
 static mpdm_t F_sweep(mpdm_t a) {
 	mpdm_sweep(IA0); return NULL;
 }
 
+/**
+ * uc - Converts a string to uppercase.
+ * @str: the string to be converted
+ *
+ * Returns @str converted to uppercase.
+ * [Strings]
+ */
+/** string = uc(str); */
 static mpdm_t F_uc(mpdm_t a) {
 	return mpdm_ulc(A0, 1);
 }
 
+/**
+ * lc - Converts a string to lowercase.
+ * @str: the string to be converted
+ *
+ * Returns @str converted to lowercase.
+ * [Strings]
+ */
+/** string = uc(str); */
 static mpdm_t F_lc(mpdm_t a) {
 	return mpdm_ulc(A0, 0);
 }
 
+/**
+ * time - Returns the current time.
+ *
+ * Returns the current time from the epoch (C library time()).
+ */
+/** integer = time(); */
 static mpdm_t F_time(mpdm_t a) {
 	return MPDM_I(time(NULL));
 }
 
+/**
+ * chdir - Changes the working directory
+ * @dir: the new path
+ *
+ * Changes the working directory
+ * [Input / Output]
+ */
+/** integer = chdir(dir); */
 static mpdm_t F_chdir(mpdm_t a) {
 	return MPDM_I(mpdm_chdir(A0));
 }
 
+/**
+ * sscanf - Extracts data like sscanf().
+ * @fmt: the string format
+ * @str: the string to be parsed
+ * @offset: the character offset to start scanning
+ *
+ * Extracts data from a string using a special format pattern, very
+ * much like the scanf() series of functions in the C library. Apart
+ * from the standard percent-sign-commands (s, u, d, i, f, x,
+ * n, [, with optional size and * to ignore), it implements S,
+ * to match a string of characters upto what follows in the format
+ * string. Also, the [ set of characters can include other % formats.
+ *
+ * Returns an array with the extracted values. If %n is used, the
+ * position in the scanned string is returned as the value.
+ * [Strings]
+ */
+/** array = sscanf(fmt, str); */
+/** array = sscanf(fmt, str, offset); */
 static mpdm_t F_sscanf(mpdm_t a) {
 	return mpdm_sscanf(A0, A1, IA2);
 }
 
+/**
+ * eval - Evaluates MSPL code.
+ * @code: A value containing a string of MPSL code, or executable code
+ * @args: optional arguments for @code
+ *
+ * Evaluates a piece of code. The @code can be a string containing MPSL
+ * source code (that will be compiled) or a direct executable value. If
+ * the compilation or the execution gives an error, the ERROR variable
+ * will be set to a printable value and NULL returned. Otherwise, the
+ * exit value from the code is returned and ERROR set to NULL. The 
+ * internal abort flag is reset on exit.
+ *
+ * [Code Control]
+ */
+/** v = eval(code, args); */
 static mpdm_t F_eval(mpdm_t a)
 {
 	mpdm_t c;
@@ -650,6 +945,19 @@ static mpdm_t F_eval(mpdm_t a)
 	return mpsl_eval(c, a);
 }
 
+
+/**
+ * sprintf - Formats a sprintf()-like string.
+ * @fmt: the string format
+ * @arg1: first argument
+ * @arg2: second argument
+ * @argn: nth argument
+ *
+ * Formats a string using the sprintf() format taking the values from
+ * the variable arguments.
+ * [Strings]
+ */
+/** string = sprintf(fmt, arg1 [,arg2 ... argn]); */
 static mpdm_t F_sprintf(mpdm_t a)
 {
 	mpdm_t f;
@@ -666,6 +974,16 @@ static mpdm_t F_sprintf(mpdm_t a)
 }
 
 
+/**
+ * print - Writes values to stdout.
+ * @arg1: first argument
+ * @arg2: second argument
+ * @argn: nth argument
+ *
+ * Writes the variable arguments to stdout.
+ * [Input / Output]
+ */
+/** print(arg1 [,arg2 ... argn]); */
 static mpdm_t F_print(mpdm_t a)
 {
 	int n;
@@ -676,6 +994,21 @@ static mpdm_t F_print(mpdm_t a)
 }
 
 
+/**
+ * write - Writes values to a file descriptor.
+ * @fd: the file descriptor
+ * @arg1: first argument
+ * @arg2: second argument
+ * @argn: nth argument
+ *
+ * Writes the variable arguments to the file descriptor, doing
+ * charset conversion in the process.
+ *
+ * Returns the total size written to @fd.
+ * [Input / Output]
+ * [Character Set Conversion]
+ */
+/** integer = write(fd, arg1 [,arg2 ... argn]); */
 static mpdm_t F_write(mpdm_t a)
 {
 	int n, r = 0;
@@ -687,6 +1020,15 @@ static mpdm_t F_write(mpdm_t a)
 }
 
 
+/**
+ * chr - Returns the Unicode character represented by the codepoint.
+ * @c: the codepoint as an integer value
+ *
+ * Returns a 1 character string containing the character which
+ * Unicode codepoint is @c.
+ * [Strings]
+ */
+/** string = chr(c); */
 static mpdm_t F_chr(mpdm_t a)
 {
 	wchar_t tmp[2];
@@ -698,6 +1040,15 @@ static mpdm_t F_chr(mpdm_t a)
 }
 
 
+/**
+ * ord - Returns the Unicode codepoint of a character.
+ * @str: the string
+ *
+ * Returns the Unicode codepoint for the first character in
+ * the string.
+ * [Strings]
+ */
+/** integer = ord(str); */
 static mpdm_t F_ord(mpdm_t a)
 {
 	int ret = 0;
@@ -712,6 +1063,21 @@ static mpdm_t F_ord(mpdm_t a)
 }
 
 
+/**
+ * map - Maps an array into another.
+ * @filter: the filter
+ * @a: the array
+ *
+ * Returns new a array built by applying the filter @filt to all the
+ * elements of the array @a. The filter can be a executable function
+ * accepting one argument, in which case the return of the function
+ * will be used as the value; @filt can also be a hash, in which case
+ * the original element will be used as the key and the value used
+ * as the output value-
+ *
+ * [Arrays]
+ */
+/** array = map(filter, a); */
 static mpdm_t F_map(mpdm_t a)
 {
 	mpdm_t key = mpdm_aget(a, 0);
@@ -745,6 +1111,22 @@ static mpdm_t F_map(mpdm_t a)
 }
 
 
+/**
+ * grep - Greps inside an array.
+ * @filter: the filter
+ * @a: the array
+ *
+ * Greps inside an array and returns another one containing only the
+ * elements that passed the filter. If @filter is a string, it's accepted
+ * to be a regular expression, which will be applied to each element.
+ * If @filter is executable, it will be called with the element as its
+ * only argument and its return value used as validation.
+ *
+ * The new array will contain all elements that passed the filter.
+ * [Arrays]
+ * [Regular Expressions]
+ */
+/** array = grep(filter, a); */
 static mpdm_t F_grep(mpdm_t a)
 {
 	mpdm_t key = mpdm_aget(a, 0);
@@ -785,7 +1167,9 @@ static mpdm_t F_getenv(mpdm_t a)
 	return mpdm_hget(e, mpdm_aget(a, 0));
 }
 
-static mpdm_t F_bincall(mpdm_t a) { return MPDM_X(mpdm_ival(mpdm_aget(a, 0))); }
+static mpdm_t F_bincall(mpdm_t a) {
+	return MPDM_X(mpdm_ival(mpdm_aget(a, 0)));
+}
 
 
 static struct {

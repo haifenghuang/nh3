@@ -85,7 +85,7 @@ doc/mpsl_api.txt: mpsl_c.c mpsl.y
 doc/mpsl_reference.txt: mpsl_f.c
 	mp_doccer mpsl_f.c -o doc/mpsl_reference -f grutatxt \
 	-t "MPSL Function Library Reference" \
-	-b "This reference documents version $(VERSION) of the Function Library." \
+	-b "This reference documents version $(VERSION) of the MPSL Function Library." \
 	-a 'Angel Ortega - angel@triptico.com'
 
 docs: $(DOCS)
