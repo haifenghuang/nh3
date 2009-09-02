@@ -1068,12 +1068,12 @@ static mpdm_t F_ord(mpdm_t a)
  * @filter: the filter
  * @a: the array
  *
- * Returns new a array built by applying the filter @filt to all the
- * elements of the array @a. The filter can be a executable function
- * accepting one argument, in which case the return of the function
- * will be used as the value; @filt can also be a hash, in which case
- * the original element will be used as the key and the value used
- * as the output value-
+ * Returns a new array built by applying the @filter to all the
+ * elements of the array @a. The filter can be an executable function
+ * accepting one argument, in which case the return value of the function
+ * will be used as the output element; @filt can also be a hash, in which
+ * case the original element will be used as a key to the hash and the
+ * associated value used as the output element.
  *
  * [Arrays]
  */
@@ -1118,7 +1118,7 @@ static mpdm_t F_map(mpdm_t a)
  *
  * Greps inside an array and returns another one containing only the
  * elements that passed the filter. If @filter is a string, it's accepted
- * to be a regular expression, which will be applied to each element.
+ * as a regular expression, which will be applied to each element.
  * If @filter is executable, it will be called with the element as its
  * only argument and its return value used as validation.
  *
