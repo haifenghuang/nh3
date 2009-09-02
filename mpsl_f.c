@@ -88,7 +88,7 @@ static mpdm_t F_clone(mpdm_t a) {
  * Dumps a value to stdin. The value can be complex. This function
  * is for debugging purposes only.
  * [Debugging]
- * [Input / Output]
+ * [Input-Output]
  */
 /** dump(v); */
 static mpdm_t F_dump(mpdm_t a) {
@@ -457,7 +457,7 @@ static mpdm_t F_keys(mpdm_t a) {
  * If the file is open for writing, the encoding to be used is read from
  * the ENCODING element of mpdm_root() and, if not set, from the
  * TEMP_ENCODING one. The latter will always be deleted afterwards.
- * [Input / Output]
+ * [Input-Output]
  * [Character Set Conversion]
  */
 /** fd = open(filename, mode); */
@@ -470,7 +470,7 @@ static mpdm_t F_open(mpdm_t a) {
  * @fd: the file descriptor
  *
  * Closes the file descriptor.
- * [Input / Output]
+ * [Input-Output]
  */
 /** close(fd); */
 static mpdm_t F_close(mpdm_t a) {
@@ -482,7 +482,7 @@ static mpdm_t F_close(mpdm_t a) {
  * @fd: the file descriptor
  *
  * Reads a line from @fd. Returns the line, or NULL on EOF.
- * [Input / Output]
+ * [Input-Output]
  * [Character Set Conversion]
  */
 /** string = read(fd); */
@@ -496,7 +496,7 @@ static mpdm_t F_read(mpdm_t a) {
  *
  * Returns a character read from @fd, or NULL on EOF. No
  * charset conversion is done.
- * [Input / Output]
+ * [Input-Output]
  */
 /** string = getchar(fd); */
 static mpdm_t F_getchar(mpdm_t a) {
@@ -512,7 +512,7 @@ static mpdm_t F_getchar(mpdm_t a) {
  * conversion is done.
  *
  * Returns @s or NULL if the writing failed.
- * [Input / Output]
+ * [Input-Output]
  */
 /** s = putchar(fd, s); */
 static mpdm_t F_putchar(mpdm_t a) {
@@ -529,7 +529,7 @@ static mpdm_t F_putchar(mpdm_t a) {
  * be: 0 for SEEK_SET, 1 for SEEK_CUR and 2 for SEEK_END.
  *
  * Returns the value from the fseek() C function call.
- * [Input / Output]
+ * [Input-Output]
  */
 /** integer = fseek(fd, offset, whence); */
 static mpdm_t F_fseek(mpdm_t a) {
@@ -541,7 +541,7 @@ static mpdm_t F_fseek(mpdm_t a) {
  * @fd: the file descriptor
  *
  * Returns the position of the file pointer in @fd.
- * [Input / Output]
+ * [Input-Output]
  */
 /** integer = ftell(fd); */
 static mpdm_t F_ftell(mpdm_t a) {
@@ -553,7 +553,7 @@ static mpdm_t F_ftell(mpdm_t a) {
  * @filename: file name to be deleted
  *
  * Deletes a file.
- * [Input / Output]
+ * [Input-Output]
  */
 /** bool = unlink(filename); */
 static mpdm_t F_unlink(mpdm_t a) {
@@ -575,7 +575,7 @@ static mpdm_t F_unlink(mpdm_t a) {
  * 12, number of blocks allocated and 13, canonicalized file name.
  * Not all elements have necesarily meaningful values, as most are
  * system-dependent.
- * [Input / Output]
+ * [Input-Output]
  */
 /** array = stat(filename); */
 static mpdm_t F_stat(mpdm_t a) {
@@ -588,7 +588,7 @@ static mpdm_t F_stat(mpdm_t a) {
  * @perms: permissions (element 2 from stat())
  *
  * Changes the permissions for a file.
- * [Input / Output]
+ * [Input-Output]
  */
 /** integer = chmod(filename, perms); */
 static mpdm_t F_chmod(mpdm_t a) {
@@ -602,7 +602,7 @@ static mpdm_t F_chmod(mpdm_t a) {
  * @gid: group id (element 5 from stat())
  *
  * Changes the owner and group id's for a file.
- * [Input / Output]
+ * [Input-Output]
  */
 /** integer = chown(filename, uid, gid); */
 static mpdm_t F_chown(mpdm_t a) {
@@ -623,7 +623,7 @@ static mpdm_t F_chown(mpdm_t a) {
  * Returns an array of files that match the globbing (can be an empty
  * array if no file matches), or NULL if globbing is unsupported.
  * Directories are returned first and their names end with a slash.
- * [Input / Output]
+ * [Input-Output]
  */
 /** array = glob(spec, base); */
 static mpdm_t F_glob(mpdm_t a) {
@@ -646,7 +646,7 @@ static mpdm_t F_glob(mpdm_t a) {
  *
  * Returns a negative number if @charset is unsupported, or zero
  * if no errors were found.
- * [Input / Output]
+ * [Input-Output]
  * [Character Set Conversion]
  */
 /** integer = encoding(charset); */
@@ -664,7 +664,7 @@ static mpdm_t F_encoding(mpdm_t a) {
  *
  * The @mode can be `r' (for reading), `w' (for writing), or `r+' or `w+'
  * for a special double pipe reading-writing mode.
- * [Input / Output]
+ * [Input-Output]
  */
 /** fd = popen(prg, mode); */
 static mpdm_t F_popen(mpdm_t a) {
@@ -676,7 +676,7 @@ static mpdm_t F_popen(mpdm_t a) {
  * @fd: the value containing the file descriptor
  *
  * Closes a pipe.
- * [Input / Output]
+ * [Input-Output]
  */
 /** pclose(fd); */
 static mpdm_t F_pclose(mpdm_t a) {
@@ -890,7 +890,7 @@ static mpdm_t F_time(mpdm_t a) {
  * @dir: the new path
  *
  * Changes the working directory
- * [Input / Output]
+ * [Input-Output]
  */
 /** integer = chdir(dir); */
 static mpdm_t F_chdir(mpdm_t a) {
@@ -981,7 +981,7 @@ static mpdm_t F_sprintf(mpdm_t a)
  * @argn: nth argument
  *
  * Writes the variable arguments to stdout.
- * [Input / Output]
+ * [Input-Output]
  */
 /** print(arg1 [,arg2 ... argn]); */
 static mpdm_t F_print(mpdm_t a)
@@ -1005,7 +1005,7 @@ static mpdm_t F_print(mpdm_t a)
  * charset conversion in the process.
  *
  * Returns the total size written to @fd.
- * [Input / Output]
+ * [Input-Output]
  * [Character Set Conversion]
  */
 /** integer = write(fd, arg1 [,arg2 ... argn]); */
