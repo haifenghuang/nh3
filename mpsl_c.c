@@ -600,3 +600,89 @@ mpdm_t mpsl_build_opcodes(void)
 
 	return r;
 }
+
+
+/**
+ * mpsl_argv - Fills the ARGV global array.
+ * @argc: number of arguments
+ * @argv: array of string values
+ *
+ * Fills the ARGV global MPSL array with an array of arguments. These
+ * are usually the ones sent to main().
+ */
+void mpsl_argv(int argc, char * argv[])
+{
+	int n;
+	mpdm_t ARGV;
+
+	/* create the ARGV array */
+	ARGV = MPDM_A(0);
+
+	for (n = 0; n < argc; n++)
+		mpdm_push(ARGV, MPDM_MBS(argv[n]));
+
+	mpdm_hset_s(mpdm_root(), L"ARGV", ARGV);
+}
+
+
+/* in mpsl_f.c */
+mpdm_t mpsl_build_funcs(void);
+
+
+/**
+ * mpsl_startup - Initializes MPSL.
+ *
+ * Initializes the Minimum Profit Scripting Language. Returns 0 if
+ * everything went OK.
+ */
+int mpsl_startup(void)
+{
+	mpdm_t r;
+	mpdm_t m;
+
+	/* startup MPDM */
+	mpdm_startup();
+
+	r = mpdm_root();
+
+	/* creates INC, unless already defined */
+	if (mpdm_hget_s(r, L"INC") == NULL)
+		mpdm_hset_s(r, L"INC", MPDM_A(0));
+
+	/* the TRUE value */
+	mpdm_hset_s(r, L"TRUE", MPDM_I(1));
+
+	/* standard file descriptors */
+	mpdm_hset_s(r, L"STDIN", MPDM_F(stdin));
+	mpdm_hset_s(r, L"STDOUT", MPDM_F(stdout));
+	mpdm_hset_s(r, L"STDERR", MPDM_F(stderr));
+
+	/* home and application directories */
+	mpdm_hset_s(r, L"HOMEDIR", mpdm_home_dir());
+	mpdm_hset_s(r, L"APPDIR", mpdm_app_dir());
+
+	/* fill now the MPSL hash */
+	m = MPDM_H(0);
+	mpdm_hset_s(r, L"MPSL", m);
+
+	/* store things there */
+	mpdm_hset_s(m, L"VERSION", MPDM_MBS(VERSION));
+	mpdm_hset_s(m, L"OPCODE", mpsl_build_opcodes());
+	mpdm_hset_s(m, L"LC", MPDM_H(0));
+	mpdm_hset_s(m, L"CORE", mpsl_build_funcs());
+
+	mpdm_dump_1 = mpsl_dump_1;
+
+	return 0;
+}
+
+
+/**
+ * mpsl_shutdown - Shuts down MPSL.
+ *
+ * Shuts down MPSL. No MPSL functions should be used from now on.
+ */
+void mpsl_shutdown(void)
+{
+	mpdm_shutdown();
+}
