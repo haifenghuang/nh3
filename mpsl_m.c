@@ -37,7 +37,7 @@
 
 int mpsl_main(int argc, char *argv[])
 {
-	mpdm_t v;
+	mpdm_t v = NULL;
 	char *immscript = NULL;
 	FILE *script = stdin;
 	int ret = 0;
