@@ -1,7 +1,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2007 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2009 Angel Ortega <angel@triptico.com>
 
     mpsl_m.c - Minimum Profit Scripting Language main()
 
@@ -50,7 +50,7 @@ int mpsl_main(int argc, char *argv[])
 	while (argc > 0) {
 		if (strcmp(argv[0], "-v") == 0 || strcmp(argv[0], "--help") == 0) {
 			printf("MPSL %s - Minimum Profit Scripting Language\n", VERSION);
-			printf("Copyright (C) 2003-2007 Angel Ortega <angel@triptico.com>\n");
+			printf("Copyright (C) 2003-2009 Angel Ortega <angel@triptico.com>\n");
 			printf
 			    ("This software is covered by the GPL license. NO WARRANTY.\n\n");
 

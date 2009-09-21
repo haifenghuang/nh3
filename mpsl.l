@@ -2,7 +2,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2007 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2009 Angel Ortega <angel@triptico.com>
 
     mpsl.l - Minimum Profit Scripting Language [F]lexer
 
