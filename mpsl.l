@@ -167,6 +167,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER})
 "&"		return BITAND;
 "|"		return BITOR;
 "^"		return BITXOR;
+"->"		return INVCALL;
 
 "eq"		return STREQ;
 "ne"		return STRNE;

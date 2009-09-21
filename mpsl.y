@@ -98,7 +98,7 @@ static void compiler_warning(char * str)
 %left BOOLAND BOOLOR
 %left INC DEC IADD ISUB IMUL IDIV IMOD
 %left '!'
-%left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE HASHPAIR RANGE '>''<'
+%left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE HASHPAIR RANGE '>''<' INVCALL
 %left BITAND
 %left BITOR BITXOR
 %left '+' '-'
@@ -505,6 +505,14 @@ expr:
 	| compsym '(' list ')'	{
 					/* function call (with args) */
 					$$ = INS2(L"EXECSYM", $1, $3);
+				}
+	| expr INVCALL compsym '(' ')' {
+					/* function call with only an inverse argument */
+					$$ = INS2(L"EXECSYM", $3, INS1(L"ILIST", $1));
+				}
+	| expr INVCALL compsym '(' list ')' {
+					/* function call with inverse argument and other ones */
+					$$ = INS2(L"EXECSYM", $3, INS2(L"ILIST", $1, $5));
 				}
 	| compsym '=' expr	{
 					/* simple assignation */

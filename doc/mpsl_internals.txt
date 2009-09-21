@@ -258,6 +258,15 @@ A LIST instruction returns an array. If `array_value' does not exist, a
 new one is created. The return value of `ins' is pushed into the array,
 which is returned.
 
+ILIST
+~~~~
+
+ ILIST <ins>
+ ILIST <ins> <array_value>
+
+Same as the LIST instruction, but the value is inserted from the start
+of the array instead of pushed at the end.
+
 HASH
 ~~~~
 

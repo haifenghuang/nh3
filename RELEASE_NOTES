@@ -1,6 +1,15 @@
 MPSL Release Notes
 ==================
 
+1.0.9
+-----
+
+ * New syntax for _inverse_ calling functions: the new
+   construction `val1->func(val2)' is equivalent
+   to `func(val1, val2)'. This way, chained function
+   calls where the first argument of one is the return
+   of the other are much easier to understand.
+
 1.0.8
 -----
 

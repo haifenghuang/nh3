@@ -385,6 +385,16 @@ O_TYPE O_list(O_ARGS)
 }
 
 
+O_TYPE O_ilist(O_ARGS)
+/* build and inverse list from instructions */
+{
+	mpdm_t ret = RF(mpdm_size(c) == 2 ? MPDM_A(0) : M(2));
+
+	mpdm_ins(ret, M(1), 0);
+	return UF(ret);
+}
+
+
 O_TYPE O_hash(O_ARGS)
 /* build hash from instructions */
 {	
@@ -463,6 +473,7 @@ static struct mpsl_op_s {
 	{ L"RETURN",	0,	O_return },
 	{ L"LOCAL",	0,	O_local },
 	{ L"LIST",	1,	O_list },
+	{ L"ILIST",	1,	O_ilist },
 	{ L"HASH",	1,	O_hash },
 	{ L"RANGE",	1,	O_range },
 	{ L"UMINUS",	1,	O_uminus },
