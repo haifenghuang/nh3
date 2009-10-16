@@ -77,7 +77,7 @@ echo "# automatically created by config.sh - do not modify" > makefile.opts
 if [ "$CC" = "" ] ; then
 	CC=cc
 	# if CC is unset, try if gcc is available
-	which gcc > /dev/null
+	which gcc > /dev/null 2>&1
 
 	if [ $? = 0 ] ; then
 		CC=gcc
