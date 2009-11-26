@@ -183,6 +183,9 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER}|{BININTEGER})
 "/="		return IDIV;
 "%"		return MOD;
 "%="		return IMOD;
+"&="		return IBITAND;
+"|="		return IBITOR;
+"^="		return IBITXOR;
 
 {SYMBOL}	{
 			/* symbol name */

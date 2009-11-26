@@ -96,7 +96,7 @@ static void compiler_warning(char * str)
 %nonassoc ELSE
 
 %left BOOLAND BOOLOR
-%left INC DEC IADD ISUB IMUL IDIV IMOD
+%left INC DEC IADD ISUB IMUL IDIV IMOD IBITAND IBITOR IBITXOR
 %left '!'
 %left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE HASHPAIR RANGE '>''<' INVCALL
 %left BITAND
@@ -401,6 +401,24 @@ expr:
 				}
 	| compsym IMOD expr	{ $$ = INS2(L"ASSIGN", $1,
 					INS2(L"MOD",
+						INS1(L"SYMVAL", $1),
+						$3)
+					);
+				}
+	| compsym IBITAND expr	{ $$ = INS2(L"ASSIGN", $1,
+					INS2(L"BITAND",
+						INS1(L"SYMVAL", $1),
+						$3)
+					);
+				}
+	| compsym IBITOR expr	{ $$ = INS2(L"ASSIGN", $1,
+					INS2(L"BITOR",
+						INS1(L"SYMVAL", $1),
+						$3)
+					);
+				}
+	| compsym IBITXOR expr	{ $$ = INS2(L"ASSIGN", $1,
+					INS2(L"BITXOR",
 						INS1(L"SYMVAL", $1),
 						$3)
 					);
