@@ -169,6 +169,8 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER}|{BININTEGER})
 "&"		return BITAND;
 "|"		return BITOR;
 "^"		return BITXOR;
+"<<"	return SHL;
+">>"	return SHR;
 "->"		return INVCALL;
 
 "eq"		return STREQ;

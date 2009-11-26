@@ -4,6 +4,7 @@ MPSL Release Notes
 1.0.9
 -----
 
+ * New operands >> and << (bit shifting).
  * New operands &=, |= and ^=.
  * New syntax for _inverse_ calling functions: the new
    construction `val1->func(val2)' is equivalent

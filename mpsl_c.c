@@ -262,6 +262,8 @@ O_TYPE O_or(O_ARGS) { mpdm_t r = M1; return ISTRU(r) ? r : M2; }
 O_TYPE O_bitand(O_ARGS) { return MPDM_I(IM1 & IM2); }
 O_TYPE O_bitor(O_ARGS) { return MPDM_I(IM1 | IM2); }
 O_TYPE O_bitxor(O_ARGS) { return MPDM_I(IM1 ^ IM2); }
+O_TYPE O_shl(O_ARGS) { return MPDM_I(IM1 << IM2); }
+O_TYPE O_shr(O_ARGS) { return MPDM_I(IM1 >> IM2); }
 O_TYPE O_numlt(O_ARGS) { return BOOL(RM1 < RM2); }
 O_TYPE O_numle(O_ARGS) { return BOOL(RM1 <= RM2); }
 O_TYPE O_numgt(O_ARGS) { return BOOL(RM1 > RM2); }
@@ -495,6 +497,8 @@ static struct mpsl_op_s {
 	{ L"BITAND",	1,	O_bitand },
 	{ L"BITOR",	1,	O_bitor },
 	{ L"BITXOR",	1,	O_bitxor },
+	{ L"SHL",	1,	O_shl },
+	{ L"SHR",	1,	O_shr },
 	{ NULL,		0,	NULL }
 };
 

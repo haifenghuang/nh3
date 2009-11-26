@@ -101,6 +101,7 @@ static void compiler_warning(char * str)
 %left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE HASHPAIR RANGE '>''<' INVCALL
 %left BITAND
 %left BITOR BITXOR
+%left SHL SHR
 %left '+' '-'
 %left '*' '/' MOD
 %nonassoc UMINUS
@@ -335,6 +336,8 @@ expr:
 	| expr BITAND expr	{ $$ = INS2(L"BITAND", $1, $3); }
 	| expr BITOR expr	{ $$ = INS2(L"BITOR", $1, $3); }
 	| expr BITXOR expr	{ $$ = INS2(L"BITXOR", $1, $3); }
+	| expr SHL expr		{ $$ = INS2(L"SHL", $1, $3); }
+	| expr SHR expr		{ $$ = INS2(L"SHR", $1, $3); }
 
 				/* increment and decrement (prefix) */
 	| INC compsym		{ $$ = INS2(L"ASSIGN", $2,

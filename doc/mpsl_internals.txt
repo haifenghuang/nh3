@@ -196,6 +196,15 @@ Bitwise operators
 
 Returns the bitwise operation between the exit values of `ins1' and `ins2'.
 
+Bitwise shifts
+~~~~~~~~~~~~~~
+
+ SHL <ins1> <ins2>
+ SHR <ins1> <ins2>
+
+Returns the bitwise shifting of the exit value of `ins1', `ins2' bits
+to the left or right.
+
 STRCAT
 ~~~~~~
 
