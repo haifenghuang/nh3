@@ -188,6 +188,8 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER}|{BININTEGER})
 "&="		return IBITAND;
 "|="		return IBITOR;
 "^="		return IBITXOR;
+"<<="		return ISHL;
+">>="		return ISHR;
 
 {SYMBOL}	{
 			/* symbol name */
