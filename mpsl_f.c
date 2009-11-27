@@ -879,6 +879,7 @@ static mpdm_t F_lc(mpdm_t a) {
  * time - Returns the current time.
  *
  * Returns the current time from the epoch (C library time()).
+ * [Miscellaneous]
  */
 /** integer = time(); */
 static mpdm_t F_time(mpdm_t a) {
@@ -1171,6 +1172,27 @@ static mpdm_t F_bincall(mpdm_t a) {
 	return MPDM_X(mpdm_ival(mpdm_aget(a, 0)));
 }
 
+/**
+ * random - Returns a random value.
+ *
+ * Returns a random number from 0 to value - 1.
+ * [Miscellaneous]
+ */
+/** integer = random(value); */
+static mpdm_t F_random(mpdm_t a) {
+	static unsigned int seed = 0;
+	int r = 0;
+	int range = mpdm_ival(mpdm_aget(a, 0));
+
+	if (range == 0 || seed == 0)
+		seed = time(NULL);
+
+	seed = (seed * 58321) + 11113;
+	r = (seed >> 16) % range;
+
+	return MPDM_I(r);
+};
+
 
 static struct {
 	wchar_t * name;
@@ -1239,6 +1261,7 @@ static struct {
 	{ L"chdir",	F_chdir },
 	{ L"sscanf",	F_sscanf },
 	{ L"bincall",	F_bincall },
+	{ L"random",	F_random },
 	{ NULL,		NULL }
 };
 
