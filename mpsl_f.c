@@ -537,7 +537,7 @@ static mpdm_t F_fseek(mpdm_t a) {
 }
 
 /**
- * fseek - Returns the current file pointer.
+ * ftell - Returns the current file pointer.
  * @fd: the file descriptor
  *
  * Returns the position of the file pointer in @fd.
