@@ -24,7 +24,6 @@ Pending Enhancements
  * 1095: Accept "local var" everywhere a symbol name is accepted.
  * 1109: There must be possible to have executable components with
    arguments in compact symbols (as in 'h.code(a1,a2).other').
- * 1110: Change the trace system to an executable mpdm_t value.
  * 1115: Add C++ style comments.
  * 1120: Invert split() arguments.
  * 1121: Invert join() arguments.
@@ -199,5 +198,7 @@ Closed
    (Sat, 25 Apr 2009 09:51:54 +0200).
  * 1118: Document the sscanf() function
    (Wed, 26 Aug 2009 17:41:01 +0200).
+ * 1110: Change the trace system to an executable mpdm_t value
+   (Thu, 25 Mar 2010 16:58:46 +0100).
 
 Email bugs to angel@triptico.com

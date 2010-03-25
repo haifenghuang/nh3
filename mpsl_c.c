@@ -1,7 +1,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2009 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2010 Angel Ortega <angel@triptico.com>
 
     mpsl_c.c - Minimum Profit Scripting Language Core
 
@@ -30,12 +30,8 @@
 #include "mpdm.h"
 #include "mpsl.h"
 
-/*******************
-	Data
-********************/
 
-/* instruction execution tracing flag */
-int mpsl_trace = 0;
+/** data **/
 
 /* global abort flag */
 int mpsl_abort = 0;
@@ -50,9 +46,11 @@ mpdm_t mpsl_opcodes = NULL;
 /* flag to control calls to mpdm_sweep() from inside mpsl_exec_i() */
 static int sweep_on_exec_i = 1;
 
-/*******************
-	Code
-********************/
+/* pointer to a trap function */
+static mpdm_t mpsl_trap_func = NULL;
+
+
+/** code **/
 
 /**
  * mpsl_is_true - Tests if a value is true.
@@ -524,8 +522,13 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	/* blindly call it, or crash */
 	ret = o->func(c, a, l, f);
 
-	if(mpsl_trace)
-		printf("** %ls: %ls\n", mpdm_string(C0), mpdm_string(ret));
+	if (mpsl_trap_func != NULL) {
+		mpdm_t f = mpsl_trap_func;
+
+		mpsl_trap_func = NULL;
+		mpdm_exec_3(f, c, a, ret);
+		mpsl_trap_func = f;
+	}
 
 	return ret;
 }
@@ -613,6 +616,24 @@ mpdm_t mpsl_build_opcodes(void)
 		mpdm_hset(r, v, v);
 	}
 
+	return r;
+}
+
+
+/**
+ * mpsl_trap - Install a trapping function.
+ * @trap_func: The trapping MPSL code
+ *
+ * Installs a trapping function. The function is an MPSL
+ * executable value receiving 3 arguments: the code stream,
+ * the arguments and the return value of the executed code.
+ *
+ * Returns the previous trapping function.
+ */
+mpdm_t mpsl_trap(mpdm_t trap_func)
+{
+	mpdm_t r = mpdm_unref(mpsl_trap_func);
+	mpsl_trap_func = mpdm_ref(trap_func);
 	return r;
 }
 

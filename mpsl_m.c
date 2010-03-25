@@ -1,7 +1,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2009 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2010 Angel Ortega <angel@triptico.com>
 
     mpsl_m.c - Minimum Profit Scripting Language main()
 
@@ -31,9 +31,25 @@
 #include "mpdm.h"
 #include "mpsl.h"
 
-/*******************
-	Code
-********************/
+
+/** code **/
+
+mpdm_t trap_func(mpdm_t args)
+{
+	mpdm_t c = mpdm_aget(args, 0);
+	mpdm_t r = mpdm_aget(args, 2);
+
+	printf("-- Code ---------------\n");
+	mpdm_dump(c);
+	printf("-- Ret  ---------------\n");
+	mpdm_dump(r);
+
+	printf("Press ENTER\n");
+	getchar();
+
+	return NULL;
+}
+
 
 int mpsl_main(int argc, char *argv[])
 {
@@ -42,6 +58,7 @@ int mpsl_main(int argc, char *argv[])
 	FILE *script = stdin;
 	int ret = 0;
 	int dump_only = 0;
+	int install_trap = 0;
 
 	/* skip the executable */
 	argv++;
@@ -50,17 +67,20 @@ int mpsl_main(int argc, char *argv[])
 	while (argc > 0) {
 		if (strcmp(argv[0], "-v") == 0 || strcmp(argv[0], "--help") == 0) {
 			printf("MPSL %s - Minimum Profit Scripting Language\n", VERSION);
-			printf("Copyright (C) 2003-2009 Angel Ortega <angel@triptico.com>\n");
+			printf("Copyright (C) 2003-2010 Angel Ortega <angel@triptico.com>\n");
 			printf
 			    ("This software is covered by the GPL license. NO WARRANTY.\n\n");
 
-			printf("Usage: mpsl [-d] [-e 'script' | script.mpsl ]\n\n");
+			printf("Usage: mpsl [-d | -s] [-e 'script' | script.mpsl ]\n\n");
 
 			return 0;
 		}
 		else
 		if (strcmp(argv[0], "-d") == 0)
 			dump_only = 1;
+		else
+		if (strcmp(argv[0], "-s") == 0)
+			install_trap = 1;
 		else
 		if (strcmp(argv[0], "-e") == 0) {
 			argv++;
@@ -83,6 +103,9 @@ int mpsl_main(int argc, char *argv[])
 
 	/* set arguments */
 	mpsl_argv(argc, argv);
+
+	if (install_trap)
+			mpsl_trap(MPDM_X(trap_func));
 
 	/* compile */
 	if (immscript != NULL)

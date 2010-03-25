@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2003/2009 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2010 Angel Ortega <angel@triptico.com>
 
     mpsl.h - Minimum Profit Scripting Language
 
@@ -26,7 +26,6 @@
 extern "C" {
 #endif
 
-extern int mpsl_trace;
 extern int mpsl_abort;
 
 int mpsl_is_true(mpdm_t v);
@@ -43,6 +42,8 @@ mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3);
 mpdm_t mpsl_compile(mpdm_t code);
 mpdm_t mpsl_compile_file(mpdm_t filename);
 mpdm_t mpsl_eval(mpdm_t code, mpdm_t args);
+
+mpdm_t mpsl_trap(mpdm_t trap_func);
 
 void mpsl_argv(int argc, char * argv[]);
 

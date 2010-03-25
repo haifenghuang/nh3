@@ -579,7 +579,7 @@ void test_mpsl_file(void)
 {
 	mpdm_t v;
 
-	mpsl_trace = 0;
+	mpsl_trap(NULL);
 
 	/* Create an INC array with the current directory */
 	mpdm_exec(mpsl_compile(MPDM_LS(L"INC = [ '.' ];")), NULL);
@@ -638,7 +638,6 @@ int main(void)
 
 	mpdm->default_sweep = 64;
 
-	mpsl_trace = 1;
 	test_mpsl();
 	test_mpsl2();
 	test_mpsl3();
