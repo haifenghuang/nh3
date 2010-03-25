@@ -43,8 +43,8 @@ static mpdm_t local_symtbl = NULL;
    (only usable while compiling) */
 mpdm_t mpsl_opcodes = NULL;
 
-/* flag to control calls to mpdm_sweep() from inside mpsl_exec_i() */
-static int sweep_on_exec_i = 1;
+/* flag to mark if an execution is from inside constant folding */
+static int in_constant_folding = 0;
 
 /* pointer to a trap function */
 static mpdm_t mpsl_trap_func = NULL;
@@ -513,7 +513,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 		return NULL;
 
 	/* sweep some values */
-	if (sweep_on_exec_i)
+	if (!in_constant_folding)
 		mpdm_sweep(0);
 
 	/* gets the opcode */
@@ -522,7 +522,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	/* blindly call it, or crash */
 	ret = o->func(c, a, l, f);
 
-	if (mpsl_trap_func != NULL) {
+	if (mpsl_trap_func != NULL && !in_constant_folding) {
 		mpdm_t f = mpsl_trap_func;
 
 		mpsl_trap_func = NULL;
@@ -562,15 +562,13 @@ static mpdm_t constant_fold(mpdm_t i)
 				return i;
 		}
 
-		/* avoid sweeping */
-		sweep_on_exec_i = 0;
+		in_constant_folding = 1;
 
 		/* execute the instruction and convert to LITERAL */
 		i = mpsl_exec_p(i, NULL);
 		i = mpsl_mkins(L"LITERAL", 1, i, NULL, NULL);
 
-		/* sweep again */
-		sweep_on_exec_i = 1;
+		in_constant_folding = 0;
 	}
 
 	return i;
