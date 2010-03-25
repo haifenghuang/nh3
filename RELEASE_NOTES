@@ -4,12 +4,13 @@ MPSL Release Notes
 1.0.9
 -----
 
- * New syntax for _inverse_ calling functions: the new
+ * New syntax for _inverse_ calling functions; the new
    construction `val1->func(val2)' is equivalent
    to `func(val1, val2)'. This way, chained function
    calls where the first argument of one is the return
-   of the other are much easier to understand.
- * Numbers prefixed by 0b are accepted as binary numbers.
+   of the other are much easier to write and understand.
+ * Numbers prefixed by `0b' are accepted as binary numbers
+   and `sprintf()' accepts `%b' to print them.
  * New operands >> and << (bit shifting).
  * New operands &=, |= and ^=, <<= and >>=.
  * New function `random()'.
