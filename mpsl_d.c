@@ -107,23 +107,24 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 		ptr = mpdm_pokews(ptr, size, L"NULL");
 	else
 	if (MPDM_IS_HASH(v)) {
-		mpdm_t a = mpdm_keys(v);
+		mpdm_t k;
+		mpdm_t w;
+		int c;
+
+		c = n = 0;
 
 		ptr = mpdm_pokews(ptr, size, L"{\n");
 
-		for (n = 0; n < mpdm_size(a); n++) {
-			mpdm_t k = mpdm_aget(a, n);
-			mpdm_t w = mpdm_hget(v, k);
+		while (mpdm_iterator(v, &c, &k, &w)) {
+			if (n++)
+				ptr = mpdm_pokews(ptr, size, L",\n");
 
 			ptr = mpsl_dump_1(k, l + 1, ptr, size);
 			ptr = mpdm_pokews(ptr, size, L" => ");
 			ptr = mpsl_dump_1(w, -(l + 1), ptr, size);
-
-			if (n < mpdm_size(a) - 1)
-				ptr = mpdm_pokews(ptr, size, L",");
-
-			ptr = mpdm_pokews(ptr, size, L"\n");
 		}
+
+		ptr = mpdm_pokews(ptr, size, L"\n");
 
 		/* re-indent */
 		for (n = 0; n < l; n++)
