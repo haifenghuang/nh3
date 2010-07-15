@@ -1186,9 +1186,10 @@ static mpdm_t F_random(mpdm_t a) {
 
 	if (range == 0 || seed == 0)
 		seed = time(NULL);
-
-	seed = (seed * 58321) + 11113;
-	r = (seed >> 16) % range;
+	else {
+		seed = (seed * 58321) + 11113;
+		r = (seed >> 16) % range;
+	}
 
 	return MPDM_I(r);
 };
