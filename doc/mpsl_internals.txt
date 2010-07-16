@@ -140,11 +140,12 @@ Math operations
  MUL <ins1> <ins2>
  DIV <ins1> <ins2>
  MOD <ins1> <ins2>
+ POW <ins1> <ins2>
 
-These instructions execute the addition, substraction, multiply, divide and
-modulo math operations from the exit values of the two instructions, and
-return the result. Values are treated as real numbers except in MOD, where
-they are treated as integers.
+These instructions execute the addition, substraction, multiply, divide,
+modulo and power math operations from the exit values of the two
+instructions, and return the result. Values are treated as real numbers
+except in MOD, where they are treated as integers.
 
 NOT
 ~~~

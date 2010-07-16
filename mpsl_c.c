@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 #include <wchar.h>
+#include <math.h>
 #include "mpdm.h"
 #include "mpsl.h"
 
@@ -262,6 +263,7 @@ O_TYPE O_bitor(O_ARGS) { return MPDM_I(IM1 | IM2); }
 O_TYPE O_bitxor(O_ARGS) { return MPDM_I(IM1 ^ IM2); }
 O_TYPE O_shl(O_ARGS) { return MPDM_I(IM1 << IM2); }
 O_TYPE O_shr(O_ARGS) { return MPDM_I(IM1 >> IM2); }
+O_TYPE O_pow(O_ARGS) { return MPDM_R(pow(RM1, RM2)); }
 O_TYPE O_numlt(O_ARGS) { return BOOL(RM1 < RM2); }
 O_TYPE O_numle(O_ARGS) { return BOOL(RM1 <= RM2); }
 O_TYPE O_numgt(O_ARGS) { return BOOL(RM1 > RM2); }
@@ -497,6 +499,7 @@ static struct mpsl_op_s {
 	{ L"BITXOR",	1,	O_bitxor },
 	{ L"SHL",	1,	O_shl },
 	{ L"SHR",	1,	O_shr },
+	{ L"POW",	1,	O_pow },
 	{ NULL,		0,	NULL }
 };
 

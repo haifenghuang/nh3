@@ -2,7 +2,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2009 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2010 Angel Ortega <angel@triptico.com>
 
     mpsl.y - Minimum Profit Scripting Language YACC parser
 
@@ -103,7 +103,7 @@ static void compiler_warning(char * str)
 %left BITOR BITXOR
 %left SHL SHR
 %left '+' '-'
-%left '*' '/' MOD
+%left '*' '/' MOD POW
 %nonassoc UMINUS
 
 %type <ins> stmt expr sym_list stmt_list list hash compsym
@@ -331,6 +331,7 @@ expr:
 	| expr '*' expr		{ $$ = INS2(L"MUL", $1, $3); }
 	| expr '/' expr		{ $$ = INS2(L"DIV", $1, $3); }
 	| expr MOD expr		{ $$ = INS2(L"MOD", $1, $3); }
+	| expr POW expr		{ $$ = INS2(L"POW", $1, $3); }
 
 				/* bit operations */
 	| expr BITAND expr	{ $$ = INS2(L"BITAND", $1, $3); }

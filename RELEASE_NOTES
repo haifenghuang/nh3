@@ -13,6 +13,7 @@ MPSL Release Notes
    and `sprintf()' accepts `%b' to print them.
  * New operands >> and << (bit shifting).
  * New operands &=, |= and ^=, <<= and >>=.
+ * New operand ** (power).
  * New function `random()'.
  * New trapping functionality.
 

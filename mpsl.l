@@ -2,7 +2,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2009 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2010 Angel Ortega <angel@triptico.com>
 
     mpsl.l - Minimum Profit Scripting Language [F]lexer
 
@@ -190,6 +190,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER}|{BININTEGER})
 "^="		return IBITXOR;
 "<<="		return ISHL;
 ">>="		return ISHR;
+"**"		return POW;
 
 {SYMBOL}	{
 			/* symbol name */
