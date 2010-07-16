@@ -282,11 +282,11 @@ use the clone() function).
 Arithmetic
 ~~~~~~~~~~
 
-The usual +, -, *, / and % operators are used for addition, substraction,
-multiply, divide and modulo, as always. Operands for the modulo operator
-are treated as integers, and for the rest of them, as real numbers.
-Operator precedence are like in C; you can always use parentheses to
-explicitly force your desired precedence.
+The usual +, -, *, /, ** and % operators are used for addition,
+substraction, multiply, divide, power and modulo, as always. Operands
+for the modulo operator are treated as integers, and for the rest of them,
+as real numbers. Operator precedence are like in C; you can always use
+parentheses to explicitly force your desired precedence.
 
 Numeric comparison
 ~~~~~~~~~~~~~~~~~~
