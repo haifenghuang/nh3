@@ -4,7 +4,7 @@ Minimum Profit Scripting Language (mpsl) TODO / Bug List
 Release Critical Bugs
 ---------------------
 
- * 1127: Document the new inverse calling syntax.
+None!
 
 Open Bugs
 ---------
@@ -14,6 +14,7 @@ Open Bugs
  * 1112: Document the difference regarding local variable access in
    named and anonymous subroutines.
  * 1119: Fix bincall() in 64 bit systems.
+ * 1127: Document the new inverse calling syntax.
 
 Pending Enhancements
 --------------------
