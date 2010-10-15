@@ -290,7 +290,7 @@ O_TYPE O_execsym(O_ARGS)
 		mpdm_t t;
 		char tmp[128];
 
-		t = mpdm_join(MPDM_LS(L"."), s);
+		t = mpdm_join_s(L".", s);
 		t = MPDM_2MBS((wchar_t *) t->data);
 
 		snprintf(tmp, sizeof(tmp), "Undefined function %s()",
