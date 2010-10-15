@@ -1,6 +1,13 @@
 MPSL Release Notes
 ==================
 
+1.0.10
+------
+
+ * Any function argument not explicitly declared and
+   sent as argument in the function call is stored
+   in the local array _ (underscore).
+
 1.0.9
 -----
 

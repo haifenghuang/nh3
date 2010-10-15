@@ -125,17 +125,26 @@ static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
 {
 	mpdm_t h;
 
-	if (s == NULL || l == NULL)
+	if (l == NULL)
 		return;
 
 	/* gets the top local variable frame */
 	h = mpdm_aget(l, -1);
 
-	if (MPDM_IS_ARRAY(s)) {
+	if (MPDM_IS_ARRAY(s) || MPDM_IS_ARRAY(v)) {
 		int n;
+		mpdm_t a;
 
 		for (n = 0; n < mpdm_size(s); n++)
 			mpdm_hset(h, mpdm_aget(s, n), mpdm_aget(v, n));
+
+		/* store the rest of arguments into _ */
+		a = MPDM_A(0);
+
+		for (; n < mpdm_size(v); n++)
+			mpdm_push(a, mpdm_aget(v, n));
+
+		mpdm_hset_s(h, L"_", a);
 	}
 	else
 		mpdm_hset(h, s, v);
