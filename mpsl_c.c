@@ -251,7 +251,9 @@ O_TYPE mpsl_exec_i(O_ARGS);
 #define RF(v) mpdm_ref(v)
 #define UF(v) mpdm_unref(v)
 
-O_TYPE O_literal(O_ARGS) { return mpdm_clone(C1); }
+O_TYPE O_literal(O_ARGS) {
+	return mpdm_clone(C1);
+}
 
 O_TYPE O_multi(O_ARGS) {
 	mpdm_t v = M1;
@@ -269,11 +271,53 @@ O_TYPE O_multi(O_ARGS) {
 }
 
 O_TYPE O_imulti(O_ARGS) { mpdm_t v = RF(M1); if (!*f) M2; return UF(v); }
-O_TYPE O_symval(O_ARGS) { return GET(M1); }
-O_TYPE O_assign(O_ARGS) { mpdm_t v = RF(M1); mpdm_t r = SET(v, M2); UF(v); return r; }
-O_TYPE O_if(O_ARGS) { return ISTRU(M1) ? M2 : M3; }
-O_TYPE O_local(O_ARGS) { set_local_symbols(M1, NULL, l); return NULL; }
-O_TYPE O_uminus(O_ARGS) { return MPDM_R(-RM1); }
+
+O_TYPE O_symval(O_ARGS) {
+	mpdm_t v = RF(M1);
+	mpdm_t r = GET(v);
+	UF(v);
+
+	return r;
+}
+
+O_TYPE O_assign(O_ARGS) {
+	mpdm_t v = RF(M1);
+	mpdm_t r = SET(v, M2);
+	UF(v);
+
+	return r;
+}
+
+O_TYPE O_if(O_ARGS) {
+	mpdm_t v = RF(M1);
+	mpdm_t r;
+
+	if (ISTRU(v))
+		r = M2;
+	else
+		r = M3;
+
+	UF(v);
+
+	return r;
+}
+
+O_TYPE O_local(O_ARGS) {
+	mpdm_t v = RF(M1);
+	set_local_symbols(v, NULL, l);
+	UF(v);
+
+	return NULL;
+}
+
+O_TYPE O_uminus(O_ARGS) {
+	mpdm_t v = RF(M1);
+	mpdm_t r = MPDM_R(-mpdm_rval(v));
+	UF(v);
+
+	return r;
+}
+
 O_TYPE O_add(O_ARGS) { return MPDM_R(RM1 + RM2); }
 O_TYPE O_sub(O_ARGS) { return MPDM_R(RM1 - RM2); }
 O_TYPE O_mul(O_ARGS) { return MPDM_R(RM1 * RM2); }
