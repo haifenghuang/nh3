@@ -252,7 +252,22 @@ O_TYPE mpsl_exec_i(O_ARGS);
 #define UF(v) mpdm_unref(v)
 
 O_TYPE O_literal(O_ARGS) { return mpdm_clone(C1); }
-O_TYPE O_multi(O_ARGS) { mpdm_t v = RF(M1); if (!*f) v = M2; else UF(v); return v; }
+
+O_TYPE O_multi(O_ARGS) {
+	mpdm_t v = M1;
+
+	if (!*f) {
+		mpdm_t t;
+
+		RF(v);
+		t = M2;
+		UF(v);
+		v = t;
+	}
+
+	return v;
+}
+
 O_TYPE O_imulti(O_ARGS) { mpdm_t v = RF(M1); if (!*f) M2; return UF(v); }
 O_TYPE O_symval(O_ARGS) { return GET(M1); }
 O_TYPE O_assign(O_ARGS) { mpdm_t v = RF(M1); mpdm_t r = SET(v, M2); UF(v); return r; }
