@@ -7,6 +7,7 @@ MPSL Release Notes
  * Any function argument not explicitly declared and
    sent as argument in the function call is stored
    in the local array _ (underscore).
+ * The adel() function no longer returns the deleted element.
 
 1.0.9
 -----

@@ -34,9 +34,9 @@ l = size(a);		Back to 4
 ins(a, 'heh', 1);	Inserts 'heh' at offset 1, all
 			existing elements moved up
 l = size(a);		It's again 5
-v = adel(a, 1);		Deletes element at offset 1
-			(and returns it), all existing
-			elements are moved down
+adel(a, 1);		Deletes element at offset 1,
+			all existing elements
+            are moved down
 l = size(a);		It's again 4
 
 *Hashes
@@ -133,7 +133,7 @@ v = shift(ary);		Deletes the first element of
 			ary and returns it
 ins(ary, val, offset);	Inserts val into ary at offset
 			incrementing its size
-v = adel(ary, offset);	Deletes and returns the element
+adel(ary, offset);	Deletes the element
 			at offset from ary, shrinking
 i = seek(ary, str);	Seeks ary for an exact match of
 			str and returns its offset, or

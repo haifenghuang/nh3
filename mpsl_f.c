@@ -249,7 +249,7 @@ static mpdm_t F_ins(mpdm_t a) {
  * the end of the array (so a value of -1 means delete the
  * last element of the array).
  *
- * Returns the deleted element.
+ * Returns NULL (previous versions returned the deleted element).
  * [Arrays]
  */
 /** v = adel(a, offset); */
@@ -941,7 +941,7 @@ static mpdm_t F_eval(mpdm_t a)
 	mpdm_t c;
 
 	a = mpdm_clone(a);
-	c = mpdm_adel(a, 0);
+	c = mpdm_shift(a);
 
 	return mpsl_eval(c, a);
 }
@@ -965,7 +965,7 @@ static mpdm_t F_sprintf(mpdm_t a)
 	mpdm_t v;
 
 	a = mpdm_clone(a);
-	f = mpdm_adel(a, 0);
+	f = mpdm_shift(a);
 
 	/* if the first argument is an array, take it as the arguments */
 	if ((v = mpdm_aget(a, 0)) != NULL && MPDM_IS_ARRAY(v))
