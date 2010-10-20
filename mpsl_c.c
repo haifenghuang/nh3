@@ -365,11 +365,43 @@ O_TYPE O_numlt(O_ARGS) { return BOOL(RM1 < RM2); }
 O_TYPE O_numle(O_ARGS) { return BOOL(RM1 <= RM2); }
 O_TYPE O_numgt(O_ARGS) { return BOOL(RM1 > RM2); }
 O_TYPE O_numge(O_ARGS) { return BOOL(RM1 >= RM2); }
-O_TYPE O_strcat(O_ARGS) { mpdm_t v = RF(M1); mpdm_t r = mpdm_strcat(v, M2); UF(v); return r; }
-O_TYPE O_streq(O_ARGS) { mpdm_t v = RF(M1); mpdm_t r = BOOL(mpdm_cmp(v, M2) == 0); UF(v); return r; }
+
+O_TYPE O_strcat(O_ARGS) {
+	mpdm_t v1 = RF(M1);
+	mpdm_t v2 = RF(M2);
+
+	mpdm_t r = mpdm_strcat(v1, v2);
+
+	UF(v2);
+	UF(v1);
+
+	return r;
+}
+
+O_TYPE O_streq(O_ARGS) {
+	mpdm_t v1 = RF(M1);
+	mpdm_t v2 = RF(M2);
+
+	mpdm_t r = BOOL(mpdm_cmp(v1, v2) == 0);
+
+	UF(v2);
+	UF(v1);
+
+	return r;
+}
+
 O_TYPE O_numeq(O_ARGS) { mpdm_t v1 = RF(M1); mpdm_t v2 = M2; UF(v1); return BOOL((v1 == NULL || v2 == NULL) ? (v1 == v2) : (R(v1) == R(v2))); }
-O_TYPE O_break(O_ARGS) { *f = 1; return NULL; }
-O_TYPE O_return(O_ARGS) { mpdm_t v = M1; *f = -1; return v; }
+
+O_TYPE O_break(O_ARGS) {
+	*f = 1;
+	return NULL;
+}
+
+O_TYPE O_return(O_ARGS) {
+	mpdm_t v = M1;
+	*f = -1;
+	return v;
+}
 
 O_TYPE O_execsym(O_ARGS)
 /* executes the value of a symbol */
