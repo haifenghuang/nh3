@@ -324,8 +324,37 @@ O_TYPE O_mul(O_ARGS) { return MPDM_R(RM1 * RM2); }
 O_TYPE O_div(O_ARGS) { return MPDM_R(RM1 / RM2); }
 O_TYPE O_mod(O_ARGS) { return MPDM_I(IM1 % IM2); }
 O_TYPE O_not(O_ARGS) { return BOOL(! ISTRU(M1)); }
-O_TYPE O_and(O_ARGS) { mpdm_t r = M1; return ISTRU(r) ? M2 : r; }
-O_TYPE O_or(O_ARGS) { mpdm_t r = M1; return ISTRU(r) ? r : M2; }
+
+O_TYPE O_and(O_ARGS) {
+	mpdm_t v = M1;
+	mpdm_t r;
+
+	if (ISTRU(v)) {
+		RF(v);
+		r = M2;
+		UF(v);
+	}
+	else
+		r = v;
+
+	return r;
+}
+
+O_TYPE O_or(O_ARGS) {
+	mpdm_t v = M1;
+	mpdm_t r;
+
+	if (!ISTRU(v)) {
+		RF(v);
+		r = M2;
+		UF(v);
+	}
+	else
+		r = v;
+
+	return r;
+}
+
 O_TYPE O_bitand(O_ARGS) { return MPDM_I(IM1 & IM2); }
 O_TYPE O_bitor(O_ARGS) { return MPDM_I(IM1 | IM2); }
 O_TYPE O_bitxor(O_ARGS) { return MPDM_I(IM1 ^ IM2); }
