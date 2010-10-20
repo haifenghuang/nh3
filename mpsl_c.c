@@ -439,10 +439,10 @@ O_TYPE generic_frame(O_ARGS)
 	/* execute instruction */
 	ret = M1;
 
-	UF(l);
-
 	/* destroy the local symbol table */
-	mpdm_pop(l);
+	mpdm_adel(l, -1);
+
+	UF(l);
 
 	return ret;
 }
