@@ -156,7 +156,7 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 		char tmp[256];
 		wchar_t *wptr;
 
-		sprintf(tmp, "bincall(%p)", v->data);
+		snprintf(tmp, sizeof(tmp), "bincall(%p)", v->data);
 		wptr = mpdm_mbstowcs(tmp, NULL, -1);
 		ptr = mpdm_pokews(ptr, size, wptr);
 		free(wptr);
