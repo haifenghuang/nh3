@@ -466,7 +466,15 @@ O_TYPE O_while(O_ARGS)
 {
 	mpdm_t r = NULL;
 
-	while (! *f && ISTRU(M1)) {
+	while (!*f) {
+		mpdm_t v = RF(M1);
+		int b = ISTRU(v);
+
+		UF(v);
+
+		if (!b)
+			break;
+
 		UF(r);
 		r = RF(M2);
 	}
@@ -474,7 +482,7 @@ O_TYPE O_while(O_ARGS)
 	if (*f == 1)
 		*f = 0;
 
-	return UF(r);
+	return UFND(r);
 }
 
 
@@ -497,7 +505,7 @@ O_TYPE O_foreach(O_ARGS)
 
 	UF(s); UF(v);
 
-	return UF(r);
+	return UFND(r);
 }
 
 
@@ -526,7 +534,7 @@ O_TYPE O_list(O_ARGS)
 	mpdm_t ret = RF(mpdm_size(c) == 2 ? MPDM_A(0) : M(2));
 
 	mpdm_push(ret, M(1));
-	return UF(ret);
+	return UFND(ret);
 }
 
 
@@ -536,7 +544,7 @@ O_TYPE O_ilist(O_ARGS)
 	mpdm_t ret = RF(mpdm_size(c) == 2 ? MPDM_A(0) : M(2));
 
 	mpdm_ins(ret, M(1), 0);
-	return UF(ret);
+	return UFND(ret);
 }
 
 
@@ -548,7 +556,7 @@ O_TYPE O_hash(O_ARGS)
 
 	k = RF(M(1)); v = RF(M(2));
 	mpdm_hset(ret, UF(k), UF(v));
-	return UF(ret);
+	return UFND(ret);
 }
 
 
