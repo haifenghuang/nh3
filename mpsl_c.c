@@ -219,7 +219,8 @@ mpdm_t mpsl_error(mpdm_t err)
 	return mpdm_hset_s(mpdm_root(), L"ERROR", err);
 }
 
-/** opcodes **/
+
+/** opcode macro helpers **/
 
 #define O_TYPE static mpdm_t
 #define O_ARGS mpdm_t c, mpdm_t a, mpdm_t l, int * f
@@ -250,6 +251,10 @@ O_TYPE mpsl_exec_i(O_ARGS);
 
 #define RF(v) mpdm_ref(v)
 #define UF(v) mpdm_unref(v)
+#define UFND(v) mpdm_unrefnd(v)
+
+
+/** opcodes **/
 
 O_TYPE O_literal(O_ARGS) {
 	return mpdm_clone(C1);
@@ -259,18 +264,24 @@ O_TYPE O_multi(O_ARGS) {
 	mpdm_t v = M1;
 
 	if (!*f) {
-		mpdm_t t;
+		mpdm_t t = v;
 
-		RF(v);
-		t = M2;
-		UF(v);
-		v = t;
+		RF(t);
+		v = M2;
+		UF(t);
 	}
 
 	return v;
 }
 
-O_TYPE O_imulti(O_ARGS) { mpdm_t v = RF(M1); if (!*f) M2; return UF(v); }
+O_TYPE O_imulti(O_ARGS) {
+	mpdm_t v = RF(M1);
+
+	if (!*f)
+		UF(RF(M2));
+
+	return UFND(v);
+}
 
 O_TYPE O_symval(O_ARGS) {
 	mpdm_t v = RF(M1);
