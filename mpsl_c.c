@@ -769,13 +769,16 @@ mpdm_t mpsl_build_opcodes(void)
  * executable value receiving 3 arguments: the code stream,
  * the arguments and the return value of the executed code.
  *
- * Returns the previous trapping function.
+ * Returns NULL (previous versions returned the previous
+ * trapping function).
  */
 mpdm_t mpsl_trap(mpdm_t trap_func)
 {
-	mpdm_t r = mpdm_unref(mpsl_trap_func);
-	mpsl_trap_func = mpdm_ref(trap_func);
-	return r;
+	mpdm_ref(trap_func);
+	mpdm_unref(mpsl_trap_func);
+	mpsl_trap_func = trap_func;
+
+	return NULL;
 }
 
 
