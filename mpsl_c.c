@@ -427,16 +427,19 @@ O_TYPE O_execsym(O_ARGS)
 
 	if (!MPDM_IS_EXEC(v)) {
 		/* not found or NULL value? error */
-		mpdm_t t;
+		mpdm_t t, w;
 		char tmp[128];
 
-		t = mpdm_join_s(L".", s);
-		t = MPDM_2MBS((wchar_t *) t->data);
+		w = RF(mpdm_join_s(L".", s));
+		t = RF(MPDM_2MBS((wchar_t *) w->data));
 
 		snprintf(tmp, sizeof(tmp), "Undefined function %s()",
 			(char *)t->data);
 
 		mpsl_error(MPDM_MBS(tmp));
+
+		UF(w);
+		UF(t);
 	}
 	else {
 		/* save current local symbol table */
