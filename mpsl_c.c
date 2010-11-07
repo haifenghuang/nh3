@@ -247,11 +247,21 @@ O_TYPE mpsl_exec_i(O_ARGS);
 #define GET(m) get_symbol(m, l)
 #define SET(m, v) set_symbol(m, v, l)
 #define BOOL mpsl_boolean
-#define ISTRU mpsl_is_true
 
 #define RF(v) mpdm_ref(v)
 #define UF(v) mpdm_unref(v)
 #define UFND(v) mpdm_unrefnd(v)
+
+static int is_true_uf(mpdm_t v)
+{
+	int r;
+
+	RF(v);
+	r = mpsl_is_true(v);
+	UF(v);
+
+	return r;
+}
 
 
 /** opcodes **/
@@ -300,15 +310,12 @@ O_TYPE O_assign(O_ARGS) {
 }
 
 O_TYPE O_if(O_ARGS) {
-	mpdm_t v = RF(M1);
 	mpdm_t r;
 
-	if (ISTRU(v))
+	if (is_true_uf(M1))
 		r = M2;
 	else
 		r = M3;
-
-	UF(v);
 
 	return r;
 }
@@ -334,13 +341,16 @@ O_TYPE O_sub(O_ARGS) { return MPDM_R(RM1 - RM2); }
 O_TYPE O_mul(O_ARGS) { return MPDM_R(RM1 * RM2); }
 O_TYPE O_div(O_ARGS) { return MPDM_R(RM1 / RM2); }
 O_TYPE O_mod(O_ARGS) { return MPDM_I(IM1 % IM2); }
-O_TYPE O_not(O_ARGS) { return BOOL(! ISTRU(M1)); }
+
+O_TYPE O_not(O_ARGS) {
+	return BOOL(!is_true_uf(M1));
+}
 
 O_TYPE O_and(O_ARGS) {
 	mpdm_t v = M1;
 	mpdm_t r;
 
-	if (ISTRU(v)) {
+	if (mpsl_is_true(v)) {
 		RF(v);
 		r = M2;
 		UF(v);
@@ -355,7 +365,7 @@ O_TYPE O_or(O_ARGS) {
 	mpdm_t v = M1;
 	mpdm_t r;
 
-	if (!ISTRU(v)) {
+	if (!mpsl_is_true(v)) {
 		RF(v);
 		r = M2;
 		UF(v);
@@ -466,15 +476,7 @@ O_TYPE O_while(O_ARGS)
 {
 	mpdm_t r = NULL;
 
-	while (!*f) {
-		mpdm_t v = RF(M1);
-		int b = ISTRU(v);
-
-		UF(v);
-
-		if (!b)
-			break;
-
+	while (!*f && is_true_uf(M1)) {
 		UF(r);
 		r = RF(M2);
 	}
