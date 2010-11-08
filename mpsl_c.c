@@ -249,7 +249,7 @@ O_TYPE mpsl_exec_i(O_ARGS);
 #define BOOL mpsl_boolean
 
 #define RF(v) mpdm_ref(v)
-#define UF(v) mpdm_unref(v)
+#define UF(v) v = mpdm_unref(v)
 #define UFND(v) mpdm_unrefnd(v)
 
 static int is_true_uf(mpdm_t v)
@@ -287,8 +287,10 @@ O_TYPE O_multi(O_ARGS) {
 O_TYPE O_imulti(O_ARGS) {
 	mpdm_t v = RF(M1);
 
-	if (!*f)
-		UF(RF(M2));
+	if (!*f) {
+		mpdm_t w = RF(M2);
+		UF(w);
+	}
 
 	return UFND(v);
 }

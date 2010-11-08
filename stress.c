@@ -42,11 +42,13 @@ int i_failed_msgs = 0;
 	Code
 ********************/
 
-void do_test(char *str, int ok)
+#define do_test(s, o) _do_test(s, o ,__LINE__)
+
+void _do_test(char *str, int ok, int line)
 {
 	char tmp[1024];
 
-	sprintf(tmp, "%s: %s\n", str, ok ? "OK!" : "*** Failed ***");
+	sprintf(tmp, "%s (line %d): %s\n", str, line, ok ? "OK!" : "*** Failed ***");
 	printf(tmp);
 
 	tests++;
@@ -62,19 +64,22 @@ void do_test(char *str, int ok)
 
 void do_set(mpdm_t * v1, mpdm_t v2)
 {
+	mpdm_ref(v2);
 	mpdm_unref(*v1);
-	*v1 = mpdm_ref(v2);
+	*v1 = v2;
 }
 
 
-mpdm_t do_test_mpsl(char *code)
+#define do_test_mpsl(c) _do_test_mpsl(c, __LINE__)
+
+mpdm_t _do_test_mpsl(char *code, int line)
 {
 	static mpdm_t v = NULL;
 
 	do_set(&v, mpsl_compile(MPDM_MBS(code)));
 
 	printf("Compile: ");
-	do_test(code, v != NULL);
+	_do_test(code, v != NULL, line);
 	return (v);
 }
 
