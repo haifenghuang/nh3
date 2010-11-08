@@ -429,7 +429,7 @@ O_TYPE O_return(O_ARGS) {
 O_TYPE O_execsym(O_ARGS)
 /* executes the value of a symbol */
 {
-	mpdm_t s, v, r = NULL;
+	mpdm_t s, v, w, r = NULL;
 
 	/* gets the symbol name */
 	s = RF(M1);
@@ -461,7 +461,9 @@ O_TYPE O_execsym(O_ARGS)
 		local_symtbl = l;
 
 		/* execute */
-		r = mpdm_exec(v, M2);
+		w = RF(M2);
+		r = mpdm_exec(v, w);
+		UF(w);
 
 		/* and get back to the original one */
 		local_symtbl = t;
@@ -558,8 +560,12 @@ O_TYPE O_hash(O_ARGS)
 	mpdm_t k, v;
 	mpdm_t ret = RF(mpdm_size(c) == 3 ? MPDM_H(0) : M(3));
 
-	k = RF(M(1)); v = RF(M(2));
-	mpdm_hset(ret, UF(k), UF(v));
+	k = RF(M1);
+	v = RF(M2);
+	mpdm_hset(ret, k, v);
+	UF(k);
+	UF(v);
+
 	return UFND(ret);
 }
 
