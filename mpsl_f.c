@@ -938,12 +938,16 @@ static mpdm_t F_sscanf(mpdm_t a) {
 /** v = eval(code, args); */
 static mpdm_t F_eval(mpdm_t a)
 {
-	mpdm_t c;
+	mpdm_t r, c;
 
-	a = mpdm_clone(a);
+	a = mpdm_ref(mpdm_clone(a));
 	c = mpdm_shift(a);
 
-	return mpsl_eval(c, a);
+	r = mpsl_eval(c, a);
+
+	mpdm_unref(a);
+
+	return r;
 }
 
 
@@ -961,17 +965,20 @@ static mpdm_t F_eval(mpdm_t a)
 /** string = sprintf(fmt, arg1 [,arg2 ... argn]); */
 static mpdm_t F_sprintf(mpdm_t a)
 {
-	mpdm_t f;
-	mpdm_t v;
+	mpdm_t f, v, r;
 
-	a = mpdm_clone(a);
+	a = mpdm_ref(mpdm_clone(a));
 	f = mpdm_shift(a);
 
 	/* if the first argument is an array, take it as the arguments */
 	if ((v = mpdm_aget(a, 0)) != NULL && MPDM_IS_ARRAY(v))
 		a = v;
 
-	return mpdm_sprintf(f, a);
+	r = mpdm_sprintf(f, a);
+
+	mpdm_unref(a);
+
+	return r;
 }
 
 
