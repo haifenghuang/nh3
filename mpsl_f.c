@@ -1115,7 +1115,7 @@ static mpdm_t F_map(mpdm_t a)
 			mpdm_aset(out, mpdm_hget(key, mpdm_aget(set, n)), n);
 	}
 
-	return mpdm_unref(out);
+	return mpdm_unrefnd(out);
 }
 
 
@@ -1147,9 +1147,12 @@ static mpdm_t F_grep(mpdm_t a)
 		/* it's executable */
 		for (n = 0; n < mpdm_size(set); n++) {
 			mpdm_t v = mpdm_aget(set, n);
+			mpdm_t w = mpdm_ref(mpdm_exec_1(key, v));
 
-			if (mpsl_is_true(mpdm_exec_1(key, v)))
+			if (mpsl_is_true(w))
 				mpdm_push(out, v);
+
+			mpdm_unref(w);
 		}
 	}
 	else
@@ -1159,13 +1162,16 @@ static mpdm_t F_grep(mpdm_t a)
 		/* it's a string; use it as a regular expression */
 		for (n = 0; n < mpdm_size(set); n++) {
 			mpdm_t v = mpdm_aget(set, n);
+			mpdm_t w = mpdm_ref(mpdm_regex(key, v, 0));
 
-			if (mpdm_regex(key, v, 0))
+			if (w)
 				mpdm_push(out, v);
+
+			mpdm_unref(w);
 		}
 	}
 
-	return mpdm_size(mpdm_unref(out)) == 0 ? NULL : out;
+	return mpdm_size(mpdm_unrefnd(out)) == 0 ? NULL : out;
 }
 
 static mpdm_t F_getenv(mpdm_t a)
