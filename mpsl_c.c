@@ -479,7 +479,20 @@ O_TYPE O_streq(O_ARGS) {
 	return r;
 }
 
-O_TYPE O_numeq(O_ARGS) { mpdm_t v1 = RF(M1); mpdm_t v2 = M2; UF(v1); return BOOL((v1 == NULL || v2 == NULL) ? (v1 == v2) : (R(v1) == R(v2))); }
+O_TYPE O_numeq(O_ARGS) {
+	mpdm_t v1 = RF(M1);
+	mpdm_t v2 = RF(M2);
+
+	mpdm_t r = BOOL((v1 == NULL || v2 == NULL) ?
+					(v1 == v2) :
+					(R(v1) == R(v2))
+				);
+
+	UF(v2);
+	UF(v1);
+
+	return r;
+}
 
 O_TYPE O_break(O_ARGS) {
 	*f = 1;
