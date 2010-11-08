@@ -239,10 +239,10 @@ O_TYPE mpsl_exec_i(O_ARGS);
 #define R(x) mpdm_rval(x)
 #define I(x) mpdm_ival(x)
 
-#define RM1 mpdm_rval(M(1))
-#define RM2 mpdm_rval(M(2))
-#define IM1 mpdm_ival(M(1))
-#define IM2 mpdm_ival(M(2))
+#define RM1 rval(M(1))
+#define RM2 rval(M(2))
+#define IM1 ival(M(1))
+#define IM2 ival(M(2))
 
 #define GET(m) get_symbol(m, l)
 #define SET(m, v) set_symbol(m, v, l)
@@ -259,6 +259,29 @@ static int is_true_uf(mpdm_t v)
 	RF(v);
 	r = mpsl_is_true(v);
 	UF(v);
+
+	return r;
+}
+
+static double rval(mpdm_t v)
+{
+	double r;
+
+	mpdm_ref(v);
+	r = mpdm_rval(v);
+	mpdm_unref(v);
+
+	return r;
+}
+
+
+static int ival(mpdm_t v)
+{
+	int r;
+
+	mpdm_ref(v);
+	r = mpdm_ival(v);
+	mpdm_unref(v);
 
 	return r;
 }
@@ -338,11 +361,25 @@ O_TYPE O_uminus(O_ARGS) {
 	return r;
 }
 
-O_TYPE O_add(O_ARGS) { return MPDM_R(RM1 + RM2); }
-O_TYPE O_sub(O_ARGS) { return MPDM_R(RM1 - RM2); }
-O_TYPE O_mul(O_ARGS) { return MPDM_R(RM1 * RM2); }
-O_TYPE O_div(O_ARGS) { return MPDM_R(RM1 / RM2); }
-O_TYPE O_mod(O_ARGS) { return MPDM_I(IM1 % IM2); }
+O_TYPE O_add(O_ARGS) {
+	return MPDM_R(RM1 + RM2);
+}
+
+O_TYPE O_sub(O_ARGS) {
+	return MPDM_R(RM1 - RM2);
+}
+
+O_TYPE O_mul(O_ARGS) {
+	return MPDM_R(RM1 * RM2);
+}
+
+O_TYPE O_div(O_ARGS) {
+	return MPDM_R(RM1 / RM2);
+}
+
+O_TYPE O_mod(O_ARGS) {
+	return MPDM_I(IM1 % IM2);
+}
 
 O_TYPE O_not(O_ARGS) {
 	return BOOL(!is_true_uf(M1));
@@ -378,16 +415,45 @@ O_TYPE O_or(O_ARGS) {
 	return r;
 }
 
-O_TYPE O_bitand(O_ARGS) { return MPDM_I(IM1 & IM2); }
-O_TYPE O_bitor(O_ARGS) { return MPDM_I(IM1 | IM2); }
-O_TYPE O_bitxor(O_ARGS) { return MPDM_I(IM1 ^ IM2); }
-O_TYPE O_shl(O_ARGS) { return MPDM_I(IM1 << IM2); }
-O_TYPE O_shr(O_ARGS) { return MPDM_I(IM1 >> IM2); }
-O_TYPE O_pow(O_ARGS) { return MPDM_R(pow(RM1, RM2)); }
-O_TYPE O_numlt(O_ARGS) { return BOOL(RM1 < RM2); }
-O_TYPE O_numle(O_ARGS) { return BOOL(RM1 <= RM2); }
-O_TYPE O_numgt(O_ARGS) { return BOOL(RM1 > RM2); }
-O_TYPE O_numge(O_ARGS) { return BOOL(RM1 >= RM2); }
+O_TYPE O_bitand(O_ARGS) {
+	return MPDM_I(IM1 & IM2);
+}
+
+O_TYPE O_bitor(O_ARGS) {
+	return MPDM_I(IM1 | IM2);
+}
+
+O_TYPE O_bitxor(O_ARGS) {
+	return MPDM_I(IM1 ^ IM2);
+}
+
+O_TYPE O_shl(O_ARGS) {
+	return MPDM_I(IM1 << IM2);
+}
+
+O_TYPE O_shr(O_ARGS) {
+	return MPDM_I(IM1 >> IM2);
+}
+
+O_TYPE O_pow(O_ARGS) {
+	return MPDM_R(pow(RM1, RM2));
+}
+
+O_TYPE O_numlt(O_ARGS) {
+	return BOOL(RM1 < RM2);
+}
+
+O_TYPE O_numle(O_ARGS) {
+	return BOOL(RM1 <= RM2);
+}
+
+O_TYPE O_numgt(O_ARGS) {
+	return BOOL(RM1 > RM2);
+}
+
+O_TYPE O_numge(O_ARGS) {
+	return BOOL(RM1 >= RM2);
+}
 
 O_TYPE O_strcat(O_ARGS) {
 	mpdm_t v1 = RF(M1);
