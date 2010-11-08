@@ -655,14 +655,14 @@ O_TYPE generic_frame(O_ARGS)
 	set_local_symbols(M2, a, l);
 
 	/* execute instruction */
-	ret = M1;
+	ret = RF(M1);
 
 	/* destroy the local symbol table */
 	mpdm_adel(l, -1);
 
 	UF(l);
 
-	return ret;
+	return UFND(ret);
 }
 
 
