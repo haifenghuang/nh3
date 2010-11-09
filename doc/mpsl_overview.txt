@@ -445,10 +445,10 @@ following examples use the two-argument version of sort() to sort arrays
 in different ways:
 
  /* reverse-sort the array (comparing each element backwards) */
- sort(array, sub (a, b) { cmp(b, a); } );
+ sorted_ary = sort(unsorted_ary, sub (a, b) { cmp(b, a); } );
  
  /* numeric sort (instead of plain ASCII) */
- sort(array, sub (a, b) { a - b; } );
+ sorted_ary = sort(unsorted_ary, sub (a, b) { a - b; } );
 
 Subroutines are defined in execution time and *not* in compilation time.
 This means that you can redefine a subroutine whenever you want, but be
@@ -584,9 +584,9 @@ returning its offset if found, or -1 otherwise:
  /* returns 2 */
  seek(weekdays, 'wednesday');
 
-The sort() function sorts the array sent as argument:
+The sort() function returns a sorted copy of the array sent as argument:
 
- sort(weekdays);
+ sorted_weekdays = sort(weekdays);
 
 The sorting is done with the cmp() function (see above); if another kind of
 sort is wanted, the 2-argument version must be used, as mentioned

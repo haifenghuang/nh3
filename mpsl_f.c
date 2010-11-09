@@ -345,7 +345,7 @@ static mpdm_t F_seek(mpdm_t a) {
  *
  * If no function is supplied, the sorting is done using cmp().
  *
- * Returns the same array (previous versions returned a new array).
+ * Returns the sorted array (the original one is left untouched).
  * [Arrays]
  */
 /** array = sort(a); */
