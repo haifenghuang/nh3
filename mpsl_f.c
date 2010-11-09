@@ -351,7 +351,13 @@ static mpdm_t F_seek(mpdm_t a) {
 /** array = sort(a); */
 /** array = sort(a, sorting_func); */
 static mpdm_t F_sort(mpdm_t a) {
-	return mpdm_sort_cb(A0,1,A1);
+	mpdm_t r, v;
+
+	v = mpdm_ref(A0);
+	r = mpdm_sort_cb(mpdm_clone(v), 1, A1);
+	mpdm_unref(v);
+
+	return r;
 }
 
 /**
