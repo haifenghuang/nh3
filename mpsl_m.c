@@ -54,6 +54,7 @@ mpdm_t trap_func(mpdm_t args)
 int mpsl_main(int argc, char *argv[])
 {
 	mpdm_t v = NULL;
+	mpdm_t w = NULL;
 	char *immscript = NULL;
 	FILE *script = stdin;
 	int ret = 0;
@@ -108,8 +109,11 @@ int mpsl_main(int argc, char *argv[])
 			mpsl_trap(MPDM_X(trap_func));
 
 	/* compile */
-	if (immscript != NULL)
-		v = mpsl_compile(MPDM_MBS(immscript));
+	if (immscript != NULL) {
+		w = mpdm_ref(MPDM_MBS(immscript));
+		v = mpsl_compile(w);
+		w = mpdm_unref(w);
+	}
 	else {
 		int c;
 
@@ -119,20 +123,28 @@ int mpsl_main(int argc, char *argv[])
 		else
 			ungetc(c, script);
 
-		if (c != EOF)
-			v = mpsl_compile_file(MPDM_F(script));
+		if (c != EOF) {
+			w = mpdm_ref(MPDM_F(script));
+			v = mpsl_compile_file(w);
+			mpdm_close(w);
+			w = mpdm_unref(w);
+		}
 	}
 
 	if (v != NULL) {
+		mpdm_ref(v);
+
 		if (dump_only)
 			mpdm_dump(v);
 		else
-			mpdm_exec(v, NULL);
+			mpdm_unref(mpdm_ref(mpdm_exec(v, NULL)));
+
+		mpdm_unref(v);
 	}
 
 	/* prints the error, if any */
-	if ((v = mpsl_error(NULL)) != NULL) {
-		mpdm_write_wcs(stderr, mpdm_string(v));
+	if ((w = mpsl_error(NULL)) != NULL) {
+		mpdm_write_wcs(stderr, mpdm_string(w));
 		fprintf(stderr, "\n");
 
 		ret = 1;
