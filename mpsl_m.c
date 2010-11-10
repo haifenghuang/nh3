@@ -143,7 +143,7 @@ int mpsl_main(int argc, char *argv[])
 	}
 
 	/* prints the error, if any */
-	if ((w = mpsl_error(NULL)) != NULL) {
+	if ((w = mpdm_hget_s(mpdm_root(), L"ERROR")) != NULL) {
 		mpdm_write_wcs(stderr, mpdm_string(w));
 		fprintf(stderr, "\n");
 
