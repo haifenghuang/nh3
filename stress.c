@@ -601,7 +601,7 @@ void test_abort_and_eval(void)
 	mpdm_t e;
 
 	mpsl_abort = 0;
-	v = mpsl_compile(MPDM_LS(L"1000;"));
+	v = mpdm_ref(mpsl_compile(MPDM_LS(L"1000;")));
 	do_test("Abort 1", mpdm_ival(mpdm_exec(v, NULL)) == 1000);
 
 	/* set global abort function */
@@ -610,6 +610,7 @@ void test_abort_and_eval(void)
 
 	mpsl_abort = 0;
 	do_test("Abort 3", mpdm_ival(mpdm_exec(v, NULL)) == 1000);
+	mpdm_unref(v);
 
 	mpsl_error(NULL);
 
