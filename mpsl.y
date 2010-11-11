@@ -715,22 +715,39 @@ mpdm_t mpsl_compile_file(mpdm_t file)
  */
 mpdm_t mpsl_eval(mpdm_t code, mpdm_t args)
 {
-	mpdm_t v = NULL;
+	mpdm_t cs, r;
 
 	/* reset error */
 	mpsl_error(NULL);
 	mpsl_abort = 0;
 
+	mpdm_ref(code);
+
 	/* if code is not executable, try to compile */
-	if (!MPDM_IS_EXEC(code))
-		code = mpsl_compile(code);
+	if (!MPDM_IS_EXEC(code)) {
+		mpdm_t c, w;
+
+		/* get the eval cache */
+		if ((c = mpdm_hget_s(mpdm_root(), L"__EVAL__")) == NULL)
+			c = mpdm_hset_s(mpdm_root(), L"__EVAL__", MPDM_H(0));
+
+		/* this code still not compiled? do it */
+		if ((cs = mpdm_hget(c, code)) == NULL)
+			cs = mpdm_hset(c, code, mpsl_compile(code));
+	}
+	else
+		cs = code;
 
 	/* execute, if possible */
-	if (MPDM_IS_EXEC(code))
-		v = mpdm_exec(code, args);
+	if (MPDM_IS_EXEC(cs))
+		r = mpdm_exec(cs, args);
+	else
+		r = NULL;
 
 	/* reset the abort flag */
 	mpsl_abort = 0;
 
-	return v;
+	mpdm_unref(code);
+
+	return r;
 }
