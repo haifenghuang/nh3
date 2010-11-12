@@ -852,6 +852,8 @@ mpdm_t mpsl_build_opcodes(void)
 	int n;
 	mpdm_t r = MPDM_H(0);
 
+    mpdm_ref(r);
+
 	for (n = 0; op_table[n].name != NULL; n++) {
 		mpdm_t v = MPDM_LS(op_table[n].name);
 
@@ -860,6 +862,8 @@ mpdm_t mpsl_build_opcodes(void)
 		/* keys and values are the same */
 		mpdm_hset(r, v, v);
 	}
+
+    mpdm_unrefnd(r);
 
 	return r;
 }

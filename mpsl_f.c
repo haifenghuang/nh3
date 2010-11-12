@@ -1294,6 +1294,9 @@ mpdm_t mpsl_build_funcs(void)
 
 	/* creates all the symbols in the CORE library */
 	c = MPDM_H(0);
+
+    mpdm_ref(c);
+
 	for (n = 0; mpsl_funcs[n].name != NULL; n++) {
 		mpdm_t f = MPDM_S(mpsl_funcs[n].name);
 		mpdm_t x = MPDM_X(mpsl_funcs[n].func);
@@ -1301,6 +1304,8 @@ mpdm_t mpsl_build_funcs(void)
 		mpdm_hset(mpdm_root(), f, x);
 		mpdm_hset(c, f, x);
 	}
+
+    mpdm_unrefnd(c);
 
 	return c;
 }
