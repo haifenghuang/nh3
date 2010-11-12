@@ -139,12 +139,10 @@ static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
 			mpdm_hset(h, mpdm_aget(s, n), mpdm_aget(v, n));
 
 		/* store the rest of arguments into _ */
-		a = MPDM_A(0);
+		a = mpdm_hset_s(h, L"_", MPDM_A(0));
 
 		for (; n < mpdm_size(v); n++)
 			mpdm_push(a, mpdm_aget(v, n));
-
-		mpdm_hset_s(h, L"_", a);
 	}
 	else
 		mpdm_hset(h, s, v);
@@ -602,12 +600,16 @@ O_TYPE O_range(O_ARGS)
 	double v2 = RM2;
 	mpdm_t ret = MPDM_A(0);
 
-	if (v1 < v2)
+    mpdm_ref(ret);
+
+   	if (v1 < v2)
 		for (n = v1; n <= v2; n++)
 			mpdm_push(ret, MPDM_R(n));
 	else
 		for (n = v1; n >= v2; n--)
 			mpdm_push(ret, MPDM_R(n));
+
+    mpdm_unrefnd(ret);
 
 	return ret;
 }
@@ -829,6 +831,7 @@ mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 	mpdm_t v;
 
 	v = MPDM_A(args + 1);
+    mpdm_ref(v);
 
 	/* inserts the opcode */
 	o = mpdm_hget_s(mpsl_opcodes, opcode);
@@ -839,6 +842,8 @@ mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2, mpdm_t a3)
 	case 2:		mpdm_aset(v, a2, 2);
 	case 1:		mpdm_aset(v, a1, 1);
 	}
+
+    mpdm_unrefnd(v);
 
 	v = constant_fold(v);
 
@@ -904,12 +909,10 @@ void mpsl_argv(int argc, char * argv[])
 	mpdm_t ARGV;
 
 	/* create the ARGV array */
-	ARGV = MPDM_A(0);
+	ARGV = mpdm_hset_s(mpdm_root(), L"ARGV", MPDM_A(0));
 
 	for (n = 0; n < argc; n++)
 		mpdm_push(ARGV, MPDM_MBS(argv[n]));
-
-	mpdm_hset_s(mpdm_root(), L"ARGV", ARGV);
 }
 
 
