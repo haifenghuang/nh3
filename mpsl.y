@@ -662,20 +662,23 @@ mpdm_t mpsl_compile(mpdm_t code)
  */
 mpdm_t mpsl_compile_file(mpdm_t file)
 {
+	mpdm_t w;
 	mpdm_t x = NULL;
-	FILE * f = NULL;
-	const char * filename = NULL;
+	FILE *f = NULL;
+	const char *filename = NULL;
 
 	if ((f = mpdm_get_filehandle(file)) != NULL) {
 		filename = "<FILE>";
+		w = file;
 	}
 	else {
 		mpdm_t inc = mpsl_get_symbol(MPDM_LS(L"INC"));
+		mpdm_t v;
 
 		/* it's a filename; open it */
-		file = MPDM_2MBS(file->data);
+		v = mpdm_ref(MPDM_2MBS(file->data));
 
-		filename = file->data;
+		filename = v->data;
 
 		if ((f = inc_fopen(filename, inc)) == NULL) {
 			char tmp[128];
@@ -684,16 +687,17 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 				"File '%s' not found in INC",
 				filename);
 			mpsl_error(MPDM_MBS(tmp));
-
-			return (NULL);
 		}
 
-		file = MPDM_F(f);
+		mpdm_unref(v);
+
+		w = MPDM_F(f);
 	}
 
-	x = do_parse(filename, NULL, f);
-
-	mpdm_close(file);
+	if (w != NULL) {
+		x = do_parse(filename, NULL, f);
+		mpdm_close(w);
+	}
 
 	return x;
 }
