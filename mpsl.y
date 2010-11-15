@@ -30,24 +30,22 @@
 #include "mpdm.h"
 #include "mpsl.h"
 
-/*******************
-	Data
-********************/
+/** data **/
 
 /* the bytecode being generated */
 static mpdm_t mpsl_bytecode = NULL;
 
 /* pointer to source code being compiled */
-extern wchar_t * mpsl_next_char;
+extern wchar_t *mpsl_next_char;
 
 /* pointer to file being compiled */
-extern FILE * mpsl_file;
+extern FILE *mpsl_file;
 
 /* line number */
 extern int mpsl_line;
 
 /* compiled filename (for errors) */
-static char * mpsl_filename = NULL;
+static char *mpsl_filename = NULL;
 
 /* cached value MPSL.OPCODE */
 extern mpdm_t mpsl_opcodes;
@@ -55,9 +53,8 @@ extern mpdm_t mpsl_opcodes;
 /* cached value MPSL.LC */
 extern mpdm_t mpsl_lc;
 
-/*******************
-	Code
-********************/
+
+/** code **/
 
 int yylex(void);
 void yyerror(char * s);
@@ -77,7 +74,7 @@ static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2, int sf)
 }
 
 
-static void compiler_warning(char * str)
+static void compiler_warning(char *str)
 {
 	fprintf(stderr, "WARNING: %s.\n", str);
 }
@@ -568,7 +565,7 @@ void yyerror(char * s)
 }
 
 
-static FILE * inc_fopen(const char * filename, mpdm_t inc)
+static FILE * inc_fopen(const char *filename, mpdm_t inc)
 /* loads filename, searching in INC if not directly accesible */
 {
 	FILE * f = NULL;
@@ -592,7 +589,7 @@ static FILE * inc_fopen(const char * filename, mpdm_t inc)
 }
 
 
-static mpdm_t do_parse(const char * filename, wchar_t * code, FILE * file)
+static mpdm_t do_parse(const char *filename, wchar_t *code, FILE *file)
 /* calls yyparse() after doing some initialisations, and returns
    the compiled code as an executable value */
 {
