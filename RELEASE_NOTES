@@ -8,6 +8,8 @@ MPSL Release Notes
    sent as argument in the function call is stored
    in the local array _ (underscore).
  * The adel() function no longer returns the deleted element.
+ * mpsl_compile_file() now has an additional argument
+   holding the source file search path.
 
 1.0.9
 -----

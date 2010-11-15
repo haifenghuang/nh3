@@ -651,28 +651,30 @@ mpdm_t mpsl_compile(mpdm_t code)
 /**
  * mpsl_compile_file - Compiles a file of MPSL code.
  * @file: File stream or file name.
+ * @inc: search path for source files.
  *
  * Compiles a source file of MPSL code and returns an mpdm value
  * executable by mpdm_exec(). If @file is an MPSL file descriptor,
  * it's read as is and compiled; otherwise, it's assumed to be a
  * file name, that will be searched for in any of the paths defined
- * in the INC MPSL global array (take note that the current
- * directory is NOT searched by default). If the file cannot be found
+ * in the @inc array. If the file cannot be found
  * or there is any other error, NULL is returned instead.
  */
-mpdm_t mpsl_compile_file(mpdm_t file)
+mpdm_t mpsl_compile_file(mpdm_t file, mpdm_t inc)
 {
 	mpdm_t w;
 	mpdm_t x = NULL;
 	FILE *f = NULL;
 	const char *filename = NULL;
 
+	mpdm_ref(file);
+	mpdm_ref(inc);
+
 	if ((f = mpdm_get_filehandle(file)) != NULL) {
 		filename = "<FILE>";
 		w = file;
 	}
 	else {
-		mpdm_t inc = mpsl_get_symbol(MPDM_LS(L"INC"));
 		mpdm_t v;
 
 		/* it's a filename; open it */
@@ -698,6 +700,9 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 		x = do_parse(filename, NULL, f);
 		mpdm_close(w);
 	}
+
+	mpdm_unref(inc);
+	mpdm_unref(file);
 
 	return x;
 }
