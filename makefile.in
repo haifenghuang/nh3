@@ -23,13 +23,13 @@ version:
 .c.o:
 	$(CC) $(CFLAGS) `cat config.cflags` -c $<
 
-y.tab.h: mpsl.y
+y.tab.h: $(MPDM)/mpdm.h mpsl.y
 	$(YACC) -d mpsl.y
 
-y.tab.c: mpsl.y
+y.tab.c: $(MPDM)/mpdm.h mpsl.y
 	$(YACC) -d mpsl.y
 
-lex.yy.c: mpsl.l
+lex.yy.c: $(MPDM)/mpdm.h mpsl.l
 	flex mpsl.l
 
 mpsl_l.o: lex.yy.c y.tab.h
