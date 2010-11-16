@@ -84,11 +84,11 @@ mpdm_t _do_test_mpsl(char *code, int line)
 }
 
 
-mpdm_t do_test_mpsl_file(char *file)
+mpdm_t do_test_mpsl_file(char *file, mpdm_t inc)
 {
 	static mpdm_t v = NULL;
 
-	do_set(&v, mpsl_compile_file(MPDM_MBS(file)));
+	do_set(&v, mpsl_compile_file(MPDM_MBS(file), inc));
 
 	printf("Compile file: ");
 	do_test(file, v != NULL);
@@ -583,15 +583,18 @@ void test_mpsl3(void)
 void test_mpsl_file(void)
 {
 	mpdm_t v;
+	mpdm_t inc;
 
 	mpsl_trap(NULL);
 
-	/* Create an INC array with the current directory */
-	mpdm_exec(mpsl_compile(MPDM_LS(L"INC = [ '.' ];")), NULL);
+	inc = mpdm_ref(MPDM_A(0));
+	mpdm_push(inc, MPDM_LS(L"."));
 
 	printf("Compiling from file:\n");
-	v = do_test_mpsl_file("test.mpsl");
+	v = do_test_mpsl_file("test.mpsl", inc);
 	v = do_test_exec(v, NULL);
+
+	mpdm_unref(inc);
 }
 
 

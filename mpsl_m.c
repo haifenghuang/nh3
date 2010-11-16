@@ -125,7 +125,7 @@ int mpsl_main(int argc, char *argv[])
 
 		if (c != EOF) {
 			w = mpdm_ref(MPDM_F(script));
-			v = mpsl_compile_file(w);
+			v = mpsl_compile_file(w, NULL);
 			mpdm_close(w);
 			w = mpdm_unref(w);
 		}

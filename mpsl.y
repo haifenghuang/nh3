@@ -30,24 +30,22 @@
 #include "mpdm.h"
 #include "mpsl.h"
 
-/*******************
-	Data
-********************/
+/** data **/
 
 /* the bytecode being generated */
 static mpdm_t mpsl_bytecode = NULL;
 
 /* pointer to source code being compiled */
-extern wchar_t * mpsl_next_char;
+extern wchar_t *mpsl_next_char;
 
 /* pointer to file being compiled */
-extern FILE * mpsl_file;
+extern FILE *mpsl_file;
 
 /* line number */
 extern int mpsl_line;
 
 /* compiled filename (for errors) */
-static char * mpsl_filename = NULL;
+static char *mpsl_filename = NULL;
 
 /* cached value MPSL.OPCODE */
 extern mpdm_t mpsl_opcodes;
@@ -55,9 +53,8 @@ extern mpdm_t mpsl_opcodes;
 /* cached value MPSL.LC */
 extern mpdm_t mpsl_lc;
 
-/*******************
-	Code
-********************/
+
+/** code **/
 
 int yylex(void);
 void yyerror(char * s);
@@ -77,7 +74,7 @@ static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2, int sf)
 }
 
 
-static void compiler_warning(char * str)
+static void compiler_warning(char *str)
 {
 	fprintf(stderr, "WARNING: %s.\n", str);
 }
@@ -568,7 +565,7 @@ void yyerror(char * s)
 }
 
 
-static FILE * inc_fopen(const char * filename, mpdm_t inc)
+static FILE * inc_fopen(const char *filename, mpdm_t inc)
 /* loads filename, searching in INC if not directly accesible */
 {
 	FILE * f = NULL;
@@ -592,7 +589,7 @@ static FILE * inc_fopen(const char * filename, mpdm_t inc)
 }
 
 
-static mpdm_t do_parse(const char * filename, wchar_t * code, FILE * file)
+static mpdm_t do_parse(const char *filename, wchar_t *code, FILE *file)
 /* calls yyparse() after doing some initialisations, and returns
    the compiled code as an executable value */
 {
@@ -654,31 +651,36 @@ mpdm_t mpsl_compile(mpdm_t code)
 /**
  * mpsl_compile_file - Compiles a file of MPSL code.
  * @file: File stream or file name.
+ * @inc: search path for source files.
  *
  * Compiles a source file of MPSL code and returns an mpdm value
  * executable by mpdm_exec(). If @file is an MPSL file descriptor,
  * it's read as is and compiled; otherwise, it's assumed to be a
  * file name, that will be searched for in any of the paths defined
- * in the INC MPSL global array (take note that the current
- * directory is NOT searched by default). If the file cannot be found
+ * in the @inc array. If the file cannot be found
  * or there is any other error, NULL is returned instead.
  */
-mpdm_t mpsl_compile_file(mpdm_t file)
+mpdm_t mpsl_compile_file(mpdm_t file, mpdm_t inc)
 {
+	mpdm_t w;
 	mpdm_t x = NULL;
-	FILE * f = NULL;
-	const char * filename = NULL;
+	FILE *f = NULL;
+	const char *filename = NULL;
+
+	mpdm_ref(file);
+	mpdm_ref(inc);
 
 	if ((f = mpdm_get_filehandle(file)) != NULL) {
 		filename = "<FILE>";
+		w = file;
 	}
 	else {
-		mpdm_t inc = mpsl_get_symbol(MPDM_LS(L"INC"));
+		mpdm_t v;
 
 		/* it's a filename; open it */
-		file = MPDM_2MBS(file->data);
+		v = mpdm_ref(MPDM_2MBS(file->data));
 
-		filename = file->data;
+		filename = v->data;
 
 		if ((f = inc_fopen(filename, inc)) == NULL) {
 			char tmp[128];
@@ -687,16 +689,20 @@ mpdm_t mpsl_compile_file(mpdm_t file)
 				"File '%s' not found in INC",
 				filename);
 			mpsl_error(MPDM_MBS(tmp));
-
-			return (NULL);
 		}
 
-		file = MPDM_F(f);
+		mpdm_unref(v);
+
+		w = MPDM_F(f);
 	}
 
-	x = do_parse(filename, NULL, f);
+	if (w != NULL) {
+		x = do_parse(filename, NULL, f);
+		mpdm_close(w);
+	}
 
-	mpdm_close(file);
+	mpdm_unref(inc);
+	mpdm_unref(file);
 
 	return x;
 }
