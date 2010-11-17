@@ -626,13 +626,12 @@ O_TYPE O_hash(O_ARGS)
 }
 
 
-O_TYPE generic_frame(O_ARGS)
-/* runs an instruction under a frame */
+O_TYPE O_blkframe(O_ARGS)
+/* runs an instruction under a block frame */
 {
 	mpdm_t ret;
 
-	/* if l is NULL (usually for subroutine frames),
-	   create a new array for holding local symbol tables */
+	/* no context? create one */
 	if (l == NULL)
 		l = MPDM_A(0);
 
@@ -656,19 +655,11 @@ O_TYPE generic_frame(O_ARGS)
 }
 
 
-O_TYPE O_blkframe(O_ARGS)
-/* runs an instruction under a block frame */
-{
-	return generic_frame(c, a, l, f);
-}
-
-
 O_TYPE O_subframe(O_ARGS)
 /* runs an instruction inside a subroutine frame */
 {
-	/* don't propagate the local symbol table,
-	   triggering a new subroutine frame */
-	return generic_frame(c, a, NULL, f);
+	/* like a block frame, but with its own symbol table */
+	return O_blkframe(c, a, MPDM_A(0), f);
 }
 
 
