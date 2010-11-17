@@ -745,9 +745,13 @@ O_TYPE mpsl_exec_i(O_ARGS)
 	if (mpsl_trap_func != NULL && !in_constant_folding) {
 		mpdm_t f = mpsl_trap_func;
 
+		mpdm_ref(ret);
+
 		mpsl_trap_func = NULL;
 		mpdm_exec_3(f, c, a, ret, l);
 		mpsl_trap_func = f;
+
+		mpdm_unrefnd(ret);
 	}
 
 	return ret;
