@@ -34,7 +34,7 @@
 
 /** code **/
 
-mpdm_t trap_func(mpdm_t args)
+mpdm_t trap_func(mpdm_t args, mpdm_t ctxt)
 {
 	mpdm_t c = mpdm_aget(args, 0);
 	mpdm_t r = mpdm_aget(args, 2);
