@@ -1,9 +1,10 @@
 MPSL Release Notes
 ==================
 
-1.0.10
-------
+2.0.0
+-----
 
+ * Adapted to MPDM 2.0.0.
  * Any function argument not explicitly declared and
    sent as argument in the function call is stored
    in the local array _ (underscore).

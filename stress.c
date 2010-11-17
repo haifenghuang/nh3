@@ -100,7 +100,7 @@ mpdm_t do_test_exec(mpdm_t x, mpdm_t a)
 {
 	static mpdm_t v = NULL;
 
-	do_set(&v, mpdm_exec(x, a));
+	do_set(&v, mpdm_exec(x, a, NULL));
 
 	return (v);
 }
@@ -605,37 +605,37 @@ void test_abort_and_eval(void)
 
 	mpsl_abort = 0;
 	v = mpdm_ref(mpsl_compile(MPDM_LS(L"1000;")));
-	do_test("Abort 1", mpdm_ival(mpdm_exec(v, NULL)) == 1000);
+	do_test("Abort 1", mpdm_ival(mpdm_exec(v, NULL, NULL)) == 1000);
 
 	/* set global abort function */
 	mpsl_abort = 1;
-	do_test("Abort 2", mpdm_exec(v, NULL) == NULL);
+	do_test("Abort 2", mpdm_exec(v, NULL, NULL) == NULL);
 
 	mpsl_abort = 0;
-	do_test("Abort 3", mpdm_ival(mpdm_exec(v, NULL)) == 1000);
+	do_test("Abort 3", mpdm_ival(mpdm_exec(v, NULL, NULL)) == 1000);
 	mpdm_unref(v);
 
 	mpsl_error(NULL);
 
-	v = mpsl_eval(MPDM_LS(L"invalid_code()"), NULL);
+	v = mpsl_eval(MPDM_LS(L"invalid_code()"), NULL, NULL);
 	e = mpdm_hget_s(mpdm_root(), L"ERROR");
 	printf("The following error is OK:\n");
 	mpdm_dump(e);
 	do_test("eval 1", v == NULL && e != NULL);
 
-	v = mpsl_eval(MPDM_LS(L"undef_func();"), NULL);
+	v = mpsl_eval(MPDM_LS(L"undef_func();"), NULL, NULL);
 	e = mpdm_hget_s(mpdm_root(), L"ERROR");
 	printf("The following error is also OK:\n");
 	mpdm_dump(e);
 	do_test("eval 2", v == NULL && e != NULL);
 
-	v = mpsl_eval(MPDM_LS(L"load('unexistent_file.mpsl');"), NULL);
+	v = mpsl_eval(MPDM_LS(L"load('unexistent_file.mpsl');"), NULL, NULL);
 	e = mpdm_hget_s(mpdm_root(), L"ERROR");
 	printf("The following error is also OK:\n");
 	mpdm_dump(e);
 	do_test("eval 3", v == NULL && e != NULL);
 
-	v = mpsl_eval(MPDM_LS(L"2000;"), NULL);
+	v = mpsl_eval(MPDM_LS(L"2000;"), NULL, NULL);
 	e = mpdm_hget_s(mpdm_root(), L"ERROR");
 	do_test("eval 4", mpdm_ival(v) == 2000 && e == NULL);
 }

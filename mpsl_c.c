@@ -37,9 +37,6 @@
 /* global abort flag */
 int mpsl_abort = 0;
 
-/* temporary storage for the local symbol table */
-static mpdm_t local_symtbl = NULL;
-
 /* temporary storage for the opcode table
    (only usable while compiling) */
 mpdm_t mpsl_opcodes = NULL;
@@ -149,25 +146,11 @@ static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
 }
 
 
-static mpdm_t get_symbol(mpdm_t s, mpdm_t l)
-/* gets a symbol from a local symbol table, or the global */
-{
-	return mpdm_sget(find_local_symtbl(s, l), s);
-}
-
-
-static mpdm_t set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
-/* sets a symbol in a local symbol table, or the global */
-{
-	mpdm_sset(find_local_symtbl(s, l), s, v);
-	return v;
-}
-
-
 /**
  * mpsl_set_symbol - Sets value to a symbol.
  * @s: symbol name
  * @v: value
+ * @l: local symbol table
  *
  * Assigns the value @v to the @s symbol. If the value exists as
  * a local symbol, it's assigned to it; otherwise, it's set as a global
@@ -177,15 +160,16 @@ static mpdm_t set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
  * program; from outside, it's exactly the same as calling mpdm_sset()
  * (as the local symbol table won't exist).
  */
-mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v)
+mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
 {
-	return set_symbol(s, v, local_symtbl);
+	return mpdm_sset(find_local_symtbl(s, l), s, v);
 }
 
 
 /**
  * mpsl_get_symbol - Gets the value of a symbol.
  * @s: symbol name
+ * @l: local symbol table
  *
  * Gets the value of a symbol. The symbol can be local or global
  * (if the symbol exists in both tables, the local value will be returned).
@@ -194,9 +178,9 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v)
  * program; from outside, it's exactly the same as calling mpdm_sget()
  * (as the local symbol table won't exist).
  */
-mpdm_t mpsl_get_symbol(mpdm_t s)
+mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t l)
 {
-	return get_symbol(s, local_symtbl);
+	return mpdm_sget(find_local_symtbl(s, l), s);
 }
 
 
@@ -242,8 +226,8 @@ O_TYPE mpsl_exec_i(O_ARGS);
 #define IM1 ival(M(1))
 #define IM2 ival(M(2))
 
-#define GET(m) get_symbol(m, l)
-#define SET(m, v) set_symbol(m, v, l)
+#define GET(m) mpsl_get_symbol(m, l)
+#define SET(m, v) mpsl_set_symbol(m, v, l)
 #define BOOL mpsl_boolean
 
 #define RF(v) mpdm_ref(v)
@@ -531,19 +515,10 @@ O_TYPE O_execsym(O_ARGS)
 		UF(t);
 	}
 	else {
-		/* save current local symbol table */
-		mpdm_t t = local_symtbl;
-
-		/* substitute with this one */
-		local_symtbl = l;
-
 		/* execute */
 		w = RF(M2);
-		r = mpdm_exec(v, w);
+		r = mpdm_exec(v, w, l);
 		UF(w);
-
-		/* and get back to the original one */
-		local_symtbl = t;
 	}
 
 	UF(s);
@@ -771,7 +746,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 		mpdm_t f = mpsl_trap_func;
 
 		mpsl_trap_func = NULL;
-		mpdm_exec_3(f, c, a, ret);
+		mpdm_exec_3(f, c, a, ret, l);
 		mpsl_trap_func = f;
 	}
 
@@ -779,13 +754,13 @@ O_TYPE mpsl_exec_i(O_ARGS)
 }
 
 
-mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a)
+mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a, mpdm_t ctxt)
 /* executes an MPSL instruction stream */
 {
 	int f = 0;
 
 	/* execute first instruction with a new flow control variable */
-	return mpsl_exec_i(c, a, local_symtbl, &f);
+	return mpsl_exec_i(c, a, ctxt, &f);
 }
 
 
@@ -812,7 +787,7 @@ static mpdm_t constant_fold(mpdm_t i)
 
 		/* execute the instruction and convert to LITERAL */
 		v = RF(i);
-		w = RF(mpsl_exec_p(v, NULL));
+		w = RF(mpsl_exec_p(v, NULL, NULL));
 		i = mpsl_mkins(L"LITERAL", 1, w, NULL, NULL);
 		UF(w);
 		UF(v);

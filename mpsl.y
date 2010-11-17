@@ -712,6 +712,7 @@ mpdm_t mpsl_compile_file(mpdm_t file, mpdm_t inc)
  * mpsl_eval - Evaluates MSPL code.
  * @code: A value containing a string of MPSL code, or executable code
  * @args: optional arguments for @code
+ * @ctxt: context for @code
  *
  * Evaluates a piece of code. The @code can be a string containing MPSL source
  * code (that will be compiled) or a direct executable value. If the compilation
@@ -719,7 +720,7 @@ mpdm_t mpsl_compile_file(mpdm_t file, mpdm_t inc)
  * value and NULL returned. Otherwise, the exit value from the code is returned
  * and ERROR set to NULL. The abort flag is reset on exit.
  */
-mpdm_t mpsl_eval(mpdm_t code, mpdm_t args)
+mpdm_t mpsl_eval(mpdm_t code, mpdm_t args, mpdm_t ctxt)
 {
 	mpdm_t cs, r;
 
@@ -746,7 +747,7 @@ mpdm_t mpsl_eval(mpdm_t code, mpdm_t args)
 
 	/* execute, if possible */
 	if (MPDM_IS_EXEC(cs))
-		r = mpdm_exec(cs, args);
+		r = mpdm_exec(cs, args, ctxt);
 	else
 		r = NULL;
 
