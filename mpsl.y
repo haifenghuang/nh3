@@ -732,7 +732,7 @@ mpdm_t mpsl_eval(mpdm_t code, mpdm_t args, mpdm_t ctxt)
 
 	/* if code is not executable, try to compile */
 	if (!MPDM_IS_EXEC(code)) {
-		mpdm_t c, w;
+		mpdm_t c;
 
 		/* get the eval cache */
 		if ((c = mpdm_hget_s(mpdm_root(), L"__EVAL__")) == NULL)
