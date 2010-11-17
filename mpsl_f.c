@@ -813,19 +813,9 @@ static mpdm_t F_gettext_domain(F_ARGS) {
  * [Code Control]
  */
 /** load(source_file); */
-
-/**
- * compile_file - Loads an MPSL source code file.
- * @source_file: the source code file
- * @inc: the search path
- *
- * Loads and executes an MPSL source code file and returns
- * its value.
- * [Code Control]
- */
-/** compile_file(source_file, inc); */
-static mpdm_t F_compile_file(F_ARGS) {
-	return mpdm_exec(mpsl_compile_file(A0, A1), NULL, l);
+static mpdm_t F_load(F_ARGS) {
+	return mpdm_exec(mpsl_compile_file(A0,
+		mpsl_get_symbol(MPDM_LS(L"INC"), l)), NULL, l);
 }
 
 /**
@@ -1275,7 +1265,7 @@ static struct {
 	{ L"pclose",	F_pclose },
 	{ L"regex",	F_regex },
 	{ L"sregex",	F_sregex },
-	{ L"compile_file",	F_compile_file },
+	{ L"load",	F_load },
 	{ L"compile",	F_compile },
 	{ L"error",	F_error },
 	{ L"eval",	F_eval },
@@ -1318,8 +1308,6 @@ mpdm_t mpsl_build_funcs(void)
 		mpdm_hset(mpdm_root(), f, x);
 		mpdm_hset(c, f, x);
 	}
-
-	mpsl_eval(MPDM_LS(L"load = sub (c) { compile_file(c, INC); };"), NULL, NULL);
 
     mpdm_unrefnd(c);
 
