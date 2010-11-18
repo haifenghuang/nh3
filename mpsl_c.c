@@ -716,34 +716,37 @@ O_TYPE mpsl_exec_i(O_ARGS)
 /* Executes one MPSL instruction in the MPSL virtual machine. Called
    from mpsl_exec_p() (which holds the flow control status variable) */
 {
-	struct mpsl_op_s * o;
 	mpdm_t ret = NULL;
 
+	mpdm_ref(c);
+	mpdm_ref(a);
+	mpdm_ref(l);
+
 	/* if aborted or NULL, do nothing */
-	if (mpsl_abort || c == NULL)
-		return NULL;
+	if (!mpsl_abort && c != NULL) {
+		/* sweep some values */
+		if (!in_constant_folding)
+			mpdm_sweep(0);
 
-	/* sweep some values */
-	if (!in_constant_folding)
-		mpdm_sweep(0);
+		/* gets the opcode and calls it */
+		ret = op_table[mpdm_ival(C0)].func(c, a, l, f);
 
-	/* gets the opcode */
-	o = &op_table[mpdm_ival(C0)];
+		if (mpsl_trap_func != NULL && !in_constant_folding) {
+			mpdm_t f = mpsl_trap_func;
 
-	/* blindly call it, or crash */
-	ret = o->func(c, a, l, f);
+			mpdm_ref(ret);
 
-	if (mpsl_trap_func != NULL && !in_constant_folding) {
-		mpdm_t f = mpsl_trap_func;
+			mpsl_trap_func = NULL;
+			mpdm_exec_3(f, c, a, ret, l);
+			mpsl_trap_func = f;
 
-		mpdm_ref(ret);
-
-		mpsl_trap_func = NULL;
-		mpdm_exec_3(f, c, a, ret, l);
-		mpsl_trap_func = f;
-
-		mpdm_unrefnd(ret);
+			mpdm_unrefnd(ret);
+		}
 	}
+
+	mpdm_unref(l);
+	mpdm_unref(a);
+	mpdm_unref(c);
 
 	return ret;
 }
