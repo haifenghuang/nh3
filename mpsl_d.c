@@ -26,6 +26,7 @@
 #include "config.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <wchar.h>
 #include <malloc.h>
 
@@ -95,6 +96,9 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 /* dump plugin for mpdm_dump() */
 {
 	int n;
+	char tmp[256];
+	wchar_t *wptr;
+
 
 	/* indent (if negative, don't prepend indentation) */
 	if (l < 0)
@@ -153,9 +157,6 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 	}
 	else
 	if (MPDM_IS_EXEC(v)) {
-		char tmp[256];
-		wchar_t *wptr;
-
 		snprintf(tmp, sizeof(tmp), "bincall(%p)", v->data);
 		wptr = mpdm_mbstowcs(tmp, NULL, -1);
 		ptr = mpdm_pokews(ptr, size, wptr);
@@ -165,10 +166,29 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 	if (MPDM_IS_STRING(v))
 		ptr = dump_string(v, ptr, size);
 	else
-	if (v->flags & MPDM_FILE)
-		ptr = mpdm_pokews(ptr, size, L"NULL /* file descriptor */");
+	if (v->flags & MPDM_FILE) {
+		FILE *f;
+
+		f = mpdm_get_filehandle(v);
+
+		if (f != NULL)
+			snprintf(tmp, sizeof(tmp), "NULL /* file descriptor: %d */", fileno(f));
+		else
+			strcpy(tmp, "NULL /* file descriptor (unknown handle) */");
+
+		wptr = mpdm_mbstowcs(tmp, NULL, -1);
+		ptr = mpdm_pokews(ptr, size, wptr);
+		free(wptr);
+	}
 	else
-		ptr = mpdm_pokews(ptr, size, L"NULL /* non-printable value */");
+	if (v->flags & MPDM_REGEX)
+		ptr = mpdm_pokews(ptr, size, L"NULL /* compiled regular expression */");
+	else {
+		snprintf(tmp, sizeof(tmp), "NULL /* non-printable value (flags: 0x%04x) */", v->flags);
+		wptr = mpdm_mbstowcs(tmp, NULL, -1);
+		ptr = mpdm_pokews(ptr, size, wptr);
+		free(wptr);
+	}
 
 	if (l == 0)
 		ptr = mpdm_pokews(ptr, size, L";\n");
