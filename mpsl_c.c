@@ -784,11 +784,8 @@ static mpdm_t constant_fold(mpdm_t i)
 		in_constant_folding = 1;
 
 		/* execute the instruction and convert to LITERAL */
-		v = RF(i);
-		w = RF(mpsl_exec_p(v, NULL, NULL));
+		w = mpsl_exec_p(i, NULL, NULL);
 		i = mpsl_mkins(L"LITERAL", 1, w, NULL, NULL);
-		UF(w);
-		UF(v);
 
 		in_constant_folding = 0;
 	}
