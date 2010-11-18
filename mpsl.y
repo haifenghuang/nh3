@@ -577,9 +577,9 @@ static FILE * inc_fopen(const char *filename, mpdm_t inc)
 	for (n = 0; n < mpdm_size(inc); n++) {
 		mpdm_t v = mpdm_aget(inc, n);
 
-		v = MPDM_2MBS(v->data);
-		snprintf(tmp, sizeof(tmp), "%s/%s",
-			(char *)v->data, filename);
+		v = mpdm_ref(MPDM_2MBS(v->data));
+		snprintf(tmp, sizeof(tmp), "%s/%s",	(char *)v->data, filename);
+		mpdm_unref(v);
 
 		if ((f = fopen(tmp, "r")) != NULL)
 			break;
