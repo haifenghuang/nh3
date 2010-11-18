@@ -665,6 +665,8 @@ int main(void)
 	mpdm_sweep(-1);
 	printf("memory: %d\n", mpdm->memory_usage);
 
+	mpdm_dump_unref();
+
 	mpsl_shutdown();
 
 	printf("\n*** Total tests passed: %d/%d\n", oks, tests);
