@@ -773,7 +773,7 @@ static mpdm_t constant_fold(mpdm_t i)
 /* tries to fold complex but constant expressions into a literal */
 {
 	int n;
-	mpdm_t v, w;
+	mpdm_t v;
 
 	/* get the number opcode */
 	n = mpdm_ival(mpdm_aget(i, 0));
@@ -791,8 +791,8 @@ static mpdm_t constant_fold(mpdm_t i)
 		in_constant_folding = 1;
 
 		/* execute the instruction and convert to LITERAL */
-		w = mpsl_exec_p(i, NULL, NULL);
-		i = mpsl_mkins(L"LITERAL", 1, w, NULL, NULL);
+		v = mpsl_exec_p(i, NULL, NULL);
+		i = mpsl_mkins(L"LITERAL", 1, v, NULL, NULL);
 
 		in_constant_folding = 0;
 	}
