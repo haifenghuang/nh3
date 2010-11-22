@@ -1202,7 +1202,7 @@ static mpdm_t F_bincall(F_ARGS) {
  */
 /** integer = random(value); */
 static mpdm_t F_random(F_ARGS)
- {
+{
 	static unsigned int seed = 0;
 	int r = 0;
 	int range = mpdm_ival(mpdm_aget(a, 0));
@@ -1216,6 +1216,21 @@ static mpdm_t F_random(F_ARGS)
 
 	return MPDM_I(r);
 };
+
+
+/**
+ * sleep - Sleeps a number of milliseconds.
+ *
+ * Sleeps a number of milliseconds.
+ * [Threading]
+ */
+/** sleep(msecs); */
+static mpdm_t F_sleep(F_ARGS)
+{
+    mpdm_sleep(mpdm_ival(mpdm_aget(a, 0)));
+
+    return NULL;
+}
 
 
 static struct {
@@ -1286,6 +1301,7 @@ static struct {
 	{ L"sscanf",	F_sscanf },
 	{ L"bincall",	F_bincall },
 	{ L"random",	F_random },
+    { L"sleep", F_sleep },
 	{ NULL,		NULL }
 };
 
