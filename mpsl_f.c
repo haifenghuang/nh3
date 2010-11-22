@@ -519,12 +519,12 @@ static mpdm_t F_getchar(F_ARGS) {
  * Writes the first character in @s into @fd. No charset
  * conversion is done.
  *
- * Returns @s or NULL if the writing failed.
+ * Returns the number of chars written (0 or 1).
  * [Input-Output]
  */
 /** s = putchar(fd, s); */
 static mpdm_t F_putchar(F_ARGS) {
-	return mpdm_putchar(A0, A1);
+	return MPDM_I(mpdm_putchar(A0, A1));
 }
 
 /**
