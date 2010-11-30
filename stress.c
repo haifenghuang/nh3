@@ -649,15 +649,12 @@ int main(void)
 {
 	mpsl_startup();
 
-	mpdm->default_sweep = 64;
-
 	test_mpsl();
 	test_mpsl2();
 	test_mpsl3();
 	test_mpsl_file();
 	test_abort_and_eval();
 
-	printf("memory: %d\n", mpdm->memory_usage);
 	mpdm_sweep(-1);
 	mpdm_sweep(-1);
 	mpdm_sweep(-1);
@@ -667,7 +664,6 @@ int main(void)
 	mpdm_sweep(-1);
 	mpdm_sweep(-1);
 	mpdm_sweep(-1);
-	printf("memory: %d\n", mpdm->memory_usage);
 
 /*	mpdm_dump_unref();*/
 
