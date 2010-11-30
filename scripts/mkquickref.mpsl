@@ -58,24 +58,23 @@ print("%%Page: 1 1\n",
 n_lines = 0;
 n_pag = 1;
 
-while(line = read(STDIN))
-{
+while (line = read(STDIN)) {
 	local l;
 
 	/* strip \n */
 	line = sregex("/\n$/", line, NULL);
 
 	/* escape parens */
-	line = sregex("/\\/g", line, '\\');
+	line = sregex("/\\\\/g", line, '\\');
 	line = sregex("/\(/g", line, '\(');
 	line = sregex("/\)/g", line, '\)');
 
 	/* leading asterisk? it's a title */
-	if(l = regex([ "/^\*/", "/.*$/" ], line))
+	if ((l = regex([ "/^\*/", "/.*$/" ], line)) && size(l) == 2)
 		print("(", l[1], ") qr_title\n");
 	else
 	/* text-tabs-text: two columns */
-	if(l = regex([ "/^[^\t]*/", "/\t+/", "/.*$/" ], line))
+	if ((l = regex([ "/^[^\t]*/", "/\t+/", "/.*$/" ], line)) && size(l) == 3)
 		print("(", l[0], ") (", l[2], ") qr_2cols\n");
 	else
 	/* other: two columns, with empty second one */
@@ -83,8 +82,7 @@ while(line = read(STDIN))
 
 	n_lines++;
 
-	if(n_lines > 170) /* 64 * 3 */
-	{
+	if (n_lines > 170) { /* 64 * 3 */
 		n_pag++;
 		n_lines = 0;
 
