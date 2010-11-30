@@ -669,7 +669,7 @@ int main(void)
 	mpdm_sweep(-1);
 	printf("memory: %d\n", mpdm->memory_usage);
 
-	mpdm_dump_unref();
+/*	mpdm_dump_unref();*/
 
 	mpsl_shutdown();
 
