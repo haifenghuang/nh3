@@ -210,12 +210,16 @@ void test_mpsl2(void)
 	do_test("mpsl calculator 5", mpdm_rval(v) == 10.0);
 
 	v = do_test_exec(do_test_mpsl("2 + 3 * 4;"), NULL);
+    mpdm_ref(v);
 	w = do_test_exec(do_test_mpsl("2 + (3 * 4);"), NULL);
 	do_test("mpsl calculator 6 (operator precedence)", mpdm_rval(v) == mpdm_rval(w));
+    mpdm_unref(v);
 
 	v = do_test_exec(do_test_mpsl("2 + 3 * 4;"), NULL);
+    mpdm_ref(v);
 	w = do_test_exec(do_test_mpsl("(2 + 3) * 4;"), NULL);
 	do_test("mpsl calculator 7 (operator precedence)", mpdm_rval(v) != mpdm_rval(w));
+    mpdm_unref(v);
 
 	v = do_test_mpsl("/* array */ [\"this\", \"one\", \"is\", 666, \"cool\"];");
 	v = do_test_exec(v, NULL);
