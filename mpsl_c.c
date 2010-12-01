@@ -41,9 +41,6 @@ int mpsl_abort = 0;
    (only usable while compiling) */
 mpdm_t mpsl_opcodes = NULL;
 
-/* flag to mark if an execution is from inside constant folding */
-static int in_constant_folding = 0;
-
 /* pointer to a trap function */
 static mpdm_t mpsl_trap_func = NULL;
 
@@ -756,7 +753,7 @@ O_TYPE mpsl_exec_i(O_ARGS)
 		/* gets the opcode and calls it */
 		ret = op_table[mpdm_ival(C0)].func(c, a, l, f);
 
-		if (mpsl_trap_func != NULL && !in_constant_folding) {
+		if (mpsl_trap_func != NULL) {
 			mpdm_t f = mpsl_trap_func;
 
 			mpdm_ref(ret);
@@ -806,13 +803,9 @@ static mpdm_t constant_fold(mpdm_t i)
 				return i;
 		}
 
-		in_constant_folding = 1;
-
 		/* execute the instruction and convert to LITERAL */
 		v = mpsl_exec_p(i, NULL, NULL);
 		i = mpsl_mkins(L"LITERAL", 1, v, NULL, NULL);
-
-		in_constant_folding = 0;
 	}
 
 	return i;
