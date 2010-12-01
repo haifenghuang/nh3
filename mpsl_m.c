@@ -137,7 +137,7 @@ int mpsl_main(int argc, char *argv[])
 		if (dump_only)
 			mpdm_dump(v);
 		else
-			mpdm_unref(mpdm_ref(mpdm_exec(v, NULL, NULL)));
+			mpdm_void(mpdm_exec(v, NULL, NULL));
 
 		mpdm_unref(v);
 	}
