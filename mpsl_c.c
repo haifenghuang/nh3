@@ -159,10 +159,6 @@ static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
  * Assigns the value @v to the @s symbol. If the value exists as
  * a local symbol, it's assigned to it; otherwise, it's set as a global
  * symbol (and created if it does not exist).
- *
- * This function is only meant to be executed from inside an MPSL
- * program; from outside, it's exactly the same as calling mpdm_sset()
- * (as the local symbol table won't exist).
  */
 mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
 {
@@ -189,10 +185,6 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
  *
  * Gets the value of a symbol. The symbol can be local or global
  * (if the symbol exists in both tables, the local value will be returned).
- *
- * This function is only meant to be executed from inside an MPSL
- * program; from outside, it's exactly the same as calling mpdm_sget()
- * (as the local symbol table won't exist).
  */
 mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t l)
 {
@@ -891,7 +883,7 @@ mpdm_t mpsl_trap(mpdm_t trap_func)
  * Fills the ARGV global MPSL array with an array of arguments. These
  * are usually the ones sent to main().
  */
-void mpsl_argv(int argc, char * argv[])
+void mpsl_argv(int argc, char *argv[])
 {
 	int n;
 	mpdm_t ARGV;
