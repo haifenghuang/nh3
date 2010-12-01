@@ -239,10 +239,10 @@ O_TYPE mpsl_exec_i(O_ARGS);
 #define R(x) mpdm_rval(x)
 #define I(x) mpdm_ival(x)
 
-#define RM1 rval(M(1))
-#define RM2 rval(M(2))
-#define IM1 ival(M(1))
-#define IM2 ival(M(2))
+#define RM1 mpdm_rval(M(1))
+#define RM2 mpdm_rval(M(2))
+#define IM1 mpdm_ival(M(1))
+#define IM2 mpdm_ival(M(2))
 
 #define GET(m) mpsl_get_symbol(m, l)
 #define SET(m, v) mpsl_set_symbol(m, v, l)
@@ -262,30 +262,6 @@ static int is_true_uf(mpdm_t v)
 
 	return r;
 }
-
-static double rval(mpdm_t v)
-{
-	double r;
-
-	mpdm_ref(v);
-	r = mpdm_rval(v);
-	mpdm_unref(v);
-
-	return r;
-}
-
-
-static int ival(mpdm_t v)
-{
-	int r;
-
-	mpdm_ref(v);
-	r = mpdm_ival(v);
-	mpdm_unref(v);
-
-	return r;
-}
-
 
 /** opcodes **/
 
