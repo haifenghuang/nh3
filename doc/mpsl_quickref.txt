@@ -238,7 +238,6 @@ print(str, str...);	Prints values to stdout
 tstr = gettext(str);	Translates str
 gettext_domain(dom,	Sets the gettext domain
     directory);		and directory
-sweep(num);		Forces a garbage collection
 getenv(envvar);		Returns the value of
 			an environment variable
 uc(str);		Returns str to uppercase
