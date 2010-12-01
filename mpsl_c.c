@@ -753,10 +753,6 @@ O_TYPE mpsl_exec_i(O_ARGS)
 
 	/* if aborted or NULL, do nothing */
 	if (!mpsl_abort && c != NULL) {
-		/* sweep some values */
-		if (!in_constant_folding)
-			mpdm_sweep(0);
-
 		/* gets the opcode and calls it */
 		ret = op_table[mpdm_ival(C0)].func(c, a, l, f);
 

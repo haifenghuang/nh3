@@ -655,18 +655,6 @@ int main(void)
 	test_mpsl_file();
 	test_abort_and_eval();
 
-	mpdm_sweep(-1);
-	mpdm_sweep(-1);
-	mpdm_sweep(-1);
-	mpdm_sweep(-1);
-	mpdm_sweep(-1);
-	mpdm_sweep(-1);
-	mpdm_sweep(-1);
-	mpdm_sweep(-1);
-	mpdm_sweep(-1);
-
-/*	mpdm_dump_unref();*/
-
 	mpsl_shutdown();
 
 	printf("\n*** Total tests passed: %d/%d\n", oks, tests);

@@ -845,22 +845,6 @@ static mpdm_t F_error(F_ARGS) {
 }
 
 /**
- * sweep - Sweeps unreferenced values.
- * @count: number of values to be swept
- *
- * Destroys values with a reference count of 0. @count is the
- * number of values to be checked for deletion; special values of
- * @count are -1, that forces a check of all currently known values
- * (can be time-consuming) and 0, which tells sweep() to check a
- * small group of them on each call.
- * [Value Management]
- */
-/** sweep(count); */
-static mpdm_t F_sweep(F_ARGS) {
-	mpdm_sweep(IA0); return NULL;
-}
-
-/**
  * uc - Converts a string to uppercase.
  * @str: the string to be converted
  *
@@ -1288,7 +1272,6 @@ static struct {
 	{ L"gettext",	F_gettext },
 	{ L"gettext_domain", F_gettext_domain },
 	{ L"sprintf",	F_sprintf },
-	{ L"sweep",	F_sweep },
 	{ L"chr",	F_chr },
 	{ L"ord",	F_ord },
 	{ L"map",	F_map },
