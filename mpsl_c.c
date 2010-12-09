@@ -302,9 +302,7 @@ O_TYPE O_if(O_ARGS) {
 }
 
 O_TYPE O_local(O_ARGS) {
-	mpdm_t v = RF(M1);
-	set_local_symbols(v, NULL, l);
-	UF(v);
+	set_local_symbols(M1, NULL, l);
 
 	return NULL;
 }
