@@ -354,9 +354,8 @@ O_TYPE O_or(O_ARGS) {
 	mpdm_t r;
 
 	if (!mpsl_is_true(v)) {
-		RF(v);
+		mpdm_void(v);
 		r = M2;
-		UF(v);
 	}
 	else
 		r = v;
