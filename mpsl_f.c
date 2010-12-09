@@ -1232,6 +1232,7 @@ static mpdm_t F_mutex(F_ARGS)
 
 /**
  * mutex_lock - Locks a mutex (possibly waiting).
+ * @mtx: the mutex
  *
  * Locks a mutex. If the mutex is already locked by
  * another process, it waits until it's unlocked.
@@ -1247,6 +1248,7 @@ static mpdm_t F_mutex_lock(F_ARGS)
 
 /**
  * mutex_unlock - Unlocks a mutex.
+ * @mtx: the mutex
  *
  * Unlocks a mutex.
  * [Threading]
@@ -1255,6 +1257,51 @@ static mpdm_t F_mutex_lock(F_ARGS)
 static mpdm_t F_mutex_unlock(F_ARGS)
 {
 	mpdm_mutex_unlock(A0);
+	return NULL;
+}
+
+
+/**
+ * semaphore - Returns a new semaphore.
+ * cnt: the initial count of the semaphore.
+ *
+ * Returns a new semaphore.
+ * [Threading]
+ */
+/** var = semaphore(cnt); */
+static mpdm_t F_semaphore(F_ARGS)
+{
+	return mpdm_new_semaphore(IA0);
+}
+
+
+/**
+ * semaphore_wait - Waits for a semaphore to be ready.
+ * @sem: the semaphore to wait onto
+ *
+ * Waits for the value of a semaphore to be > 0. If it's
+ * not, the thread waits until it is.
+ * [Threading]
+ */
+/** semaphore_wait(sem); */
+static mpdm_t F_semaphore_wait(F_ARGS)
+{
+	mpdm_semaphore_wait(A0);
+	return NULL;
+}
+
+
+/**
+ * semaphore_post - Increments the value of a semaphore.
+ * @sem: the semaphore to increment
+ *
+ * Increments by 1 the value of a semaphore.
+ * [Threading]
+ */
+/** semaphore_post(mtx); */
+static mpdm_t F_semaphore_post(F_ARGS)
+{
+	mpdm_semaphore_post(A0);
 	return NULL;
 }
 
@@ -1330,6 +1377,9 @@ static struct {
 	{ L"mutex",	F_mutex },
 	{ L"mutex_lock", F_mutex_lock },
 	{ L"mutex_unlock", F_mutex_unlock },
+	{ L"semaphore",	F_semaphore },
+	{ L"semaphore_wait", F_semaphore_wait },
+	{ L"semaphore_post", F_semaphore_post },
 	{ NULL,		NULL }
 };
 
