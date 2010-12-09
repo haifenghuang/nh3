@@ -290,11 +290,7 @@ O_TYPE O_imulti(O_ARGS) {
 }
 
 O_TYPE O_symval(O_ARGS) {
-	mpdm_t v = RF(M1);
-	mpdm_t r = GET(v);
-	UF(v);
-
-	return r;
+	return GET(M1);
 }
 
 O_TYPE O_assign(O_ARGS) {
