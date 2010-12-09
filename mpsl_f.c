@@ -1217,6 +1217,48 @@ static mpdm_t F_sleep(F_ARGS)
 }
 
 
+/**
+ * mutex - Returns a new mutex.
+ *
+ * Returns a new mutex.
+ * [Threading]
+ */
+/** var = mutex(); */
+static mpdm_t F_mutex(F_ARGS)
+{
+	return mpdm_new_mutex();
+}
+
+
+/**
+ * mutex_lock - Locks a mutex (possibly waiting).
+ *
+ * Locks a mutex. If the mutex is already locked by
+ * another process, it waits until it's unlocked.
+ * [Threading]
+ */
+/** mutex_lock(mtx); */
+static mpdm_t F_mutex_lock(F_ARGS)
+{
+	mpdm_mutex_lock(A0);
+	return NULL;
+}
+
+
+/**
+ * mutex_unlock - Unlocks a mutex.
+ *
+ * Unlocks a mutex.
+ * [Threading]
+ */
+/** mutex_unlock(mtx); */
+static mpdm_t F_mutex_unlock(F_ARGS)
+{
+	mpdm_mutex_unlock(A0);
+	return NULL;
+}
+
+
 static struct {
 	wchar_t * name;
 	mpdm_t (* func)(mpdm_t, mpdm_t);
@@ -1285,6 +1327,9 @@ static struct {
 	{ L"bincall",	F_bincall },
 	{ L"random",	F_random },
     { L"sleep", F_sleep },
+	{ L"mutex",	F_mutex },
+	{ L"mutex_lock", F_mutex_lock },
+	{ L"mutex_unlock", F_mutex_unlock },
 	{ NULL,		NULL }
 };
 
