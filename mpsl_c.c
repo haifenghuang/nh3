@@ -404,15 +404,7 @@ O_TYPE O_numge(O_ARGS) {
 }
 
 O_TYPE O_strcat(O_ARGS) {
-	mpdm_t v1 = RF(M1);
-	mpdm_t v2 = RF(M2);
-
-	mpdm_t r = mpdm_strcat(v1, v2);
-
-	UF(v2);
-	UF(v1);
-
-	return r;
+	return mpdm_strcat(M1, M2);
 }
 
 O_TYPE O_streq(O_ARGS) {
