@@ -440,7 +440,7 @@ O_TYPE O_return(O_ARGS) {
 O_TYPE O_execsym(O_ARGS)
 /* executes the value of a symbol */
 {
-	mpdm_t s, v, w, r = NULL;
+	mpdm_t s, v, r = NULL;
 
 	/* gets the symbol name */
 	s = RF(M1);
@@ -466,9 +466,7 @@ O_TYPE O_execsym(O_ARGS)
 	}
 	else {
 		/* execute */
-		w = RF(M2);
-		r = mpdm_exec(v, w, l);
-		UF(w);
+		r = mpdm_exec(v, M2, l);
 	}
 
 	UF(s);
