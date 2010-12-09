@@ -408,15 +408,7 @@ O_TYPE O_strcat(O_ARGS) {
 }
 
 O_TYPE O_streq(O_ARGS) {
-	mpdm_t v1 = RF(M1);
-	mpdm_t v2 = RF(M2);
-
-	mpdm_t r = BOOL(mpdm_cmp(v1, v2) == 0);
-
-	UF(v2);
-	UF(v1);
-
-	return r;
+	return BOOL(mpdm_cmp(M1, M2) == 0);
 }
 
 O_TYPE O_numeq(O_ARGS) {
