@@ -521,20 +521,18 @@ O_TYPE O_range(O_ARGS)
 	double n;
 	double v1 = RM1;
 	double v2 = RM2;
-	mpdm_t ret = MPDM_A(0);
-
-    mpdm_ref(ret);
+	mpdm_t r = RF(MPDM_A(0));
 
    	if (v1 < v2)
 		for (n = v1; n <= v2; n++)
-			mpdm_push(ret, MPDM_R(n));
+			mpdm_push(r, MPDM_R(n));
 	else
 		for (n = v1; n >= v2; n--)
-			mpdm_push(ret, MPDM_R(n));
+			mpdm_push(r, MPDM_R(n));
 
-    mpdm_unrefnd(ret);
+    UFND(r);
 
-	return ret;
+	return r;
 }
 
 
@@ -561,14 +559,9 @@ O_TYPE O_ilist(O_ARGS)
 O_TYPE O_hash(O_ARGS)
 /* build hash from instructions */
 {	
-	mpdm_t k, v;
 	mpdm_t ret = RF(mpdm_size(c) == 3 ? MPDM_H(0) : M(3));
 
-	k = RF(M1);
-	v = RF(M2);
-	mpdm_hset(ret, k, v);
-	UF(k);
-	UF(v);
+	mpdm_hset(ret, M1, M2);
 
 	return UFND(ret);
 }
