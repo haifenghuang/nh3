@@ -308,11 +308,7 @@ O_TYPE O_local(O_ARGS) {
 }
 
 O_TYPE O_uminus(O_ARGS) {
-	mpdm_t v = RF(M1);
-	mpdm_t r = MPDM_R(-mpdm_rval(v));
-	UF(v);
-
-	return r;
+	return MPDM_R(-mpdm_rval(M1));
 }
 
 O_TYPE O_add(O_ARGS) {
