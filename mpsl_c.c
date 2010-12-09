@@ -273,11 +273,8 @@ O_TYPE O_multi(O_ARGS) {
 	mpdm_t v = M1;
 
 	if (!*f) {
-		mpdm_t t = v;
-
-		RF(t);
+		mpdm_void(v);
 		v = M2;
-		UF(t);
 	}
 
 	return v;
