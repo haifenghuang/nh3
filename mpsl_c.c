@@ -294,11 +294,7 @@ O_TYPE O_symval(O_ARGS) {
 }
 
 O_TYPE O_assign(O_ARGS) {
-	mpdm_t v = RF(M1);
-	mpdm_t r = SET(v, M2);
-	UF(v);
-
-	return r;
+	return SET(M1, M2);
 }
 
 O_TYPE O_if(O_ARGS) {
