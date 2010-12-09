@@ -298,14 +298,7 @@ O_TYPE O_assign(O_ARGS) {
 }
 
 O_TYPE O_if(O_ARGS) {
-	mpdm_t r;
-
-	if (is_true_uf(M1))
-		r = M2;
-	else
-		r = M3;
-
-	return r;
+	return is_true_uf(M1) ? M2 : M3;
 }
 
 O_TYPE O_local(O_ARGS) {
