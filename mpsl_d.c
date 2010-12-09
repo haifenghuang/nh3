@@ -183,6 +183,15 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
 	else
 	if (v->flags & MPDM_REGEX)
 		ptr = mpdm_pokews(ptr, size, L"NULL /* compiled regular expression */");
+	else
+	if (v->flags & MPDM_MUTEX)
+		ptr = mpdm_pokews(ptr, size, L"NULL /* mutex */");
+	else
+	if (v->flags & MPDM_SEMAPHORE)
+		ptr = mpdm_pokews(ptr, size, L"NULL /* semaphore */");
+	else
+	if (v->flags & MPDM_THREAD)
+		ptr = mpdm_pokews(ptr, size, L"NULL /* thread handle */");
 	else {
 		snprintf(tmp, sizeof(tmp), "NULL /* non-printable value (flags: 0x%04x) */", v->flags);
 		wptr = mpdm_mbstowcs(tmp, NULL, -1);
