@@ -96,7 +96,7 @@ static void compiler_warning(char *str)
 %left INC DEC IADD ISUB IMUL IDIV IMOD IBITAND IBITOR IBITXOR ISHR ISHL
 %left '!'
 %left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE HASHPAIR RANGE '>''<' INVCALL
-%left BITAND
+%left AMPERSAND
 %left BITOR BITXOR
 %left SHL SHR
 %left '+' '-'
@@ -331,7 +331,7 @@ expr:
 	| expr POW expr		{ $$ = INS2(L"POW", $1, $3); }
 
 				/* bit operations */
-	| expr BITAND expr	{ $$ = INS2(L"BITAND", $1, $3); }
+	| expr AMPERSAND expr	{ $$ = INS2(L"BITAND", $1, $3); }
 	| expr BITOR expr	{ $$ = INS2(L"BITOR", $1, $3); }
 	| expr BITXOR expr	{ $$ = INS2(L"BITXOR", $1, $3); }
 	| expr SHL expr		{ $$ = INS2(L"SHL", $1, $3); }
@@ -544,6 +544,14 @@ expr:
 	| expr INVCALL compsym '(' list ')' {
 					/* function call with inverse argument and other ones */
 					$$ = INS2(L"EXECSYM", $3, INS2(L"ILIST", $1, $5));
+				}
+	| AMPERSAND compsym '(' ')'	{
+					/* function call as a new thread (without args) */
+					$$ = INS1(L"THREADSYM", $2);
+				}
+	| AMPERSAND compsym '(' list ')'	{
+					/* function call as a new thread (with args) */
+					$$ = INS2(L"THREADSYM", $2, $4);
 				}
 	| compsym '=' expr	{
 					/* simple assignation */

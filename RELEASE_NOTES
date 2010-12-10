@@ -4,12 +4,16 @@ MPSL Release Notes
 2.0.0
 -----
 
- * Adapted to MPDM 2.0.0.
- * Any function argument not explicitly declared and
+ - New multithreading support:
+   * A function can be prefixed with & (ampersand) to execute
+     it in a new thread; the new thread handler is returned.
+   * Support for mutex values.
+   * Support for semaphore values.
+ - Any function argument not explicitly declared and
    sent as argument in the function call is stored
    in the local array _ (underscore).
- * The adel() function no longer returns the deleted element.
- * mpsl_compile_file() now has an additional argument
+ - The adel() function no longer returns the deleted element.
+ - mpsl_compile_file() now has an additional argument
    holding the source file search path.
 
 1.0.9
