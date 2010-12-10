@@ -437,8 +437,7 @@ O_TYPE O_return(O_ARGS) {
 	return v;
 }
 
-O_TYPE O_execsym(O_ARGS)
-/* executes the value of a symbol */
+O_TYPE execsym(O_ARGS, int th)
 {
 	mpdm_t s, v, r = NULL;
 
@@ -466,12 +465,26 @@ O_TYPE O_execsym(O_ARGS)
 	}
 	else {
 		/* execute */
-		r = mpdm_exec(v, M2, l);
+		r = th ? mpdm_exec_thread(v, M2, l) : mpdm_exec(v, M2, l);
 	}
 
 	UF(s);
 
 	return r;
+}
+
+
+O_TYPE O_execsym(O_ARGS)
+/* executes the value of a symbol */
+{
+	return execsym(c, a, l, f, 0);
+}
+
+
+O_TYPE O_threadsym(O_ARGS)
+/* executes the value of a symbol in a new thread */
+{
+	return execsym(c, a, l, f, 1);
 }
 
 
@@ -615,6 +628,7 @@ static struct mpsl_op_s {
 	{ L"SYMVAL",	0,	O_symval },
 	{ L"ASSIGN",	0,	O_assign },
 	{ L"EXECSYM",	0,	O_execsym },
+	{ L"THREADSYM",	0,	O_threadsym },
 	{ L"IF",	0,	O_if },
 	{ L"WHILE",	0,	O_while },
 	{ L"FOREACH",	0,	O_foreach },
