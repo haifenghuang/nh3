@@ -65,8 +65,9 @@
  */
 /** integer = size(v); */
 /* ; */
-static mpdm_t F_size(F_ARGS) {
-	return MPDM_I(mpdm_size(A0));
+static mpdm_t F_size(F_ARGS)
+{
+    return MPDM_I(mpdm_size(A0));
 }
 
 /**
@@ -79,8 +80,9 @@ static mpdm_t F_size(F_ARGS) {
  * [Value Management]
  */
 /** v2 = clone(v); */
-static mpdm_t F_clone(F_ARGS) {
-	return mpdm_clone(A0);
+static mpdm_t F_clone(F_ARGS)
+{
+    return mpdm_clone(A0);
 }
 
 /**
@@ -93,8 +95,10 @@ static mpdm_t F_clone(F_ARGS) {
  * [Input-Output]
  */
 /** dump(v); */
-static mpdm_t F_dump(F_ARGS) {
-	mpdm_dump(A0); return NULL;
+static mpdm_t F_dump(F_ARGS)
+{
+    mpdm_dump(A0);
+    return NULL;
 }
 
 /**
@@ -106,8 +110,9 @@ static mpdm_t F_dump(F_ARGS) {
  * [Strings]
  */
 /** string = dumper(v); */
-static mpdm_t F_dumper(F_ARGS) {
-	return mpdm_dumper(A0);
+static mpdm_t F_dumper(F_ARGS)
+{
+    return mpdm_dumper(A0);
 }
 
 /**
@@ -128,8 +133,9 @@ static mpdm_t F_dumper(F_ARGS) {
  * [Arrays]
  */
 /** integer = cmp(v); */
-static mpdm_t F_cmp(F_ARGS) {
-	return MPDM_I(mpdm_cmp(A0, A1));
+static mpdm_t F_cmp(F_ARGS)
+{
+    return MPDM_I(mpdm_cmp(A0, A1));
 }
 
 /**
@@ -141,8 +147,9 @@ static mpdm_t F_cmp(F_ARGS) {
  * [Arrays]
  */
 /** bool = is_array(v); */
-static mpdm_t F_is_array(F_ARGS) {
-	return mpsl_boolean(MPDM_IS_ARRAY(A0));
+static mpdm_t F_is_array(F_ARGS)
+{
+    return mpsl_boolean(MPDM_IS_ARRAY(A0));
 }
 
 /**
@@ -154,8 +161,9 @@ static mpdm_t F_is_array(F_ARGS) {
  * [Hashes]
  */
 /** bool = is_hash(v); */
-static mpdm_t F_is_hash(F_ARGS) {
-	return mpsl_boolean(MPDM_IS_HASH(A0));
+static mpdm_t F_is_hash(F_ARGS)
+{
+    return mpsl_boolean(MPDM_IS_HASH(A0));
 }
 
 /**
@@ -166,8 +174,9 @@ static mpdm_t F_is_hash(F_ARGS) {
  * [Value Management]
  */
 /** bool = is_exec(v); */
-static mpdm_t F_is_exec(F_ARGS) {
-	return mpsl_boolean(MPDM_IS_EXEC(A0));
+static mpdm_t F_is_exec(F_ARGS)
+{
+    return mpsl_boolean(MPDM_IS_EXEC(A0));
 }
 
 /**
@@ -191,8 +200,9 @@ static mpdm_t F_is_exec(F_ARGS) {
  * [Strings]
  */
 /** array = splice(v, i, offset, del); */
-static mpdm_t F_splice(F_ARGS) {
-	return mpdm_splice(A0,A1,IA2,IA3);
+static mpdm_t F_splice(F_ARGS)
+{
+    return mpdm_splice(A0, A1, IA2, IA3);
 }
 
 /**
@@ -206,8 +216,9 @@ static mpdm_t F_splice(F_ARGS) {
  * [Arrays]
  */
 /** expand(a, offset, num); */
-static mpdm_t F_expand(F_ARGS) {
-	return mpdm_expand(A0,IA1,IA2);
+static mpdm_t F_expand(F_ARGS)
+{
+    return mpdm_expand(A0, IA1, IA2);
 }
 
 /**
@@ -221,8 +232,9 @@ static mpdm_t F_expand(F_ARGS) {
  * [Arrays]
  */
 /** collapse(a, offset, num); */
-static mpdm_t F_collapse(F_ARGS) {
-	return mpdm_collapse(A0,IA1,IA2);
+static mpdm_t F_collapse(F_ARGS)
+{
+    return mpdm_collapse(A0, IA1, IA2);
 }
 
 /**
@@ -237,8 +249,9 @@ static mpdm_t F_collapse(F_ARGS) {
  * [Arrays]
  */
 /** e = ins(a, e, offset); */
-static mpdm_t F_ins(F_ARGS) {
-	return mpdm_ins(A0,A1,IA2);
+static mpdm_t F_ins(F_ARGS)
+{
+    return mpdm_ins(A0, A1, IA2);
 }
 
 /**
@@ -255,8 +268,9 @@ static mpdm_t F_ins(F_ARGS) {
  * [Arrays]
  */
 /** v = adel(a, offset); */
-static mpdm_t F_adel(F_ARGS) {
-	return mpdm_adel(A0,IA1);
+static mpdm_t F_adel(F_ARGS)
+{
+    return mpdm_adel(A0, IA1);
 }
 
 /**
@@ -270,8 +284,9 @@ static mpdm_t F_adel(F_ARGS) {
  * [Arrays]
  */
 /** v = shift(a); */
-static mpdm_t F_shift(F_ARGS) {
-	return mpdm_shift(A0);
+static mpdm_t F_shift(F_ARGS)
+{
+    return mpdm_shift(A0);
 }
 
 /**
@@ -283,8 +298,9 @@ static mpdm_t F_shift(F_ARGS) {
  * [Arrays]
  */
 /** e = push(a, e); */
-static mpdm_t F_push(F_ARGS) {
-	return mpdm_push(A0,A1);
+static mpdm_t F_push(F_ARGS)
+{
+    return mpdm_push(A0, A1);
 }
 
 /**
@@ -296,8 +312,9 @@ static mpdm_t F_push(F_ARGS) {
  * [Arrays]
  */
 /** v = pop(a); */
-static mpdm_t F_pop(F_ARGS) {
-	return mpdm_pop(A0);
+static mpdm_t F_pop(F_ARGS)
+{
+    return mpdm_pop(A0);
 }
 
 /**
@@ -315,8 +332,9 @@ static mpdm_t F_pop(F_ARGS) {
  * [Arrays]
  */
 /** v = queue(a, e, size); */
-static mpdm_t F_queue(F_ARGS) {
-	return mpdm_queue(A0,A1,IA2);
+static mpdm_t F_queue(F_ARGS)
+{
+    return mpdm_queue(A0, A1, IA2);
 }
 
 /**
@@ -331,8 +349,9 @@ static mpdm_t F_queue(F_ARGS) {
  * [Arrays]
  */
 /** integer = seek(a, k, step); */
-static mpdm_t F_seek(F_ARGS) {
-	return MPDM_I(mpdm_seek(A0,A1,IA2));
+static mpdm_t F_seek(F_ARGS)
+{
+    return MPDM_I(mpdm_seek(A0, A1, IA2));
 }
 
 /**
@@ -352,14 +371,15 @@ static mpdm_t F_seek(F_ARGS) {
  */
 /** array = sort(a); */
 /** array = sort(a, sorting_func); */
-static mpdm_t F_sort(F_ARGS) {
-	mpdm_t r, v;
+static mpdm_t F_sort(F_ARGS)
+{
+    mpdm_t r, v;
 
-	v = mpdm_ref(A0);
-	r = mpdm_sort_cb(mpdm_clone(v), 1, A1);
-	mpdm_unref(v);
+    v = mpdm_ref(A0);
+    r = mpdm_sort_cb(mpdm_clone(v), 1, A1);
+    mpdm_unref(v);
 
-	return r;
+    return r;
 }
 
 /**
@@ -378,8 +398,9 @@ static mpdm_t F_sort(F_ARGS) {
  * [Strings]
  */
 /** array = split(s, v); */
-static mpdm_t F_split(F_ARGS) {
-	return mpdm_split(A0,A1);
+static mpdm_t F_split(F_ARGS)
+{
+    return mpdm_split(A0, A1);
 }
 
 /**
@@ -392,8 +413,9 @@ static mpdm_t F_split(F_ARGS) {
  * [Strings]
  */
 /** string = join(s, a); */
-static mpdm_t F_join(F_ARGS) {
-	return mpdm_join(A0,A1);
+static mpdm_t F_join(F_ARGS)
+{
+    return mpdm_join(A0, A1);
 }
 
 /**
@@ -404,8 +426,9 @@ static mpdm_t F_join(F_ARGS) {
  * [Hashes]
  */
 /** integer = hsize(h); */
-static mpdm_t F_hsize(F_ARGS) {
-	return MPDM_I(mpdm_hsize(A0));
+static mpdm_t F_hsize(F_ARGS)
+{
+    return MPDM_I(mpdm_hsize(A0));
 }
 
 /**
@@ -417,8 +440,9 @@ static mpdm_t F_hsize(F_ARGS) {
  * [Hashes]
  */
 /** bool = exists(h, k); */
-static mpdm_t F_exists(F_ARGS) {
-	return mpsl_boolean(mpdm_exists(A0, A1));
+static mpdm_t F_exists(F_ARGS)
+{
+    return mpsl_boolean(mpdm_exists(A0, A1));
 }
 
 /**
@@ -431,8 +455,9 @@ static mpdm_t F_exists(F_ARGS) {
  * [Hashes]
  */
 /** v = hdel(h, k); */
-static mpdm_t F_hdel(F_ARGS) {
-	return mpdm_hdel(A0, A1);
+static mpdm_t F_hdel(F_ARGS)
+{
+    return mpdm_hdel(A0, A1);
 }
 
 /**
@@ -444,8 +469,9 @@ static mpdm_t F_hdel(F_ARGS) {
  * [Arrays]
  */
 /** array = keys(h); */
-static mpdm_t F_keys(F_ARGS) {
-	return mpdm_keys(A0);
+static mpdm_t F_keys(F_ARGS)
+{
+    return mpdm_keys(A0);
 }
 
 /**
@@ -469,8 +495,9 @@ static mpdm_t F_keys(F_ARGS) {
  * [Character Set Conversion]
  */
 /** fd = open(filename, mode); */
-static mpdm_t F_open(F_ARGS) {
-	return mpdm_open(A0, A1);
+static mpdm_t F_open(F_ARGS)
+{
+    return mpdm_open(A0, A1);
 }
 
 /**
@@ -481,8 +508,9 @@ static mpdm_t F_open(F_ARGS) {
  * [Input-Output]
  */
 /** close(fd); */
-static mpdm_t F_close(F_ARGS) {
-	return mpdm_close(A0);
+static mpdm_t F_close(F_ARGS)
+{
+    return mpdm_close(A0);
 }
 
 /**
@@ -494,8 +522,9 @@ static mpdm_t F_close(F_ARGS) {
  * [Character Set Conversion]
  */
 /** string = read(fd); */
-static mpdm_t F_read(F_ARGS) {
-	return mpdm_read(A0);
+static mpdm_t F_read(F_ARGS)
+{
+    return mpdm_read(A0);
 }
 
 /**
@@ -507,8 +536,9 @@ static mpdm_t F_read(F_ARGS) {
  * [Input-Output]
  */
 /** string = getchar(fd); */
-static mpdm_t F_getchar(F_ARGS) {
-	return mpdm_getchar(A0);
+static mpdm_t F_getchar(F_ARGS)
+{
+    return mpdm_getchar(A0);
 }
 
 /**
@@ -523,8 +553,9 @@ static mpdm_t F_getchar(F_ARGS) {
  * [Input-Output]
  */
 /** s = putchar(fd, s); */
-static mpdm_t F_putchar(F_ARGS) {
-	return MPDM_I(mpdm_putchar(A0, A1));
+static mpdm_t F_putchar(F_ARGS)
+{
+    return MPDM_I(mpdm_putchar(A0, A1));
 }
 
 /**
@@ -540,8 +571,9 @@ static mpdm_t F_putchar(F_ARGS) {
  * [Input-Output]
  */
 /** integer = fseek(fd, offset, whence); */
-static mpdm_t F_fseek(F_ARGS) {
-	return MPDM_I(mpdm_fseek(A0, IA1, IA2));
+static mpdm_t F_fseek(F_ARGS)
+{
+    return MPDM_I(mpdm_fseek(A0, IA1, IA2));
 }
 
 /**
@@ -552,8 +584,9 @@ static mpdm_t F_fseek(F_ARGS) {
  * [Input-Output]
  */
 /** integer = ftell(fd); */
-static mpdm_t F_ftell(F_ARGS) {
-	return MPDM_I(mpdm_ftell(A0));
+static mpdm_t F_ftell(F_ARGS)
+{
+    return MPDM_I(mpdm_ftell(A0));
 }
 
 /**
@@ -564,8 +597,9 @@ static mpdm_t F_ftell(F_ARGS) {
  * [Input-Output]
  */
 /** bool = unlink(filename); */
-static mpdm_t F_unlink(F_ARGS) {
-	return mpsl_boolean(mpdm_unlink(A0));
+static mpdm_t F_unlink(F_ARGS)
+{
+    return mpsl_boolean(mpdm_unlink(A0));
 }
 
 /**
@@ -586,8 +620,9 @@ static mpdm_t F_unlink(F_ARGS) {
  * [Input-Output]
  */
 /** array = stat(filename); */
-static mpdm_t F_stat(F_ARGS) {
-	return mpdm_stat(A0);
+static mpdm_t F_stat(F_ARGS)
+{
+    return mpdm_stat(A0);
 }
 
 /**
@@ -599,8 +634,9 @@ static mpdm_t F_stat(F_ARGS) {
  * [Input-Output]
  */
 /** integer = chmod(filename, perms); */
-static mpdm_t F_chmod(F_ARGS) {
-	return MPDM_I(mpdm_chmod(A0,A1));
+static mpdm_t F_chmod(F_ARGS)
+{
+    return MPDM_I(mpdm_chmod(A0, A1));
 }
 
 /**
@@ -613,8 +649,9 @@ static mpdm_t F_chmod(F_ARGS) {
  * [Input-Output]
  */
 /** integer = chown(filename, uid, gid); */
-static mpdm_t F_chown(F_ARGS) {
-	return MPDM_I(mpdm_chown(A0,A1,A2));
+static mpdm_t F_chown(F_ARGS)
+{
+    return MPDM_I(mpdm_chown(A0, A1, A2));
 }
 
 /**
@@ -634,8 +671,9 @@ static mpdm_t F_chown(F_ARGS) {
  * [Input-Output]
  */
 /** array = glob(spec, base); */
-static mpdm_t F_glob(F_ARGS) {
-	return mpdm_glob(A0, A1);
+static mpdm_t F_glob(F_ARGS)
+{
+    return mpdm_glob(A0, A1);
 }
 
 /**
@@ -658,8 +696,9 @@ static mpdm_t F_glob(F_ARGS) {
  * [Character Set Conversion]
  */
 /** integer = encoding(charset); */
-static mpdm_t F_encoding(F_ARGS) {
-	return MPDM_I(mpdm_encoding(A0));
+static mpdm_t F_encoding(F_ARGS)
+{
+    return MPDM_I(mpdm_encoding(A0));
 }
 
 /**
@@ -675,8 +714,9 @@ static mpdm_t F_encoding(F_ARGS) {
  * [Input-Output]
  */
 /** fd = popen(prg, mode); */
-static mpdm_t F_popen(F_ARGS) {
-	return mpdm_popen(A0, A1);
+static mpdm_t F_popen(F_ARGS)
+{
+    return mpdm_popen(A0, A1);
 }
 
 /**
@@ -687,8 +727,9 @@ static mpdm_t F_popen(F_ARGS) {
  * [Input-Output]
  */
 /** pclose(fd); */
-static mpdm_t F_pclose(F_ARGS) {
-	return mpdm_pclose(A0);
+static mpdm_t F_pclose(F_ARGS)
+{
+    return mpdm_pclose(A0);
 }
 
 /**
@@ -728,8 +769,9 @@ static mpdm_t F_pclose(F_ARGS) {
 /** string = regex(r, v, offset); */
 /** array = regex(ra, v); */
 /** array = regex(); */
-static mpdm_t F_regex(F_ARGS) {
-	return mpdm_regex(A0,A1,IA2);
+static mpdm_t F_regex(F_ARGS)
+{
+    return mpdm_regex(A0, A1, IA2);
 }
 
 /**
@@ -763,8 +805,9 @@ static mpdm_t F_regex(F_ARGS) {
 /** string = sregex(r, v, s); */
 /** string = sregex(r, v, s, offset); */
 /** integer = sregex(); */
-static mpdm_t F_sregex(F_ARGS) {
-	return mpdm_sregex(A0,A1,A2,IA3);
+static mpdm_t F_sregex(F_ARGS)
+{
+    return mpdm_sregex(A0, A1, A2, IA3);
 }
 
 /**
@@ -782,8 +825,9 @@ static mpdm_t F_sregex(F_ARGS) {
  * [Localization]
  */
 /** string = gettext(str); */
-static mpdm_t F_gettext(F_ARGS) {
-	return mpdm_gettext(A0);
+static mpdm_t F_gettext(F_ARGS)
+{
+    return mpdm_gettext(A0);
 }
 
 /**
@@ -800,8 +844,9 @@ static mpdm_t F_gettext(F_ARGS) {
  * [Localization]
  */
 /** bool = gettext_domain(dom, data); */
-static mpdm_t F_gettext_domain(F_ARGS) {
-	return MPDM_I(mpdm_gettext_domain(A0, A1));
+static mpdm_t F_gettext_domain(F_ARGS)
+{
+    return MPDM_I(mpdm_gettext_domain(A0, A1));
 }
 
 /**
@@ -813,9 +858,11 @@ static mpdm_t F_gettext_domain(F_ARGS) {
  * [Code Control]
  */
 /** load(source_file); */
-static mpdm_t F_load(F_ARGS) {
-	return mpdm_exec(mpsl_compile_file(A0,
-		mpsl_get_symbol(MPDM_LS(L"INC"), l)), NULL, l);
+static mpdm_t F_load(F_ARGS)
+{
+    return mpdm_exec(mpsl_compile_file(A0,
+                                       mpsl_get_symbol(MPDM_LS(L"INC"),
+                                                       l)), NULL, l);
 }
 
 /**
@@ -827,8 +874,9 @@ static mpdm_t F_load(F_ARGS) {
  * [Code Control]
  */
 /** func = compile(source); */
-static mpdm_t F_compile(F_ARGS) {
-	return mpsl_compile(A0);
+static mpdm_t F_compile(F_ARGS)
+{
+    return mpsl_compile(A0);
 }
 
 /**
@@ -840,8 +888,9 @@ static mpdm_t F_compile(F_ARGS) {
  * MPSL code can be executed until reset.
  */
 /** error(err); */
-static mpdm_t F_error(F_ARGS) {
-	return mpsl_error(A0);
+static mpdm_t F_error(F_ARGS)
+{
+    return mpsl_error(A0);
 }
 
 /**
@@ -852,8 +901,9 @@ static mpdm_t F_error(F_ARGS) {
  * [Strings]
  */
 /** string = uc(str); */
-static mpdm_t F_uc(F_ARGS) {
-	return mpdm_ulc(A0, 1);
+static mpdm_t F_uc(F_ARGS)
+{
+    return mpdm_ulc(A0, 1);
 }
 
 /**
@@ -864,8 +914,9 @@ static mpdm_t F_uc(F_ARGS) {
  * [Strings]
  */
 /** string = uc(str); */
-static mpdm_t F_lc(F_ARGS) {
-	return mpdm_ulc(A0, 0);
+static mpdm_t F_lc(F_ARGS)
+{
+    return mpdm_ulc(A0, 0);
 }
 
 /**
@@ -875,8 +926,9 @@ static mpdm_t F_lc(F_ARGS) {
  * [Miscellaneous]
  */
 /** integer = time(); */
-static mpdm_t F_time(F_ARGS) {
-	return MPDM_I(time(NULL));
+static mpdm_t F_time(F_ARGS)
+{
+    return MPDM_I(time(NULL));
 }
 
 /**
@@ -887,8 +939,9 @@ static mpdm_t F_time(F_ARGS) {
  * [Input-Output]
  */
 /** integer = chdir(dir); */
-static mpdm_t F_chdir(F_ARGS) {
-	return MPDM_I(mpdm_chdir(A0));
+static mpdm_t F_chdir(F_ARGS)
+{
+    return MPDM_I(mpdm_chdir(A0));
 }
 
 /**
@@ -910,8 +963,9 @@ static mpdm_t F_chdir(F_ARGS) {
  */
 /** array = sscanf(fmt, str); */
 /** array = sscanf(fmt, str, offset); */
-static mpdm_t F_sscanf(F_ARGS) {
-	return mpdm_sscanf(A0, A1, IA2);
+static mpdm_t F_sscanf(F_ARGS)
+{
+    return mpdm_sscanf(A0, A1, IA2);
 }
 
 /**
@@ -931,16 +985,16 @@ static mpdm_t F_sscanf(F_ARGS) {
 /** v = eval(code, args); */
 static mpdm_t F_eval(F_ARGS)
 {
-	mpdm_t r, c;
+    mpdm_t r, c;
 
-	a = mpdm_ref(mpdm_clone(a));
-	c = mpdm_shift(a);
+    a = mpdm_ref(mpdm_clone(a));
+    c = mpdm_shift(a);
 
-	r = mpsl_eval(c, a, l);
+    r = mpsl_eval(c, a, l);
 
-	mpdm_unref(a);
+    mpdm_unref(a);
 
-	return r;
+    return r;
 }
 
 
@@ -958,20 +1012,20 @@ static mpdm_t F_eval(F_ARGS)
 /** string = sprintf(fmt, arg1 [,arg2 ... argn]); */
 static mpdm_t F_sprintf(F_ARGS)
 {
-	mpdm_t f, v, r;
+    mpdm_t f, v, r;
 
-	a = mpdm_ref(mpdm_clone(a));
-	f = mpdm_shift(a);
+    a = mpdm_ref(mpdm_clone(a));
+    f = mpdm_shift(a);
 
-	/* if the first argument is an array, take it as the arguments */
-	if ((v = mpdm_aget(a, 0)) != NULL && MPDM_IS_ARRAY(v))
-		a = v;
+    /* if the first argument is an array, take it as the arguments */
+    if ((v = mpdm_aget(a, 0)) != NULL && MPDM_IS_ARRAY(v))
+        a = v;
 
-	r = mpdm_sprintf(f, a);
+    r = mpdm_sprintf(f, a);
 
-	mpdm_unref(a);
+    mpdm_unref(a);
 
-	return r;
+    return r;
 }
 
 
@@ -987,11 +1041,11 @@ static mpdm_t F_sprintf(F_ARGS)
 /** print(arg1 [,arg2 ... argn]); */
 static mpdm_t F_print(F_ARGS)
 {
-	int n;
+    int n;
 
-	for (n = 0; n < mpdm_size(a); n++)
-		mpdm_write_wcs(stdout, mpdm_string(A(n)));
-	return NULL;
+    for (n = 0; n < mpdm_size(a); n++)
+        mpdm_write_wcs(stdout, mpdm_string(A(n)));
+    return NULL;
 }
 
 
@@ -1012,12 +1066,12 @@ static mpdm_t F_print(F_ARGS)
 /** integer = write(fd, arg1 [,arg2 ... argn]); */
 static mpdm_t F_write(F_ARGS)
 {
-	int n, r = 0;
+    int n, r = 0;
 
-	for (n = 1; n < mpdm_size(a); n++)
-		r += mpdm_write(A0, A(n));
+    for (n = 1; n < mpdm_size(a); n++)
+        r += mpdm_write(A0, A(n));
 
-	return MPDM_I(r);
+    return MPDM_I(r);
 }
 
 
@@ -1032,12 +1086,12 @@ static mpdm_t F_write(F_ARGS)
 /** string = chr(c); */
 static mpdm_t F_chr(F_ARGS)
 {
-	wchar_t tmp[2];
+    wchar_t tmp[2];
 
-	tmp[0] = (wchar_t) mpdm_ival(mpdm_aget(a, 0));
-	tmp[1] = L'\0';
+    tmp[0] = (wchar_t) mpdm_ival(mpdm_aget(a, 0));
+    tmp[1] = L'\0';
 
-	return MPDM_S(tmp);
+    return MPDM_S(tmp);
 }
 
 
@@ -1052,15 +1106,15 @@ static mpdm_t F_chr(F_ARGS)
 /** integer = ord(str); */
 static mpdm_t F_ord(F_ARGS)
 {
-	int ret = 0;
-	mpdm_t v = mpdm_aget(a, 0);
+    int ret = 0;
+    mpdm_t v = mpdm_aget(a, 0);
 
-	if (v != NULL) {
-		wchar_t * ptr = mpdm_string(v);
-		ret = (int) *ptr;
-	}
+    if (v != NULL) {
+        wchar_t *ptr = mpdm_string(v);
+        ret = (int) *ptr;
+    }
 
-	return MPDM_I(ret);
+    return MPDM_I(ret);
 }
 
 
@@ -1081,34 +1135,33 @@ static mpdm_t F_ord(F_ARGS)
 /** array = map(filter, a); */
 static mpdm_t F_map(F_ARGS)
 {
-	mpdm_t key = mpdm_aget(a, 0);
-	mpdm_t set = mpdm_aget(a, 1);
-	mpdm_t out;
+    mpdm_t key = mpdm_aget(a, 0);
+    mpdm_t set = mpdm_aget(a, 1);
+    mpdm_t out;
 
-	/* map NULL to NULL */
-	if (set == NULL)
-		return NULL;
+    /* map NULL to NULL */
+    if (set == NULL)
+        return NULL;
 
-	out = mpdm_ref(MPDM_A(mpdm_size(set)));
+    out = mpdm_ref(MPDM_A(mpdm_size(set)));
 
-	if (MPDM_IS_EXEC(key)) {
-		int n;
+    if (MPDM_IS_EXEC(key)) {
+        int n;
 
-		/* executes the code using the element as argument
-		   and stores the result in the output array */
-		for (n = 0; n < mpdm_size(set); n++)
-			mpdm_aset(out, mpdm_exec_1(key, mpdm_aget(set, n), l), n);
-	}
-	else
-	if(MPDM_IS_HASH(key)) {
-		int n;
+        /* executes the code using the element as argument
+           and stores the result in the output array */
+        for (n = 0; n < mpdm_size(set); n++)
+            mpdm_aset(out, mpdm_exec_1(key, mpdm_aget(set, n), l), n);
+    }
+    else if (MPDM_IS_HASH(key)) {
+        int n;
 
-		/* maps each value using the element as key */
-		for (n = 0; n < mpdm_size(set); n++)
-			mpdm_aset(out, mpdm_hget(key, mpdm_aget(set, n)), n);
-	}
+        /* maps each value using the element as key */
+        for (n = 0; n < mpdm_size(set); n++)
+            mpdm_aset(out, mpdm_hget(key, mpdm_aget(set, n)), n);
+    }
 
-	return mpdm_unrefnd(out);
+    return mpdm_unrefnd(out);
 }
 
 
@@ -1130,52 +1183,52 @@ static mpdm_t F_map(F_ARGS)
 /** array = grep(filter, a); */
 static mpdm_t F_grep(F_ARGS)
 {
-	mpdm_t key = mpdm_aget(a, 0);
-	mpdm_t set = mpdm_aget(a, 1);
-	mpdm_t out = mpdm_ref(MPDM_A(0));
+    mpdm_t key = mpdm_aget(a, 0);
+    mpdm_t set = mpdm_aget(a, 1);
+    mpdm_t out = mpdm_ref(MPDM_A(0));
 
-	if (MPDM_IS_EXEC(key)) {
-		int n;
+    if (MPDM_IS_EXEC(key)) {
+        int n;
 
-		/* it's executable */
-		for (n = 0; n < mpdm_size(set); n++) {
-			mpdm_t v = mpdm_aget(set, n);
-			mpdm_t w = mpdm_ref(mpdm_exec_1(key, v, l));
+        /* it's executable */
+        for (n = 0; n < mpdm_size(set); n++) {
+            mpdm_t v = mpdm_aget(set, n);
+            mpdm_t w = mpdm_ref(mpdm_exec_1(key, v, l));
 
-			if (mpsl_is_true(w))
-				mpdm_push(out, v);
+            if (mpsl_is_true(w))
+                mpdm_push(out, v);
 
-			mpdm_unref(w);
-		}
-	}
-	else
-	if(key->flags & MPDM_STRING) {
-		int n;
+            mpdm_unref(w);
+        }
+    }
+    else if (key->flags & MPDM_STRING) {
+        int n;
 
-		/* it's a string; use it as a regular expression */
-		for (n = 0; n < mpdm_size(set); n++) {
-			mpdm_t v = mpdm_aget(set, n);
-			mpdm_t w = mpdm_ref(mpdm_regex(key, v, 0));
+        /* it's a string; use it as a regular expression */
+        for (n = 0; n < mpdm_size(set); n++) {
+            mpdm_t v = mpdm_aget(set, n);
+            mpdm_t w = mpdm_ref(mpdm_regex(key, v, 0));
 
-			if (w)
-				mpdm_push(out, v);
+            if (w)
+                mpdm_push(out, v);
 
-			mpdm_unref(w);
-		}
-	}
+            mpdm_unref(w);
+        }
+    }
 
-	return mpdm_size(mpdm_unrefnd(out)) == 0 ? NULL : out;
+    return mpdm_size(mpdm_unrefnd(out)) == 0 ? NULL : out;
 }
 
 static mpdm_t F_getenv(F_ARGS)
 {
-	mpdm_t e = mpdm_hget_s(mpdm_root(), L"ENV");
+    mpdm_t e = mpdm_hget_s(mpdm_root(), L"ENV");
 
-	return mpdm_hget(e, mpdm_aget(a, 0));
+    return mpdm_hget(e, mpdm_aget(a, 0));
 }
 
-static mpdm_t F_bincall(F_ARGS) {
-	return MPDM_X(mpdm_ival(mpdm_aget(a, 0)));
+static mpdm_t F_bincall(F_ARGS)
+{
+    return MPDM_X(mpdm_ival(mpdm_aget(a, 0)));
 }
 
 /**
@@ -1187,18 +1240,18 @@ static mpdm_t F_bincall(F_ARGS) {
 /** integer = random(value); */
 static mpdm_t F_random(F_ARGS)
 {
-	static unsigned int seed = 0;
-	int r = 0;
-	int range = mpdm_ival(mpdm_aget(a, 0));
+    static unsigned int seed = 0;
+    int r = 0;
+    int range = mpdm_ival(mpdm_aget(a, 0));
 
-	if (range == 0 || seed == 0)
-		seed = time(NULL);
-	else {
-		seed = (seed * 58321) + 11113;
-		r = (seed >> 16) % range;
-	}
+    if (range == 0 || seed == 0)
+        seed = time(NULL);
+    else {
+        seed = (seed * 58321) + 11113;
+        r = (seed >> 16) % range;
+    }
 
-	return MPDM_I(r);
+    return MPDM_I(r);
 };
 
 
@@ -1226,7 +1279,7 @@ static mpdm_t F_sleep(F_ARGS)
 /** var = mutex(); */
 static mpdm_t F_mutex(F_ARGS)
 {
-	return mpdm_new_mutex();
+    return mpdm_new_mutex();
 }
 
 
@@ -1241,8 +1294,8 @@ static mpdm_t F_mutex(F_ARGS)
 /** mutex_lock(mtx); */
 static mpdm_t F_mutex_lock(F_ARGS)
 {
-	mpdm_mutex_lock(A0);
-	return NULL;
+    mpdm_mutex_lock(A0);
+    return NULL;
 }
 
 
@@ -1256,8 +1309,8 @@ static mpdm_t F_mutex_lock(F_ARGS)
 /** mutex_unlock(mtx); */
 static mpdm_t F_mutex_unlock(F_ARGS)
 {
-	mpdm_mutex_unlock(A0);
-	return NULL;
+    mpdm_mutex_unlock(A0);
+    return NULL;
 }
 
 
@@ -1271,7 +1324,7 @@ static mpdm_t F_mutex_unlock(F_ARGS)
 /** var = semaphore(cnt); */
 static mpdm_t F_semaphore(F_ARGS)
 {
-	return mpdm_new_semaphore(IA0);
+    return mpdm_new_semaphore(IA0);
 }
 
 
@@ -1286,8 +1339,8 @@ static mpdm_t F_semaphore(F_ARGS)
 /** semaphore_wait(sem); */
 static mpdm_t F_semaphore_wait(F_ARGS)
 {
-	mpdm_semaphore_wait(A0);
-	return NULL;
+    mpdm_semaphore_wait(A0);
+    return NULL;
 }
 
 
@@ -1301,111 +1354,109 @@ static mpdm_t F_semaphore_wait(F_ARGS)
 /** semaphore_post(mtx); */
 static mpdm_t F_semaphore_post(F_ARGS)
 {
-	mpdm_semaphore_post(A0);
-	return NULL;
+    mpdm_semaphore_post(A0);
+    return NULL;
 }
 
 
 static struct {
-	wchar_t * name;
-	mpdm_t (* func)(mpdm_t, mpdm_t);
+    wchar_t *name;
+     mpdm_t(*func) (mpdm_t, mpdm_t);
 } mpsl_funcs[] = {
-	{ L"size",	F_size },
-	{ L"clone",	F_clone },
-	{ L"dump",	F_dump },
-	{ L"dumper",	F_dumper },
-	{ L"cmp",	F_cmp },
-	{ L"is_array",	F_is_array },
-	{ L"is_hash",	F_is_hash },
-	{ L"is_exec",	F_is_exec },
-	{ L"splice",	F_splice },
-	{ L"expand",	F_expand },
-	{ L"collapse",	F_collapse },
-	{ L"ins",	F_ins },
-	{ L"adel",	F_adel },
-	{ L"shift",	F_shift },
-	{ L"push",	F_push },
-	{ L"pop",	F_pop },
-	{ L"queue",	F_queue },
-	{ L"seek",	F_seek },
-	{ L"sort",	F_sort },
-	{ L"split",	F_split },
-	{ L"join",	F_join },
-	{ L"hsize",	F_hsize },
-	{ L"exists",	F_exists },
-	{ L"hdel",	F_hdel },
-	{ L"keys",	F_keys },
-	{ L"open",	F_open },
-	{ L"close",	F_close },
-	{ L"read",	F_read },
-	{ L"write",	F_write },
-	{ L"getchar",	F_getchar },
-	{ L"putchar",	F_putchar },
-	{ L"fseek",	F_fseek },
-	{ L"ftell",	F_ftell },
-	{ L"unlink",	F_unlink },
-	{ L"stat",	F_stat },
-	{ L"chmod",	F_chmod },
-	{ L"chown",	F_chown },
-	{ L"glob",	F_glob },
-	{ L"encoding",	F_encoding },
-	{ L"popen",	F_popen },
-	{ L"pclose",	F_pclose },
-	{ L"regex",	F_regex },
-	{ L"sregex",	F_sregex },
-	{ L"load",	F_load },
-	{ L"compile",	F_compile },
-	{ L"error",	F_error },
-	{ L"eval",	F_eval },
-	{ L"print",	F_print },
-	{ L"gettext",	F_gettext },
-	{ L"gettext_domain", F_gettext_domain },
-	{ L"sprintf",	F_sprintf },
-	{ L"chr",	F_chr },
-	{ L"ord",	F_ord },
-	{ L"map",	F_map },
-	{ L"grep",	F_grep },
-	{ L"getenv",	F_getenv },
-	{ L"uc",	F_uc },
-	{ L"lc",	F_lc },
-	{ L"time",	F_time },
-	{ L"chdir",	F_chdir },
-	{ L"sscanf",	F_sscanf },
-	{ L"bincall",	F_bincall },
-	{ L"random",	F_random },
-    { L"sleep", F_sleep },
-	{ L"mutex",	F_mutex },
-	{ L"mutex_lock", F_mutex_lock },
-	{ L"mutex_unlock", F_mutex_unlock },
-	{ L"semaphore",	F_semaphore },
-	{ L"semaphore_wait", F_semaphore_wait },
-	{ L"semaphore_post", F_semaphore_post },
-	{ NULL,		NULL }
+    { L"size",           F_size },
+    { L"clone",          F_clone },
+    { L"dump",           F_dump },
+    { L"dumper",         F_dumper },
+    { L"cmp",            F_cmp },
+    { L"is_array",       F_is_array },
+    { L"is_hash",        F_is_hash },
+    { L"is_exec",        F_is_exec },
+    { L"splice",         F_splice },
+    { L"expand",         F_expand },
+    { L"collapse",       F_collapse },
+    { L"ins",            F_ins },
+    { L"adel",           F_adel },
+    { L"shift",          F_shift },
+    { L"push",           F_push },
+    { L"pop",            F_pop },
+    { L"queue",          F_queue },
+    { L"seek",           F_seek },
+    { L"sort",           F_sort },
+    { L"split",          F_split },
+    { L"join",           F_join },
+    { L"hsize",          F_hsize },
+    { L"exists",         F_exists },
+    { L"hdel",           F_hdel },
+    { L"keys",           F_keys },
+    { L"open",           F_open },
+    { L"close",          F_close },
+    { L"read",           F_read },
+    { L"write",          F_write },
+    { L"getchar",        F_getchar },
+    { L"putchar",        F_putchar },
+    { L"fseek",          F_fseek },
+    { L"ftell",          F_ftell },
+    { L"unlink",         F_unlink },
+    { L"stat",           F_stat },
+    { L"chmod",          F_chmod },
+    { L"chown",          F_chown },
+    { L"glob",           F_glob },
+    { L"encoding",       F_encoding },
+    { L"popen",          F_popen },
+    { L"pclose",         F_pclose },
+    { L"regex",          F_regex },
+    { L"sregex",         F_sregex },
+    { L"load",           F_load },
+    { L"compile",        F_compile },
+    { L"error",          F_error },
+    { L"eval",           F_eval },
+    { L"print",          F_print },
+    { L"gettext",        F_gettext },
+    { L"gettext_domain", F_gettext_domain },
+    { L"sprintf",        F_sprintf },
+    { L"chr",            F_chr },
+    { L"ord",            F_ord },
+    { L"map",            F_map },
+    { L"grep",           F_grep },
+    { L"getenv",         F_getenv },
+    { L"uc",             F_uc },
+    { L"lc",             F_lc },
+    { L"time",           F_time },
+    { L"chdir",          F_chdir },
+    { L"sscanf",         F_sscanf },
+    { L"bincall",        F_bincall },
+    { L"random",         F_random },
+    { L"sleep",          F_sleep },
+    { L"mutex",          F_mutex },
+    { L"mutex_lock",     F_mutex_lock },
+    { L"mutex_unlock",   F_mutex_unlock },
+    { L"semaphore",      F_semaphore },
+    { L"semaphore_wait", F_semaphore_wait },
+    { L"semaphore_post", F_semaphore_post },
+    { NULL,              NULL }
 };
 
 
 mpdm_t mpsl_build_funcs(void)
 /* build all functions */
 {
-	mpdm_t c;
-	int n;
+    mpdm_t c;
+    int n;
 
-	/* creates all the symbols in the CORE library */
-	c = MPDM_H(0);
+    /* creates all the symbols in the CORE library */
+    c = MPDM_H(0);
 
     mpdm_ref(c);
 
-	for (n = 0; mpsl_funcs[n].name != NULL; n++) {
-		mpdm_t f = MPDM_S(mpsl_funcs[n].name);
-		mpdm_t x = MPDM_X(mpsl_funcs[n].func);
+    for (n = 0; mpsl_funcs[n].name != NULL; n++) {
+        mpdm_t f = MPDM_S(mpsl_funcs[n].name);
+        mpdm_t x = MPDM_X(mpsl_funcs[n].func);
 
-		mpdm_hset(mpdm_root(), f, x);
-		mpdm_hset(c, f, x);
-	}
+        mpdm_hset(mpdm_root(), f, x);
+        mpdm_hset(c, f, x);
+    }
 
     mpdm_unrefnd(c);
 
-	return c;
+    return c;
 }
-
-
