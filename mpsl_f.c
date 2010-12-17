@@ -720,6 +720,21 @@ static mpdm_t F_popen(F_ARGS)
 }
 
 /**
+ * popen2 - Opens a pipe and returns an array of two pipes.
+ * @prg: the program to pipe
+ *
+ * Opens a read-write pipe and returns an array of two descriptors,
+ * one for reading and one for writing. If @prg could not be piped to,
+ * returns NULL.
+ * [Input-Output]
+ */
+/** array = popen2(prg); */
+static mpdm_t F_popen2(F_ARGS)
+{
+    return mpdm_popen2(A0);
+}
+
+/**
  * pclose - Closes a pipe.
  * @fd: the value containing the file descriptor
  *
@@ -1403,6 +1418,7 @@ static struct {
     { L"glob",           F_glob },
     { L"encoding",       F_encoding },
     { L"popen",          F_popen },
+    { L"popen2",         F_popen2 },
     { L"pclose",         F_pclose },
     { L"regex",          F_regex },
     { L"sregex",         F_sregex },
