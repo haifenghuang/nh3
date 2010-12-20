@@ -31,8 +31,8 @@
 #include <stdlib.h>
 #include "y.tab.h"
 
-void yyerror(char * s);
-int yy_input_for_flex(char * buf, int max);
+void yyerror(char *s);
+int yy_input_for_flex(char *buf, int max);
 
 /* redefinition of input function for GNU Flex */
 #undef YY_INPUT
@@ -52,14 +52,18 @@ mpdm_t mpsl_lc = NULL;
 
 /* dynamic string manipulation macros */
 #ifndef ds_init
-struct ds { wchar_t * d; int p; int s; };
+struct ds {
+    wchar_t *d;
+    int p;
+    int s;
+};
 #define ds_init(x) do { x.d = (wchar_t *)0; x.p = x.s = 0; } while(0)
 #define ds_rewind(x) x.p = 0;
 #define ds_free(x) do { if(x.d) free(x.d); ds_init(x); } while(0)
 #define ds_redim(x) do { if(x.p >= x.s) x.d = realloc(x.d, ++x.s * sizeof(wchar_t)); } while(0)
 #define ds_poke(x,c) do { ds_redim(x); x.d[x.p++] = c; } while(0)
 #define ds_pokes(x,t) do { wchar_t *p = t; while(*p) ds_poke(x, *p++); } while(0)
-#endif /* ds_init */
+#endif                          /* ds_init */
 
 /* a dynamic string */
 struct ds ds_v;
@@ -67,40 +71,40 @@ struct ds ds_v;
 static wchar_t *s_mbstowcs(char *str)
 /* converts from mbs to wcs, using a static buffer */
 {
-	static wchar_t * wc = NULL;
-	static int wc_s = 0;
-	int n;
+    static wchar_t *wc = NULL;
+    static int wc_s = 0;
+    int n;
 
-	/* allocs wchar_t space, if needed */
-	if ((n = mbstowcs(NULL, str, 0)) > wc_s) {
-		wc_s = n;
-		wc = realloc(wc, (wc_s + 1) * sizeof(wchar_t));
-	}
+    /* allocs wchar_t space, if needed */
+    if ((n = mbstowcs(NULL, str, 0)) > wc_s) {
+        wc_s = n;
+        wc = realloc(wc, (wc_s + 1) * sizeof(wchar_t));
+    }
 
-	/* really converts */
-	mbstowcs(wc, str, n);
-	wc[n] = L'\0';
+    /* really converts */
+    mbstowcs(wc, str, n);
+    wc[n] = L'\0';
 
-	return wc;
+    return wc;
 }
 
 
-static mpdm_t literal_cache(char *ptr, wchar_t *wptr)
+static mpdm_t literal_cache(char *ptr, wchar_t * wptr)
 /* the cache of literal values */
 {
-	mpdm_t v;
+    mpdm_t v;
 
-	/* convert to wchar_t */
-	if (ptr != NULL)
-		wptr = s_mbstowcs(ptr);
+    /* convert to wchar_t */
+    if (ptr != NULL)
+        wptr = s_mbstowcs(ptr);
 
-	/* search in cache */
-	if ((v = mpdm_hget_s(mpsl_lc, wptr)) == NULL) {
-		v = MPDM_S(wptr);
-		mpdm_hset(mpsl_lc, v, v);
-	}
+    /* search in cache */
+    if ((v = mpdm_hget_s(mpsl_lc, wptr)) == NULL) {
+        v = MPDM_S(wptr);
+        mpdm_hset(mpsl_lc, v, v);
+    }
 
-	return v;
+    return v;
 }
 
 
@@ -234,47 +238,49 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER}|{BININTEGER})
 
 %%
 
-int yywrap(void) { return 1; }
+int yywrap(void)
+{
+    return 1;
+}
 
 int yy_input_for_flex(char *buf, int max)
 {
-	int n = 0;
+    int n = 0;
 
-	if (mpsl_file != NULL) {
-		while (n < max) {
-			int c;
+    if (mpsl_file != NULL) {
+        while (n < max) {
+            int c;
 
-			if ((c = fgetc(mpsl_file)) == EOF) {
-				mpsl_file = NULL;
-				break;
-			}
+            if ((c = fgetc(mpsl_file)) == EOF) {
+                mpsl_file = NULL;
+                break;
+            }
 
-			buf[n++] = c;
-		}
-	}
-	else
-	if (mpsl_next_char != NULL) {
-		for (;;) {
-			char tmp[64];	/* really MB_CUR_MAX + 1 */
-			int c, i;
+            buf[n++] = c;
+        }
+    }
+    else if (mpsl_next_char != NULL) {
+        for (;;) {
+            char tmp[64];       /* really MB_CUR_MAX + 1 */
+            int c, i;
 
-			if (*mpsl_next_char == L'\0' ||
-			   (c = wctomb(tmp, *mpsl_next_char)) < 0) {
-				mpsl_next_char = NULL;
-				break;
-			}
+            if (*mpsl_next_char == L'\0' ||
+                (c = wctomb(tmp, *mpsl_next_char)) < 0) {
+                mpsl_next_char = NULL;
+                break;
+            }
 
-			/* no room? try next time */
-			if (n + c >= max)
-				break;
+            /* no room? try next time */
+            if (n + c >= max)
+                break;
 
-			mpsl_next_char++;
+            mpsl_next_char++;
 
-			/* transfer */
-			for (i = 0; i < c; i++)
-				buf[n++] = tmp[i];
-		}
-	}
+            /* transfer */
+            for (i = 0; i < c; i++)
+                buf[n++] = tmp[i];
+        }
+    }
 
-	return n;
+    return n;
 }
