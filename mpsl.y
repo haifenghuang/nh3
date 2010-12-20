@@ -57,26 +57,26 @@ extern mpdm_t mpsl_lc;
 /** code **/
 
 int yylex(void);
-void yyerror(char * s);
+void yyerror(char *s);
 
-#define INS0(o)			mpsl_mkins(o, 0, NULL, NULL, NULL)
-#define INS1(o,a1)		mpsl_mkins(o, 1, a1, NULL, NULL)
-#define INS2(o,a1,a2)		mpsl_mkins(o, 2, a1, a2, NULL)
-#define INS3(o,a1,a2,a3)	mpsl_mkins(o, 3, a1, a2, a3)
+#define INS0(o)             mpsl_mkins(o, 0, NULL, NULL, NULL)
+#define INS1(o,a1)          mpsl_mkins(o, 1, a1, NULL, NULL)
+#define INS2(o,a1,a2)       mpsl_mkins(o, 2, a1, a2, NULL)
+#define INS3(o,a1,a2,a3)    mpsl_mkins(o, 3, a1, a2, a3)
 
 static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2, int sf)
 /* creates an executable value with the MPSL executor as the first
    argument and a compiled stream as the second */
 {
-	return MPDM_X2(mpsl_exec_p,
-		mpsl_mkins(sf ? L"SUBFRAME" : L"BLKFRAME",
-			a2 == NULL ? 1 : 2, a1, a2, NULL));
+    return MPDM_X2(mpsl_exec_p,
+                   mpsl_mkins(sf ? L"SUBFRAME" : L"BLKFRAME",
+                              a2 == NULL ? 1 : 2, a1, a2, NULL));
 }
 
 
 static void compiler_warning(char *str)
 {
-	fprintf(stderr, "WARNING: %s.\n", str);
+    fprintf(stderr, "WARNING: %s.\n", str);
 }
 
 
@@ -562,77 +562,77 @@ expr:
 
 %%
 
-void yyerror(char * s)
+void yyerror(char *s)
 {
-	char tmp[1024];
+    char tmp[1024];
 
-	snprintf(tmp, sizeof(tmp), "%s in %s, line %d",
-		s, mpsl_filename, mpsl_line + 1);
+    snprintf(tmp, sizeof(tmp), "%s in %s, line %d",
+             s, mpsl_filename, mpsl_line + 1);
 
-	mpsl_error(MPDM_MBS(tmp));
+    mpsl_error(MPDM_MBS(tmp));
 }
 
 
-static FILE * inc_fopen(const char *filename, mpdm_t inc)
+static FILE *inc_fopen(const char *filename, mpdm_t inc)
 /* loads filename, searching in INC if not directly accesible */
 {
-	FILE * f = NULL;
-	char tmp[1024];
-	int n;
+    FILE *f = NULL;
+    char tmp[1024];
+    int n;
 
-	/* loop through INC, prepending each path
-	   to the filename */
-	for (n = 0; n < mpdm_size(inc); n++) {
-		mpdm_t v = mpdm_aget(inc, n);
+    /* loop through INC, prepending each path
+       to the filename */
+    for (n = 0; n < mpdm_size(inc); n++) {
+        mpdm_t v = mpdm_aget(inc, n);
 
-		v = mpdm_ref(MPDM_2MBS(v->data));
-		snprintf(tmp, sizeof(tmp), "%s/%s",	(char *)v->data, filename);
-		mpdm_unref(v);
+        v = mpdm_ref(MPDM_2MBS(v->data));
+        snprintf(tmp, sizeof(tmp), "%s/%s", (char *) v->data, filename);
+        mpdm_unref(v);
 
-		if ((f = fopen(tmp, "r")) != NULL)
-			break;
-	}
+        if ((f = fopen(tmp, "r")) != NULL)
+            break;
+    }
 
-	return f;
+    return f;
 }
 
 
-static mpdm_t do_parse(const char *filename, wchar_t *code, FILE *file)
+static mpdm_t do_parse(const char *filename, wchar_t * code, FILE * file)
 /* calls yyparse() after doing some initialisations, and returns
    the compiled code as an executable value */
 {
-	mpdm_t v;
-	mpdm_t x = NULL;
+    mpdm_t v;
+    mpdm_t x = NULL;
 
-	/* first line */
-	mpsl_line = 0;
+    /* first line */
+    mpsl_line = 0;
 
-	/* reset last bytecode */
-	mpsl_bytecode = NULL;
+    /* reset last bytecode */
+    mpsl_bytecode = NULL;
 
-	/* set globals */
-	mpsl_next_char = code;
-	mpsl_file = file;
+    /* set globals */
+    mpsl_next_char = code;
+    mpsl_file = file;
 
-	if (mpsl_filename != NULL)
-		free(mpsl_filename);
+    if (mpsl_filename != NULL)
+        free(mpsl_filename);
 
-	mpsl_filename = strdup(filename);
+    mpsl_filename = strdup(filename);
 
-	/* cache some values */
-	v = mpdm_hget_s(mpdm_root(), L"MPSL");
-	mpsl_opcodes = mpdm_hget_s(v, L"OPCODE");
-	mpsl_lc = mpdm_hget_s(v, L"LC");
+    /* cache some values */
+    v = mpdm_hget_s(mpdm_root(), L"MPSL");
+    mpsl_opcodes = mpdm_hget_s(v, L"OPCODE");
+    mpsl_lc = mpdm_hget_s(v, L"LC");
 
-	/* compile! */
-	if (yyparse() == 0 && mpsl_bytecode != NULL)
-		x = mpsl_x(mpsl_bytecode, NULL, 1);
+    /* compile! */
+    if (yyparse() == 0 && mpsl_bytecode != NULL)
+        x = mpsl_x(mpsl_bytecode, NULL, 1);
 
-	/* clean back cached values */
-	mpsl_opcodes = NULL;
-	mpsl_lc = NULL;
+    /* clean back cached values */
+    mpsl_opcodes = NULL;
+    mpsl_lc = NULL;
 
-	return x;
+    return x;
 }
 
 
@@ -646,13 +646,13 @@ static mpdm_t do_parse(const char *filename, wchar_t *code, FILE *file)
  */
 mpdm_t mpsl_compile(mpdm_t code)
 {
-	mpdm_t x = NULL;
+    mpdm_t x = NULL;
 
-	mpdm_ref(code);
-	x = do_parse("<INLINE>", (wchar_t *) code->data, NULL);
-	mpdm_unref(code);
+    mpdm_ref(code);
+    x = do_parse("<INLINE>", (wchar_t *) code->data, NULL);
+    mpdm_unref(code);
 
-	return x;
+    return x;
 }
 
 
@@ -670,49 +670,48 @@ mpdm_t mpsl_compile(mpdm_t code)
  */
 mpdm_t mpsl_compile_file(mpdm_t file, mpdm_t inc)
 {
-	mpdm_t w;
-	mpdm_t x = NULL;
-	FILE *f = NULL;
-	const char *filename = NULL;
+    mpdm_t w;
+    mpdm_t x = NULL;
+    FILE *f = NULL;
+    const char *filename = NULL;
 
-	mpdm_ref(file);
-	mpdm_ref(inc);
+    mpdm_ref(file);
+    mpdm_ref(inc);
 
-	if ((f = mpdm_get_filehandle(file)) != NULL) {
-		filename = "<FILE>";
-		w = file;
-	}
-	else {
-		mpdm_t v;
+    if ((f = mpdm_get_filehandle(file)) != NULL) {
+        filename = "<FILE>";
+        w = file;
+    }
+    else {
+        mpdm_t v;
 
-		/* it's a filename; open it */
-		v = mpdm_ref(MPDM_2MBS(file->data));
+        /* it's a filename; open it */
+        v = mpdm_ref(MPDM_2MBS(file->data));
 
-		filename = v->data;
+        filename = v->data;
 
-		if ((f = inc_fopen(filename, inc)) == NULL) {
-			char tmp[128];
+        if ((f = inc_fopen(filename, inc)) == NULL) {
+            char tmp[128];
 
-			snprintf(tmp, sizeof(tmp) - 1,
-				"File '%s' not found in INC",
-				filename);
-			mpsl_error(MPDM_MBS(tmp));
-		}
+            snprintf(tmp, sizeof(tmp) - 1,
+                     "File '%s' not found in INC", filename);
+            mpsl_error(MPDM_MBS(tmp));
+        }
 
-		mpdm_unref(v);
+        mpdm_unref(v);
 
-		w = MPDM_F(f);
-	}
+        w = MPDM_F(f);
+    }
 
-	if (w != NULL) {
-		x = do_parse(filename, NULL, f);
-		mpdm_close(w);
-	}
+    if (w != NULL) {
+        x = do_parse(filename, NULL, f);
+        mpdm_close(w);
+    }
 
-	mpdm_unref(inc);
-	mpdm_unref(file);
+    mpdm_unref(inc);
+    mpdm_unref(file);
 
-	return x;
+    return x;
 }
 
 
@@ -730,39 +729,39 @@ mpdm_t mpsl_compile_file(mpdm_t file, mpdm_t inc)
  */
 mpdm_t mpsl_eval(mpdm_t code, mpdm_t args, mpdm_t ctxt)
 {
-	mpdm_t cs, r;
+    mpdm_t cs, r;
 
-	/* reset error */
-	mpsl_error(NULL);
-	mpsl_abort = 0;
+    /* reset error */
+    mpsl_error(NULL);
+    mpsl_abort = 0;
 
-	mpdm_ref(code);
+    mpdm_ref(code);
 
-	/* if code is not executable, try to compile */
-	if (!MPDM_IS_EXEC(code)) {
-		mpdm_t c;
+    /* if code is not executable, try to compile */
+    if (!MPDM_IS_EXEC(code)) {
+        mpdm_t c;
 
-		/* get the eval cache */
-		if ((c = mpdm_hget_s(mpdm_root(), L"__EVAL__")) == NULL)
-			c = mpdm_hset_s(mpdm_root(), L"__EVAL__", MPDM_H(0));
+        /* get the eval cache */
+        if ((c = mpdm_hget_s(mpdm_root(), L"__EVAL__")) == NULL)
+            c = mpdm_hset_s(mpdm_root(), L"__EVAL__", MPDM_H(0));
 
-		/* this code still not compiled? do it */
-		if ((cs = mpdm_hget(c, code)) == NULL)
-			cs = mpdm_hset(c, code, mpsl_compile(code));
-	}
-	else
-		cs = code;
+        /* this code still not compiled? do it */
+        if ((cs = mpdm_hget(c, code)) == NULL)
+            cs = mpdm_hset(c, code, mpsl_compile(code));
+    }
+    else
+        cs = code;
 
-	/* execute, if possible */
-	if (MPDM_IS_EXEC(cs))
-		r = mpdm_exec(cs, args, ctxt);
-	else
-		r = NULL;
+    /* execute, if possible */
+    if (MPDM_IS_EXEC(cs))
+        r = mpdm_exec(cs, args, ctxt);
+    else
+        r = NULL;
 
-	/* reset the abort flag */
-	mpsl_abort = 0;
+    /* reset the abort flag */
+    mpsl_abort = 0;
 
-	mpdm_unref(code);
+    mpdm_unref(code);
 
-	return r;
+    return r;
 }
