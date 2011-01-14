@@ -4,6 +4,8 @@ MPSL Release Notes
 2.0.0
 -----
 
+ - Updated to match MPDM refactoring (no more sweeping /
+   garbage collection).
  - New multithreading support:
    * A function can be prefixed with & (ampersand) to execute
      it in a new thread; the new thread handler is returned.
