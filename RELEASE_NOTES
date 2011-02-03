@@ -22,6 +22,7 @@ MPSL Release Notes
     - join().
     - sscanf().
     - map().
+    - grep().
 
 1.0.9
 -----

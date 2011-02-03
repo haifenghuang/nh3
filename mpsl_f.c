@@ -1182,8 +1182,8 @@ static mpdm_t F_map(F_ARGS)
 
 /**
  * grep - Greps inside an array.
- * @filter: the filter
  * @a: the array
+ * @filter: the filter
  *
  * Greps inside an array and returns another one containing only the
  * elements that passed the filter. If @filter is a string, it's accepted
@@ -1198,8 +1198,8 @@ static mpdm_t F_map(F_ARGS)
 /** array = grep(filter, a); */
 static mpdm_t F_grep(F_ARGS)
 {
-    mpdm_t key = mpdm_aget(a, 0);
-    mpdm_t set = mpdm_aget(a, 1);
+    mpdm_t set = mpdm_aget(a, 0);
+    mpdm_t key = mpdm_aget(a, 1);
     mpdm_t out = mpdm_ref(MPDM_A(0));
 
     if (MPDM_IS_EXEC(key)) {

@@ -633,9 +633,9 @@ elements that matched:
  a = [ 1, 9, "mix190", 4, "foo", 9000 ];
  
  /* b is [ 9, "mix190", 9000 ] */
- b = grep('/9/', a);
+ b = grep(a, '/9/');
 
-The first argument of grep() can also be an executable value,
+The second argument of grep() can also be an executable value,
 that will accept each element of the array on each call. The
 output array will contain all elements for which the function
 call returned true:
@@ -644,7 +644,7 @@ call returned true:
  a = [ 1, 45, 20, 4, 0, 1000 ];
  
  /* b is [ 45, 20, 1000 ] */
- b = grep( sub(e) { e > 10; }, a);
+ b = grep(a, sub(e) { e > 10; });
 
 If no element were generated, NULL is returned (instead of
 an empty array).
