@@ -18,7 +18,8 @@ MPSL Release Notes
  - mpsl_compile_file() now has an additional argument
    holding the source file search path.
  - The following functions had had their arguments swapped:
-   - split().
+    - split().
+    - join().
 
 1.0.9
 -----
