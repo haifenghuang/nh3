@@ -1135,8 +1135,8 @@ static mpdm_t F_ord(F_ARGS)
 
 /**
  * map - Maps an array into another.
- * @filter: the filter
  * @a: the array
+ * @filter: the filter
  *
  * Returns a new array built by applying the @filter to all the
  * elements of the array @a. The filter can be an executable function
@@ -1147,11 +1147,11 @@ static mpdm_t F_ord(F_ARGS)
  *
  * [Arrays]
  */
-/** array = map(filter, a); */
+/** array = map(a, filter); */
 static mpdm_t F_map(F_ARGS)
 {
-    mpdm_t key = mpdm_aget(a, 0);
-    mpdm_t set = mpdm_aget(a, 1);
+    mpdm_t set = mpdm_aget(a, 0);
+    mpdm_t key = mpdm_aget(a, 1);
     mpdm_t out;
 
     /* map NULL to NULL */
