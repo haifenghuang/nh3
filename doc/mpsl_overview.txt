@@ -493,7 +493,7 @@ The split() and join() functions can be used to convert strings into
 arrays and vice-versa. Examples:
 
  /* sets a to [ 12, 'abcd', 356, '', 'xxx' ] */
- local a = split(':', '12:abcd:356::xxx');
+ local a = split('12:abcd:356::xxx', ':');
  
  /* sets b to 12->abcd->356->->xxx */
  local b = join('->', a);
@@ -502,7 +502,7 @@ The split() function can have a special separator, NULL, that makes it
 explode the string in characters:
 
  /* sets c to [ 't', 'h', 'i', 's' ] */
- local c = split(NULL, "this");
+ local c = split("this");
 
 The splice() function can be used to delete, insert or replace a subset of
 a string with another one. It returns a two element array: one with the

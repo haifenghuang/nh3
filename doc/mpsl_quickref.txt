@@ -108,9 +108,9 @@ i = cmp(str1, str2);	Compares two strings, returns
 del = splice(str1,	Inserts str2 inside str1 at
    str2, offset, del);	offset, deleting del characters
 			(returns the deleted string)
-ary = split(sep, str);	Splits str using sep as
+ary = split(str, sep);	Splits str using sep as
 			separator
-ary = split(NULL, str);	Splits str in characters
+ary = split(str);	Splits str in characters
 str = join(sep, ary);	Joins ary into str, using
 			sep as separator (inverse of
 			split())

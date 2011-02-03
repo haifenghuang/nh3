@@ -17,6 +17,8 @@ MPSL Release Notes
  - The adel() function no longer returns the deleted element.
  - mpsl_compile_file() now has an additional argument
    holding the source file search path.
+ - The following functions had had their arguments swapped:
+   - split().
 
 1.0.9
 -----
