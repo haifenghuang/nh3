@@ -142,10 +142,10 @@ s = sort(ary);		Sorts ary alphabetically
 s = sort(ary, func);	Sorts ary using a special
 sub func(a,b) { ... }	sorting function, that accepts
 			two arguments to compare
-ary2 = map(func, ary);	Executes func on each element
+ary2 = map(ary, func);	Executes func on each element
 sub func(a) { ... }	of ary and returns an array
 			with the return values
-ary2 = map(hash, ary);	Uses the elements of ary as
+ary2 = map(ary, hash);	Uses the elements of ary as
 			keys of hash and returns an
 			array with the values
 ary2 = grep(rx, ary);	Matches the regex on all

@@ -21,6 +21,7 @@ MPSL Release Notes
     - split().
     - join().
     - sscanf().
+    - map().
 
 1.0.9
 -----

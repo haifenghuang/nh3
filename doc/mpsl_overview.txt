@@ -596,7 +596,7 @@ Whenever a change must be done on every element of an array, the map()
 function can be useful and much faster than iterating the array using
 foreach() and storing the changes in another one.
 
-The first argument of map() can be an executable value accepting one
+The second argument of map() can be an executable value accepting one
 argument, that will be set to each element of the array. The return
 value will be used as the new value:
 
@@ -610,21 +610,21 @@ value will be used as the new value:
  a = [ 1, 5, 3, 7, 30, 20 ];
  
  /* a_by_10 will contain [10, 50, 30, 70, 300, 200 ] */
- a_by_10 = map(multiply_by_10, a);
+ a_by_10 = map(a, multiply_by_10);
 
 Of course, the executable value can be an anonymous subroutine:
 
  /* Creates a zero-filled version of the numbers in a */
- a_zero_filled = map( sub(e) { sprintf("%04d", e); }, a);
+ a_zero_filled = map(a, sub(e) { sprintf("%04d", e); });
 
-The first argument of map() can also be a hash to directly
+The second argument of map() can also be a hash to directly
 map keys to values:
 
  /* numerals as keys, names as values */
  english_nums = { 1 => "one", 2 => "two", 3 => "three" };
  
  /* translated_nums will have [ "one", "two", "three" ] */
- translated_nums = map(english_nums, [ 1, 2, 3 ]);
+ translated_nums = map([ 1, 2, 3 ], english_nums);
 
 Another powerful array function is grep(); it matches a regular
 expression on an array and returns a new one containing all
