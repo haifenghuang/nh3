@@ -68,11 +68,11 @@ while (line = read(STDIN)) {
                  sregex("/\)/g", '\)');
 
 	/* leading asterisk? it's a title */
-	if ((l = regex([ "/^\*/", "/.*$/" ], line)) && size(l) == 2)
+	if ((l = regex(line, [ "/^\*/", "/.*$/" ])) && size(l) == 2)
 		print("(", l[1], ") qr_title\n");
 	else
 	/* text-tabs-text: two columns */
-	if ((l = regex([ "/^[^\t]*/", "/\t+/", "/.*$/" ], line)) && size(l) == 3)
+	if ((l = regex(line, [ "/^[^\t]*/", "/\t+/", "/.*$/" ])) && size(l) == 3)
 		print("(", l[0], ") (", l[2], ") qr_2cols\n");
 	else
 	/* other: two columns, with empty second one */

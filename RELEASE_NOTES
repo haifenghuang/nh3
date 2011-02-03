@@ -23,6 +23,7 @@ MPSL Release Notes
     - sscanf().
     - map().
     - grep().
+    - regex().
     - sregex().
 
 1.0.9

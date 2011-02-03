@@ -27,7 +27,6 @@ Pending Enhancements
  * 1109: There must be possible to have executable components with
    arguments in compact symbols (as in 'h.code(a1,a2).other').
  * 1115: Add C++ style comments.
- * 1123: Invert regex() arguments.
 
 Closed
 ------
@@ -202,5 +201,6 @@ Closed
  * 1125: Invert map() arguments (Thu, 03 Feb 2011 10:51:53 +0100).
  * 1126: Invert grep() arguments (Thu, 03 Feb 2011 12:23:20 +0100).
  * 1124: Invert sregex() arguments (Thu, 03 Feb 2011 13:09:17 +0100).
+ * 1123: Invert regex() arguments (Thu, 03 Feb 2011 15:59:47 +0100).
 
 Email bugs to angel@triptico.com

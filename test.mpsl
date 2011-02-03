@@ -216,17 +216,17 @@ r = "|/\*[^*]*\*+([^/*][^*]*\*+)*/|";
 
 sub substr(s, o, l) { local w=splice(s, NULL, o, l); return(w[1]); }
 
-v = regex(r, source);
+v = regex(source, r);
 dump(v);
 /* get last matching coords */
 c = regex();
 
-v = regex(r, source, c[0] + c[1]);
+v = regex(source, r, c[0] + c[1]);
 dump(v);
 /* get last matching coords */
 c = regex();
 
-v = regex(r, source, c[0] + c[1]);
+v = regex(source, r, c[0] + c[1]);
 dump(v);
 
 /* assignations as expressions */
@@ -243,7 +243,7 @@ if(f = open("config.h", "r"))
 print("\nAssignations as expressions: looped regex matching\n");
 c = 0;
 
-while(v = regex(r, source, c))
+while(v = regex(source, r, c))
 {
 	print(v, "\n");
 	c = regex();
@@ -323,7 +323,7 @@ r = "/\w+/";
 c = 0;
 
 print("Words:\n");
-while(w = regex(r, v, c))
+while(w = regex(v, r, c))
 {
 	print(w, "\n");
 	c = regex();
@@ -334,7 +334,7 @@ r = "/'[^']*'/";
 c = 0;
 
 print("Quotes:\n");
-while(w = regex(r, v, c))
+while(w = regex(v, r, c))
 {
 	print(w, "\n");
 	c = regex();

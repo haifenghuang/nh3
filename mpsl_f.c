@@ -749,9 +749,9 @@ static mpdm_t F_pclose(F_ARGS)
 
 /**
  * regex - Matches a regular expression.
+ * @v: the value to be matched
  * @r: the regular expression
  * @ra: an array of regular expressions
- * @v: the value to be matched
  * @offset: offset from the start of the value
  *
  * Matches a regular expression against a value. Valid flags are `i',
@@ -780,9 +780,9 @@ static mpdm_t F_pclose(F_ARGS)
  * is returned.
  * [Regular Expressions]
  */
-/** string = regex(r, v); */
-/** string = regex(r, v, offset); */
-/** array = regex(ra, v); */
+/** string = regex(v, r); */
+/** string = regex(v, r, offset); */
+/** array = regex(v, ra); */
 /** array = regex(); */
 static mpdm_t F_regex(F_ARGS)
 {

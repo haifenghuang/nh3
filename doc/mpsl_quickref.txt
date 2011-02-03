@@ -148,10 +148,10 @@ sub func(a) { ... }	of ary and returns an array
 ary2 = map(ary, hash);	Uses the elements of ary as
 			keys of hash and returns an
 			array with the values
-ary2 = grep(rx, ary);	Matches the regex on all
+ary2 = grep(ary, rx);	Matches the regex on all
 			elements in ary and returns
 			all the matching ones
-ary2 = grep(func, ary);	Executes func on all elements
+ary2 = grep(ary, func);	Executes func on all elements
 sub func(a) { ... }	of ary and returns a new array
 			with all elements on which
 			func returned true
@@ -199,15 +199,15 @@ chdir(dir);		Change current directory
 
 *Regular expression functions
 
-s = regex(reg, str);	Matches the reg regexp into
+s = regex(str, reg);	Matches the reg regexp into
 			str, returns the matching
 			substring
-s = regex(r, str, off);	The same, but starting at off
+s = regex(str, r, off);	The same, but starting at off
 			offset into str
 ary = regex();		Returns the last matching
 			offset and size as a
 			two element array
-ary2 = regex(ary, str);	Matches an array of regular
+ary2 = regex(str, ary);	Matches an array of regular
 			expressions, returns as many
 			matches as elements in ary
 res = sregex(str, reg,	Matches the reg regexp into

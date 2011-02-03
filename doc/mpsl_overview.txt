@@ -726,7 +726,7 @@ of its forms, it can be used to test if a string matches:
  /* hours, minutes, seconds */
  v = "07:55:35";
  
- if (regex("/^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/", v))
+ if (regex(v, "/^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/"))
  	print("The v variable contains a valid time\n");
 
 The regular expression can contain flags; those are `i', for case
@@ -742,7 +742,7 @@ the `g' flag is used. If no match is found, NULL is returned.
 
  v = "The value of PI is 3.1416, more or less";
  
- pi = regex("/[0-9]+\.[0-9]+/", v);
+ pi = regex(v, "/[0-9]+\.[0-9]+/");
 
 If regex() is called without arguments, it returns the last match as an array
 of two elements; the first contain the offset of the matched strings, and the
@@ -763,7 +763,7 @@ This can be used to extract many values from the same string:
  s = "There is 10 and 35 and 42 in the number 103542!";
  offset = 0;
  
- while (n = regex("/[0-9]+/", s, offset)) {
+ while (n = regex(s, "/[0-9]+/", offset)) {
  	local c;
  
  	/* print result */
@@ -779,10 +779,10 @@ This can be used to extract many values from the same string:
 Though, for this particular example, the `g' flag could be more suitable:
 
  /* return all numbers in one step */
- foreach (s, regex('/[0-9]+/g', s))
- 	print(s, "\n");
+ foreach (i, regex(s, '/[0-9]+/g'))
+ 	print(i, "\n");
 
-For more complex situations, the first argument of regex() can be an array
+For more complex situations, the second argument of regex() can be an array
 of regular expressions (instead of a string). Those expressions will tried
 one after the other on the string, each one using the offset returned by
 the previous one. If all of them are matched, an array with the matched strings
@@ -794,11 +794,11 @@ is returned.
  v3 = "key3=333  ";
  
  /* array regex: a regex for each part */
- r = regex([ "/\s*/",        /* possible leading blanks (0) */
+ r = regex(v1, [ "/\s*/",    /* possible leading blanks (0) */
              "/[a-z0-9]+/i", /* the key (1) */
              "/\s*=\s*/",    /* optional blanks, the = , more blanks (2) */
              "/[a-z0-9]+/i"  /* the value (3) */
-           ], v1);
+           ]);
  
  if (r != NULL) {
  	/* the key is the element #1 and the value the #3 */
