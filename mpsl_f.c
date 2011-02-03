@@ -384,8 +384,8 @@ static mpdm_t F_sort(F_ARGS)
 
 /**
  * split - Separates a string into an array of pieces.
- * @s: the separator
  * @v: the value to be separated
+ * @s: the separator
  *
  * Separates the @v string value into an array of pieces, using @s
  * as a separator.
@@ -397,7 +397,7 @@ static mpdm_t F_sort(F_ARGS)
  * [Arrays]
  * [Strings]
  */
-/** array = split(s, v); */
+/** array = split(v, s); */
 static mpdm_t F_split(F_ARGS)
 {
     return mpdm_split(A0, A1);
