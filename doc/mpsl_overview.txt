@@ -813,12 +813,12 @@ The sregex() function can be used to substitute the matching part of a
 string with another string. The simplest form:
 
  /* substitute all characters in password with asterisks */
- sregex('/./g', password, '*');
+ sregex(password, '/./g', '*');
 
 The substitution part can also be a hash:
 
  /* substitute \n, \r, etc with their equivalents */
- sregex("/\\[rnt]/g", var, {
+ sregex(var, "/\\[rnt]/g", {
 	'\r'	=>	"\r",
 	'\n'	=>	"\n",
 	'\t'	=>	"\t"
@@ -827,7 +827,7 @@ The substitution part can also be a hash:
 Or even a function:
 
  /* zero-pad all numbers in var */
- sregex('/[0-9]+/g', var, sub (m) {
+ sregex(var, '/[0-9]+/g', sub (m) {
 	sprintf("%04d", m);
 	});
 

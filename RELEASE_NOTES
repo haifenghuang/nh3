@@ -7,10 +7,10 @@ MPSL Release Notes
  - Updated to match MPDM refactoring (no more sweeping /
    garbage collection).
  - New multithreading support:
-   * A function can be prefixed with & (ampersand) to execute
-     it in a new thread; the new thread handler is returned.
-   * Support for mutex values.
-   * Support for semaphore values.
+    - A function can be prefixed with & (ampersand) to execute
+      it in a new thread; the new thread handler is returned.
+    - Support for mutex values.
+    - Support for semaphore values.
  - Any function argument not explicitly declared and
    sent as argument in the function call is stored
    in the local array _ (underscore).
@@ -23,6 +23,7 @@ MPSL Release Notes
     - sscanf().
     - map().
     - grep().
+    - sregex().
 
 1.0.9
 -----

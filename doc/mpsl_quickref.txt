@@ -210,12 +210,12 @@ ary = regex();		Returns the last matching
 ary2 = regex(ary, str);	Matches an array of regular
 			expressions, returns as many
 			matches as elements in ary
-res = sregex(reg, str,	Matches the reg regexp into
+res = sregex(str, reg,	Matches the reg regexp into
    str2);		str and changes it with str2
-res = sregex(reg, str,	Matches the reg regexp into
+res = sregex(str, reg,	Matches the reg regexp into
    hash);		str and changes it with its
 			value in hash
-res = sregex(reg, str,	Matches the reg regexp into
+res = sregex(str, reg,	Matches the reg regexp into
    func);		str and changes with the
 sub func(m) { ... };	return value of func using
 			the matched string as argument

@@ -62,12 +62,12 @@ while (line = read(STDIN)) {
 	local l;
 
 	/* strip \n */
-	line = sregex("/\n$/", line, NULL);
+	line = sregex(line, "/\n$/", NULL);
 
 	/* escape parens */
-	line = sregex("/\\\\/g", line, '\\');
-	line = sregex("/\(/g", line, '\(');
-	line = sregex("/\)/g", line, '\)');
+	line = sregex(line, "/\\\\/g", '\\');
+	line = sregex(line, "/\(/g", '\(');
+	line = sregex(line, "/\)/g", '\)');
 
 	/* leading asterisk? it's a title */
 	if ((l = regex([ "/^\*/", "/.*$/" ], line)) && size(l) == 2)

@@ -197,10 +197,10 @@ else
 
 unlink("test.txt");
 
-sub chop(s) { sregex("/\n$/", s, NULL); }
+sub chop(s) { sregex(s, "/\n$/", NULL); }
 
 eol = "\n";
-sub chop2(s) { sregex("/" ~ eol ~ "$/", s, NULL); }
+sub chop2(s) { sregex(s, "/" ~ eol ~ "$/", NULL); }
 
 if(chop("text with eol\n") eq "text with eol")
 	print("Sregex works!\n");
@@ -360,7 +360,7 @@ else
 
 s = "This is a %s and a %d and another %s and a %f";
 dict = { "%s" => "STRING", "%d" => "INTEGER", "%f" => "FLOAT" };
-print(sregex("/%\w/g", s, sub (a) { dict[a]; } ), "\n");
+print(sregex(s, "/%\w/g", sub (a) { dict[a]; } ), "\n");
 
 /* eval as compilable code */
 v = eval("1 + 2;");

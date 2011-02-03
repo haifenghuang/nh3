@@ -791,8 +791,8 @@ static mpdm_t F_regex(F_ARGS)
 
 /**
  * sregex - Matches and substitutes a regular expression.
- * @r: the regular expression
  * @v: the value to be matched
+ * @r: the regular expression
  * @s: the substitution string, hash or code
  * @offset: offset from the start of v
  *
@@ -817,8 +817,8 @@ static mpdm_t F_regex(F_ARGS)
  * were done.
  * [Regular Expressions]
  */
-/** string = sregex(r, v, s); */
-/** string = sregex(r, v, s, offset); */
+/** string = sregex(v, r, s); */
+/** string = sregex(v, r, s, offset); */
 /** integer = sregex(); */
 static mpdm_t F_sregex(F_ARGS)
 {
