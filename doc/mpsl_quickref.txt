@@ -120,7 +120,7 @@ char = chr(number);	Returns the character
 			represented by number
 number = ord(str);	Returns the numeric value of
 			the first character in str
-ary = sscanf(fmt, str);	Extracts values from a
+ary = sscanf(str, fmt);	Extracts values from a
 			string using a format
 
 *Array functions

@@ -961,8 +961,8 @@ static mpdm_t F_chdir(F_ARGS)
 
 /**
  * sscanf - Extracts data like sscanf().
- * @fmt: the string format
  * @str: the string to be parsed
+ * @fmt: the string format
  * @offset: the character offset to start scanning
  *
  * Extracts data from a string using a special format pattern, very
@@ -976,8 +976,8 @@ static mpdm_t F_chdir(F_ARGS)
  * position in the scanned string is returned as the value.
  * [Strings]
  */
-/** array = sscanf(fmt, str); */
-/** array = sscanf(fmt, str, offset); */
+/** array = sscanf(str, fmt); */
+/** array = sscanf(str, fmt, offset); */
 static mpdm_t F_sscanf(F_ARGS)
 {
     return mpdm_sscanf(A0, A1, IA2);
