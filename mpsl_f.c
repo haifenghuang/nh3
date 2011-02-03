@@ -1222,7 +1222,7 @@ static mpdm_t F_grep(F_ARGS)
         /* it's a string; use it as a regular expression */
         for (n = 0; n < mpdm_size(set); n++) {
             mpdm_t v = mpdm_aget(set, n);
-            mpdm_t w = mpdm_ref(mpdm_regex(key, v, 0));
+            mpdm_t w = mpdm_ref(mpdm_regex(v, key, 0));
 
             if (w)
                 mpdm_push(out, v);
