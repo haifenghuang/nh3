@@ -496,7 +496,7 @@ arrays and vice-versa. Examples:
  local a = split('12:abcd:356::xxx', ':');
  
  /* sets b to 12->abcd->356->->xxx */
- local b = join('->', a);
+ local b = join(a, '->');
 
 The split() function can have a special separator, NULL, that makes it
 explode the string in characters:

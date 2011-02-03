@@ -31,7 +31,7 @@ print("x: ", window.ids.main.x, "\n");
 dump(window);
 
 content = glob("*.*");
-print("Current directory: ", join(", ", content), "\n");
+print("Current directory: ", join(content, ", "), "\n");
 print("Number of files: ", size(content), "\n");
 
 foreach(a, content)
@@ -143,22 +143,22 @@ print("cmp('friday','monday'): ", cmp('friday','monday'), "\n");
 print("cmp('sunday','sunday'): ", cmp('sunday','sunday'), "\n");
 
 l = keys(days);
-print("\nUnsorted:\n", join("\n", l), "\n");
+print("\nUnsorted:\n", join(l, "\n"), "\n");
 
 l = sort(keys(days));
-print("\nSorted:\n", join("\n", l),"\n");
+print("\nSorted:\n", join(l, "\n"),"\n");
 
 l = sort(keys(days), sub (a, b) { cmp(a, b); });
-print("\nSorted, with explicit callback function:\n", join("\n", l),"\n");
+print("\nSorted, with explicit callback function:\n", join(l, "\n"),"\n");
 
 l = sort(keys(days), sub (a, b) { cmp(b, a); });
-print("\nReverse-sorted:\n", join("\n", l),"\n");
+print("\nReverse-sorted:\n", join(l, "\n"),"\n");
 
 l = sort([ 1, 2, 10, 20, 100, 200 ]);
-print("\nASCII-sorted:\n", join("\n", l),"\n");
+print("\nASCII-sorted:\n", join(l, "\n"),"\n");
 
 l = sort([ 1, 2, 10, 20, 100, 200 ], sub (a, b) { a - b; });
-print("\nNumeric-sorted:\n", join("\n", l),"\n");
+print("\nNumeric-sorted:\n", join(l, "\n"),"\n");
 
 print("\nFile tests:\n");
 
@@ -287,7 +287,7 @@ sub dumper(v, i)
 		foreach(n, keys(v))
 			push(w, dumper(n, i + 1) ~ " => " ~ dumper(v[n], i + 1));
 
-		ret = ret ~ join(",\n", w) ~ "\n" ~ ind ~ "}";
+		ret = ret ~ join(w, ",\n") ~ "\n" ~ ind ~ "}";
 	}
 	else
 	if (is_array(v))
@@ -299,7 +299,7 @@ sub dumper(v, i)
 		foreach(n, v)
 			push(w, dumper(n, i + 1));
 
-		ret = ret ~ join(",\n", w) ~ "\n" ~ ind ~ "]";
+		ret = ret ~ join(w, ",\n") ~ "\n" ~ ind ~ "]";
 	}
 	else
 	if(regex("/^[0-9\.]+$/", v))

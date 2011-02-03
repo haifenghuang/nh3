@@ -111,7 +111,7 @@ del = splice(str1,	Inserts str2 inside str1 at
 ary = split(str, sep);	Splits str using sep as
 			separator
 ary = split(str);	Splits str in characters
-str = join(sep, ary);	Joins ary into str, using
+str = join(ary, sep);	Joins ary into str, using
 			sep as separator (inverse of
 			split())
 str = sprintf(fmtstr,	Formats a string
