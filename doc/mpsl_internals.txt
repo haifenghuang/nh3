@@ -121,10 +121,15 @@ WHILE
 ~~~~~
 
  WHILE <ins1> <ins2>
+ WHILE <ins1> <ins2> <ins3> <ins4>
 
 A WHILE instruction executes `ins1' and, if it's a true value, executes
 `ins2'. This operation is repeated until `ins1' returns a non-true value.
 It always returns NULL.
+
+In the 4 argument version, `ins3' is executed just before entering the
+loop and `ins4' executed just after `ins2' on each loop (i.e. it
+behaves like C language's `for' construction).
 
 LOCAL
 ~~~~~
