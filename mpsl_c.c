@@ -235,6 +235,7 @@ O_TYPE mpsl_exec_i(O_ARGS);
 #define M1 M(1)
 #define M2 M(2)
 #define M3 M(3)
+#define M4 M(4)
 
 #define R(x) mpdm_rval(x)
 #define I(x) mpdm_ival(x)
@@ -522,11 +523,11 @@ O_TYPE O_threadsym(O_ARGS)
 
 
 O_TYPE O_while(O_ARGS)
-/* while loop */
+/* while/for loop */
 {
     mpdm_t r = NULL;
 
-    while (!*f && is_true_uf(M1)) {
+    for (mpdm_void(M3); !*f && is_true_uf(M1); mpdm_void(M4)) {
         UF(r);
         r = RF(M2);
     }
@@ -770,7 +771,7 @@ static mpdm_t constant_fold(mpdm_t i)
 
         /* execute the instruction and convert to LITERAL */
         v = mpsl_exec_p(i, NULL, NULL);
-        i = mpsl_mkins(L"LITERAL", 1, v, NULL, NULL);
+        i = mpsl_mkins(L"LITERAL", 1, v, NULL, NULL, NULL);
     }
 
     return i;
@@ -778,7 +779,7 @@ static mpdm_t constant_fold(mpdm_t i)
 
 
 mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2,
-                  mpdm_t a3)
+                  mpdm_t a3, mpdm_t a4)
 /* creates an instruction */
 {
     mpdm_t o;
@@ -792,6 +793,7 @@ mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2,
     mpdm_aset(v, o, 0);
 
     switch (args) {
+    case 4: mpdm_aset(v, a4, 4); /* no break */
     case 3: mpdm_aset(v, a3, 3); /* no break */
     case 2: mpdm_aset(v, a2, 2); /* no break */
     case 1: mpdm_aset(v, a1, 1); /* no break */

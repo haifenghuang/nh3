@@ -4,6 +4,7 @@ MPSL Release Notes
 2.0.0
 -----
 
+ - A new C-like for() control flow construction.
  - Updated to match MPDM refactoring (no more sweeping /
    garbage collection).
  - New multithreading support:

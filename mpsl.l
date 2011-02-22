@@ -154,6 +154,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER}|{BININTEGER})
 
 "NULL"		return NULLV;
 "while"		return WHILE;
+"for"       return FOR;
 "if"		return IF;
 "else"		return ELSE;
 "sub"		return SUB;

@@ -59,10 +59,11 @@ extern mpdm_t mpsl_lc;
 int yylex(void);
 void yyerror(char *s);
 
-#define INS0(o)             mpsl_mkins(o, 0, NULL, NULL, NULL)
-#define INS1(o,a1)          mpsl_mkins(o, 1, a1, NULL, NULL)
-#define INS2(o,a1,a2)       mpsl_mkins(o, 2, a1, a2, NULL)
-#define INS3(o,a1,a2,a3)    mpsl_mkins(o, 3, a1, a2, a3)
+#define INS0(o)             mpsl_mkins(o, 0, NULL, NULL, NULL, NULL)
+#define INS1(o,a1)          mpsl_mkins(o, 1, a1, NULL, NULL, NULL)
+#define INS2(o,a1,a2)       mpsl_mkins(o, 2, a1, a2, NULL, NULL)
+#define INS3(o,a1,a2,a3)    mpsl_mkins(o, 3, a1, a2, a3, NULL)
+#define INS4(o,a1,a2,a3,a4) mpsl_mkins(o, 4, a1, a2, a3, a4)
 
 static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2, int sf)
 /* creates an executable value with the MPSL executor as the first
@@ -70,7 +71,7 @@ static mpdm_t mpsl_x(mpdm_t a1, mpdm_t a2, int sf)
 {
     return MPDM_X2(mpsl_exec_p,
                    mpsl_mkins(sf ? L"SUBFRAME" : L"BLKFRAME",
-                              a2 == NULL ? 1 : 2, a1, a2, NULL));
+                              a2 == NULL ? 1 : 2, a1, a2, NULL, NULL));
 }
 
 
@@ -88,7 +89,7 @@ static void compiler_warning(char *str)
 };
 
 %token <v> NULLV INTEGER REAL STRING SYMBOL LITERAL
-%token WHILE IF SUB FOREACH LOCAL BREAK RETURN
+%token WHILE FOR IF SUB FOREACH LOCAL BREAK RETURN
 %nonassoc IFI
 %nonassoc ELSE
 
@@ -133,6 +134,11 @@ stmt:
 					/* while loop */
 					$$ = INS2(L"WHILE", $3, $5);
 				}
+    | FOR '(' expr ';' expr ';' expr ')' stmt
+                {
+                    /* for loop */
+                    $$ = INS4(L"WHILE", $5, $7, $3, $9);
+                }
 	| IF '(' expr ')' stmt %prec IFI
 				{
 					/* if - then construction */
