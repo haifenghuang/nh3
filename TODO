@@ -6,6 +6,7 @@ Release Critical Bugs
 
  * 1128: Document the _ array in functions.
  * 1129: Document the new multithreading support.
+ * 1130: Document the for() instruction.
 
 Open Bugs
 ---------
