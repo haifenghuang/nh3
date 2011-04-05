@@ -14,7 +14,6 @@ Open Bugs
  * 1112: Document the difference regarding local variable access in
    named and anonymous subroutines.
  * 1119: Fix bincall() in 64 bit systems.
- * 1127: Document the new inverse calling syntax.
  * 1132: Fix for() to allow an instruction (and not just an expression)
    in the 'init' part.
 
@@ -210,5 +209,7 @@ Closed
    (Tue, 05 Apr 2011 09:48:37 +0200)
  * 1130: Document the for() instruction
    (Tue, 05 Apr 2011 13:07:58 +0200).
+ * 1127: Document the new inverse calling syntax
+   (Tue, 05 Apr 2011 13:18:26 +0200).
 
 Email bugs to angel@triptico.com

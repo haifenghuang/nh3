@@ -56,6 +56,25 @@ parentheses, and separate them by commas:
 
 Parentheses are needed even if a function has no arguments.
 
+An alternative to this standard way of function calls, new in MSPL 2.x, is
+what is named the 'inverse' calling syntax, in which the first argument of
+a function is specified before the function call itself; for example,
+
+ print("Hello!\n");
+
+can also be expressed as
+
+ "Hello\n"->print();
+
+Which is convenient when calling a long list of functions that process
+the output of another, like in
+
+ func3(func2(func1(func0(first_value, arg0), arg1), arg2), arg3)
+
+that can be better expressed as
+
+ first_value->func0(arg0)->func1(arg1)->func2(arg2)->func3(arg3)
+
 True and false
 ~~~~~~~~~~~~~~
 
@@ -271,7 +290,7 @@ as in C.
 For
 ~~~
 
-A C-like `for' is also available from version 2.0.0. For example:
+A C-like `for' is also available from version 2.x. For example:
 
  for (n = 0; n < 10; n++)
      print(n, "\n");
