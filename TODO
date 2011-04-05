@@ -204,5 +204,7 @@ Closed
  * 1123: Invert regex() arguments (Thu, 03 Feb 2011 15:59:47 +0100).
  * 1069: Implement a C-like for() instruction
    (Tue, 22 Feb 2011 13:57:01 +0100).
+ * 1131: Do not create the subroutine _ argument if there is nothing
+   to store into (Tue, 05 Apr 2011 09:33:23 +0200).
 
 Email bugs to angel@triptico.com
