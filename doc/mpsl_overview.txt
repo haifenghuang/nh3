@@ -60,11 +60,11 @@ An alternative to this standard way of function calls, new in MSPL 2.x, is
 what is named the 'inverse' calling syntax, in which the first argument of
 a function is specified before the function call itself; for example,
 
- print("Hello!\n");
+ print('Hello!', "\n");
 
 can also be expressed as
 
- "Hello\n"->print();
+ 'Hello'->print("\n");
 
 Which is convenient when calling a long list of functions that process
 the output of another, like in
