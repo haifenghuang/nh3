@@ -354,6 +354,9 @@ The well known binary +=, -=, *=, /= and %= also exist:
 Subroutines
 -----------
 
+Overview
+~~~~~~~~
+
 Subroutines (also called functions) are created with the 'sub' keyword:
 
  sub main_loop
@@ -389,6 +392,9 @@ it will change the original value:
  my_q = [ 10, 20, 30 ];
  dequeue(my_q);		/* on exit, my_q will contain only [ 10, 20 ] */
 
+Return value
+~~~~~~~~~~~~
+
 As every code fragment in MPSL, subroutines always return a value. By
 default, a subroutine returns the result of the last operation:
 
@@ -417,6 +423,9 @@ it's not called, but a pointer to it returned instead:
  b = sum;		/* b has a pointer to the sum subroutine */
  
  c = b(20, 30);		/* c == 50, same as calling sum(20, 30) */
+
+Anonymous subroutines
+~~~~~~~~~~~~~~~~~~~~~
 
 The `sub' directive can also be used as an rvalue to define anonymous
 subroutines. So, the following can be done:
@@ -450,6 +459,9 @@ in different ways:
  /* numeric sort (instead of plain ASCII) */
  sorted_ary = sort(unsorted_ary, sub (a, b) { a - b; } );
 
+Scope
+~~~~~
+
 Subroutines are defined in execution time and *not* in compilation time.
 This means that you can redefine a subroutine whenever you want, but be
 aware that you can't use it before the `sub' instruction has been
@@ -466,6 +478,32 @@ executed. This is a common pitfall:
 It's easier to see subroutine definitions as an assignation of a code
 block to a variable: you would never access a variable before assigning a
 value to it.
+
+Variable number of arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If a subroutine is called with more arguments that those specified in the
+definition, the list of values is stored inside the _ local list, making
+possible to implement variable argument functions. For example:
+
+ sub sum {
+     local total = 0;
+ 
+     /* loop all arguments and sum them */
+     foreach (v, _)
+         total += v;
+ 
+     return total;
+ }
+
+This function allows being called with an arbitrary number of arguments, as
+in
+
+ a = sum(1, 2, 3);
+ b = sum(10, 20, 30, 40, 50);
+
+Both traditionally named arguments and these unnamed ones can be combined.
+The _ local array will only be defined if there are 'lost' arguments.
 
 Builtin functions
 -----------------
