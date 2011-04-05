@@ -99,7 +99,11 @@ foreach (v, a) {	Iterate the array a, assigning
    statement list;	each element to v and
 }			executing list
 
-break;			Exits loop in while and foreach
+for (init; cond; after) {	C-like loop
+   statement list;
+}
+
+break;			Exits loop in while, foreach and for
 
 *String functions
 
