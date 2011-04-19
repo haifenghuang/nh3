@@ -258,7 +258,7 @@ uc(str);		Returns str to uppercase
 lc(str);		Returns str to lowercase
 time();			Returns the time in seconds
 x = compile(str);	Compiles a str of MPSL code
-sleep(msecs);	Sleeps a numb er of milliseconds
+sleep(msecs);	Sleeps a number of milliseconds
 
 *String escapes for double quotes
 
