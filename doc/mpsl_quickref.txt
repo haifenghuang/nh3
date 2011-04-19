@@ -224,6 +224,16 @@ res = sregex(str, reg,	Matches the reg regexp into
 sub func(m) { ... };	return value of func using
 			the matched string as argument
 
+*Multitasking
+
+&func(args);		Executes func() in a new thread
+m = mutex();		Creates a mutex
+mutex_lock(m);		Locks a mutex
+mutex_unlock(m);	Unlocks a mutex
+s = semaphore();	Creates a semaphore
+semaphore_wait(s);	Waits on a semaphore
+semaphore_post(s);	Posts on a semaphore
+
 *Miscellaneous functions
 
 s = size(str);		Returns the length of str
@@ -248,6 +258,7 @@ uc(str);		Returns str to uppercase
 lc(str);		Returns str to lowercase
 time();			Returns the time in seconds
 x = compile(str);	Compiles a str of MPSL code
+sleep(msecs);	Sleeps a numb er of milliseconds
 
 *String escapes for double quotes
 

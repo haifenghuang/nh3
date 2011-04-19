@@ -1008,6 +1008,45 @@ The load() function can be used to load, compile and execute an MPSL
 source file. The file will be searched for using the paths in the INC
 array.
 
+Multitasking
+------------
+
+Since version 2.x, MPSL includes native multitasking / multithreading
+support.
+
+To execute a subroutine asynchronously, prepend the function call with
+a & (ampersand).
+
+ /* saves the results in a different thread */
+ &save_data(filename, data);
+
+To ease thread synchronisation, two objects are now available: mutexes
+and semaphores. The semantics are as usual.
+
+ /* creates a new mutex */
+ local m = mutex();
+ 
+ /* locks a mutex */
+ mutex_lock(m);
+ 
+ /* unlocks it */
+ mutex_unlock(m);
+ 
+ /* creates a semaphore */
+ local s = semaphore();
+ 
+ /* waits on a semaphore */
+ semaphore_wait(s);
+ 
+ /* posts to a semaphore (waking up threads waiting on it) */
+ semaphore_post(s);
+
+Though not explictly thread-related, the sleep() function suspends
+the thread a specific number of milliseconds.
+
+ /* sleeps for a second */
+ sleep(1000);
+
 Special symbols
 ---------------
 
