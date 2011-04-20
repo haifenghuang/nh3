@@ -137,7 +137,7 @@ stmt:
     | FOR '(' expr ';' expr ';' expr ')' stmt
                 {
                     /* for loop */
-                    $$ = INS4(L"WHILE", $5, $7, $3, $9);
+                    $$ = INS4(L"WHILE", $5, $9, $3, $7);
                 }
 	| IF '(' expr ')' stmt %prec IFI
 				{

@@ -213,5 +213,6 @@ Closed
    (Tue, 05 Apr 2011 13:18:26 +0200).
  * 1129: Document the new multithreading support
    (Tue, 19 Apr 2011 09:49:07 +0200).
+ * 1133: Fix for() (Wed, 20 Apr 2011 06:35:17 +0200).
 
 Email bugs to angel@triptico.com

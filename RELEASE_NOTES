@@ -1,6 +1,12 @@
 MPSL Release Notes
 ==================
 
+2.0.1
+-----
+
+ - Bugfixes:
+    - Fixed for() loop.
+
 2.0.0
 -----
 
