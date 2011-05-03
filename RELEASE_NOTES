@@ -5,7 +5,8 @@ MPSL Release Notes
 -----
 
  - Bugfixes:
-    - Fixed for() loop.
+    - Several fixes to for() construction: fixed incorrect
+      calling order and for (;;) is accepted for infinite loops.
 
 2.0.0
 -----

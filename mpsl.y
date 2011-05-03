@@ -139,6 +139,11 @@ stmt:
                     /* for loop */
                     $$ = INS4(L"WHILE", $5, $9, $3, $7);
                 }
+    | FOR '(' ';' ';' ')' stmt
+                {
+                    /* infinite loop */
+                    $$ = INS2(L"WHILE", INS1(L"LITERAL", MPDM_I(1)), $6);
+                }
 	| IF '(' expr ')' stmt %prec IFI
 				{
 					/* if - then construction */
