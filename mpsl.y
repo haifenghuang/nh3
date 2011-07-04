@@ -96,7 +96,7 @@ static void compiler_warning(char *str)
 %left BOOLAND BOOLOR
 %left INC DEC IADD ISUB IMUL IDIV IMOD IBITAND IBITOR IBITXOR ISHR ISHL
 %left '!'
-%left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE ARROW RANGE '>''<' INVCALL
+%left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE ARROW ':' RANGE '>''<' INVCALL
 %left AMPERSAND
 %left BITOR BITXOR
 %left SHL SHR
@@ -274,16 +274,25 @@ sym_list:
 	;
 
 hash:
-	expr ARROW expr	{
-					$$ = INS2(L"HASH", $1, $3);
-				}
-	| hash ',' expr ARROW expr
-				{
-					/* build hash from list of
-					   instructions */
-					$$ = INS3(L"HASH", $3, $5, $1);
-				}
-	;
+    expr ARROW expr {
+                $$ = INS2(L"HASH", $1, $3);
+                }
+    | SYMBOL ':' expr {
+                $$ = INS2(L"HASH", INS1(L"LITERAL", $1), $3);
+                }
+    | hash ',' expr ARROW expr
+                {
+                    /* build hash from list of
+                       instructions */
+                    $$ = INS3(L"HASH", $3, $5, $1);
+                }
+    | hash ',' SYMBOL ':' expr
+                {
+                    /* build hash from list of
+                       instructions */
+                    $$ = INS3(L"HASH", INS1(L"LITERAL", $3), $5, $1);
+                }
+    ;
 
 compsym:
 	SYMBOL			{
