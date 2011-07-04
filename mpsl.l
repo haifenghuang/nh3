@@ -169,7 +169,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER}|{BININTEGER})
 "<="		return NUMLE;
 "&&"		return BOOLAND;
 "||"		return BOOLOR;
-"=>"		return HASHPAIR;
+"=>"		return ARROW;
 ".."		return RANGE;
 "&"		return AMPERSAND;
 "|"		return BITOR;

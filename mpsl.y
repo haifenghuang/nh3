@@ -96,7 +96,7 @@ static void compiler_warning(char *str)
 %left BOOLAND BOOLOR
 %left INC DEC IADD ISUB IMUL IDIV IMOD IBITAND IBITOR IBITXOR ISHR ISHL
 %left '!'
-%left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE HASHPAIR RANGE '>''<' INVCALL
+%left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE ARROW RANGE '>''<' INVCALL
 %left AMPERSAND
 %left BITOR BITXOR
 %left SHL SHR
@@ -274,10 +274,10 @@ sym_list:
 	;
 
 hash:
-	expr HASHPAIR expr	{
+	expr ARROW expr	{
 					$$ = INS2(L"HASH", $1, $3);
 				}
-	| hash ',' expr HASHPAIR expr
+	| hash ',' expr ARROW expr
 				{
 					/* build hash from list of
 					   instructions */
