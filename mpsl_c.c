@@ -180,6 +180,22 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
 }
 
 
+mpdm_t mpsl_get_symbol_i(mpdm_t s, mpdm_t l, int i)
+{
+    mpdm_t r;
+
+    mpdm_ref(s);
+    mpdm_ref(l);
+
+    r = mpdm_sget_i(find_local_symtbl(s, l), s, i);
+
+    mpdm_unref(l);
+    mpdm_unref(s);
+
+    return r;
+}
+
+
 /**
  * mpsl_get_symbol - Gets the value of a symbol.
  * @s: symbol name
@@ -190,17 +206,7 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
  */
 mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t l)
 {
-    mpdm_t r;
-
-    mpdm_ref(s);
-    mpdm_ref(l);
-
-    r = mpdm_sget(find_local_symtbl(s, l), s);
-
-    mpdm_unref(l);
-    mpdm_unref(s);
-
-    return r;
+    return mpsl_get_symbol_i(s, l, 0);
 }
 
 
@@ -500,6 +506,12 @@ O_TYPE execsym(O_ARGS, int th)
         UF(t);
     }
     else {
+        /* does the symbol have more than one part? */
+        if (MPDM_IS_ARRAY(s) && mpdm_size(s) > 1) {
+            /* if so, store the prefix into local variable 'this' */
+            mpsl_set_symbol(MPDM_LS(L"this"), mpsl_get_symbol_i(s, l, 1), l);
+        }
+
         /* execute */
         r = th ? mpdm_exec_thread(v, M2, l) : mpdm_exec(v, M2, l);
     }
