@@ -21,6 +21,7 @@ typedef enum {
     OP_SUB,
     OP_MUL,
     OP_DIV,
+    OP_LT,
     OP_PC,
     OP_PATH,
     OP_RETURN,
@@ -66,8 +67,8 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
     case OP_MUL:
     case OP_DIV:
         {
-            double v1   = mpdm_rval(mpdm_pop(stack));
             double v2   = mpdm_rval(mpdm_pop(stack));
+            double v1   = mpdm_rval(mpdm_pop(stack));
             double r;
 
             switch (opcode) {
@@ -78,6 +79,21 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
             }
 
             mpdm_push(stack, MPDM_R(r));
+        }
+
+        break;
+
+    case OP_LT:
+        {
+            double v2   = mpdm_rval(mpdm_pop(stack));
+            double v1   = mpdm_rval(mpdm_pop(stack));
+            int r;
+
+            switch (opcode) {
+            case OP_LT:     r = v1 < v2; break;
+            }
+
+            mpdm_push(stack, MPDM_I(r));
         }
 
         break;
@@ -251,6 +267,10 @@ int main(int argc, char *argv[])
     prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
     rs_mpsl_reset_machine(machine);
 
+    add_ins_1(prg, OP_LITERAL, MPDM_I(1));
+    add_ins_1(prg, OP_LITERAL, MPDM_I(2));
+    add_ins_0(prg, OP_LT);
+    add_ins_0(prg, OP_PRINT);
     add_ins_0(prg, OP_PATH);
     add_ins_1(prg, OP_LITERAL, MPDM_LS(L"true\n"));
     add_ins_0(prg, OP_PRINT);
@@ -273,6 +293,58 @@ int main(int argc, char *argv[])
     add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
     add_ins_0(prg, OP_SYMVAL);
     add_ins_0(prg, OP_PRINT);
+    add_ins_1(prg, OP_LITERAL, MPDM_I(3));
+    add_ins_1(prg, OP_LITERAL, MPDM_I(4));
+    add_ins_0(prg, OP_ADD);
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
+    add_ins_0(prg, OP_ASSIGN);
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
+    add_ins_0(prg, OP_SYMVAL);
+    add_ins_0(prg, OP_PRINT);
+
+    /* VAR1 = VAR1 + 4 ; print VAR1 */
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
+    add_ins_0(prg, OP_SYMVAL);
+    add_ins_1(prg, OP_LITERAL, MPDM_I(4));
+    add_ins_0(prg, OP_ADD);
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
+    add_ins_0(prg, OP_ASSIGN);
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
+    add_ins_0(prg, OP_SYMVAL);
+    add_ins_0(prg, OP_PRINT);
+
+    rs_mpsl_exec(machine, 0);
+
+    prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
+    rs_mpsl_reset_machine(machine);
+
+    /* VAR1 = 0 */
+    add_ins_1(prg, OP_LITERAL, MPDM_I(0));
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
+    add_ins_0(prg, OP_ASSIGN);
+
+    /* { print VAR1; print "\n"; VAR1 = VAR1 + 1; } */
+    add_ins_0(prg, OP_PATH);
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
+    add_ins_0(prg, OP_SYMVAL);
+    add_ins_0(prg, OP_PRINT);
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"\n"));
+    add_ins_0(prg, OP_PRINT);
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
+    add_ins_0(prg, OP_SYMVAL);
+    add_ins_1(prg, OP_LITERAL, MPDM_I(1));
+    add_ins_0(prg, OP_ADD);
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
+    add_ins_0(prg, OP_ASSIGN);
+    add_ins_0(prg, OP_RETURN);
+
+    /* | VAR1 < 10 while */
+    add_ins_0(prg, OP_PC);
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
+    add_ins_0(prg, OP_SYMVAL);
+    add_ins_1(prg, OP_LITERAL, MPDM_I(10));
+    add_ins_0(prg, OP_LT);
+    add_ins_0(prg, OP_WHILE);
 
     rs_mpsl_exec(machine, 0);
 
