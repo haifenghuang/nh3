@@ -22,6 +22,9 @@ typedef enum {
     OP_MUL,
     OP_DIV,
     OP_LT,
+    OP_LE,
+    OP_GT,
+    OP_GE,
     OP_PC,
     OP_PATH,
     OP_RETURN,
@@ -84,6 +87,9 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
         break;
 
     case OP_LT:
+    case OP_LE:
+    case OP_GT:
+    case OP_GE:
         {
             double v2   = mpdm_rval(mpdm_pop(stack));
             double v1   = mpdm_rval(mpdm_pop(stack));
@@ -91,6 +97,9 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
 
             switch (opcode) {
             case OP_LT:     r = v1 < v2; break;
+            case OP_LE:     r = v1 <= v2; break;
+            case OP_GT:     r = v1 > v2; break;
+            case OP_GE:     r = v1 >= v2; break;
             }
 
             mpdm_push(stack, MPDM_I(r));
