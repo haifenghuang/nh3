@@ -266,6 +266,7 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
     max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0x7fffffff;
 
     while (
+        pc < mpdm_size(prg) &&
         (ret = rs_mpsl_exec1(prg, stack, c_stack, &pc)) > 0 &&
         clock() < max
     );
@@ -391,7 +392,7 @@ int main(int argc, char *argv[])
     printf("*\n");
     rs_mpsl_exec(machine, 1);
     printf("*\n");
-/*    rs_mpsl_exec(machine, 0);*/
+    rs_mpsl_exec(machine, 0);
 
     prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
     rs_mpsl_reset_machine(machine);
