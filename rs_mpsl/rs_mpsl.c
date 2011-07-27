@@ -28,6 +28,7 @@ typedef enum {
     OP_GT,
     OP_GE,
     OP_PC,
+    OP_CALL,
     OP_PATH,
     OP_RETURN,
     OP_IF,
@@ -35,10 +36,10 @@ typedef enum {
     OP_WHILE,
     OP_ASSIGN,
     OP_SYMVAL,
-    OP_PRINT,
-    OP_DUMP,
     OP_APUSH,
-    OP_HSET
+    OP_HSET,
+    OP_PRINT,
+    OP_DUMP
 } mpsl_op_t;
 
 #define mpsl_is_true(v) mpdm_ival(v)
@@ -117,6 +118,25 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
     case OP_PC:
         /* push the program counter */
         mpdm_push(stack, MPDM_I(pc));
+        break;
+
+    case OP_CALL:
+        /* call the value on the stack */
+        {
+            mpdm_t x = mpdm_pop(stack);
+
+            /* executable value? arguments are in the stack in an array */
+            if (MPDM_IS_EXEC(x)) {
+                mpdm_t args = mpdm_pop(stack);
+                mpdm_push(stack, mpdm_exec(x, args, NULL));
+            }
+            else {
+                /* "lightweight" call */
+                mpdm_push(c_stack, MPDM_I(pc));
+                pc = mpdm_ival(x);
+            }
+        }
+
         break;
 
     case OP_PATH:
@@ -444,6 +464,33 @@ int main(int argc, char *argv[])
     add_arg(prg, MPDM_LS(L"Courier"));
     add_ins(prg, OP_HSET);
     add_ins(prg, OP_DUMP);
+
+    rs_mpsl_exec(machine, 0);
+
+    prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
+    rs_mpsl_reset_machine(machine);
+
+    /* { + 2 / } "avg" = */
+    add_ins(prg, OP_PATH);
+    add_ins(prg, OP_ADD);
+    add_ins(prg, OP_LITERAL);
+    add_arg(prg, MPDM_I(2));
+    add_ins(prg, OP_DIV);
+    add_ins(prg, OP_RETURN);
+    add_ins(prg, OP_LITERAL);
+    add_arg(prg, MPDM_LS(L"avg"));
+    add_ins(prg, OP_ASSIGN);
+
+    /* 3 4 "avg" $ & ? */
+    add_ins(prg, OP_LITERAL);
+    add_arg(prg, MPDM_I(3));
+    add_ins(prg, OP_LITERAL);
+    add_arg(prg, MPDM_I(4));
+    add_ins(prg, OP_LITERAL);
+    add_arg(prg, MPDM_LS(L"avg"));
+    add_ins(prg, OP_SYMVAL);
+    add_ins(prg, OP_CALL);
+    add_ins(prg, OP_PRINT);
 
     rs_mpsl_exec(machine, 0);
 
