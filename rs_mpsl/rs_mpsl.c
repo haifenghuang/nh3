@@ -35,7 +35,9 @@ typedef enum {
     OP_WHILE,
     OP_ASSIGN,
     OP_SYMVAL,
-    OP_PRINT
+    OP_PRINT,
+    OP_DUMP,
+    OP_APUSH
 } mpsl_op_t;
 
 #define mpsl_is_true(v) mpdm_ival(v)
@@ -209,6 +211,14 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
         mpdm_write_wcs(stdout, mpdm_string(mpdm_pop(stack)));
         break;
 
+    case OP_DUMP:
+        {
+            mpdm_t v = mpdm_pop(stack);
+            mpdm_dump(v);
+            mpdm_void(v);
+        }
+        break;
+
     case OP_ASSIGN:
         /* assign a value to a symbol */
         {
@@ -221,6 +231,14 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
     case OP_SYMVAL:
         /* get symbol value */
         mpdm_push(stack, mpdm_hget(mpdm_root(), mpdm_pop(stack)));
+        break;
+
+    case OP_APUSH:
+        /* pushes a value into an array on the stack */
+        {
+            mpdm_t v = mpdm_pop(stack);
+            mpdm_push(mpdm_aget(stack, -1), v);
+        }
         break;
     }
 
@@ -366,13 +384,25 @@ int main(int argc, char *argv[])
     add_ins_0(prg, OP_PC);
     add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
     add_ins_0(prg, OP_SYMVAL);
-    add_ins_1(prg, OP_LITERAL, MPDM_I(100000));
+    add_ins_1(prg, OP_LITERAL, MPDM_I(10));
     add_ins_0(prg, OP_LT);
     add_ins_0(prg, OP_WHILE);
 
     printf("*\n");
     rs_mpsl_exec(machine, 1);
     printf("*\n");
+/*    rs_mpsl_exec(machine, 0);*/
+
+    prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
+    rs_mpsl_reset_machine(machine);
+
+    add_ins_1(prg, OP_LITERAL, MPDM_A(0));
+    add_ins_1(prg, OP_LITERAL, MPDM_I(1));
+    add_ins_0(prg, OP_APUSH);
+    add_ins_1(prg, OP_LITERAL, MPDM_I(2));
+    add_ins_0(prg, OP_APUSH);
+    add_ins_0(prg, OP_DUMP);
+
     rs_mpsl_exec(machine, 0);
 
     return 0;
