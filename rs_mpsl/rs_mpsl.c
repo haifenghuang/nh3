@@ -210,7 +210,7 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
         /* in the stack:
             <body pc> <condition pc> <condition>
         */
-        if (mpdm_ival(mpdm_pop(stack))) {
+        if (mpsl_is_true(mpdm_pop(stack))) {
             /* set the return address to the cond. pc */
             mpdm_push(c_stack, mpdm_aget(stack, -1));
 
