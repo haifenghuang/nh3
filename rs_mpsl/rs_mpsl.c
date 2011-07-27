@@ -37,7 +37,8 @@ typedef enum {
     OP_SYMVAL,
     OP_PRINT,
     OP_DUMP,
-    OP_APUSH
+    OP_APUSH,
+    OP_HSET
 } mpsl_op_t;
 
 #define mpsl_is_true(v) mpdm_ival(v)
@@ -240,6 +241,14 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
             mpdm_push(mpdm_aget(stack, -1), v);
         }
         break;
+
+    case OP_HSET:
+        /* sets a hash's key/value pair */
+        {
+            mpdm_t v = mpdm_pop(stack);
+            mpdm_t k = mpdm_pop(stack);
+            mpdm_hset(mpdm_aget(stack, -1), k, v);
+        }
     }
 
     *ppc = pc;
@@ -402,6 +411,17 @@ int main(int argc, char *argv[])
     add_ins_0(prg, OP_APUSH);
     add_ins_1(prg, OP_LITERAL, MPDM_I(2));
     add_ins_0(prg, OP_APUSH);
+    add_ins_0(prg, OP_DUMP);
+
+    rs_mpsl_exec(machine, 0);
+
+    prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
+    rs_mpsl_reset_machine(machine);
+
+    add_ins_1(prg, OP_LITERAL, MPDM_H(0));
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"font_face"));
+    add_ins_1(prg, OP_LITERAL, MPDM_LS(L"Courier"));
+    add_ins_0(prg, OP_HSET);
     add_ins_0(prg, OP_DUMP);
 
     rs_mpsl_exec(machine, 0);
