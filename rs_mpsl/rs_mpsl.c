@@ -62,7 +62,7 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
     switch (opcode) {
     case OP_LITERAL:
         /* literal: push argument */
-        mpdm_push(stack, mpdm_aget(op, 1));
+        mpdm_push(stack, mpdm_clone(mpdm_aget(op, 1)));
         break;
 
     case OP_ADD:
