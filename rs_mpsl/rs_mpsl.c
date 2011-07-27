@@ -34,6 +34,7 @@ typedef enum {
     OP_IF,
     OP_IFELSE,
     OP_WHILE,
+    OP_FOREACH,
     OP_ASSIGN,
     OP_SYMVAL,
     OP_APUSH,
@@ -224,6 +225,38 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
 
         break;
 
+    case OP_FOREACH:
+        /* in the stack:
+            <body pc> <array> <iterator>
+        */
+        {
+            int i = mpdm_ival(mpdm_pop(stack));
+            mpdm_t v;
+
+            if (mpdm_iterator(mpdm_aget(stack, -1), &i, &v, NULL)) {
+                /* another iteration */
+
+                /* push return value back over 'foreach' */
+                mpdm_push(c_stack, MPDM_I(pc - 1));
+
+                /* call the body */
+                pc = mpdm_ival(mpdm_aget(stack, -2));
+
+                /* stack the iterator back */
+                mpdm_push(stack, MPDM_I(i));
+
+                /* stack the element (the body should pick it) */
+                mpdm_push(stack, v);
+            }
+            else {
+                /* clean stack */
+                mpdm_adel(stack, -1);
+                mpdm_adel(stack, -1);
+            }
+        }
+
+        break;
+
     case OP_PRINT:
         /* prints the value in the stack */
         mpdm_write_wcs(stdout, mpdm_string(mpdm_pop(stack)));
@@ -319,6 +352,7 @@ int main(int argc, char *argv[])
     mpdm_t v;
     mpdm_t machine, prg;
     int ret;
+    int n;
 
     mpdm_startup();
 
@@ -491,6 +525,30 @@ int main(int argc, char *argv[])
     add_ins(prg, OP_SYMVAL);
     add_ins(prg, OP_CALL);
     add_ins(prg, OP_PRINT);
+
+    rs_mpsl_exec(machine, 0);
+
+    prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
+    rs_mpsl_reset_machine(machine);
+
+    /* { ? } */
+    add_ins(prg, OP_PATH);
+    add_ins(prg, OP_PRINT);
+    add_ins(prg, OP_RETURN);
+
+    /* [1..10] 0 foreach */
+    add_ins(prg, OP_LITERAL);
+    v = MPDM_A(0);
+    mpdm_ref(v);
+    for (n = 10; n < 20; n++)
+        mpdm_push(v, MPDM_I(n));
+
+    add_arg(prg, v);
+    mpdm_unref(v);
+
+    add_ins(prg, OP_LITERAL);
+    add_arg(prg, MPDM_I(0));
+    add_ins(prg, OP_FOREACH);
 
     rs_mpsl_exec(machine, 0);
 
