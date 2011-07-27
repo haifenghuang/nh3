@@ -227,6 +227,7 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
     return ret;
 }
 
+#include <time.h>
 
 int rs_mpsl_exec(mpdm_t machine, int msecs)
 {
@@ -235,8 +236,15 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
     mpdm_t stack    = mpdm_hget_s(machine, L"stack");
     mpdm_t c_stack  = mpdm_hget_s(machine, L"c_stack");
     int pc          = mpdm_ival(mpdm_hget_s(machine, L"pc"));
+    clock_t max;
 
-    while ((ret = rs_mpsl_exec1(prg, stack, c_stack, &pc)) > 0);
+    /* maximum running time */
+    max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0x7fffffff;
+
+    while (
+        (ret = rs_mpsl_exec1(prg, stack, c_stack, &pc)) > 0 &&
+        clock() < max
+    );
 
     mpdm_hset_s(machine, L"pc", MPDM_I(pc));
 
@@ -269,6 +277,7 @@ int main(int argc, char *argv[])
 {
     mpdm_t v;
     mpdm_t machine, prg;
+    int ret;
 
     mpdm_startup();
 
@@ -351,10 +360,13 @@ int main(int argc, char *argv[])
     add_ins_0(prg, OP_PC);
     add_ins_1(prg, OP_LITERAL, MPDM_LS(L"VAR1"));
     add_ins_0(prg, OP_SYMVAL);
-    add_ins_1(prg, OP_LITERAL, MPDM_I(10));
+    add_ins_1(prg, OP_LITERAL, MPDM_I(100000));
     add_ins_0(prg, OP_LT);
     add_ins_0(prg, OP_WHILE);
 
+    printf("*\n");
+    rs_mpsl_exec(machine, 1);
+    printf("*\n");
     rs_mpsl_exec(machine, 0);
 
     return 0;
