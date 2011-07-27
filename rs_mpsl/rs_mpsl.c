@@ -22,6 +22,7 @@ typedef enum {
     OP_MUL,
     OP_DIV,
     OP_EQ,
+    OP_NEQ,
     OP_LT,
     OP_LE,
     OP_GT,
@@ -88,6 +89,7 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
         break;
 
     case OP_EQ:
+    case OP_NEQ:
     case OP_LT:
     case OP_LE:
     case OP_GT:
@@ -99,6 +101,7 @@ int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
 
             switch (opcode) {
             case OP_EQ:     r = v1 == v2; break;
+            case OP_NEQ:    r = v1 != v2; break;
             case OP_LT:     r = v1 < v2; break;
             case OP_LE:     r = v1 <= v2; break;
             case OP_GT:     r = v1 > v2; break;
