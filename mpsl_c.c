@@ -62,7 +62,7 @@ int mpsl_is_true(mpdm_t v)
 
     /* if it's a printable string... */
     if (v->flags & MPDM_STRING) {
-        wchar_t *ptr = (wchar_t *) v->data;
+        wchar_t *ptr = mpdm_string(v);
 
         /* ... and it's "" or the "0" string, it's false */
         if (*ptr == L'\0' || (*ptr == L'0' && *(ptr + 1) == L'\0'))
