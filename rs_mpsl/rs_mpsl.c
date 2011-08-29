@@ -29,7 +29,7 @@ typedef enum {
     OP_GE,
     OP_PC,
     OP_CALL,
-    OP_PATH,
+    OP_POST,
     OP_RETURN,
     OP_IF,
     OP_IFELSE,
@@ -148,8 +148,8 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
     
             break;
     
-        case OP_PATH:
-            /* new code path */
+        case OP_POST:
+            /* 'postponed' code */
             mpdm_push(stack, MPDM_I(pc));
     
             {
@@ -159,7 +159,7 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
                 while (l && pc < mpdm_size(prg)) {
                     opcode = mpdm_ival(mpdm_aget(prg, pc++));
     
-                    if (opcode == OP_PATH)
+                    if (opcode == OP_POST)
                         l++;
                     if (opcode == OP_RETURN)
                         l--;
@@ -350,12 +350,12 @@ int main(int argc, char *argv[])
     add_arg(prg, MPDM_I(2));
     add_ins(prg, OP_LT);
     add_ins(prg, OP_PRINT);
-    add_ins(prg, OP_PATH);
+    add_ins(prg, OP_POST);
     add_ins(prg, OP_LITERAL);
     add_arg(prg, MPDM_LS(L"true\n"));
     add_ins(prg, OP_PRINT);
     add_ins(prg, OP_RETURN);
-    add_ins(prg, OP_PATH);
+    add_ins(prg, OP_POST);
     add_ins(prg, OP_LITERAL);
     add_arg(prg, MPDM_LS(L"false\n"));
     add_ins(prg, OP_PRINT);
@@ -422,7 +422,7 @@ int main(int argc, char *argv[])
     add_ins(prg, OP_ASSIGN);
 
     /* { print VAR1; print "\n"; VAR1 = VAR1 + 1; } */
-    add_ins(prg, OP_PATH);
+    add_ins(prg, OP_POST);
     add_ins(prg, OP_LITERAL);
     add_arg(prg, MPDM_LS(L"VAR1"));
     add_ins(prg, OP_SYMVAL);
@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
     rs_mpsl_reset_machine(machine);
 
     /* { + 2 / } "avg" = */
-    add_ins(prg, OP_PATH);
+    add_ins(prg, OP_POST);
     add_ins(prg, OP_ADD);
     add_ins(prg, OP_LITERAL);
     add_arg(prg, MPDM_I(2));
@@ -516,7 +516,7 @@ int main(int argc, char *argv[])
     rs_mpsl_reset_machine(machine);
 
     /* { ? } */
-    add_ins(prg, OP_PATH);
+    add_ins(prg, OP_POST);
     add_ins(prg, OP_PRINT);
     add_ins(prg, OP_RETURN);
 
