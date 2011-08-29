@@ -53,268 +53,11 @@ void rs_mpsl_reset_machine(mpdm_t machine)
 }
 
 
-int rs_mpsl_exec1(mpdm_t prg, mpdm_t stack, mpdm_t c_stack, int *ppc)
-{
-    mpsl_op_t opcode;
-    int pc;
-    int ret = 1;
-
-    pc = *ppc;
-
-    /* get the opcode */
-    opcode = mpdm_ival(mpdm_aget(prg, pc++));
-
-    switch (opcode) {
-    case OP_LITERAL:
-        /* literal: next thing in pc is the literal */
-        mpdm_push(stack, mpdm_clone(mpdm_aget(prg, pc++)));
-        break;
-
-    case OP_ADD:
-    case OP_SUB:
-    case OP_MUL:
-    case OP_DIV:
-        {
-            double v2   = mpdm_rval(mpdm_pop(stack));
-            double v1   = mpdm_rval(mpdm_pop(stack));
-            double r;
-
-            switch (opcode) {
-            case OP_ADD:    r = v1 + v2; break;
-            case OP_SUB:    r = v1 - v2; break;
-            case OP_MUL:    r = v1 * v2; break;
-            case OP_DIV:    r = v1 / v2; break;
-            }
-
-            mpdm_push(stack, MPDM_R(r));
-        }
-
-        break;
-
-    case OP_EQ:
-    case OP_NEQ:
-    case OP_LT:
-    case OP_LE:
-    case OP_GT:
-    case OP_GE:
-        {
-            double v2   = mpdm_rval(mpdm_pop(stack));
-            double v1   = mpdm_rval(mpdm_pop(stack));
-            int r;
-
-            switch (opcode) {
-            case OP_EQ:     r = v1 == v2; break;
-            case OP_NEQ:    r = v1 != v2; break;
-            case OP_LT:     r = v1 < v2; break;
-            case OP_LE:     r = v1 <= v2; break;
-            case OP_GT:     r = v1 > v2; break;
-            case OP_GE:     r = v1 >= v2; break;
-            }
-
-            mpdm_push(stack, MPDM_I(r));
-        }
-
-        break;
-
-    case OP_PC:
-        /* push the program counter */
-        mpdm_push(stack, MPDM_I(pc));
-        break;
-
-    case OP_CALL:
-        /* call the value on the stack */
-        {
-            mpdm_t x = mpdm_pop(stack);
-
-            /* executable value? arguments are in the stack in an array */
-            if (MPDM_IS_EXEC(x)) {
-                mpdm_t args = mpdm_pop(stack);
-                mpdm_push(stack, mpdm_exec(x, args, NULL));
-            }
-            else {
-                /* "lightweight" call */
-                mpdm_push(c_stack, MPDM_I(pc));
-                pc = mpdm_ival(x);
-            }
-        }
-
-        break;
-
-    case OP_PATH:
-        /* new code path */
-        mpdm_push(stack, MPDM_I(pc));
-
-        {
-            /* move beyond the appropriate return */
-            int l = 1;
-
-            while (l && pc < mpdm_size(prg)) {
-                opcode = mpdm_ival(mpdm_aget(prg, pc++));
-
-                if (opcode == OP_PATH)
-                    l++;
-                if (opcode == OP_RETURN)
-                    l--;
-            }
-
-            /* return not found? error */
-            if (l)
-                ret = -2;
-        }
-
-        break;
-
-    case OP_RETURN:
-        /* if there is a return address, use it;
-           otherwise, trigger error */
-        if (mpdm_size(c_stack))
-            pc = mpdm_ival(mpdm_pop(c_stack));
-        else
-            ret = -1;
-
-        break;
-
-    case OP_IF:
-        if (mpsl_is_true(mpdm_pop(stack))) {
-            /* push return address and call */
-            mpdm_push(c_stack, MPDM_I(pc));
-            pc = mpdm_ival(mpdm_pop(stack));
-        }
-        else
-            mpdm_adel(stack, -1);
-
-        break;
-
-    case OP_IFELSE:
-        /* always push return address */
-        mpdm_push(c_stack, MPDM_I(pc));
-
-        if (mpsl_is_true(mpdm_pop(stack))) {
-            /* drop false pc */
-            mpdm_adel(stack, -1);
-
-            /* jump to true pc */
-            pc = mpdm_ival(mpdm_pop(stack));
-        }
-        else {
-            /* jump to false pc */
-            pc = mpdm_ival(mpdm_pop(stack));
-
-            /* drop true pc */
-            mpdm_adel(stack, -1);
-        }
-
-        break;
-
-    case OP_WHILE:
-        /* in the stack:
-            <body pc> <condition pc> <condition>
-        */
-        if (mpsl_is_true(mpdm_pop(stack))) {
-            /* set the return address to the cond. pc */
-            mpdm_push(c_stack, mpdm_aget(stack, -1));
-
-            /* jump to the body */
-            pc = mpdm_ival(mpdm_aget(stack, -2));
-        }
-        else {
-            /* drop both pcs */
-            mpdm_adel(stack, -1);
-            mpdm_adel(stack, -1);
-        }
-
-        break;
-
-    case OP_FOREACH:
-        /* in the stack:
-            <body pc> <array> <iterator>
-        */
-        {
-            int i = mpdm_ival(mpdm_pop(stack));
-            mpdm_t v;
-
-            if (mpdm_iterator(mpdm_aget(stack, -1), &i, &v, NULL)) {
-                /* another iteration */
-
-                /* push return value back over 'foreach' */
-                mpdm_push(c_stack, MPDM_I(pc - 1));
-
-                /* call the body */
-                pc = mpdm_ival(mpdm_aget(stack, -2));
-
-                /* stack the iterator back */
-                mpdm_push(stack, MPDM_I(i));
-
-                /* stack the element (the body should pick it) */
-                mpdm_push(stack, v);
-            }
-            else {
-                /* clean stack */
-                mpdm_adel(stack, -1);
-                mpdm_adel(stack, -1);
-            }
-        }
-
-        break;
-
-    case OP_PRINT:
-        /* prints the value in the stack */
-        mpdm_write_wcs(stdout, mpdm_string(mpdm_pop(stack)));
-        break;
-
-    case OP_DUMP:
-        {
-            mpdm_t v = mpdm_pop(stack);
-            mpdm_dump(v);
-            mpdm_void(v);
-        }
-        break;
-
-    case OP_ASSIGN:
-        /* assign a value to a symbol */
-        {
-            mpdm_t s = mpdm_pop(stack);
-            mpdm_t v = mpdm_pop(stack);
-            mpdm_hset(mpdm_root(), s, v);
-        }
-        break;
-
-    case OP_SYMVAL:
-        /* get symbol value */
-        mpdm_push(stack, mpdm_hget(mpdm_root(), mpdm_pop(stack)));
-        break;
-
-    case OP_APUSH:
-        /* pushes a value into an array on the stack */
-        {
-            mpdm_t v = mpdm_pop(stack);
-            mpdm_push(mpdm_aget(stack, -1), v);
-        }
-        break;
-
-    case OP_HSET:
-        /* sets a hash's key/value pair */
-        {
-            mpdm_t v = mpdm_pop(stack);
-            mpdm_t k = mpdm_pop(stack);
-            mpdm_hset(mpdm_aget(stack, -1), k, v);
-        }
-    }
-
-    *ppc = pc;
-
-    /* got to the end? trigger exit */
-    if (pc == mpdm_size(prg))
-        ret = 0;
-
-    return ret;
-}
-
 #include <time.h>
 
 int rs_mpsl_exec(mpdm_t machine, int msecs)
 {
-    int ret;
+    int ret = 0;
     mpdm_t prg      = mpdm_hget_s(machine, L"prg");
     mpdm_t stack    = mpdm_hget_s(machine, L"stack");
     mpdm_t c_stack  = mpdm_hget_s(machine, L"c_stack");
@@ -324,11 +67,252 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
     /* maximum running time */
     max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0x7fffffff;
 
-    while (
-        pc < mpdm_size(prg) &&
-        (ret = rs_mpsl_exec1(prg, stack, c_stack, &pc)) > 0 &&
-        clock() < max
-    );
+    while (ret == 0 && pc < mpdm_size(prg)) {
+
+        /* get the opcode */
+        mpsl_op_t opcode = mpdm_ival(mpdm_aget(prg, pc++));
+    
+        switch (opcode) {
+        case OP_LITERAL:
+            /* literal: next thing in pc is the literal */
+            mpdm_push(stack, mpdm_clone(mpdm_aget(prg, pc++)));
+            break;
+    
+        case OP_ADD:
+        case OP_SUB:
+        case OP_MUL:
+        case OP_DIV:
+            {
+                double v2   = mpdm_rval(mpdm_pop(stack));
+                double v1   = mpdm_rval(mpdm_pop(stack));
+                double r;
+    
+                switch (opcode) {
+                case OP_ADD:    r = v1 + v2; break;
+                case OP_SUB:    r = v1 - v2; break;
+                case OP_MUL:    r = v1 * v2; break;
+                case OP_DIV:    r = v1 / v2; break;
+                }
+    
+                mpdm_push(stack, MPDM_R(r));
+            }
+    
+            break;
+    
+        case OP_EQ:
+        case OP_NEQ:
+        case OP_LT:
+        case OP_LE:
+        case OP_GT:
+        case OP_GE:
+            {
+                double v2   = mpdm_rval(mpdm_pop(stack));
+                double v1   = mpdm_rval(mpdm_pop(stack));
+                int r;
+    
+                switch (opcode) {
+                case OP_EQ:     r = v1 == v2; break;
+                case OP_NEQ:    r = v1 != v2; break;
+                case OP_LT:     r = v1 < v2; break;
+                case OP_LE:     r = v1 <= v2; break;
+                case OP_GT:     r = v1 > v2; break;
+                case OP_GE:     r = v1 >= v2; break;
+                }
+    
+                mpdm_push(stack, MPDM_I(r));
+            }
+    
+            break;
+    
+        case OP_PC:
+            /* push the program counter */
+            mpdm_push(stack, MPDM_I(pc));
+            break;
+    
+        case OP_CALL:
+            /* call the value on the stack */
+            {
+                mpdm_t x = mpdm_pop(stack);
+    
+                /* executable value? arguments are in the stack in an array */
+                if (MPDM_IS_EXEC(x)) {
+                    mpdm_t args = mpdm_pop(stack);
+                    mpdm_push(stack, mpdm_exec(x, args, NULL));
+                }
+                else {
+                    /* "lightweight" call */
+                    mpdm_push(c_stack, MPDM_I(pc));
+                    pc = mpdm_ival(x);
+                }
+            }
+    
+            break;
+    
+        case OP_PATH:
+            /* new code path */
+            mpdm_push(stack, MPDM_I(pc));
+    
+            {
+                /* move beyond the appropriate return */
+                int l = 1;
+    
+                while (l && pc < mpdm_size(prg)) {
+                    opcode = mpdm_ival(mpdm_aget(prg, pc++));
+    
+                    if (opcode == OP_PATH)
+                        l++;
+                    if (opcode == OP_RETURN)
+                        l--;
+                }
+    
+                /* return not found? error */
+                if (l)
+                    ret = -2;
+            }
+    
+            break;
+    
+        case OP_RETURN:
+            /* if there is a return address, use it;
+               otherwise, trigger error */
+            if (mpdm_size(c_stack))
+                pc = mpdm_ival(mpdm_pop(c_stack));
+            else
+                ret = -1;
+    
+            break;
+    
+        case OP_IF:
+            if (mpsl_is_true(mpdm_pop(stack))) {
+                /* push return address and call */
+                mpdm_push(c_stack, MPDM_I(pc));
+                pc = mpdm_ival(mpdm_pop(stack));
+            }
+            else
+                mpdm_adel(stack, -1);
+    
+            break;
+    
+        case OP_IFELSE:
+            /* always push return address */
+            mpdm_push(c_stack, MPDM_I(pc));
+    
+            if (mpsl_is_true(mpdm_pop(stack))) {
+                /* drop false pc */
+                mpdm_adel(stack, -1);
+    
+                /* jump to true pc */
+                pc = mpdm_ival(mpdm_pop(stack));
+            }
+            else {
+                /* jump to false pc */
+                pc = mpdm_ival(mpdm_pop(stack));
+    
+                /* drop true pc */
+                mpdm_adel(stack, -1);
+            }
+    
+            break;
+    
+        case OP_WHILE:
+            /* in the stack:
+                <body pc> <condition pc> <condition>
+            */
+            if (mpsl_is_true(mpdm_pop(stack))) {
+                /* set the return address to the cond. pc */
+                mpdm_push(c_stack, mpdm_aget(stack, -1));
+    
+                /* jump to the body */
+                pc = mpdm_ival(mpdm_aget(stack, -2));
+            }
+            else {
+                /* drop both pcs */
+                mpdm_adel(stack, -1);
+                mpdm_adel(stack, -1);
+            }
+    
+            break;
+    
+        case OP_FOREACH:
+            /* in the stack:
+                <body pc> <array> <iterator>
+            */
+            {
+                int i = mpdm_ival(mpdm_pop(stack));
+                mpdm_t v;
+    
+                if (mpdm_iterator(mpdm_aget(stack, -1), &i, &v, NULL)) {
+                    /* another iteration */
+    
+                    /* push return value back over 'foreach' */
+                    mpdm_push(c_stack, MPDM_I(pc - 1));
+    
+                    /* call the body */
+                    pc = mpdm_ival(mpdm_aget(stack, -2));
+    
+                    /* stack the iterator back */
+                    mpdm_push(stack, MPDM_I(i));
+    
+                    /* stack the element (the body should pick it) */
+                    mpdm_push(stack, v);
+                }
+                else {
+                    /* clean stack */
+                    mpdm_adel(stack, -1);
+                    mpdm_adel(stack, -1);
+                }
+            }
+    
+            break;
+    
+        case OP_PRINT:
+            /* prints the value in the stack */
+            mpdm_write_wcs(stdout, mpdm_string(mpdm_pop(stack)));
+            break;
+    
+        case OP_DUMP:
+            {
+                mpdm_t v = mpdm_pop(stack);
+                mpdm_dump(v);
+                mpdm_void(v);
+            }
+            break;
+    
+        case OP_ASSIGN:
+            /* assign a value to a symbol */
+            {
+                mpdm_t s = mpdm_pop(stack);
+                mpdm_t v = mpdm_pop(stack);
+                mpdm_hset(mpdm_root(), s, v);
+            }
+            break;
+    
+        case OP_SYMVAL:
+            /* get symbol value */
+            mpdm_push(stack, mpdm_hget(mpdm_root(), mpdm_pop(stack)));
+            break;
+    
+        case OP_APUSH:
+            /* pushes a value into an array on the stack */
+            {
+                mpdm_t v = mpdm_pop(stack);
+                mpdm_push(mpdm_aget(stack, -1), v);
+            }
+            break;
+    
+        case OP_HSET:
+            /* sets a hash's key/value pair */
+            {
+                mpdm_t v = mpdm_pop(stack);
+                mpdm_t k = mpdm_pop(stack);
+                mpdm_hset(mpdm_aget(stack, -1), k, v);
+            }
+        }
+
+        /* if out of slice time, break */        
+        if (clock() > max)
+            ret = 1;
+    }
 
     mpdm_hset_s(machine, L"pc", MPDM_I(pc));
 
@@ -550,6 +534,7 @@ int main(int argc, char *argv[])
     add_arg(prg, MPDM_I(0));
     add_ins(prg, OP_FOREACH);
 
+    printf("foreach\n");
     rs_mpsl_exec(machine, 0);
 
     return 0;
