@@ -506,22 +506,8 @@ O_TYPE execsym(O_ARGS, int th)
         UF(t);
     }
     else {
-        int ts = 0;
-
-        /* does the symbol have more than one part? */
-        if (MPDM_IS_ARRAY(s) && mpdm_size(s) > 1) {
-            /* if so, store the prefix into local variable 'this' */
-            mpdm_push(l, MPDM_H(0));
-            mpsl_set_symbol(MPDM_LS(L"this"), mpsl_get_symbol_i(s, l, 1), l);
-
-            ts = 1;
-        }
-
         /* execute */
         r = th ? mpdm_exec_thread(v, M2, l) : mpdm_exec(v, M2, l);
-
-        if (ts)
-            mpdm_adel(l, -1);
     }
 
     UF(s);

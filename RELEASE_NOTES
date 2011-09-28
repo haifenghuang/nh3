@@ -5,8 +5,6 @@ MPSL Release Notes
 -----
 
  - New features:
-    - Some support for Object-Oriented programming, including:
-      - A new `this' keyword.
     - An abbreviated way of defining hashes (ala JavaScript).
  - Bugfixes:
     - Several fixes to for() construction: fixed incorrect
