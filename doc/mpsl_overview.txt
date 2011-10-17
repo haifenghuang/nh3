@@ -152,21 +152,33 @@ values can be of any type (scalar, array or hash). However, keys are
 usually scalar values, in particular strings.
 
  en2es_workdays = {
-	'monday'	=>	'lunes',
-	'tuesday'	=>	'martes',
-	'wednesday'	=>	'miercoles',
-	'thursday'	=>	'jueves',
-	'friday'	=>	'viernes'
-	};
+    'monday'    =>  'lunes',
+    'tuesday'   =>  'martes',
+    'wednesday' =>  'miercoles',
+    'thursday'  =>  'jueves',
+    'friday'    =>  'viernes'
+ };
  
  print(en2es_workdays['monday'], "\n"); /* prints lunes */
  
  week = {
-	'workdays'	=>	workdays,
-	'weekend'	=>	[ 'saturday', 'sunday' ]
-	};
+    'workdays'  =>  workdays,
+    'weekend'   =>  [ 'saturday', 'sunday' ]
+ };
 
-Hash definitions *must* use the => to mark key/value pairs.
+Hash definitions can use the => to mark key/value pairs (what is called
+the "traditional" or Perl-like syntax), or a special, JavaScript-like
+simpler mode (supported since version 2.0.1) which is useful when the
+keys are composed only by alphanumeric characters (letters, numbers and
+the _ symbol). Like this:
+
+ en2es_workdays = {
+    monday:     'lunes',
+    tuesday:    'martes',
+    wednesday:  'miercoles',
+    thursday:   'jueves',
+    friday:     'viernes'
+ };
 
 Hash assignation is always by reference, as in arrays (in fact, hashes are
 just a special case of array).

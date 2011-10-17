@@ -4,7 +4,7 @@ Minimum Profit Scripting Language (mpsl) TODO / Bug List
 Release Critical Bugs
 ---------------------
 
- * 1134: Document the JavaScript style of defining hashes.
+None!
 
 Open Bugs
 ---------
@@ -216,5 +216,7 @@ Closed
  * 1129: Document the new multithreading support
    (Tue, 19 Apr 2011 09:49:07 +0200).
  * 1133: Fix for() (Wed, 20 Apr 2011 06:35:17 +0200).
+ * 1134: Document the JavaScript style of defining hashes
+   (Mon, 17 Oct 2011 20:13:21 +0200).
 
 Email bugs to angel@triptico.com
