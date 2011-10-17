@@ -22,6 +22,9 @@
 
 */
 
+#ifndef MPSL_H_
+#define MPSL_H_
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -55,3 +58,5 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* MPSL_H_ */
