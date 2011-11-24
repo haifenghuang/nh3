@@ -1374,6 +1374,23 @@ static mpdm_t F_semaphore_post(F_ARGS)
 }
 
 
+/**
+ * tr - Transliterates a string.
+ * @str: the string
+ * @from: set of characters to be replaced
+ * @to: set of characters to replace
+ *
+ * Transliterates @str to a new string with all characters from @from
+ * replaced by those in @to.
+ * [Threading]
+ */
+/** tr(str, from, to); */
+static mpdm_t F_tr(F_ARGS)
+{
+    return mpdm_tr(A0, A1, A2);
+}
+
+
 static struct {
     wchar_t *name;
      mpdm_t(*func) (mpdm_t, mpdm_t);
@@ -1449,6 +1466,7 @@ static struct {
     { L"semaphore",      F_semaphore },
     { L"semaphore_wait", F_semaphore_wait },
     { L"semaphore_post", F_semaphore_post },
+    { L"tr",             F_tr },
     { NULL,              NULL }
 };
 

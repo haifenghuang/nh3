@@ -1,6 +1,12 @@
 MPSL Release Notes
 ==================
 
+2.0.2
+-----
+
+ - New features:
+    - New function tr(), to transliterate strings.
+
 2.0.1
 -----
 
