@@ -1216,7 +1216,7 @@ static mpdm_t F_grep(F_ARGS)
             mpdm_unref(w);
         }
     }
-    else if (key->flags & MPDM_STRING) {
+    else if (MPDM_IS_STRING(key)) {
         int n;
 
         /* it's a string; use it as a regular expression */

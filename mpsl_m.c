@@ -112,7 +112,7 @@ int mpsl_main(int argc, char *argv[])
     if (immscript != NULL) {
         w = mpdm_ref(MPDM_MBS(immscript));
         v = mpsl_compile(w);
-        w = mpdm_unref(w);
+        mpdm_unref(w);
     }
     else {
         int c;
@@ -127,7 +127,7 @@ int mpsl_main(int argc, char *argv[])
             w = mpdm_ref(MPDM_F(script));
             v = mpsl_compile_file(w, NULL);
             mpdm_close(w);
-            w = mpdm_unref(w);
+            mpdm_unref(w);
         }
     }
 

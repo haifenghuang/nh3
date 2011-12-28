@@ -574,17 +574,16 @@ O_TYPE O_foreach(O_ARGS)
 O_TYPE O_range(O_ARGS)
 /* build list from range of two numeric values */
 {
-    double n;
     double v1 = RM1;
     double v2 = RM2;
     mpdm_t r = RF(MPDM_A(0));
 
     if (v1 < v2)
-        for (n = v1; n <= v2; n++)
-            mpdm_push(r, MPDM_R(n));
+        while (v1 <= v2)
+            mpdm_push(r, MPDM_R(v1 += 1.0));
     else
-        for (n = v1; n >= v2; n--)
-            mpdm_push(r, MPDM_R(n));
+        while (v1 >= v2)
+            mpdm_push(r, MPDM_R(v1 -= 1.0));
 
     UFND(r);
 
