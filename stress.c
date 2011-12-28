@@ -49,7 +49,7 @@ void _do_test(char *str, int ok, int line)
 	char tmp[1024];
 
 	sprintf(tmp, "%s (line %d): %s\n", str, line, ok ? "OK!" : "*** Failed ***");
-	printf(tmp);
+	printf("%s", tmp);
 
 	tests++;
 
