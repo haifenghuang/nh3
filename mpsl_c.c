@@ -579,11 +579,15 @@ O_TYPE O_range(O_ARGS)
     mpdm_t r = RF(MPDM_A(0));
 
     if (v1 < v2)
-        while (v1 <= v2)
-            mpdm_push(r, MPDM_R(v1 += 1.0));
+        while (v1 <= v2) {
+            mpdm_push(r, MPDM_R(v1));
+            v1 += 1.0;
+        }
     else
-        while (v1 >= v2)
-            mpdm_push(r, MPDM_R(v1 -= 1.0));
+        while (v1 >= v2) {
+            mpdm_push(r, MPDM_R(v1));
+            v1 -= 1.0;
+        }
 
     UFND(r);
 

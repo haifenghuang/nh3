@@ -72,16 +72,13 @@ static wchar_t *s_mbstowcs(char *str)
 /* converts from mbs to wcs, using a static buffer */
 {
     static wchar_t *wc = NULL;
-    static int wc_s = 0;
     int n;
 
-    /* allocs wchar_t space, if needed */
-    if ((n = mbstowcs(NULL, str, 0)) > wc_s) {
-        wc_s = n;
-        wc = realloc(wc, (wc_s + 1) * sizeof(wchar_t));
-    }
+    /* get needed space */
+    n = mbstowcs(NULL, str, 0);
+    wc = realloc(wc, (n + 1) * sizeof(wchar_t));
 
-    /* really converts */
+    /* really convert */
     mbstowcs(wc, str, n);
     wc[n] = L'\0';
 
