@@ -5,6 +5,8 @@ MPSL Release Notes
 -----
 
  - New features:
+    - The push() functions accepts a variable number of elements
+      to be pushed into the array (not only one).
     - New function tr(), to transliterate strings.
 
 2.0.1

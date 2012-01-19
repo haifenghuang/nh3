@@ -292,15 +292,27 @@ static mpdm_t F_shift(F_ARGS)
 /**
  * push - Pushes a value into an array.
  * @a: the array
- * @e: the value
+ * @arg1: first value
+ * @arg2: second value
+ * @argn: nth value
  *
- * Pushes a value into an array (i.e. inserts at the end).
+ * Pushes values into an array (i.e. inserts at the end).
+ * Returns the last element pushed.
  * [Arrays]
  */
-/** e = push(a, e); */
+/** argn = push(a, arg1 [, arg2, ... argn]); */
 static mpdm_t F_push(F_ARGS)
 {
-    return mpdm_push(A0, A1);
+    int n;
+    mpdm_t r = NULL;
+
+    for (n = 1; n < mpdm_size(a); n++) {
+        mpdm_unref(r);
+        r = mpdm_push(A0, A(n));
+        mpdm_ref(r);
+    }
+
+    return mpdm_unrefnd(r);
 }
 
 /**
