@@ -1,7 +1,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2010 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
 
     mpsl_f.c - Minimum Profit Scripting Language Function Library
 
@@ -913,6 +913,7 @@ static mpdm_t F_compile(F_ARGS)
  * Simulates an error. The @err error message is stored in the `ERROR'
  * global variable and an internal abort global flag is set, so no further
  * MPSL code can be executed until reset.
+ * [Code Control]
  */
 /** error(err); */
 static mpdm_t F_error(F_ARGS)
@@ -1403,6 +1404,19 @@ static mpdm_t F_tr(F_ARGS)
 }
 
 
+/**
+ * int - Returns the integer part of a number.
+ * @n: the number
+ *
+ * Returns the integer part of the number @n.
+ * [Miscellaneous]
+ */
+static mpdm_t F_int(F_ARGS)
+{
+    return MPDM_I(RA0);
+}
+
+
 static struct {
     wchar_t *name;
      mpdm_t(*func) (mpdm_t, mpdm_t);
@@ -1479,6 +1493,7 @@ static struct {
     { L"semaphore_wait", F_semaphore_wait },
     { L"semaphore_post", F_semaphore_post },
     { L"tr",             F_tr },
+    { L"int",            F_int },
     { NULL,              NULL }
 };
 

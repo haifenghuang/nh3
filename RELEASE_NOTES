@@ -8,6 +8,7 @@ MPSL Release Notes
     - The push() functions accepts a variable number of elements
       to be pushed into the array (not only one).
     - New function tr(), to transliterate strings.
+    - New function int(), to return the integral part of a number.
 
 2.0.1
 -----
