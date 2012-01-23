@@ -60,16 +60,17 @@ int mpsl_main(int argc, char *argv[])
     int ret = 0;
     int dump_only = 0;
     int install_trap = 0;
+    int ok = 0;
 
     /* skip the executable */
     argv++;
     argc--;
 
-    while (argc > 0) {
+    while (!ok && argc > 0) {
         if (strcmp(argv[0], "-v") == 0 || strcmp(argv[0], "--help") == 0) {
             printf("MPSL %s - Minimum Profit Scripting Language\n",
                    VERSION);
-            printf("Copyright (C) 2003-2010 Angel Ortega <angel@triptico.com>\n");
+            printf("Copyright (C) 2003-2012 Angel Ortega <angel@triptico.com>\n");
             printf("This software is covered by the GPL license. NO WARRANTY.\n\n");
 
             printf("Usage: mpsl [-d | -s] [-e 'script' | script.mpsl ]\n\n");
@@ -87,6 +88,7 @@ int mpsl_main(int argc, char *argv[])
             argv++;
             argc--;
             immscript = argv[0];
+            ok = 1;
         }
         else {
             /* next argument is a script name; open it */
@@ -94,6 +96,7 @@ int mpsl_main(int argc, char *argv[])
                 fprintf(stderr, "Can't open '%s'\n", argv[0]);
                 return 1;
             }
+            ok = 1;
         }
 
         argv++;
