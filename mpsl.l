@@ -214,8 +214,6 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER}|{BININTEGER})
 <STR>\\n	{ ds_poke(ds_v, L'\n'); }
 <STR>\\t	{ ds_poke(ds_v, L'\t'); }
 <STR>\\r	{ ds_poke(ds_v, L'\r'); }
-<STR>\\b	{ ds_poke(ds_v, L'\b'); }
-<STR>\\a	{ ds_poke(ds_v, L'\a'); }
 <STR>\\e	{ ds_poke(ds_v, 27); }
 <STR>\\\"	{ ds_poke(ds_v, L'\"'); }
 <STR>\\\\	{ ds_poke(ds_v, L'\\'); }
