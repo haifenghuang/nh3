@@ -1406,19 +1406,6 @@ static mpdm_t F_tr(F_ARGS)
 
 
 /**
- * int - Returns the integer part of a number.
- * @n: the number
- *
- * Returns the integer part of the number @n.
- * [Miscellaneous]
- */
-static mpdm_t F_int(F_ARGS)
-{
-    return MPDM_I(RA0);
-}
-
-
-/**
  * strftime - Formats the time as a string.
  * @f: format string
  * @t: seconds (from the Unix epoch)
@@ -1530,7 +1517,6 @@ static struct {
     { L"semaphore_wait", F_semaphore_wait },
     { L"semaphore_post", F_semaphore_post },
     { L"tr",             F_tr },
-    { L"int",            F_int },
     { L"strftime",       F_strftime },
     { NULL,              NULL }
 };
