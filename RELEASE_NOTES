@@ -9,6 +9,7 @@ MPSL Release Notes
       to be pushed into the array (not only one).
     - New function tr(), to transliterate strings.
     - New function int(), to return the integral part of a number.
+    - New function strftime() (like C lib's one).
 
 2.0.1
 -----

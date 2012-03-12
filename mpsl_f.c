@@ -19,7 +19,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-    http://www.triptico.com
+    http://triptico.com
 
 */
 
@@ -951,7 +951,7 @@ static mpdm_t F_lc(F_ARGS)
  * time - Returns the current time.
  *
  * Returns the current time from the epoch (C library time()).
- * [Miscellaneous]
+ * [Time]
  */
 /** integer = time(); */
 static mpdm_t F_time(F_ARGS)
@@ -1288,6 +1288,7 @@ static mpdm_t F_random(F_ARGS)
  *
  * Sleeps a number of milliseconds.
  * [Threading]
+ * [Time]
  */
 /** sleep(msecs); */
 static mpdm_t F_sleep(F_ARGS)
@@ -1417,6 +1418,42 @@ static mpdm_t F_int(F_ARGS)
 }
 
 
+/**
+ * strftime - Formats the time as a string.
+ * @f: format string
+ * @t: seconds (from the Unix epoch)
+ *
+ * Returns as a string, formatted using the @f format string,
+ * the time @t given as argument (or now if @t is not given).
+ * See the local clib strftime() implementation for details
+ * on the format string.
+ * [Strings]
+ * [Time]
+ */
+/** string = strftime(@f); */
+/** string = strftime(@f, @t); */
+static mpdm_t F_strftime(F_ARGS)
+{
+    char *ptr;
+    time_t t;
+    char tmp[2048];
+    struct tm *tm;
+
+    ptr = mpdm_wcstombs(mpdm_string(A0), NULL);
+
+    if ((t = IA1) == 0)
+        t = time(NULL);
+
+    tm = localtime(&t);
+
+    strftime(tmp, sizeof(tmp) - 1, ptr, tm);
+
+    free(ptr);
+
+    return MPDM_MBS(tmp);
+}
+
+
 static struct {
     wchar_t *name;
      mpdm_t(*func) (mpdm_t, mpdm_t);
@@ -1494,6 +1531,7 @@ static struct {
     { L"semaphore_post", F_semaphore_post },
     { L"tr",             F_tr },
     { L"int",            F_int },
+    { L"strftime",       F_strftime },
     { NULL,              NULL }
 };
 
