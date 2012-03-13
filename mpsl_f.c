@@ -1441,6 +1441,24 @@ static mpdm_t F_strftime(F_ARGS)
 }
 
 
+/**
+ * connect - Opens a client TCP/IP socket.
+ * @h: host name or ip
+ * @s: service or port number
+ *
+ * Opens a client TCP/IP socket to the @h host at @s service (or port).
+ * Returns NULL if the connection cannot be done or a file type value,
+ * that can be used with all file operation functions, including close().
+ * [Sockets]
+ * [Input-Output]
+ */
+/** f = connect(@h, @s); */
+static mpdm_t F_connect(F_ARGS)
+{
+    return mpdm_connect(A0, A1);
+}
+
+
 static struct {
     wchar_t *name;
      mpdm_t(*func) (mpdm_t, mpdm_t);
@@ -1518,6 +1536,7 @@ static struct {
     { L"semaphore_post", F_semaphore_post },
     { L"tr",             F_tr },
     { L"strftime",       F_strftime },
+    { L"connect",        F_connect },
     { NULL,              NULL }
 };
 

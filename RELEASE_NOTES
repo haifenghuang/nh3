@@ -1,14 +1,15 @@
 MPSL Release Notes
 ==================
 
-2.0.2
+2.1.0
 -----
 
  - New features:
+    - New TCP/IP socket client support via the connect() function.
     - The push() functions accepts a variable number of elements
       to be pushed into the array (not only one).
     - New function tr(), to transliterate strings.
-    - New function strftime() (like C lib's one).
+    - New function strftime() (like C library's one).
 
 2.0.1
 -----
