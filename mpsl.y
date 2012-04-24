@@ -2,7 +2,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2010 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
 
     mpsl.y - Minimum Profit Scripting Language YACC parser
 
@@ -20,7 +20,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-    http://www.triptico.com
+    http://triptico.com
 
 */
 
@@ -96,12 +96,13 @@ static void compiler_warning(char *str)
 %left BOOLAND BOOLOR
 %left INC DEC IADD ISUB IMUL IDIV IMOD IBITAND IBITOR IBITXOR ISHR ISHL
 %left '!'
-%left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE ARROW ':' RANGE '>''<' INVCALL
+%left STRCAT STREQ NUMEQ STRNE NUMNE NUMGE NUMLE ARROW ':' RANGE '>''<'
 %left AMPERSAND
 %left BITOR BITXOR
 %left SHL SHR
 %left '+' '-'
 %left '*' '/' MOD POW
+%left INVCALL
 %nonassoc UMINUS
 
 %type <ins> stmt expr sym_list stmt_list list hash compsym
