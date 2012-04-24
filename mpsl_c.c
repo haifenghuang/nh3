@@ -481,13 +481,20 @@ O_TYPE O_return(O_ARGS)
 
 O_TYPE execsym(O_ARGS, int th, int m)
 {
-    mpdm_t s, v, p, r = NULL;
+    mpdm_t s, v, p, o = NULL, r = NULL;
 
     /* gets the symbol name */
     s = RF(M1);
 
     /* gets the arguments */
     p = RF(M2);
+
+    /* if it's to be called as a method, the object
+       should be inserted into the local symtable
+       before searching the symbol */
+    if (m && (o = mpdm_aget(p, 0)) && MPDM_IS_HASH(o)) {
+        mpdm_push(l, o);
+    }
 
     /* gets the symbol value */
     v = GET(s);
@@ -509,28 +516,16 @@ O_TYPE execsym(O_ARGS, int th, int m)
         UF(t);
     }
     else {
-        mpdm_t o;
-
         /* execute */
-        if (th)
-            r = mpdm_exec_thread(v, p, l);
-        else {
-            if (m && (o = mpdm_aget(p, 0)) && MPDM_IS_HASH(o)) {
-                /* push the object as a local symbol table */
-                mpdm_push(l, o);
-
-                r = mpdm_exec(v, p, l);
-
-                /* take it from the symbol table */
-                mpdm_adel(l, -1);
-            }
-            else
-                r = mpdm_exec(v, p, l);
-        }
+        r = th ? mpdm_exec_thread(v, p, l) : mpdm_exec(v, p, l);
     }
 
     UF(s);
     UF(p);
+
+    /* drop the object from the local symtable */
+    if (o)
+        mpdm_adel(l, -1);
 
     return r;
 }
