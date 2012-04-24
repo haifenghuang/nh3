@@ -4,7 +4,7 @@ Minimum Profit Scripting Language (mpsl) TODO / Bug List
 Release Critical Bugs
 ---------------------
 
-None!
+ * 1136: Document the `METHOD' opcode.
 
 Open Bugs
 ---------

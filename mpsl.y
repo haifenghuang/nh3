@@ -559,11 +559,11 @@ expr:
 				}
 	| expr INVCALL compsym '(' ')' {
 					/* function call with only an inverse argument */
-					$$ = INS2(L"EXECSYM", $3, INS1(L"ILIST", $1));
+					$$ = INS2(L"METHOD", $1, INS2(L"EXECSYM", $3, INS1(L"ILIST", $1)));
 				}
 	| expr INVCALL compsym '(' list ')' {
 					/* function call with inverse argument and other ones */
-					$$ = INS2(L"EXECSYM", $3, INS2(L"ILIST", $1, $5));
+					$$ = INS2(L"METHOD", $1, INS2(L"EXECSYM", $3, INS2(L"ILIST", $1, $5)));
 				}
 	| AMPERSAND compsym '(' ')'	{
 					/* function call as a new thread (without args) */
