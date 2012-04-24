@@ -479,12 +479,15 @@ O_TYPE O_return(O_ARGS)
     return v;
 }
 
-O_TYPE execsym(O_ARGS, int th)
+O_TYPE execsym(O_ARGS, int th, int m)
 {
-    mpdm_t s, v, r = NULL;
+    mpdm_t s, v, p, r = NULL;
 
     /* gets the symbol name */
     s = RF(M1);
+
+    /* gets the arguments */
+    p = RF(M2);
 
     /* gets the symbol value */
     v = GET(s);
@@ -506,11 +509,28 @@ O_TYPE execsym(O_ARGS, int th)
         UF(t);
     }
     else {
+        mpdm_t o;
+
         /* execute */
-        r = th ? mpdm_exec_thread(v, M2, l) : mpdm_exec(v, M2, l);
+        if (th)
+            r = mpdm_exec_thread(v, p, l);
+        else {
+            if (m && (o = mpdm_aget(p, 0)) && MPDM_IS_HASH(o)) {
+                /* push the object as a local symbol table */
+                mpdm_push(l, o);
+
+                r = mpdm_exec(v, p, l);
+
+                /* take it from the symbol table */
+                mpdm_adel(l, -1);
+            }
+            else
+                r = mpdm_exec(v, p, l);
+        }
     }
 
     UF(s);
+    UF(p);
 
     return r;
 }
@@ -519,14 +539,22 @@ O_TYPE execsym(O_ARGS, int th)
 O_TYPE O_execsym(O_ARGS)
 /* executes the value of a symbol */
 {
-    return execsym(c, a, l, f, 0);
+    return execsym(c, a, l, f, 0, 0);
 }
 
 
 O_TYPE O_threadsym(O_ARGS)
 /* executes the value of a symbol in a new thread */
 {
-    return execsym(c, a, l, f, 1);
+    return execsym(c, a, l, f, 1, 0);
+}
+
+
+O_TYPE O_method(O_ARGS)
+/* executes the value of a symbol including
+   the first argument in the symtable */
+{
+    return execsym(c, a, l, f, 0, 1);
 }
 
 
@@ -665,36 +693,6 @@ O_TYPE O_subframe(O_ARGS)
 }
 
 
-O_TYPE O_method(O_ARGS)
-/* executes an instruction using a special hash in the symtable */
-{
-    mpdm_t ret;
-    mpdm_t o;
-
-    RF(l);
-
-    /* get the object */
-    o = RF(M1);
-
-    if (MPDM_IS_HASH(o)) {
-        /* push the object as a local symbol table */
-        mpdm_push(l, o);
-
-        ret = RF(M2);
-
-        /* take it from the symbol table */
-        mpdm_adel(l, -1);
-    }
-    else
-        ret = RF(M2);
-
-    UF(o);
-    UF(l);
-
-    return UFND(ret);
-}
-
-
 static struct mpsl_op_s {
     wchar_t *name;
     int foldable;
@@ -707,6 +705,7 @@ static struct mpsl_op_s {
     { L"ASSIGN",    0, O_assign },
     { L"EXECSYM",   0, O_execsym },
     { L"THREADSYM", 0, O_threadsym },
+    { L"METHOD",    0, O_method },
     { L"IF",        0, O_if },
     { L"WHILE",     0, O_while },
     { L"FOREACH",   0, O_foreach },
@@ -741,7 +740,6 @@ static struct mpsl_op_s {
     { L"SHL",       1, O_shl },
     { L"SHR",       1, O_shr },
     { L"POW",       1, O_pow },
-    { L"METHOD",    0, O_method },
     { NULL,         0, NULL }
 };
 
