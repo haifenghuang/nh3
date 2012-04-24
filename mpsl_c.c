@@ -665,6 +665,36 @@ O_TYPE O_subframe(O_ARGS)
 }
 
 
+O_TYPE O_method(O_ARGS)
+/* executes an instruction using a special hash in the symtable */
+{
+    mpdm_t ret;
+    mpdm_t o;
+
+    RF(l);
+
+    /* get the object */
+    o = RF(M1);
+
+    if (MPDM_IS_HASH(o)) {
+        /* push the object as a local symbol table */
+        mpdm_push(l, o);
+
+        ret = RF(M2);
+
+        /* take it from the symbol table */
+        mpdm_adel(l, -1);
+    }
+    else
+        ret = RF(M2);
+
+    UF(o);
+    UF(l);
+
+    return UFND(ret);
+}
+
+
 static struct mpsl_op_s {
     wchar_t *name;
     int foldable;
@@ -711,6 +741,7 @@ static struct mpsl_op_s {
     { L"SHL",       1, O_shl },
     { L"SHR",       1, O_shr },
     { L"POW",       1, O_pow },
+    { L"METHOD",    0, O_method },
     { NULL,         0, NULL }
 };
 
