@@ -1459,6 +1459,21 @@ static mpdm_t F_connect(F_ARGS)
 }
 
 
+/**
+ * new - Creates a new object using another as its base.
+ * @c: the class / base object
+ *
+ * Creates a new object using another one as a class or base object.
+ * The @c value is assumed to be hash.
+ * 
+ * [Object-oriented programming]
+ */
+/** o = new(c); */
+static mpdm_t F_new(F_ARGS)
+{
+    return mpdm_clone(A0);
+}
+
 static struct {
     wchar_t *name;
      mpdm_t(*func) (mpdm_t, mpdm_t);
@@ -1537,6 +1552,7 @@ static struct {
     { L"tr",             F_tr },
     { L"strftime",       F_strftime },
     { L"connect",        F_connect },
+    { L"new",            F_new },
     { NULL,              NULL }
 };
 

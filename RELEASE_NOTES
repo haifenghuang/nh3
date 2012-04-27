@@ -1,6 +1,14 @@
 MPSL Release Notes
 ==================
 
+2.2.0
+-----
+
+ - New features:
+    - By the new() operator and the usage of the -> operator as
+      a method call, it helps implementing simple object-oriented
+      programming.
+
 2.1.0
 -----
 
