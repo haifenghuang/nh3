@@ -1461,17 +1461,36 @@ static mpdm_t F_connect(F_ARGS)
 
 /**
  * new - Creates a new object using another as its base.
- * @c: the class / base object
+ * @c1: class / base object
+ * @c2: class / base object
+ * @cn: class / base object
  *
- * Creates a new object using another one as a class or base object.
- * The @c value is assumed to be hash.
+ * Creates a new object using as classes or base objects all the ones
+ * sent as arguments (assumed to be hashes).
  * 
  * [Object-oriented programming]
  */
-/** o = new(c); */
+/** o = new(c1 [, c2, ...cn]); */
 static mpdm_t F_new(F_ARGS)
 {
-    return mpdm_clone(A0);
+    int n;
+    mpdm_t r = mpdm_ref(MPDM_H(0));
+
+    for (n = 0; n < mpdm_size(a); n++) {
+        mpdm_t w, k, v;
+        int m = 0;
+
+        w = mpdm_ref(A(n));
+
+        if (MPDM_IS_HASH(w)) {
+            while (mpdm_iterator(w, &m, &k, &v))
+                mpdm_hset(r, k, mpdm_clone(v));
+        }
+
+        mpdm_unref(w);
+    }
+
+    return mpdm_unrefnd(r);
 }
 
 static struct {
