@@ -517,7 +517,7 @@ O_TYPE execsym(O_ARGS, int th, int m)
     }
     else {
         /* execute */
-        r = th ? mpdm_exec_thread(v, p, l) : mpdm_exec(v, p, l);
+        r = RF(th ? mpdm_exec_thread(v, p, l) : mpdm_exec(v, p, l));
     }
 
     UF(s);
@@ -527,7 +527,7 @@ O_TYPE execsym(O_ARGS, int th, int m)
     if (o)
         mpdm_adel(l, -1);
 
-    return r;
+    return UFND(r);
 }
 
 
