@@ -8,6 +8,7 @@ MPSL Release Notes
     - By the new() operator and the usage of the -> operator as
       a method call, it helps implementing simple object-oriented
       programming.
+    - join() can also join arrays.
 
 2.1.0
 -----

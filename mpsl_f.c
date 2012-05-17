@@ -416,15 +416,18 @@ static mpdm_t F_split(F_ARGS)
 }
 
 /**
- * join - Joins all elements of an array into one.
+ * join - Joins an array.
  * @a: array to be joined
- * @s: joiner string
+ * @s: joiner string or second array
  *
- * Joins all elements from @a into one string, using @s as a glue.
+ * If @s is a string or NULL, returns a new string with all elements
+ * in @a joined using @s. If @s is an array, it returns a new one
+ * containing all elements of @a followed by all elements of @s.
  * [Arrays]
  * [Strings]
  */
-/** string = join(a, s); */
+/** string = join(a, joiner_str); */
+/** array = join(a1, a2); */
 static mpdm_t F_join(F_ARGS)
 {
     return mpdm_join(A0, A1);
