@@ -181,32 +181,30 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
 
     w = r;
 
-    for (n = 0; w != NULL && n < mpdm_size(p) - 1; n++) {
+    for (n = 0; w != NULL && n < mpdm_size(p); n++) {
         /* is executable? run it and take its output */
         while (MPDM_IS_EXEC(w))
             w = mpdm_exec(w, NULL, NULL);
 
-        if (MPDM_IS_HASH(w))
-            w = mpdm_hget(w, mpdm_aget(p, n));
-        else
-        if (MPDM_IS_ARRAY(w))
-            w = mpdm_aget(w, mpdm_ival(mpdm_aget(p, n)));
-        else {
-            mpdm_void(w);
-            w = NULL;
-        }
-    }
-
-    if (w != NULL) {
-        /* resolve executable values again */
-        while (MPDM_IS_EXEC(w))
-            w = mpdm_exec(w, NULL, NULL);
-
-        if (w) {
+        /* last component? */
+        if (n == mpdm_size(p) - 1) {
+            /* yes; do the setting */
             if (MPDM_IS_HASH(w))
                 w = mpdm_hset(w, mpdm_aget(p, n), v);
             else
+            if (MPDM_IS_ARRAY(w))
                 w = mpdm_aset(w, v, mpdm_ival(mpdm_aget(p, n)));
+        }
+        else {
+            if (MPDM_IS_HASH(w))
+                w = mpdm_hget(w, mpdm_aget(p, n));
+            else
+            if (MPDM_IS_ARRAY(w))
+                w = mpdm_aget(w, mpdm_ival(mpdm_aget(p, n)));
+            else {
+                mpdm_void(w);
+                w = NULL;
+            }
         }
     }
 
