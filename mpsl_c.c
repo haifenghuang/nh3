@@ -178,17 +178,25 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
 }
 
 
-static mpdm_t sget(mpdm_t s, mpdm_t l)
+/**
+ * mpsl_get_symbol - Gets the value of a symbol.
+ * @s: symbol name
+ * @l: local symbol table
+ *
+ * Gets the value of a symbol. The symbol can be local or global
+ * (if the symbol exists in both tables, the local value will be returned).
+ */
+mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t l)
 {
     int n;
     mpdm_t r, p, w;
 
+    mpdm_ref(l);
+    mpdm_ref(s);
+
     /* get the local or global symbol table */
     if ((r = find_local_symtbl(s, l)) == NULL)
         r = mpdm_root();
-
-    mpdm_ref(l);
-    mpdm_ref(s);
 
     /* splits the path, if needed */
     if (MPDM_IS_ARRAY(s))
@@ -221,30 +229,6 @@ static mpdm_t sget(mpdm_t s, mpdm_t l)
     mpdm_unref(l);
 
     return w;
-}
-
-
-/**
- * mpsl_get_symbol - Gets the value of a symbol.
- * @s: symbol name
- * @l: local symbol table
- *
- * Gets the value of a symbol. The symbol can be local or global
- * (if the symbol exists in both tables, the local value will be returned).
- */
-mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t l)
-{
-    mpdm_t r;
-
-    mpdm_ref(s);
-    mpdm_ref(l);
-
-    r = sget(s, l);
-
-    mpdm_unref(l);
-    mpdm_unref(s);
-
-    return r;
 }
 
 
