@@ -180,26 +180,27 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
 }
 
 
-static mpdm_t sget(mpdm_t r, mpdm_t k)
+static mpdm_t sget(mpdm_t l, mpdm_t s)
 {
     int n;
-    mpdm_t p, w;
+    mpdm_t r, p, w;
 
-    if (r == NULL)
+    /* get the local or global symbol table */
+    if ((r = find_local_symtbl(s, l)) == NULL)
         r = mpdm_root();
 
-    mpdm_ref(r);
-    mpdm_ref(k);
+    mpdm_ref(l);
+    mpdm_ref(s);
 
     /* splits the path, if needed */
-    if (MPDM_IS_ARRAY(k))
-        p = mpdm_ref(k);
+    if (MPDM_IS_ARRAY(s))
+        p = mpdm_ref(s);
     else
-        p = mpdm_ref(mpdm_split_s(k, L"."));
+        p = mpdm_ref(mpdm_split_s(s, L"."));
 
     w = r;
 
-    for (n = 0; n < mpdm_size(p); n++) {
+    for (n = 0; w != NULL && n < mpdm_size(p); n++) {
         /* is executable? run it and take its output */
         while (MPDM_IS_EXEC(w))
             w = mpdm_exec(w, NULL, NULL);
@@ -212,17 +213,14 @@ static mpdm_t sget(mpdm_t r, mpdm_t k)
             w = mpdm_aget(w, i);
         }
         else {
-            mpdm_unref(mpdm_ref(w));
+            mpdm_void(w);
             w = NULL;
         }
-
-        if (w == NULL)
-            break;
     }
 
     mpdm_unref(p);
-    mpdm_unref(k);
-    mpdm_unref(r);
+    mpdm_unref(s);
+    mpdm_unref(l);
 
     return w;
 }
@@ -243,8 +241,7 @@ mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t l)
     mpdm_ref(s);
     mpdm_ref(l);
 
-//    r = mpdm_sget(find_local_symtbl(s, l), s);
-    r = sget(find_local_symtbl(s, l), s);
+    r = sget(l, s);
 
     mpdm_unref(l);
     mpdm_unref(s);
