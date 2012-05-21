@@ -150,7 +150,17 @@ static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
 }
 
 
-static mpdm_t sset(mpdm_t s, mpdm_t v, mpdm_t l)
+/**
+ * mpsl_set_symbol - Sets value to a symbol.
+ * @s: symbol name
+ * @v: value
+ * @l: local symbol table
+ *
+ * Assigns the value @v to the @s symbol. If the value exists as
+ * a local symbol, it's assigned to it; otherwise, it's set as a global
+ * symbol (and created if it does not exist).
+ */
+mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
 {
     int n;
     mpdm_t r, p, w;
@@ -206,35 +216,6 @@ static mpdm_t sset(mpdm_t s, mpdm_t v, mpdm_t l)
     mpdm_unref(l);
 
     return w;
-}
-
-
-/**
- * mpsl_set_symbol - Sets value to a symbol.
- * @s: symbol name
- * @v: value
- * @l: local symbol table
- *
- * Assigns the value @v to the @s symbol. If the value exists as
- * a local symbol, it's assigned to it; otherwise, it's set as a global
- * symbol (and created if it does not exist).
- */
-mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
-{
-    mpdm_t r;
-
-    mpdm_ref(s);
-    mpdm_ref(v);
-    mpdm_ref(l);
-
-//    r = sset(find_local_symtbl(s, l), s, v);
-    r = sset(s, v, l);
-
-    mpdm_unref(l);
-    mpdm_unref(v);
-    mpdm_unref(s);
-
-    return r;
 }
 
 
