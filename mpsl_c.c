@@ -178,7 +178,7 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
 }
 
 
-static mpdm_t sget(mpdm_t l, mpdm_t s)
+static mpdm_t sget(mpdm_t s, mpdm_t l)
 {
     int n;
     mpdm_t r, p, w;
@@ -239,7 +239,7 @@ mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t l)
     mpdm_ref(s);
     mpdm_ref(l);
 
-    r = sget(l, s);
+    r = sget(s, l);
 
     mpdm_unref(l);
     mpdm_unref(s);
