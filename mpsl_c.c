@@ -382,6 +382,25 @@ O_TYPE O_local(O_ARGS)
     return NULL;
 }
 
+O_TYPE O_global(O_ARGS)
+{
+    mpdm_t v = RF(M1);
+
+    if (MPDM_IS_ARRAY(v)) {
+        int n;
+
+        for (n = 0; n < mpdm_size(v); n++)
+            mpdm_hset(mpdm_root(), mpdm_aget(v, n), NULL);
+    }
+    else
+        mpdm_hset(mpdm_root(), v, NULL);
+
+    UF(v);
+
+    return NULL;
+}
+
+
 O_TYPE O_uminus(O_ARGS)
 {
     return MPDM_R(-mpdm_rval(M1));
@@ -768,6 +787,7 @@ static struct mpsl_op_s {
     { L"BREAK",     0, O_break },
     { L"RETURN",    0, O_return },
     { L"LOCAL",     0, O_local },
+    { L"GLOBAL",    0, O_global },
     { L"LIST",      1, O_list },
     { L"ILIST",     1, O_ilist },
     { L"HASH",      1, O_hash },

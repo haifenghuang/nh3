@@ -89,7 +89,7 @@ static void compiler_warning(char *str)
 };
 
 %token <v> NULLV INTEGER REAL STRING SYMBOL LITERAL
-%token WHILE FOR IF SUB FOREACH LOCAL BREAK RETURN
+%token WHILE FOR IF SUB FOREACH LOCAL GLOBAL BREAK RETURN
 %nonassoc IFI
 %nonassoc ELSE
 
@@ -224,6 +224,21 @@ stmt:
 					   creation and assignation */
 					$$ = INS2(L"MULTI",
 						INS1(L"LOCAL",
+							INS1(L"LITERAL", $2)),
+						INS2(L"ASSIGN",
+							INS1(L"LITERAL", $2),$4)
+						);
+				}
+	| GLOBAL sym_list ';'	{
+					/* global symbol creation */
+					$$ = INS1(L"GLOBAL", $2);
+				}
+	| GLOBAL SYMBOL '=' expr	';'
+				{
+					/* contraction; global symbol
+					   creation and assignation */
+					$$ = INS2(L"MULTI",
+						INS1(L"GLOBAL",
 							INS1(L"LITERAL", $2)),
 						INS2(L"ASSIGN",
 							INS1(L"LITERAL", $2),$4)

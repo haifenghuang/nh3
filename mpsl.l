@@ -2,7 +2,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2010 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
 
     mpsl.l - Minimum Profit Scripting Language [F]lexer
 
@@ -20,7 +20,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-    http://www.triptico.com
+    http://triptico.com
 
 */
 
@@ -157,6 +157,7 @@ INTEGER		({DECINTEGER}|{OCTINTEGER}|{HEXINTEGER}|{BININTEGER})
 "sub"		return SUB;
 "foreach"	return FOREACH;
 "local"		return LOCAL;
+"global"    return GLOBAL;
 "break"		return BREAK;
 "return"	return RETURN;
 

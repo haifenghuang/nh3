@@ -9,6 +9,7 @@ MPSL Release Notes
       a method call, it helps implementing simple object-oriented
       programming.
     - join() can also join arrays.
+    - New keyword `global', to define global variables.
 
 2.1.0
 -----
