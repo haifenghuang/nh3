@@ -92,21 +92,19 @@ static mpdm_t find_local_symtbl(mpdm_t s, mpdm_t l)
     int n;
     mpdm_t v = NULL;
 
-    /* no local symbol table? nothing to find */
-    if (l == NULL)
-        return NULL;
+    if (l != NULL) {
+        /* if s is multiple, take just the first element */
+        if (MPDM_IS_ARRAY(s))
+            s = mpdm_aget(s, 0);
 
-    /* if s is multiple, take just the first element */
-    if (MPDM_IS_ARRAY(s))
-        s = mpdm_aget(s, 0);
+        /* travel the local symbol table trying to find it */
+        for (n = mpdm_size(l) - 1; n >= 0; n--) {
+            mpdm_t h = mpdm_aget(l, n);
 
-    /* travel the local symbol table trying to find it */
-    for (n = mpdm_size(l) - 1; n >= 0; n--) {
-        mpdm_t h = mpdm_aget(l, n);
-
-        if (mpdm_exists(h, s)) {
-            v = h;
-            break;
+            if (mpdm_exists(h, s)) {
+                v = h;
+                break;
+            }
         }
     }
 
