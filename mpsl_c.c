@@ -214,10 +214,8 @@ mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t l)
         if (MPDM_IS_HASH(w))
             w = mpdm_hget(w, mpdm_aget(p, n));
         else
-        if (MPDM_IS_ARRAY(w)) {
-            int i = mpdm_ival(mpdm_aget(p, n));
-            w = mpdm_aget(w, i);
-        }
+        if (MPDM_IS_ARRAY(w))
+            w = mpdm_aget(w, mpdm_ival(mpdm_aget(p, n)));
         else {
             mpdm_void(w);
             w = NULL;
