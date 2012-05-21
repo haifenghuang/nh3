@@ -1,7 +1,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2010 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
 
     mpsl_c.c - Minimum Profit Scripting Language Core
 
@@ -19,7 +19,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-    http://www.triptico.com
+    http://triptico.com
 
 */
 
@@ -180,6 +180,54 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
 }
 
 
+static mpdm_t sget(mpdm_t r, mpdm_t k)
+{
+    int n;
+    mpdm_t p, w;
+
+    if (r == NULL)
+        r = mpdm_root();
+
+    mpdm_ref(r);
+    mpdm_ref(k);
+
+    /* splits the path, if needed */
+    if (MPDM_IS_ARRAY(k))
+        p = mpdm_ref(k);
+    else
+        p = mpdm_ref(mpdm_split_s(k, L"."));
+
+    w = r;
+
+    for (n = 0; n < mpdm_size(p); n++) {
+        /* is executable? run it and take its output */
+        while (MPDM_IS_EXEC(w))
+            w = mpdm_exec(w, NULL, NULL);
+
+        if (MPDM_IS_HASH(w))
+            w = mpdm_hget(w, mpdm_aget(p, n));
+        else
+        if (MPDM_IS_ARRAY(w)) {
+            int i = mpdm_ival(mpdm_aget(p, n));
+            w = mpdm_aget(w, i);
+        }
+        else {
+            mpdm_unref(mpdm_ref(w));
+            w = NULL;
+        }
+
+        if (w == NULL)
+            break;
+    }
+
+    mpdm_unref(p);
+    mpdm_unref(k);
+    mpdm_unref(r);
+
+    return w;
+}
+
+
 /**
  * mpsl_get_symbol - Gets the value of a symbol.
  * @s: symbol name
@@ -195,7 +243,8 @@ mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t l)
     mpdm_ref(s);
     mpdm_ref(l);
 
-    r = mpdm_sget(find_local_symtbl(s, l), s);
+//    r = mpdm_sget(find_local_symtbl(s, l), s);
+    r = sget(find_local_symtbl(s, l), s);
 
     mpdm_unref(l);
     mpdm_unref(s);
