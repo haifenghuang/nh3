@@ -150,6 +150,72 @@ static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
 }
 
 
+static mpdm_t sset(mpdm_t r, mpdm_t k, mpdm_t v)
+{
+    int n;
+    mpdm_t p, w;
+
+    if (r == NULL)
+        r = mpdm_root();
+
+    mpdm_ref(r);
+    mpdm_ref(k);
+    mpdm_ref(v);
+
+    /* splits the path, if needed */
+    if (MPDM_IS_ARRAY(k))
+        p = mpdm_ref(k);
+    else
+        p = mpdm_ref(mpdm_split_s(k, L"."));
+
+    w = r;
+
+    for (n = 0; n < mpdm_size(p) - 1; n++) {
+        /* is executable? run it and take its output */
+        while (MPDM_IS_EXEC(w))
+            w = mpdm_exec(w, NULL, NULL);
+
+        if (MPDM_IS_HASH(w))
+            w = mpdm_hget(w, mpdm_aget(p, n));
+        else
+        if (MPDM_IS_ARRAY(w)) {
+            int i = mpdm_ival(mpdm_aget(p, n));
+            w = mpdm_aget(w, i);
+        }
+        else {
+            mpdm_unref(mpdm_ref(w));
+            w = NULL;
+        }
+
+        if (w == NULL)
+            break;
+    }
+
+    /* if want to set, do it */
+    if (w != NULL) {
+        /* resolve executable values again */
+        while (MPDM_IS_EXEC(w))
+            w = mpdm_exec(w, NULL, NULL);
+
+        if (w) {
+            if (w->flags & MPDM_HASH)
+                w = mpdm_hset(w, mpdm_aget(p, n), v);
+            else {
+                int i = mpdm_ival(mpdm_aget(p, n));
+                w = mpdm_aset(w, v, i);
+            }
+        }
+    }
+
+    mpdm_unref(p);
+    mpdm_unref(v);
+    mpdm_unref(k);
+    mpdm_unref(r);
+
+    return w;
+}
+
+
 /**
  * mpsl_set_symbol - Sets value to a symbol.
  * @s: symbol name
@@ -168,7 +234,7 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
     mpdm_ref(v);
     mpdm_ref(l);
 
-    r = mpdm_sset(find_local_symtbl(s, l), s, v);
+    r = sset(find_local_symtbl(s, l), s, v);
 
     mpdm_unref(l);
     mpdm_unref(v);
