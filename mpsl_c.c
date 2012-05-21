@@ -150,27 +150,28 @@ static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
 }
 
 
-static mpdm_t sset(mpdm_t r, mpdm_t k, mpdm_t v)
+static mpdm_t sset(mpdm_t l, mpdm_t s, mpdm_t v)
 {
     int n;
-    mpdm_t p, w;
+    mpdm_t r, p, w;
 
-    if (r == NULL)
+    /* get the local or global symbol table */
+    if ((r = find_local_symtbl(s, l)) == NULL)
         r = mpdm_root();
 
     mpdm_ref(r);
-    mpdm_ref(k);
+    mpdm_ref(s);
     mpdm_ref(v);
 
     /* splits the path, if needed */
-    if (MPDM_IS_ARRAY(k))
-        p = mpdm_ref(k);
+    if (MPDM_IS_ARRAY(s))
+        p = mpdm_ref(s);
     else
-        p = mpdm_ref(mpdm_split_s(k, L"."));
+        p = mpdm_ref(mpdm_split_s(s, L"."));
 
     w = r;
 
-    for (n = 0; n < mpdm_size(p) - 1; n++) {
+    for (n = 0; w != NULL && n < mpdm_size(p) - 1; n++) {
         /* is executable? run it and take its output */
         while (MPDM_IS_EXEC(w))
             w = mpdm_exec(w, NULL, NULL);
@@ -178,17 +179,12 @@ static mpdm_t sset(mpdm_t r, mpdm_t k, mpdm_t v)
         if (MPDM_IS_HASH(w))
             w = mpdm_hget(w, mpdm_aget(p, n));
         else
-        if (MPDM_IS_ARRAY(w)) {
-            int i = mpdm_ival(mpdm_aget(p, n));
-            w = mpdm_aget(w, i);
-        }
+        if (MPDM_IS_ARRAY(w))
+            w = mpdm_aget(w, mpdm_ival(mpdm_aget(p, n)));
         else {
-            mpdm_unref(mpdm_ref(w));
+            mpdm_void(w);
             w = NULL;
         }
-
-        if (w == NULL)
-            break;
     }
 
     /* if want to set, do it */
@@ -198,18 +194,16 @@ static mpdm_t sset(mpdm_t r, mpdm_t k, mpdm_t v)
             w = mpdm_exec(w, NULL, NULL);
 
         if (w) {
-            if (w->flags & MPDM_HASH)
+            if (MPDM_IS_HASH(w))
                 w = mpdm_hset(w, mpdm_aget(p, n), v);
-            else {
-                int i = mpdm_ival(mpdm_aget(p, n));
-                w = mpdm_aset(w, v, i);
-            }
+            else
+                w = mpdm_aset(w, v, mpdm_ival(mpdm_aget(p, n)));
         }
     }
 
     mpdm_unref(p);
     mpdm_unref(v);
-    mpdm_unref(k);
+    mpdm_unref(s);
     mpdm_unref(r);
 
     return w;
@@ -234,7 +228,8 @@ mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
     mpdm_ref(v);
     mpdm_ref(l);
 
-    r = sset(find_local_symtbl(s, l), s, v);
+//    r = sset(find_local_symtbl(s, l), s, v);
+    r = sset(l, s, v);
 
     mpdm_unref(l);
     mpdm_unref(v);
