@@ -10,6 +10,7 @@ MPSL Release Notes
       programming.
     - join() can also join arrays.
     - New keyword `global', to define global variables.
+    - map() can also use a hash as first argument.
 
 2.1.0
 -----

@@ -1150,16 +1150,17 @@ static mpdm_t F_ord(F_ARGS)
 
 
 /**
- * map - Maps an array into another.
- * @a: the array
+ * map - Maps a multiple value to an array.
+ * @a: the value (array or hash)
  * @filter: the filter
  *
  * Returns a new array built by applying the @filter to all the
- * elements of the array @a. The filter can be an executable function
- * accepting one argument, in which case the return value of the function
- * will be used as the output element; @filt can also be a hash, in which
- * case the original element will be used as a key to the hash and the
- * associated value used as the output element.
+ * elements of the @a multiple value. The filter can be an executable
+ * function accepting one argument if @a is an array and two if @a is
+ * a hash, in which case the return value of the function will be used
+ * as the output element; @filter can also be a hash, in which
+ * case each array element or hash key will be used as a key to the
+ * hash and the associated value used as the output element.
  *
  * [Arrays]
  */
@@ -1168,28 +1169,26 @@ static mpdm_t F_map(F_ARGS)
 {
     mpdm_t set = mpdm_aget(a, 0);
     mpdm_t key = mpdm_aget(a, 1);
-    mpdm_t out;
+    mpdm_t out = NULL;
+    int n = 0, i = 0;
+    mpdm_t k, v;
 
-    /* map NULL to NULL */
-    if (set == NULL)
-        return NULL;
+    if (set != NULL) {
+        out = mpdm_ref(
+            MPDM_A(MPDM_IS_HASH(set) ? mpdm_hsize(set) : mpdm_size(set))
+        );
 
-    out = mpdm_ref(MPDM_A(mpdm_size(set)));
-
-    if (MPDM_IS_EXEC(key)) {
-        int n;
-
-        /* executes the code using the element as argument
-           and stores the result in the output array */
-        for (n = 0; n < mpdm_size(set); n++)
-            mpdm_aset(out, mpdm_exec_1(key, mpdm_aget(set, n), l), n);
-    }
-    else if (MPDM_IS_HASH(key)) {
-        int n;
-
-        /* maps each value using the element as key */
-        for (n = 0; n < mpdm_size(set); n++)
-            mpdm_aset(out, mpdm_hget(key, mpdm_aget(set, n)), n);
+        if (MPDM_IS_EXEC(key)) {
+            while (mpdm_iterator(set, &n, &k, &v)) {
+                mpdm_aset(out, mpdm_exec_2(key, k, v, l), i++);
+            }
+        }
+        else
+        if (MPDM_IS_HASH(key)) {
+            while (mpdm_iterator(set, &n, &k, &v)) {
+                mpdm_aset(out, mpdm_hget(key, k), i++);
+            }
+        }
     }
 
     return mpdm_unrefnd(out);
