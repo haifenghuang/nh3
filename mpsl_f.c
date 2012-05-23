@@ -1240,17 +1240,19 @@ static mpdm_t F_hmap(F_ARGS)
 
 
 /**
- * grep - Greps inside an array.
- * @a: the array
+ * grep - Greps inside a multiple value.
+ * @a: the array or hash
  * @filter: the filter
  *
- * Greps inside an array and returns another one containing only the
+ * Greps inside a multiple value and returns another one containing only the
  * elements that passed the filter. If @filter is a string, it's accepted
- * as a regular expression, which will be applied to each element.
- * If @filter is executable, it will be called with the element as its
- * only argument and its return value used as validation.
+ * as a regular expression, which will be applied to each element or hash
+ * key. If @filter is executable, it will be called with the element as
+ * its only argument if @a is an array or with two if @a is a hash,
+ * and its return value used as validation.
  *
- * The new array will contain all elements that passed the filter.
+ * The new value will have the same type as @a and will contain all
+ * elements that passed the filter.
  * [Arrays]
  * [Regular Expressions]
  */
@@ -1258,39 +1260,47 @@ static mpdm_t F_hmap(F_ARGS)
 static mpdm_t F_grep(F_ARGS)
 {
     mpdm_t set = mpdm_aget(a, 0);
-    mpdm_t key = mpdm_aget(a, 1);
-    mpdm_t out = mpdm_ref(MPDM_A(0));
+    mpdm_t fil = mpdm_aget(a, 1);
+    mpdm_t out = NULL;
+    int n = 0;
+    mpdm_t k, v;
 
-    if (MPDM_IS_EXEC(key)) {
-        int n;
+    if (set != NULL) {
 
-        /* it's executable */
-        for (n = 0; n < mpdm_size(set); n++) {
-            mpdm_t v = mpdm_aget(set, n);
-            mpdm_t w = mpdm_ref(mpdm_exec_1(key, v, l));
+        out = mpdm_ref(MPDM_IS_HASH(set) ? MPDM_H(0) : MPDM_A(0));
 
-            if (mpsl_is_true(w))
-                mpdm_push(out, v);
+        if (MPDM_IS_EXEC(fil)) {
+            while (mpdm_iterator(set, &n, &k, &v)) {
+                mpdm_t w = mpdm_ref(mpdm_exec_2(fil, k, v, l));
 
-            mpdm_unref(w);
+                if (mpsl_is_true(w)) {
+                    if (MPDM_IS_HASH(out))
+                        mpdm_hset(out, k, v);
+                    else
+                        mpdm_push(out, k);
+                }
+
+                mpdm_unref(w);
+            }
+        }
+        else
+        if (MPDM_IS_STRING(fil)) {
+            while (mpdm_iterator(set, &n, &k, &v)) {
+                mpdm_t w = mpdm_ref(mpdm_regex(v, fil, 0));
+
+                if (w) {
+                    if (MPDM_IS_HASH(out))
+                        mpdm_hset(out, k, v);
+                    else
+                        mpdm_push(out, k);
+                }
+
+                mpdm_unref(w);
+            }
         }
     }
-    else if (MPDM_IS_STRING(key)) {
-        int n;
 
-        /* it's a string; use it as a regular expression */
-        for (n = 0; n < mpdm_size(set); n++) {
-            mpdm_t v = mpdm_aget(set, n);
-            mpdm_t w = mpdm_ref(mpdm_regex(v, key, 0));
-
-            if (w)
-                mpdm_push(out, v);
-
-            mpdm_unref(w);
-        }
-    }
-
-    return mpdm_size(mpdm_unrefnd(out)) == 0 ? NULL : out;
+    return mpdm_unrefnd(out);
 }
 
 static mpdm_t F_getenv(F_ARGS)

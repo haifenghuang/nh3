@@ -10,7 +10,8 @@ MPSL Release Notes
       programming.
     - join() can also join arrays.
     - New keyword `global', to define global variables.
-    - map() can also use a hash as first argument.
+    - The map() and grep() functions also accept a hash as their
+      first argument.
     - New function hmap(), to map an array or hash to another hash.
 
 2.1.0
