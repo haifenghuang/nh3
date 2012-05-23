@@ -1163,12 +1163,13 @@ static mpdm_t F_ord(F_ARGS)
  * hash and the associated value used as the output element.
  *
  * [Arrays]
+ * [Hashes]
  */
 /** array = map(a, filter); */
 static mpdm_t F_map(F_ARGS)
 {
     mpdm_t set = mpdm_aget(a, 0);
-    mpdm_t key = mpdm_aget(a, 1);
+    mpdm_t fil = mpdm_aget(a, 1);
     mpdm_t out = NULL;
     int n = 0, i = 0;
     mpdm_t k, v;
@@ -1178,15 +1179,58 @@ static mpdm_t F_map(F_ARGS)
             MPDM_A(MPDM_IS_HASH(set) ? mpdm_hsize(set) : mpdm_size(set))
         );
 
-        if (MPDM_IS_EXEC(key)) {
+        if (MPDM_IS_EXEC(fil)) {
             while (mpdm_iterator(set, &n, &k, &v)) {
-                mpdm_aset(out, mpdm_exec_2(key, k, v, l), i++);
+                mpdm_aset(out, mpdm_exec_2(fil, k, v, l), i++);
             }
         }
         else
-        if (MPDM_IS_HASH(key)) {
+        if (MPDM_IS_HASH(fil)) {
             while (mpdm_iterator(set, &n, &k, &v)) {
-                mpdm_aset(out, mpdm_hget(key, k), i++);
+                mpdm_aset(out, mpdm_hget(fil, k), i++);
+            }
+        }
+    }
+
+    return mpdm_unrefnd(out);
+}
+
+
+/**
+ * hmap - Maps a multiple value to a hash.
+ * @a: the value (array or hash)
+ * @filter: the filter
+ *
+ * Returns a new hash built by applying the @filter to all the elements
+ * of the @a multiple value. The filter can be an executable function
+ * accepting one argument if @a is an array and two if @a is a hash,
+ * in which case the return value of the function is expected to be a
+ * two element array, with the 0th element to be the key and the 1st
+ * element the value for the new pair in the output hash.
+ *
+ * [Arrays]
+ * [Hashes]
+ */
+/** hash = hmap(a, filter); */
+static mpdm_t F_hmap(F_ARGS)
+{
+    mpdm_t set = mpdm_aget(a, 0);
+    mpdm_t fil = mpdm_aget(a, 1);
+    mpdm_t out = NULL;
+    int n = 0;
+    mpdm_t k, v;
+
+    if (set != NULL) {
+        out = mpdm_ref(MPDM_H(0));
+
+        if (MPDM_IS_EXEC(fil)) {
+            while (mpdm_iterator(set, &n, &k, &v)) {
+                mpdm_t w = mpdm_ref(mpdm_exec_2(fil, k, v, l));
+
+                if (MPDM_IS_ARRAY(w))
+                    mpdm_hset(out, mpdm_aget(w, 0), mpdm_aget(w, 1));
+
+                mpdm_unref(w);
             }
         }
     }
@@ -1554,6 +1598,7 @@ static struct {
     { L"chr",            F_chr },
     { L"ord",            F_ord },
     { L"map",            F_map },
+    { L"hmap",           F_hmap },
     { L"grep",           F_grep },
     { L"getenv",         F_getenv },
     { L"uc",             F_uc },
