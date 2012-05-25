@@ -1312,7 +1312,13 @@ static mpdm_t F_getenv(F_ARGS)
 
 static mpdm_t F_bincall(F_ARGS)
 {
-    return MPDM_X(mpdm_ival(mpdm_aget(a, 0)));
+    void *func;
+    char *ptr = mpdm_wcstombs(mpdm_string(mpdm_aget(a, 0)), NULL);
+
+    sscanf(ptr, "%p", &func);
+    free(ptr);
+
+    return MPDM_X(func);
 }
 
 /**
