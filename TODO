@@ -6,7 +6,7 @@ Release Critical Bugs
 
  * 1136: Document the `METHOD' opcode.
  * 1137: Document the `GLOBAL' opcode.
- * 1138: Fix initial random() seed to not be second-aligned.
+ * 1138: Add a clean solution that getpid() for randomizing.
 
 Open Bugs
 ---------

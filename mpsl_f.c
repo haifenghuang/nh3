@@ -1321,6 +1321,9 @@ static mpdm_t F_bincall(F_ARGS)
     return MPDM_X(func);
 }
 
+/* FIXME: for randomizing */
+int getpid(void);
+
 /**
  * random - Returns a random value.
  *
@@ -1335,7 +1338,7 @@ static mpdm_t F_random(F_ARGS)
     int range = mpdm_ival(mpdm_aget(a, 0));
 
     if (range == 0 || seed == 0)
-        seed = time(NULL);
+        seed = time(NULL) ^ getpid();
     else {
         seed = (seed * 58321) + 11113;
         r = (seed >> 16) % range;
