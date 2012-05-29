@@ -27,6 +27,8 @@ enum {
     OP_JF,
     OP_TPUSH,
     OP_TPOP,
+    OP_EXECSYM,
+    OP_RETURN,
     OP_ADD,
     OP_SUB,
     OP_MUL,
@@ -56,6 +58,7 @@ void rs_mpsl_reset_machine(mpdm_t machine)
 
     mpdm_hset_s(machine, L"pc",         MPDM_I(0));
     mpdm_hset_s(machine, L"sp",         MPDM_I(0));
+    mpdm_hset_s(machine, L"cs",         MPDM_I(0));
     mpdm_hset_s(machine, L"tt",         MPDM_I(1));
 }
 
@@ -118,6 +121,7 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
     mpdm_t symtbl   = mpdm_hget_s(machine, L"symtbl");
     int pc          = mpdm_ival(mpdm_hget_s(machine, L"pc"));
     int sp          = mpdm_ival(mpdm_hget_s(machine, L"sp"));
+    int cs          = mpdm_ival(mpdm_hget_s(machine, L"cs"));
     int tt          = mpdm_ival(mpdm_hget_s(machine, L"tt"));
     clock_t max;
     mpdm_t v, w;
@@ -200,6 +204,17 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
             --tt;
             break;
 
+        case OP_EXECSYM:
+            /* calls a subroutine */
+            /* args...? */
+            mpdm_aset(c_stack, MPDM_I(pc), cs++);
+            break;
+
+        case OP_RETURN:
+            /* returns from subroutine */
+            pc = mpdm_ival(mpdm_aget(c_stack, --cs));
+            break;
+
         case OP_ADD:
         case OP_SUB:
         case OP_MUL:
@@ -260,6 +275,7 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
 
     mpdm_hset_s(machine, L"pc", MPDM_I(pc));
     mpdm_hset_s(machine, L"sp", MPDM_I(sp));
+    mpdm_hset_s(machine, L"cs", MPDM_I(cs));
     mpdm_hset_s(machine, L"tt", MPDM_I(tt));
 
     return ret;
