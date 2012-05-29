@@ -22,6 +22,11 @@ enum {
     OP_ASSIGN,
     OP_LOCAL,
     OP_GLOBAL,
+    OP_JMP,
+    OP_JT,
+    OP_JF,
+    OP_TPUSH,
+    OP_TPOP,
     OP_ADD,
     OP_SUB,
     OP_MUL,
@@ -79,13 +84,25 @@ static mpdm_t find_symtbl(mpdm_t s, mpdm_t symtbl, int tt)
 
 mpdm_t rs_mpsl_get_symbol(mpdm_t s, mpdm_t symtbl, int tt)
 {
-    return mpdm_hget(find_symtbl(s, symtbl, tt), s);
+    mpdm_t r;
+
+    mpdm_ref(s);
+    r = mpdm_hget(find_symtbl(s, symtbl, tt), s);
+    mpdm_unref(s);
+
+    return r;
 }
 
 
 mpdm_t rs_mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t symtbl, int tt)
 {
-    return mpdm_hset(find_symtbl(s, symtbl, tt), s, v);
+    mpdm_t r;
+
+    mpdm_ref(s);
+    r = mpdm_hset(find_symtbl(s, symtbl, tt), s, v);
+    mpdm_unref(s);
+
+    return r;
 }
 
 
@@ -152,6 +169,37 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
             PUSH(v);
             break;
 
+        case OP_JMP:
+            /* non-conditional jump */
+            pc = mpdm_ival(mpdm_aget(prg, pc));
+            break;
+
+        case OP_JT:
+            /* jump if true */
+            if (mpsl_is_true(POP()))
+                pc = mpdm_ival(mpdm_aget(prg, pc));
+            else
+                pc++;
+            break;
+
+        case OP_JF:
+            /* jump if false */
+            if (!mpsl_is_true(POP()))
+                pc = mpdm_ival(mpdm_aget(prg, pc));
+            else
+                pc++;
+            break;
+
+        case OP_TPUSH:
+            /* pushes the TOS as a new symtbl */
+            mpdm_aset(symtbl, POP(), tt++);
+            break;
+
+        case OP_TPOP:
+            /* discards the last symtbl */
+            --tt;
+            break;
+
         case OP_ADD:
         case OP_SUB:
         case OP_MUL:
@@ -182,9 +230,9 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
             switch (opcode) {
             case OP_EQ:     r = v1 == v2; break;
             case OP_NEQ:    r = v1 != v2; break;
-            case OP_LT:     r = v1 < v2;  break;
+            case OP_LT:     r = v1 <  v2; break;
             case OP_LE:     r = v1 <= v2; break;
-            case OP_GT:     r = v1 > v2;  break;
+            case OP_GT:     r = v1 >  v2; break;
             case OP_GE:     r = v1 >= v2; break;
             }
     
