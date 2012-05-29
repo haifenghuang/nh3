@@ -49,7 +49,11 @@ void rs_mpsl_reset_machine(mpdm_t machine)
 {
     mpdm_hset_s(machine, L"stack",      MPDM_A(0));
     mpdm_hset_s(machine, L"c_stack",    MPDM_A(0));
+    mpdm_hset_s(machine, L"symtbl",     MPDM_A(0));
+
     mpdm_hset_s(machine, L"pc",         MPDM_I(0));
+    mpdm_hset_s(machine, L"sp",         MPDM_I(0));
+    mpdm_hset_s(machine, L"tt",         MPDM_I(0));
 }
 
 
@@ -61,7 +65,10 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
     mpdm_t prg      = mpdm_hget_s(machine, L"prg");
     mpdm_t stack    = mpdm_hget_s(machine, L"stack");
     mpdm_t c_stack  = mpdm_hget_s(machine, L"c_stack");
+    mpdm_t symtbl   = mpdm_hget_s(machine, L"symtbl");
     int pc          = mpdm_ival(mpdm_hget_s(machine, L"pc"));
+    int sp          = mpdm_ival(mpdm_hget_s(machine, L"sp"));
+    int tt          = mpdm_ival(mpdm_hget_s(machine, L"tt"));
     clock_t max;
 
     /* maximum running time */
