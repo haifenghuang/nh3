@@ -15,8 +15,13 @@
 #include <stdio.h>
 #include <mpdm.h>
 
-typedef enum {
+enum {
+    OP_POP,
     OP_LITERAL,
+    OP_SYMVAL,
+    OP_ASSIGN,
+    OP_LOCAL,
+    OP_GLOBAL,
     OP_ADD,
     OP_SUB,
     OP_MUL,
@@ -27,37 +32,65 @@ typedef enum {
     OP_LE,
     OP_GT,
     OP_GE,
-    OP_PC,
-    OP_CALL,
-    OP_POST,
-    OP_RETURN,
-    OP_IF,
-    OP_IFELSE,
-    OP_WHILE,
-    OP_FOREACH,
-    OP_ASSIGN,
-    OP_SYMVAL,
-    OP_APUSH,
-    OP_HSET,
     OP_PRINT,
     OP_DUMP
 } mpsl_op_t;
+
 
 #define mpsl_is_true(v) mpdm_ival(v)
 
 void rs_mpsl_reset_machine(mpdm_t machine)
 {
+    mpdm_t v;
+
     mpdm_hset_s(machine, L"stack",      MPDM_A(0));
     mpdm_hset_s(machine, L"c_stack",    MPDM_A(0));
-    mpdm_hset_s(machine, L"symtbl",     MPDM_A(0));
+
+    v = mpdm_hset_s(machine, L"symtbl",     MPDM_A(0));
+    mpdm_push(v, MPDM_H(0));
 
     mpdm_hset_s(machine, L"pc",         MPDM_I(0));
     mpdm_hset_s(machine, L"sp",         MPDM_I(0));
-    mpdm_hset_s(machine, L"tt",         MPDM_I(0));
+    mpdm_hset_s(machine, L"tt",         MPDM_I(1));
 }
 
 
 #include <time.h>
+
+static mpdm_t find_symtbl(mpdm_t s, mpdm_t symtbl, int tt)
+{
+    int n;
+    mpdm_t l = NULL;
+
+    for (n = tt - 1; n >= 0; n--) {
+        if ((l = mpdm_aget(symtbl, n)) == NULL)
+            break;
+
+        if (mpdm_exists(l, s))
+            break;
+    }
+
+    if (l == NULL || n < 0)
+        l = mpdm_root();
+
+    return l;
+}
+
+
+mpdm_t rs_mpsl_get_symbol(mpdm_t s, mpdm_t symtbl, int tt)
+{
+    return mpdm_hget(find_symtbl(s, symtbl, tt), s);
+}
+
+
+mpdm_t rs_mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t symtbl, int tt)
+{
+    return mpdm_hset(find_symtbl(s, symtbl, tt), s, v);
+}
+
+
+#define PUSH(v) mpdm_aset(stack, v, sp++)
+#define POP()   mpdm_aget(stack, --sp)
 
 int rs_mpsl_exec(mpdm_t machine, int msecs)
 {
@@ -70,6 +103,8 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
     int sp          = mpdm_ival(mpdm_hget_s(machine, L"sp"));
     int tt          = mpdm_ival(mpdm_hget_s(machine, L"tt"));
     clock_t max;
+    mpdm_t v, w;
+    double v1, v2, r;
 
     /* maximum running time */
     max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0x7fffffff;
@@ -77,32 +112,61 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
     while (ret == 0 && pc < mpdm_size(prg)) {
 
         /* get the opcode */
-        mpsl_op_t opcode = mpdm_ival(mpdm_aget(prg, pc++));
+        int opcode = mpdm_ival(mpdm_aget(prg, pc++));
     
         switch (opcode) {
+        case OP_POP:
+            /* discards the TOS */
+            --sp;
+            break;
+
         case OP_LITERAL:
             /* literal: next thing in pc is the literal */
-            mpdm_push(stack, mpdm_clone(mpdm_aget(prg, pc++)));
+            PUSH(mpdm_clone(mpdm_aget(prg, pc++)));
+            break;
+
+        case OP_SYMVAL:
+            /* get symbol value */
+            v = POP();
+            PUSH(rs_mpsl_get_symbol(v, symtbl, tt));
+            break;
+
+        case OP_ASSIGN:
+            /* assign a value to a symbol */
+            v = POP();
+            w = POP();
+            PUSH(rs_mpsl_set_symbol(v, w, symtbl, tt));
+            break;
+
+        case OP_LOCAL:
+            /* creates a local symbol */
+            v = POP();
+            mpdm_hset(mpdm_aget(symtbl, tt - 1), v, NULL);
+            PUSH(v);
             break;
     
+        case OP_GLOBAL:
+            /* creates a global symbol */
+            v = POP();
+            mpdm_hset(mpdm_root(), v, NULL);
+            PUSH(v);
+            break;
+
         case OP_ADD:
         case OP_SUB:
         case OP_MUL:
         case OP_DIV:
-            {
-                double v2   = mpdm_rval(mpdm_pop(stack));
-                double v1   = mpdm_rval(mpdm_pop(stack));
-                double r;
+            v2 = mpdm_rval(POP());
+            v1 = mpdm_rval(POP());
     
-                switch (opcode) {
-                case OP_ADD:    r = v1 + v2; break;
-                case OP_SUB:    r = v1 - v2; break;
-                case OP_MUL:    r = v1 * v2; break;
-                case OP_DIV:    r = v1 / v2; break;
-                }
-    
-                mpdm_push(stack, MPDM_R(r));
+            switch (opcode) {
+            case OP_ADD:    r = v1 + v2; break;
+            case OP_SUB:    r = v1 - v2; break;
+            case OP_MUL:    r = v1 * v2; break;
+            case OP_DIV:    r = v1 / v2; break;
             }
+    
+            PUSH(MPDM_R(r));
     
             break;
     
@@ -112,208 +176,33 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
         case OP_LE:
         case OP_GT:
         case OP_GE:
-            {
-                double v2   = mpdm_rval(mpdm_pop(stack));
-                double v1   = mpdm_rval(mpdm_pop(stack));
-                int r;
+            v2 = mpdm_rval(POP());
+            v1 = mpdm_rval(POP());
     
-                switch (opcode) {
-                case OP_EQ:     r = v1 == v2; break;
-                case OP_NEQ:    r = v1 != v2; break;
-                case OP_LT:     r = v1 < v2; break;
-                case OP_LE:     r = v1 <= v2; break;
-                case OP_GT:     r = v1 > v2; break;
-                case OP_GE:     r = v1 >= v2; break;
-                }
-    
-                mpdm_push(stack, MPDM_I(r));
+            switch (opcode) {
+            case OP_EQ:     r = v1 == v2; break;
+            case OP_NEQ:    r = v1 != v2; break;
+            case OP_LT:     r = v1 < v2;  break;
+            case OP_LE:     r = v1 <= v2; break;
+            case OP_GT:     r = v1 > v2;  break;
+            case OP_GE:     r = v1 >= v2; break;
             }
     
-            break;
-    
-        case OP_PC:
-            /* push the program counter */
-            mpdm_push(stack, MPDM_I(pc));
-            break;
-    
-        case OP_CALL:
-            /* call the value on the stack */
-            {
-                mpdm_t x = mpdm_pop(stack);
-    
-                /* executable value? arguments are in the stack in an array */
-                if (MPDM_IS_EXEC(x)) {
-                    mpdm_t args = mpdm_pop(stack);
-                    mpdm_push(stack, mpdm_exec(x, args, NULL));
-                }
-                else {
-                    /* "lightweight" call */
-                    mpdm_push(c_stack, MPDM_I(pc));
-                    pc = mpdm_ival(x);
-                }
-            }
-    
-            break;
-    
-        case OP_POST:
-            /* 'postponed' code */
-            mpdm_push(stack, MPDM_I(pc));
-    
-            {
-                /* move beyond the appropriate return */
-                int l = 1;
-    
-                while (l && pc < mpdm_size(prg)) {
-                    opcode = mpdm_ival(mpdm_aget(prg, pc++));
-    
-                    if (opcode == OP_POST)
-                        l++;
-                    if (opcode == OP_RETURN)
-                        l--;
-                }
-    
-                /* return not found? error */
-                if (l)
-                    ret = -2;
-            }
-    
-            break;
-    
-        case OP_RETURN:
-            /* if there is a return address, use it;
-               otherwise, trigger error */
-            if (mpdm_size(c_stack))
-                pc = mpdm_ival(mpdm_pop(c_stack));
-            else
-                ret = -1;
-    
-            break;
-    
-        case OP_IF:
-            if (mpsl_is_true(mpdm_pop(stack))) {
-                /* push return address and call */
-                mpdm_push(c_stack, MPDM_I(pc));
-                pc = mpdm_ival(mpdm_pop(stack));
-            }
-            else
-                mpdm_adel(stack, -1);
-    
-            break;
-    
-        case OP_IFELSE:
-            /* always push return address */
-            mpdm_push(c_stack, MPDM_I(pc));
-    
-            if (mpsl_is_true(mpdm_pop(stack))) {
-                /* drop false pc */
-                mpdm_adel(stack, -1);
-    
-                /* jump to true pc */
-                pc = mpdm_ival(mpdm_pop(stack));
-            }
-            else {
-                /* jump to false pc */
-                pc = mpdm_ival(mpdm_pop(stack));
-    
-                /* drop true pc */
-                mpdm_adel(stack, -1);
-            }
-    
-            break;
-    
-        case OP_WHILE:
-            /* in the stack:
-                <body pc> <condition pc> <condition>
-            */
-            if (mpsl_is_true(mpdm_pop(stack))) {
-                /* set the return address to the cond. pc */
-                mpdm_push(c_stack, mpdm_aget(stack, -1));
-    
-                /* jump to the body */
-                pc = mpdm_ival(mpdm_aget(stack, -2));
-            }
-            else {
-                /* drop both pcs */
-                mpdm_adel(stack, -1);
-                mpdm_adel(stack, -1);
-            }
-    
-            break;
-    
-        case OP_FOREACH:
-            /* in the stack:
-                <body pc> <array> <iterator>
-            */
-            {
-                int i = mpdm_ival(mpdm_pop(stack));
-                mpdm_t v;
-    
-                if (mpdm_iterator(mpdm_aget(stack, -1), &i, &v, NULL)) {
-                    /* another iteration */
-    
-                    /* push return value back over 'foreach' */
-                    mpdm_push(c_stack, MPDM_I(pc - 1));
-    
-                    /* call the body */
-                    pc = mpdm_ival(mpdm_aget(stack, -2));
-    
-                    /* stack the iterator back */
-                    mpdm_push(stack, MPDM_I(i));
-    
-                    /* stack the element (the body should pick it) */
-                    mpdm_push(stack, v);
-                }
-                else {
-                    /* clean stack */
-                    mpdm_adel(stack, -1);
-                    mpdm_adel(stack, -1);
-                }
-            }
+            PUSH(MPDM_I(r));
     
             break;
     
         case OP_PRINT:
             /* prints the value in the stack */
-            mpdm_write_wcs(stdout, mpdm_string(mpdm_pop(stack)));
+            mpdm_write_wcs(stdout, mpdm_string(POP()));
             break;
     
         case OP_DUMP:
-            {
-                mpdm_t v = mpdm_pop(stack);
-                mpdm_dump(v);
-                mpdm_void(v);
-            }
+            v = POP();
+            mpdm_dump(v);
+            mpdm_void(v);
+
             break;
-    
-        case OP_ASSIGN:
-            /* assign a value to a symbol */
-            {
-                mpdm_t s = mpdm_pop(stack);
-                mpdm_t v = mpdm_pop(stack);
-                mpdm_hset(mpdm_root(), s, v);
-            }
-            break;
-    
-        case OP_SYMVAL:
-            /* get symbol value */
-            mpdm_push(stack, mpdm_hget(mpdm_root(), mpdm_pop(stack)));
-            break;
-    
-        case OP_APUSH:
-            /* pushes a value into an array on the stack */
-            {
-                mpdm_t v = mpdm_pop(stack);
-                mpdm_push(mpdm_aget(stack, -1), v);
-            }
-            break;
-    
-        case OP_HSET:
-            /* sets a hash's key/value pair */
-            {
-                mpdm_t v = mpdm_pop(stack);
-                mpdm_t k = mpdm_pop(stack);
-                mpdm_hset(mpdm_aget(stack, -1), k, v);
-            }
         }
 
         /* if out of slice time, break */        
@@ -322,6 +211,8 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
     }
 
     mpdm_hset_s(machine, L"pc", MPDM_I(pc));
+    mpdm_hset_s(machine, L"sp", MPDM_I(sp));
+    mpdm_hset_s(machine, L"tt", MPDM_I(tt));
 
     return ret;
 }
@@ -332,9 +223,9 @@ static mpdm_t add_arg(mpdm_t prg, mpdm_t arg)
     return mpdm_push(prg, arg);
 }
 
-static mpdm_t add_ins(mpdm_t prg, mpsl_op_t opcode)
+static mpdm_t add_ins(mpdm_t prg, int opcode)
 {
-    return mpdm_push(prg, MPDM_I((int) opcode));
+    return mpdm_push(prg, MPDM_I(opcode));
 }
 
 
@@ -355,193 +246,26 @@ int main(int argc, char *argv[])
     add_arg(prg, MPDM_I(1));
     add_ins(prg, OP_LITERAL);
     add_arg(prg, MPDM_I(2));
-    add_ins(prg, OP_LT);
-    add_ins(prg, OP_PRINT);
-    add_ins(prg, OP_POST);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"true\n"));
-    add_ins(prg, OP_PRINT);
-    add_ins(prg, OP_RETURN);
-    add_ins(prg, OP_POST);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"false\n"));
-    add_ins(prg, OP_PRINT);
-    add_ins(prg, OP_RETURN);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(1));
-    add_ins(prg, OP_IFELSE);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(2));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(3));
     add_ins(prg, OP_ADD);
-    add_ins(prg, OP_PRINT);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"!!!\n"));
-    add_ins(prg, OP_PRINT);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"content\n"));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_ASSIGN);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_SYMVAL);
-    add_ins(prg, OP_PRINT);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(3));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(4));
-    add_ins(prg, OP_ADD);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_ASSIGN);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_SYMVAL);
-    add_ins(prg, OP_PRINT);
-
-    /* VAR1 = VAR1 + 4 ; print VAR1 */
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_SYMVAL);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(4));
-    add_ins(prg, OP_ADD);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_ASSIGN);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_SYMVAL);
-    add_ins(prg, OP_PRINT);
-
-    rs_mpsl_exec(machine, 0);
-
-    prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
-    rs_mpsl_reset_machine(machine);
-
-    /* VAR1 = 0 */
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(0));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_ASSIGN);
-
-    /* { print VAR1; print "\n"; VAR1 = VAR1 + 1; } */
-    add_ins(prg, OP_POST);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_SYMVAL);
-    add_ins(prg, OP_PRINT);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"\n"));
-    add_ins(prg, OP_PRINT);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_SYMVAL);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(1));
-    add_ins(prg, OP_ADD);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_ASSIGN);
-    add_ins(prg, OP_RETURN);
-
-    /* | VAR1 < 10 while */
-    add_ins(prg, OP_PC);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"VAR1"));
-    add_ins(prg, OP_SYMVAL);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(10));
-    add_ins(prg, OP_LT);
-    add_ins(prg, OP_WHILE);
-
-    printf("*\n");
-    rs_mpsl_exec(machine, 1);
-    printf("*\n");
-    rs_mpsl_exec(machine, 0);
-
-    prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
-    rs_mpsl_reset_machine(machine);
-
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_A(0));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(1));
-    add_ins(prg, OP_APUSH);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(2));
-    add_ins(prg, OP_APUSH);
     add_ins(prg, OP_DUMP);
 
     rs_mpsl_exec(machine, 0);
 
     prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
     rs_mpsl_reset_machine(machine);
-
     add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_H(0));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"font_face"));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"Courier"));
-    add_ins(prg, OP_HSET);
+    add_arg(prg, MPDM_LS(L"MPDM"));
+    add_ins(prg, OP_SYMVAL);
     add_ins(prg, OP_DUMP);
-
-    rs_mpsl_exec(machine, 0);
-
-    prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
-    rs_mpsl_reset_machine(machine);
-
-    /* { + 2 / } "avg" = */
-    add_ins(prg, OP_POST);
-    add_ins(prg, OP_ADD);
     add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(2));
-    add_ins(prg, OP_DIV);
-    add_ins(prg, OP_RETURN);
+    add_arg(prg, MPDM_LS(L"test"));
+    add_ins(prg, OP_LOCAL);
     add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"avg"));
+    add_arg(prg, MPDM_I(666));
+    add_ins(prg, OP_LITERAL);
+    add_arg(prg, MPDM_LS(L"test"));
     add_ins(prg, OP_ASSIGN);
 
-    /* 3 4 "avg" $ & ? */
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(3));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(4));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"avg"));
-    add_ins(prg, OP_SYMVAL);
-    add_ins(prg, OP_CALL);
-    add_ins(prg, OP_PRINT);
-
-    rs_mpsl_exec(machine, 0);
-
-    prg = mpdm_hset_s(machine, L"prg", MPDM_A(0));
-    rs_mpsl_reset_machine(machine);
-
-    /* { ? } */
-    add_ins(prg, OP_POST);
-    add_ins(prg, OP_PRINT);
-    add_ins(prg, OP_RETURN);
-
-    /* [1..10] 0 foreach */
-    add_ins(prg, OP_LITERAL);
-    v = MPDM_A(0);
-    mpdm_ref(v);
-    for (n = 10; n < 20; n++)
-        mpdm_push(v, MPDM_I(n));
-
-    add_arg(prg, v);
-    mpdm_unref(v);
-
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(0));
-    add_ins(prg, OP_FOREACH);
-
-    printf("foreach\n");
     rs_mpsl_exec(machine, 0);
 
     return 0;
