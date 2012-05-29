@@ -573,6 +573,8 @@ O_TYPE execsym(O_ARGS, int th, int m)
     if (m && (o = mpdm_aget(p, 0)) && MPDM_IS_HASH(o)) {
         mpdm_push(l, o);
     }
+    else
+        m = 0;
 
     /* gets the symbol value */
     v = GET(s);
@@ -602,7 +604,7 @@ O_TYPE execsym(O_ARGS, int th, int m)
     UF(p);
 
     /* drop the object from the local symtable */
-    if (o)
+    if (m)
         mpdm_adel(l, -1);
 
     return UFND(r);
