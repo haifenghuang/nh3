@@ -15,6 +15,59 @@
 #include <stdio.h>
 #include <mpdm.h>
 
+
+/** basic MPSL runtime **/
+
+#define mpsl_is_true(v) mpdm_ival(v)
+
+static mpdm_t find_symtbl(mpdm_t s, mpdm_t symtbl, int tt)
+/* finds the local symbol table that stores s */
+{
+    int n;
+    mpdm_t l = NULL;
+
+    for (n = tt - 1; n >= 0; n--) {
+        if ((l = mpdm_aget(symtbl, n)) == NULL)
+            break;
+
+        if (mpdm_exists(l, s))
+            break;
+    }
+
+    if (l == NULL || n < 0)
+        l = mpdm_root();
+
+    return l;
+}
+
+
+mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t symtbl, int tt)
+{
+    mpdm_t r;
+
+    mpdm_ref(s);
+    r = mpdm_hget(find_symtbl(s, symtbl, tt), s);
+    mpdm_unref(s);
+
+    return r;
+}
+
+
+mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t symtbl, int tt)
+{
+    mpdm_t r;
+
+    mpdm_ref(s);
+    r = mpdm_hset(find_symtbl(s, symtbl, tt), s, v);
+    mpdm_unref(s);
+
+    return r;
+}
+
+
+
+/** virtual machine **/
+
 enum {
     OP_POP,
     OP_LITERAL,
@@ -39,12 +92,9 @@ enum {
     OP_LE,
     OP_GT,
     OP_GE,
-    OP_PRINT,
     OP_DUMP
-} mpsl_op_t;
+};
 
-
-#define mpsl_is_true(v) mpdm_ival(v)
 
 void rs_mpsl_reset_machine(mpdm_t machine)
 {
@@ -64,50 +114,6 @@ void rs_mpsl_reset_machine(mpdm_t machine)
 
 
 #include <time.h>
-
-static mpdm_t find_symtbl(mpdm_t s, mpdm_t symtbl, int tt)
-{
-    int n;
-    mpdm_t l = NULL;
-
-    for (n = tt - 1; n >= 0; n--) {
-        if ((l = mpdm_aget(symtbl, n)) == NULL)
-            break;
-
-        if (mpdm_exists(l, s))
-            break;
-    }
-
-    if (l == NULL || n < 0)
-        l = mpdm_root();
-
-    return l;
-}
-
-
-mpdm_t rs_mpsl_get_symbol(mpdm_t s, mpdm_t symtbl, int tt)
-{
-    mpdm_t r;
-
-    mpdm_ref(s);
-    r = mpdm_hget(find_symtbl(s, symtbl, tt), s);
-    mpdm_unref(s);
-
-    return r;
-}
-
-
-mpdm_t rs_mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t symtbl, int tt)
-{
-    mpdm_t r;
-
-    mpdm_ref(s);
-    r = mpdm_hset(find_symtbl(s, symtbl, tt), s, v);
-    mpdm_unref(s);
-
-    return r;
-}
-
 
 #define PUSH(v) mpdm_aset(stack, v, sp++)
 #define POP()   mpdm_aget(stack, --sp)
@@ -149,14 +155,14 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
         case OP_SYMVAL:
             /* get symbol value */
             v = POP();
-            PUSH(rs_mpsl_get_symbol(v, symtbl, tt));
+            PUSH(mpsl_get_symbol(v, symtbl, tt));
             break;
 
         case OP_ASSIGN:
             /* assign a value to a symbol */
             v = POP();
             w = POP();
-            PUSH(rs_mpsl_set_symbol(v, w, symtbl, tt));
+            PUSH(mpsl_set_symbol(v, w, symtbl, tt));
             break;
 
         case OP_LOCAL:
@@ -253,11 +259,6 @@ int rs_mpsl_exec(mpdm_t machine, int msecs)
     
             PUSH(MPDM_I(r));
     
-            break;
-    
-        case OP_PRINT:
-            /* prints the value in the stack */
-            mpdm_write_wcs(stdout, mpdm_string(POP()));
             break;
     
         case OP_DUMP:
