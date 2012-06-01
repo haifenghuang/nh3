@@ -20,52 +20,6 @@
 
 #define mpsl_is_true(v) mpdm_ival(v)
 
-static mpdm_t find_symtbl(mpdm_t s, mpdm_t symtbl, int tt)
-/* finds the local symbol table that stores s */
-{
-    int n;
-    mpdm_t l = NULL;
-
-    for (n = tt - 1; n >= 0; n--) {
-        if ((l = mpdm_aget(symtbl, n)) == NULL)
-            break;
-
-        if (mpdm_exists(l, s))
-            break;
-    }
-
-    if (l == NULL || n < 0)
-        l = mpdm_root();
-
-    return l;
-}
-
-
-mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t symtbl, int tt)
-{
-    mpdm_t r;
-
-    mpdm_ref(s);
-    r = mpdm_hget(find_symtbl(s, symtbl, tt), s);
-    mpdm_unref(s);
-
-    return r;
-}
-
-
-mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t symtbl, int tt)
-{
-    mpdm_t r;
-
-    mpdm_ref(s);
-    r = mpdm_hset(find_symtbl(s, symtbl, tt), s, v);
-    mpdm_unref(s);
-
-    return r;
-}
-
-
-
 /** virtual machine **/
 
 enum {
@@ -105,6 +59,40 @@ struct mpsl_vm {
     int cs;                 /* call stack pointer */
     int tt;                 /* symbol table top */
 };
+
+
+static mpdm_t find_symtbl(struct mpsl_vm *m, mpdm_t s)
+/* finds the local symbol table that stores s */
+{
+    int n;
+    mpdm_t l = NULL;
+
+    for (n = m->tt - 1; n >= 0; n--) {
+        if ((l = mpdm_aget(m->symtbl, n)) == NULL)
+            break;
+
+        if (mpdm_exists(l, s))
+            break;
+    }
+
+    if (l == NULL || n < 0)
+        l = mpdm_root();
+
+    return l;
+}
+
+
+mpdm_t mpsl_get_symbol(struct mpsl_vm *m, mpdm_t s)
+{
+    return mpdm_hget(find_symtbl(m, s), s);
+}
+
+
+mpdm_t mpsl_set_symbol(struct mpsl_vm *m, mpdm_t s, mpdm_t v)
+{
+    return mpdm_hset(find_symtbl(m, s), s, v);
+}
+
 
 
 void mpsl_reset_vm(struct mpsl_vm *m, mpdm_t prg)
@@ -160,14 +148,14 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SYMVAL:
             /* get symbol value */
             v = POP();
-            PUSH(mpsl_get_symbol(v, m->symtbl, m->tt));
+            PUSH(mpsl_get_symbol(m, v));
             break;
 
         case OP_ASSIGN:
             /* assign a value to a symbol */
             v = POP();
             w = POP();
-            PUSH(mpsl_set_symbol(v, w, m->symtbl, m->tt));
+            PUSH(mpsl_set_symbol(m, v, w));
             break;
 
         case OP_LOCAL:
