@@ -14,15 +14,18 @@
 
 #include <stdio.h>
 #include <wchar.h>
+#include <wctype.h>
 #include <mpdm.h>
 
 
 /** compiler **/
 
 enum {
-    IF, ELSE, WHILE, BREAK, LOCAL, GLOBAL, SUB, RETURN, NULLV,
+    IF, ELSE, WHILE, BREAK,
+    LOCAL, GLOBAL, SUB, RETURN, NULLV,
 
-    LBRACE, RBRACE, LPAREN, RPAREN, LBRACK, RBRACK, COLON, SEMI, EQUAL, DOT,
+    LBRACE, RBRACE, LPAREN, RPAREN, LBRACK, RBRACK,
+    COLON, SEMI, EQUAL, DOT,
 
     SYMBOL, LITERAL,
 
@@ -34,7 +37,8 @@ static wchar_t *tokens_c = L"{}()[]:;=.";
 
 static wchar_t *tokens_s[] = {
     /* should match token enum */
-    L"if", L"else", L"while", L"break", L"local", L"global", L"sub", L"return", L"NULL", NULL
+    L"if", L"else", L"while", L"break",
+    L"local", L"global", L"sub", L"return", L"NULL", NULL
 };
 
 /* dynamic string manipulation macros */
@@ -87,25 +91,20 @@ static void next_c(struct mpsl_lp *l)
 
 static void token(struct mpsl_lp *l)
 {
-    switch (l->c) {
-    case L'\0':
-    case WEOF:  l->token = EOP; break;
+    wchar_t *ptr;
 
-    case L'{':  next_c(l); l->token = LBRACE;   break;
-    case L'}':  next_c(l); l->token = RBRACE;   break;
-    case L'(':  next_c(l); l->token = LPAREN;   break;
-    case L')':  next_c(l); l->token = RPAREN;   break;
-    case L'[':  next_c(l); l->token = LBRACK;   break;
-    case L']':  next_c(l); l->token = RBRACK;   break;
-    case L';':  next_c(l); l->token = SEMI;     break;
-    case L'=':  next_c(l); l->token = EQUAL;    break;
-    case L'.':  next_c(l); l->token = DOT;      break;
-
-    case L'"':
-        /* string */
-        break;
-
-    case L'\'':
+    if (l->c == L'\0' || l->c == WEOF)
+        l->token = EOP;
+    else
+    if ((ptr = wcschr(tokens_c, l->c)) != NULL) {
+        next_c(l);
+        l->token = (ptr - tokens_c) + LBRACE;
+    }
+    else
+    if (l->c == L'"') {
+    }
+    else
+    if (l->c == L'\'') {
         /* verbatim string */
         next_c(l);
         ds_rewind(l->token_s);
@@ -116,57 +115,32 @@ static void token(struct mpsl_lp *l)
         }
         ds_poke(l->token_s, L'\0');
         l->token = LITERAL;
+    }
+    else
+    if (iswalpha(l->c)) {
+        int n;
 
-        break;
-
-    case L'0':
-        /* special numbers */
+        /* token */
         ds_rewind(l->token_s);
-        ds_poke(l->token_s, L'0');
-
+        ds_poke(l->token_s, l->c);
         next_c(l);
 
-        if (l->c == L'b' || l->c == L'B') {
-            /* binary number */
-            ds_poke(l->token_s, L'b');
+        while (iswalnum(l->c)) {
+            ds_poke(l->token_s, l->c);
             next_c(l);
-
-            while (l->c == L'0' || l->c == L'1') {
-                ds_poke(l->token_s, l->c);
-                next_c(l);
-            }
-            ds_poke(l->token_s, L'\0');
         }
+        ds_poke(l->token_s, l->c);
+
+        /* is it a special token? */
+        for (n = 0; tokens_s[n] != NULL; n++) {
+            if (wcscmp(l->token_s.d, tokens_s[n]) == 0)
+                break;
+        }
+
+        if (tokens_s[n] == NULL)
+            l->token = SYMBOL;
         else
-        if (l->c == L'x' || l->c == L'X') {
-            /* hexadecimal number */
-            ds_poke(l->token_s, L'x');
-            next_c(l);
-
-            while (wcschr(L"0123456789abcdefABCDEF", l->c) != NULL) {
-                ds_poke(l->token_s, l->c);
-                next_c(l);
-            }
-            ds_poke(l->token_s, L'\0');
-        }
-        else {
-            /* octal number */
-            next_c(l);
-
-            while (wcschr(L"01234567", l->c) != NULL) {
-                ds_poke(l->token_s, l->c);
-                next_c(l);
-            }
-            ds_poke(l->token_s, L'\0');
-        }
-
-        l->token = LITERAL;
-
-        break;
-
-    default:
-        /* numbers and tokens */
-        break;
+            l->token = n;
     }
 }
 
