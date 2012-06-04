@@ -97,18 +97,13 @@ mpdm_t mpsl_set_symbol(struct mpsl_vm *m, mpdm_t s, mpdm_t v)
 
 void mpsl_reset_vm(struct mpsl_vm *m, mpdm_t prg)
 {
-    if (prg) {
-        mpdm_unref(m->prg);
-        m->prg = mpdm_ref(prg);
-    }
+    if (prg)
+        mpdm_set(&m->prg, prg);
 
-    mpdm_unref(m->stack);
-    m->stack = mpdm_ref(MPDM_A(0));
-    mpdm_unref(m->c_stack);
-    m->c_stack = mpdm_ref(MPDM_A(0));
-    mpdm_unref(m->symtbl);
-    m->symtbl = mpdm_ref(MPDM_A(0));
-    mpdm_push(m->symtbl, MPDM_H(0));
+    mpdm_set(&m->stack,     MPDM_A(0));
+    mpdm_set(&m->c_stack,   MPDM_A(0));
+
+    mpdm_push(mpdm_set(&m->symtbl, MPDM_A(0)), MPDM_H(0));
 
     m->pc = m->sp = m->cs = m->tt = 0;
 }
