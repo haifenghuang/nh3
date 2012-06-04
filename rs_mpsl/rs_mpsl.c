@@ -20,21 +20,19 @@
 /** compiler **/
 
 enum {
-    IF, ELSE,
-    WHILE, BREAK,
-    LOCAL, GLOBAL,
-    SUB, RETURN,
-    NULLV,
-    LBRACE, RBRACE,
-    LPAREN, RPAREN,
-    LBRACK, RBRACK,
-    COLON, SEMI,
-    EQUAL, DOT,
+    IF, ELSE, WHILE, BREAK, LOCAL, GLOBAL, SUB, RETURN, NULLV,
+
+    LBRACE, RBRACE, LPAREN, RPAREN, LBRACK, RBRACK, COLON, SEMI, EQUAL, DOT,
+
     SYMBOL, LITERAL,
-    EOP
+
+    EOP, ERROR
 };
 
-static wchar_t *tokens[] = {
+/* should match token enum */
+static wchar_t *tokens_c = L"{}()[]:;=.";
+
+static wchar_t *tokens_s[] = {
     /* should match token enum */
     L"if", L"else", L"while", L"break", L"local", L"global", L"sub", L"return", L"NULL", NULL
 };
@@ -63,36 +61,33 @@ struct mpsl_lp {
     wchar_t c;          /* last char read from input */
     wchar_t *ptr;       /* program source */
     FILE *f;            /* program file */
+    int error;          /* non-zero if syntax error */
 };
 
 
 static void next_c(struct mpsl_lp *l)
 /* gets the next char */
 {
-    if (l->ptr != NULL)
-        l->c = *(l->ptr++);
-    else
-        l->c = fgetwc(l->f);
+    do {
+        if (l->ptr != NULL)
+            l->c = *(l->ptr++);
+        else
+            l->c = fgetwc(l->f);
 
-    /* update position in source */
-    if (l->c == L'\n') {
-        l->y++;
-        l->x = 0;
-    }
-    else
-        l->x++;
+        /* update position in source */
+        if (l->c == L'\n') {
+            l->y++;
+            l->x = 0;
+        }
+        else
+            l->x++;
+    } while (wcschr(L" \t\r\n", l->c));
 }
 
 
-static void next_token(struct mpsl_lp *l)
+static void token(struct mpsl_lp *l)
 {
-again:
     switch (l->c) {
-    case L' ':
-    case L'\t':
-    case L'\r':
-    case L'\n': next_c(l); goto again;
-
     case L'\0':
     case WEOF:  l->token = EOP; break;
 
@@ -112,6 +107,61 @@ again:
 
     case L'\'':
         /* verbatim string */
+        next_c(l);
+        ds_rewind(l->token_s);
+
+        while (l->c != L'\'') {
+            ds_poke(l->token_s, l->c);
+            next_c(l);
+        }
+        ds_poke(l->token_s, L'\0');
+        l->token = LITERAL;
+
+        break;
+
+    case L'0':
+        /* special numbers */
+        ds_rewind(l->token_s);
+        ds_poke(l->token_s, L'0');
+
+        next_c(l);
+
+        if (l->c == L'b' || l->c == L'B') {
+            /* binary number */
+            ds_poke(l->token_s, L'b');
+            next_c(l);
+
+            while (l->c == L'0' || l->c == L'1') {
+                ds_poke(l->token_s, l->c);
+                next_c(l);
+            }
+            ds_poke(l->token_s, L'\0');
+        }
+        else
+        if (l->c == L'x' || l->c == L'X') {
+            /* hexadecimal number */
+            ds_poke(l->token_s, L'x');
+            next_c(l);
+
+            while (wcschr(L"0123456789abcdefABCDEF", l->c) != NULL) {
+                ds_poke(l->token_s, l->c);
+                next_c(l);
+            }
+            ds_poke(l->token_s, L'\0');
+        }
+        else {
+            /* octal number */
+            next_c(l);
+
+            while (wcschr(L"01234567", l->c) != NULL) {
+                ds_poke(l->token_s, l->c);
+                next_c(l);
+            }
+            ds_poke(l->token_s, L'\0');
+        }
+
+        l->token = LITERAL;
+
         break;
 
     default:
