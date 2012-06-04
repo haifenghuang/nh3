@@ -93,6 +93,9 @@ static void token(struct mpsl_lp *l)
 {
     wchar_t *ptr;
 
+    /* reset token storage */
+    ds_rewind(l->token_s);
+
     if (l->c == L'\0' || l->c == WEOF)
         l->token = EOP;
     else
@@ -107,13 +110,13 @@ static void token(struct mpsl_lp *l)
     if (l->c == L'\'') {
         /* verbatim string */
         next_c(l);
-        ds_rewind(l->token_s);
 
         while (l->c != L'\'') {
             ds_poke(l->token_s, l->c);
             next_c(l);
         }
         ds_poke(l->token_s, L'\0');
+
         l->token = LITERAL;
     }
     else
@@ -121,7 +124,6 @@ static void token(struct mpsl_lp *l)
         int n;
 
         /* token */
-        ds_rewind(l->token_s);
         ds_poke(l->token_s, l->c);
         next_c(l);
 
@@ -129,7 +131,7 @@ static void token(struct mpsl_lp *l)
             ds_poke(l->token_s, l->c);
             next_c(l);
         }
-        ds_poke(l->token_s, l->c);
+        ds_poke(l->token_s, L'\0');
 
         /* is it a special token? */
         for (n = 0; tokens_s[n] != NULL; n++) {
