@@ -114,10 +114,18 @@ void mpsl_reset_vm(struct mpsl_vm *m, mpdm_t prg)
 }
 
 
-#include <time.h>
+static void PUSH(struct mpsl_vm *m, mpdm_t v)
+{
+    mpdm_aset(m->stack, v, m->sp++);
+}
 
-#define PUSH(v) mpdm_aset(m->stack, v, m->sp++)
-#define POP()   mpdm_aget(m->stack, --m->sp)
+
+static mpdm_t POP(struct mpsl_vm *m)
+{
+    return mpdm_aget(m->stack, --m->sp);
+}
+
+#include <time.h>
 
 int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 {
@@ -135,41 +143,38 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         int opcode = mpdm_ival(mpdm_aget(m->prg, m->pc++));
     
         switch (opcode) {
+        case OP_LITERAL:
+            /* literal: next thing in pc is the literal */
+            PUSH(m, mpdm_clone(mpdm_aget(m->prg, m->pc++)));
+            break;
+
         case OP_POP:
             /* discards the TOS */
             --m->sp;
             break;
 
-        case OP_LITERAL:
-            /* literal: next thing in pc is the literal */
-            PUSH(mpdm_clone(mpdm_aget(m->prg, m->pc++)));
-            break;
-
         case OP_SYMVAL:
             /* get symbol value */
-            v = POP();
-            PUSH(mpsl_get_symbol(m, v));
+            PUSH(m, mpsl_get_symbol(m, POP(m)));
             break;
 
         case OP_ASSIGN:
             /* assign a value to a symbol */
-            v = POP();
-            w = POP();
-            PUSH(mpsl_set_symbol(m, v, w));
+            PUSH(m, mpsl_set_symbol(m, POP(m), POP(m)));
             break;
 
         case OP_LOCAL:
             /* creates a local symbol */
-            v = POP();
+            v = POP(m);
             mpdm_hset(mpdm_aget(m->symtbl, m->tt - 1), v, NULL);
-            PUSH(v);
+            PUSH(m, v);
             break;
     
         case OP_GLOBAL:
             /* creates a global symbol */
-            v = POP();
+            v = POP(m);
             mpdm_hset(mpdm_root(), v, NULL);
-            PUSH(v);
+            PUSH(m, v);
             break;
 
         case OP_JMP:
@@ -179,7 +184,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 
         case OP_JT:
             /* jump if true */
-            if (mpsl_is_true(POP()))
+            if (mpsl_is_true(POP(m)))
                 m->pc = mpdm_ival(mpdm_aget(m->prg, m->pc));
             else
                 m->pc++;
@@ -187,7 +192,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 
         case OP_JF:
             /* jump if false */
-            if (!mpsl_is_true(POP()))
+            if (!mpsl_is_true(POP(m)))
                 m->pc = mpdm_ival(mpdm_aget(m->prg, m->pc));
             else
                 m->pc++;
@@ -195,7 +200,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 
         case OP_TPUSH:
             /* pushes the TOS as a new symtbl */
-            mpdm_aset(m->symtbl, POP(), m->tt++);
+            mpdm_aset(m->symtbl, POP(m), m->tt++);
             break;
 
         case OP_TPOP:
@@ -218,8 +223,8 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SUB:
         case OP_MUL:
         case OP_DIV:
-            v2 = mpdm_rval(POP());
-            v1 = mpdm_rval(POP());
+            v2 = mpdm_rval(POP(m));
+            v1 = mpdm_rval(POP(m));
     
             switch (opcode) {
             case OP_ADD:    r = v1 + v2; break;
@@ -228,7 +233,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
             case OP_DIV:    r = v1 / v2; break;
             }
     
-            PUSH(MPDM_R(r));
+            PUSH(m, MPDM_R(r));
     
             break;
     
@@ -238,8 +243,8 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_LE:
         case OP_GT:
         case OP_GE:
-            v2 = mpdm_rval(POP());
-            v1 = mpdm_rval(POP());
+            v2 = mpdm_rval(POP(m));
+            v1 = mpdm_rval(POP(m));
     
             switch (opcode) {
             case OP_EQ:     r = v1 == v2; break;
@@ -250,12 +255,12 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
             case OP_GE:     r = v1 >= v2; break;
             }
     
-            PUSH(MPDM_I(r));
+            PUSH(m, MPDM_I(r));
     
             break;
     
         case OP_DUMP:
-            v = POP();
+            v = POP(m);
             mpdm_dump(v);
             mpdm_void(v);
 

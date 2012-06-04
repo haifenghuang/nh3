@@ -959,9 +959,7 @@ mpdm_t mpsl_build_opcodes(void)
  */
 mpdm_t mpsl_trap(mpdm_t trap_func)
 {
-    mpdm_ref(trap_func);
-    mpdm_unref(mpsl_trap_func);
-    mpsl_trap_func = trap_func;
+    mpdm_set(&mpsl_trap_func, trap_func);
 
     return NULL;
 }
