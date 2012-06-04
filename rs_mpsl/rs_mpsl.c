@@ -13,7 +13,112 @@
 */
 
 #include <stdio.h>
+#include <wchar.h>
 #include <mpdm.h>
+
+
+/** compiler **/
+
+enum {
+    IF, ELSE,
+    WHILE, BREAK,
+    LOCAL, GLOBAL,
+    SUB, RETURN,
+    NULLV,
+    LBRACE, RBRACE,
+    LPAREN, RPAREN,
+    LBRACK, RBRACK,
+    COLON, SEMI,
+    EQUAL, DOT,
+    SYMBOL, LITERAL,
+    EOP
+};
+
+static wchar_t *tokens[] = {
+    /* should match token enum */
+    L"if", L"else", L"while", L"break", L"local", L"global", L"sub", L"return", L"NULL", NULL
+};
+
+/* dynamic string manipulation macros */
+#ifndef ds_init
+struct ds {
+    wchar_t *d;
+    int p;
+    int s;
+};
+#define ds_init(x) do { x.d = (wchar_t *)0; x.p = x.s = 0; } while(0)
+#define ds_rewind(x) x.p = 0;
+#define ds_free(x) do { if(x.d) free(x.d); ds_init(x); } while(0)
+#define ds_redim(x) do { if(x.p >= x.s) x.d = realloc(x.d, ++x.s * sizeof(wchar_t)); } while(0)
+#define ds_poke(x,c) do { ds_redim(x); x.d[x.p++] = c; } while(0)
+#define ds_pokes(x,t) do { wchar_t *p = t; while(*p) ds_poke(x, *p++); } while(0)
+#endif                          /* ds_init */
+
+struct mpsl_lp {
+    int token;          /* token found */
+    struct ds token_s;  /* token as string */
+    mpdm_t prg;         /* generated program */
+    int x;              /* x source position */
+    int y;              /* y source position */
+    wchar_t c;          /* last char read from input */
+    wchar_t *ptr;       /* program source */
+    FILE *f;            /* program file */
+};
+
+
+static void next_c(struct mpsl_lp *l)
+/* gets the next char */
+{
+    if (l->ptr != NULL)
+        l->c = *(l->ptr++);
+    else
+        l->c = fgetwc(l->f);
+
+    /* update position in source */
+    if (l->c == L'\n') {
+        l->y++;
+        l->x = 0;
+    }
+    else
+        l->x++;
+}
+
+
+static void next_token(struct mpsl_lp *l)
+{
+again:
+    switch (l->c) {
+    case L' ':
+    case L'\t':
+    case L'\r':
+    case L'\n': next_c(l); goto again;
+
+    case L'\0':
+    case WEOF:  l->token = EOP; break;
+
+    case L'{':  next_c(l); l->token = LBRACE;   break;
+    case L'}':  next_c(l); l->token = RBRACE;   break;
+    case L'(':  next_c(l); l->token = LPAREN;   break;
+    case L')':  next_c(l); l->token = RPAREN;   break;
+    case L'[':  next_c(l); l->token = LBRACK;   break;
+    case L']':  next_c(l); l->token = RBRACK;   break;
+    case L';':  next_c(l); l->token = SEMI;     break;
+    case L'=':  next_c(l); l->token = EQUAL;    break;
+    case L'.':  next_c(l); l->token = DOT;      break;
+
+    case L'"':
+        /* string */
+        break;
+
+    case L'\'':
+        /* verbatim string */
+        break;
+
+    default:
+        /* numbers and tokens */
+        break;
+    }
+}
 
 
 /** basic MPSL runtime **/
@@ -126,7 +231,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 {
     int ret = 0;
     clock_t max;
-    mpdm_t v, w;
+    mpdm_t v;
     double v1, v2, r;
 
     /* maximum running time */
@@ -285,10 +390,7 @@ static mpdm_t add_ins(mpdm_t prg, int opcode)
 
 int main(int argc, char *argv[])
 {
-    mpdm_t v;
     mpdm_t prg;
-    int ret;
-    int n;
     struct mpsl_vm m;
 
     mpdm_startup();

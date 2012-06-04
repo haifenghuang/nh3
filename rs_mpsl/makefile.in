@@ -1,5 +1,5 @@
 stress: rs_mpsl.c
-	gcc -g -I../../mpdm -L../../mpdm $< -lmpdm -o $@
+	gcc -g -Wall -I../../mpdm -L../../mpdm $< -lmpdm -o $@
 
 clean:
 	rm -f stress Makefile
