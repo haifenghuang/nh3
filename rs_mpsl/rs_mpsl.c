@@ -179,7 +179,8 @@ static int token(struct mpsl_lp *l)
 /** virtual machine **/
 
 enum {
-    OP_LITERAL, OP_POP,
+    OP_EOP,
+    OP_LITERAL, OP_NULL, OP_POP,
     OP_SYMVAL, OP_ASSIGN,
     OP_LOCAL, OP_GLOBAL,
     OP_JMP, OP_JT, OP_JF,
@@ -188,6 +189,10 @@ enum {
     OP_ADD, OP_SUB, OP_MUL, OP_DIV,
     OP_EQ, OP_NE, OP_LT, OP_LE, OP_GT, OP_GE,
     OP_DUMP
+};
+
+enum {
+    VM_IDLE, VM_RUNNING, VM_TIMEOUT, VM_ERROR
 };
 
 struct mpsl_vm {
@@ -199,6 +204,7 @@ struct mpsl_vm {
     int sp;                 /* stack pointer */
     int cs;                 /* call stack pointer */
     int tt;                 /* symbol table top */
+    int mode;               /* running mode */
 };
 
 
@@ -247,6 +253,7 @@ void mpsl_reset_vm(struct mpsl_vm *m, mpdm_t prg)
     mpdm_push(mpdm_set(&m->symtbl, MPDM_A(0)), MPDM_H(0));
 
     m->pc = m->sp = m->cs = m->tt = 0;
+    m->mode = VM_IDLE;
 }
 
 
@@ -265,7 +272,6 @@ static mpdm_t POP(struct mpsl_vm *m)
 
 int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 {
-    int ret = 0;
     clock_t max;
     mpdm_t v;
     double v1, v2, r;
@@ -273,15 +279,28 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
     /* maximum running time */
     max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0x7fffffff;
 
-    while (ret == 0 && m->pc < mpdm_size(m->prg)) {
+    /* start running if there is no error */
+    if (m->mode != VM_ERROR)
+        m->mode = VM_RUNNING;
+
+    while (m->mode == VM_RUNNING) {
 
         /* get the opcode */
         int opcode = mpdm_ival(mpdm_aget(m->prg, m->pc++));
     
         switch (opcode) {
+        case OP_EOP:
+            m->mode = VM_IDLE;
+            break;
+
         case OP_LITERAL:
             /* literal: next thing in pc is the literal */
             PUSH(m, mpdm_clone(mpdm_aget(m->prg, m->pc++)));
+            break;
+
+        case OP_NULL:
+            /* pushes a NULL value */
+            PUSH(m, NULL);
             break;
 
         case OP_POP:
@@ -384,7 +403,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
     
             switch (opcode) {
             case OP_EQ:     r = v1 == v2; break;
-            case OP_NEQ:    r = v1 != v2; break;
+            case OP_NE:     r = v1 != v2; break;
             case OP_LT:     r = v1 <  v2; break;
             case OP_LE:     r = v1 <= v2; break;
             case OP_GT:     r = v1 >  v2; break;
@@ -405,10 +424,10 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 
         /* if out of slice time, break */        
         if (clock() > max)
-            ret = 1;
+            m->mode = VM_TIMEOUT;
     }
 
-    return ret;
+    return m->mode;
 }
 
 
