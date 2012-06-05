@@ -349,12 +349,12 @@ static void parse(struct mpsl_lp *l)
 
 enum {
     OP_EOP,
-    OP_LITERAL, OP_NULL, OP_POP,
-    OP_SYMVAL, OP_ASSIGN,
-    OP_LOCAL, OP_GLOBAL,
-    OP_JMP, OP_JT, OP_JF,
+    OP_LITERAL, OP_NULL, OP_ARRAY, OP_HASH, OP_ROOT, OP_POP,
+    OP_HGET, OP_HSET,
     OP_TPUSH, OP_TPOP,
-    OP_EXECSYM, OP_RETURN,
+    OP_CALL, OP_RETURN,
+    OP_JMP, OP_JT, OP_JF,
+
     OP_ADD, OP_SUB, OP_MUL, OP_DIV,
     OP_EQ, OP_NE, OP_LT, OP_LE, OP_GT, OP_GE,
     OP_DUMP
@@ -437,6 +437,23 @@ static mpdm_t POP(struct mpsl_vm *m)
     return mpdm_aget(m->stack, --m->sp);
 }
 
+
+static mpdm_t TOS(struct mpsl_vm *m)
+{
+    return mpdm_aget(m->stack, m->sp - 1);
+}
+
+
+static mpdm_t PC(struct mpsl_vm *m)
+{
+    return mpdm_aget(m->prg, m->pc++);
+}
+
+
+#define IPOP(m) mpdm_ival(POP(m))
+#define RPOP(m) mpdm_rval(POP(m))
+
+
 #include <time.h>
 
 int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
@@ -444,6 +461,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
     clock_t max;
     mpdm_t v;
     double v1, v2, r;
+    int i;
 
     /* maximum running time */
     max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0x7fffffff;
@@ -455,100 +473,33 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
     while (m->mode == VM_RUNNING) {
 
         /* get the opcode */
-        int opcode = mpdm_ival(mpdm_aget(m->prg, m->pc++));
+        int opcode = mpdm_ival(PC(m));
     
         switch (opcode) {
-        case OP_EOP:
-            m->mode = VM_IDLE;
-            break;
+        case OP_EOP:        m->mode = VM_IDLE; break;
+        case OP_LITERAL:    PUSH(m, mpdm_clone(PC(m))); break;
+        case OP_NULL:       PUSH(m, NULL); break;
+        case OP_ARRAY:      PUSH(m, MPDM_A(0)); break;
+        case OP_HASH:       PUSH(m, MPDM_H(0)); break;
+        case OP_ROOT:       PUSH(m, mpdm_root()); break;
+        case OP_POP:        --m->sp; break;
+        case OP_HGET:       PUSH(m, mpdm_hget(TOS(m), POP(m))); break;
+        case OP_HSET:       PUSH(m, mpdm_hset(TOS(m), POP(m), POP(m))); break;
+        case OP_TPUSH:      mpdm_aset(m->symtbl, POP(m), m->tt++); break;
+        case OP_TPOP:       --m->tt; break;
+        case OP_CALL:       mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++); m->pc = IPOP(m); break;
+        case OP_RETURN:     m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
+        case OP_JMP:        m->pc = mpdm_ival(PC(m)); break;
+        case OP_JT:         if (mpsl_is_true(POP(m))) m->pc = mpdm_ival(PC(m)) else m->pc++; break;
+        case OP_JF:         if (!mpsl_is_true(POP(m))) m->pc = mpdm_ival(PC(m)) else m->pc++; break;
 
-        case OP_LITERAL:
-            /* literal: next thing in pc is the literal */
-            PUSH(m, mpdm_clone(mpdm_aget(m->prg, m->pc++)));
-            break;
-
-        case OP_NULL:
-            /* pushes a NULL value */
-            PUSH(m, NULL);
-            break;
-
-        case OP_POP:
-            /* discards the TOS */
-            --m->sp;
-            break;
-
-        case OP_SYMVAL:
-            /* get symbol value */
-            PUSH(m, mpsl_get_symbol(m, POP(m)));
-            break;
-
-        case OP_ASSIGN:
-            /* assign a value to a symbol */
-            PUSH(m, mpsl_set_symbol(m, POP(m), POP(m)));
-            break;
-
-        case OP_LOCAL:
-            /* creates a local symbol */
-            v = POP(m);
-            mpdm_hset(mpdm_aget(m->symtbl, m->tt - 1), v, NULL);
-            PUSH(m, v);
-            break;
-    
-        case OP_GLOBAL:
-            /* creates a global symbol */
-            v = POP(m);
-            mpdm_hset(mpdm_root(), v, NULL);
-            PUSH(m, v);
-            break;
-
-        case OP_JMP:
-            /* non-conditional jump */
-            m->pc = mpdm_ival(mpdm_aget(m->prg, m->pc));
-            break;
-
-        case OP_JT:
-            /* jump if true */
-            if (mpsl_is_true(POP(m)))
-                m->pc = mpdm_ival(mpdm_aget(m->prg, m->pc));
-            else
-                m->pc++;
-            break;
-
-        case OP_JF:
-            /* jump if false */
-            if (!mpsl_is_true(POP(m)))
-                m->pc = mpdm_ival(mpdm_aget(m->prg, m->pc));
-            else
-                m->pc++;
-            break;
-
-        case OP_TPUSH:
-            /* pushes the TOS as a new symtbl */
-            mpdm_aset(m->symtbl, POP(m), m->tt++);
-            break;
-
-        case OP_TPOP:
-            /* discards the last symtbl */
-            --m->tt;
-            break;
-
-        case OP_EXECSYM:
-            /* calls a subroutine */
-            /* args...? */
-            mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++);
-            break;
-
-        case OP_RETURN:
-            /* returns from subroutine */
-            m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs));
-            break;
 
         case OP_ADD:
         case OP_SUB:
         case OP_MUL:
         case OP_DIV:
-            v2 = mpdm_rval(POP(m));
-            v1 = mpdm_rval(POP(m));
+            v2 = RPOP(m);
+            v1 = RPOP(m);
     
             switch (opcode) {
             case OP_ADD:    r = v1 + v2; break;
@@ -567,8 +518,8 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_LE:
         case OP_GT:
         case OP_GE:
-            v2 = mpdm_rval(POP(m));
-            v1 = mpdm_rval(POP(m));
+            v2 = RPOP(m);
+            v1 = RPOP(m);
     
             switch (opcode) {
             case OP_EQ:     r = v1 == v2; break;
@@ -623,38 +574,20 @@ int main(int argc, char *argv[])
     memset(&m, '\0', sizeof(m));
     memset(&lp, '\0', sizeof(lp));
 
-    lp.ptr = L"a = 1000; b = NULL; while (c) { d; e; }";
+/*    lp.ptr = L"a = 1000; b = NULL; while (c) { d; e; }";
     next_c(&lp);
     while (token(&lp) != EOP && lp.token != ERROR)
         printf("%d\n", lp.token);
     printf("%d.\n", lp.token);
-
+*/
     prg = MPDM_A(0);
     mpsl_reset_vm(&m, prg);
 
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(1));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(2));
-    add_ins(prg, OP_ADD);
+    add_ins(prg, OP_HASH);
+    add_ins(prg, OP_LITERAL); add_arg(prg, MPDM_LS(L"number_of_the_beast"));
+    add_ins(prg, OP_LITERAL); add_arg(prg, MPDM_I(666));
+    add_ins(prg, OP_HSET);
     add_ins(prg, OP_DUMP);
-
-    mpsl_exec_vm(&m, 0);
-
-    prg = MPDM_A(0);
-    mpsl_reset_vm(&m, prg);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"MPDM"));
-    add_ins(prg, OP_SYMVAL);
-    add_ins(prg, OP_DUMP);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"test"));
-    add_ins(prg, OP_LOCAL);
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_I(666));
-    add_ins(prg, OP_LITERAL);
-    add_arg(prg, MPDM_LS(L"test"));
-    add_ins(prg, OP_ASSIGN);
 
     mpsl_exec_vm(&m, 0);
 
