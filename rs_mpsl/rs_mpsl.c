@@ -22,7 +22,7 @@
 
 enum {
     IF, ELSE, WHILE, BREAK,
-    LOCAL, GLOBAL, SUB, RETURN, NULLV,
+    LOCAL, GLOBAL, SUB, RETURN, NULLT,
 
     LBRACE, RBRACE, LPAREN, RPAREN, LBRACK, RBRACK,
     COLON, SEMI, EQUAL, DOT,
@@ -88,8 +88,14 @@ static void next_c(struct mpsl_lp *l)
     } while (wcschr(L" \t\r\n", l->c));
 }
 
+#define STORE(COND) while (COND) { \
+    ds_poke(l->token_s, l->c); \
+    next_c(l); \
+    } \
+    ds_poke(l->token_s, L'\0')
 
-static void token(struct mpsl_lp *l)
+
+static int token(struct mpsl_lp *l)
 {
     wchar_t *ptr;
 
@@ -111,11 +117,7 @@ static void token(struct mpsl_lp *l)
         /* verbatim string */
         next_c(l);
 
-        while (l->c != L'\'') {
-            ds_poke(l->token_s, l->c);
-            next_c(l);
-        }
-        ds_poke(l->token_s, L'\0');
+        STORE(l->c != L'\'');
 
         l->token = LITERAL;
     }
@@ -127,11 +129,7 @@ static void token(struct mpsl_lp *l)
         ds_poke(l->token_s, l->c);
         next_c(l);
 
-        while (iswalnum(l->c)) {
-            ds_poke(l->token_s, l->c);
-            next_c(l);
-        }
-        ds_poke(l->token_s, L'\0');
+        STORE(iswalnum(l->c));
 
         /* is it a special token? */
         for (n = 0; tokens_s[n] != NULL; n++) {
@@ -144,6 +142,33 @@ static void token(struct mpsl_lp *l)
         else
             l->token = n;
     }
+    else
+    if (iswdigit(l->c)) {
+        /* numbers */
+        ds_poke(l->token_s, l->c);
+
+        if (l->c == L'0') {
+            /* binary, hexadecimal or octal numbers */
+        }
+
+        /* store while digits */
+        STORE(iswdigit(l->c));
+
+        /* is it a dot or scientific notation? */
+        if (l->c == L'.' || l->c == L'e' || l->c == L'E') {
+            /* store it and another set of digits */
+            ds_poke(l->token_s, l->c);
+            STORE(iswdigit(l->c));
+        }
+
+        l->token = LITERAL;
+    }
+    else {
+        l->error = 1;
+        l->token = ERROR;
+    }
+
+    return l->token;
 }
 
 
@@ -154,29 +179,14 @@ static void token(struct mpsl_lp *l)
 /** virtual machine **/
 
 enum {
-    OP_POP,
-    OP_LITERAL,
-    OP_SYMVAL,
-    OP_ASSIGN,
-    OP_LOCAL,
-    OP_GLOBAL,
-    OP_JMP,
-    OP_JT,
-    OP_JF,
-    OP_TPUSH,
-    OP_TPOP,
-    OP_EXECSYM,
-    OP_RETURN,
-    OP_ADD,
-    OP_SUB,
-    OP_MUL,
-    OP_DIV,
-    OP_EQ,
-    OP_NEQ,
-    OP_LT,
-    OP_LE,
-    OP_GT,
-    OP_GE,
+    OP_LITERAL, OP_POP,
+    OP_SYMVAL, OP_ASSIGN,
+    OP_LOCAL, OP_GLOBAL,
+    OP_JMP, OP_JT, OP_JF,
+    OP_TPUSH, OP_TPOP,
+    OP_EXECSYM, OP_RETURN,
+    OP_ADD, OP_SUB, OP_MUL, OP_DIV,
+    OP_EQ, OP_NE, OP_LT, OP_LE, OP_GT, OP_GE,
     OP_DUMP
 };
 
@@ -364,7 +374,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
             break;
     
         case OP_EQ:
-        case OP_NEQ:
+        case OP_NE:
         case OP_LT:
         case OP_LE:
         case OP_GT:
