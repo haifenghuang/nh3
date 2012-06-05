@@ -349,10 +349,11 @@ static void parse(struct mpsl_lp *l)
 
 enum {
     OP_EOP,
-    OP_LITERAL, OP_NULL, OP_ARRAY, OP_HASH, OP_ROOT, OP_POP,
-    OP_HGET, OP_HSET,
-    OP_TPUSH, OP_TPOP,
-    OP_CALL, OP_RETURN,
+    OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROT,
+    OP_POP, OP_SWP,
+    OP_HGT, OP_HST,
+    OP_TPU, OP_TPO,
+    OP_CAL, OP_RET,
     OP_JMP, OP_JT, OP_JF,
 
     OP_ADD, OP_SUB, OP_MUL, OP_DIV,
@@ -426,9 +427,9 @@ void mpsl_reset_vm(struct mpsl_vm *m, mpdm_t prg)
 }
 
 
-static void PUSH(struct mpsl_vm *m, mpdm_t v)
+static mpdm_t PUSH(struct mpsl_vm *m, mpdm_t v)
 {
-    mpdm_aset(m->stack, v, m->sp++);
+    return mpdm_aset(m->stack, v, m->sp++);
 }
 
 
@@ -452,16 +453,16 @@ static mpdm_t PC(struct mpsl_vm *m)
 
 #define IPOP(m) mpdm_ival(POP(m))
 #define RPOP(m) mpdm_rval(POP(m))
-
+#define RF(v) mpdm_ref(v)
+#define UF(v) mpdm_unref(v)
 
 #include <time.h>
 
 int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 {
     clock_t max;
-    mpdm_t v;
+    mpdm_t v, w;
     double v1, v2, r;
-    int i;
 
     /* maximum running time */
     max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0x7fffffff;
@@ -476,22 +477,23 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         int opcode = mpdm_ival(PC(m));
     
         switch (opcode) {
-        case OP_EOP:        m->mode = VM_IDLE; break;
-        case OP_LITERAL:    PUSH(m, mpdm_clone(PC(m))); break;
-        case OP_NULL:       PUSH(m, NULL); break;
-        case OP_ARRAY:      PUSH(m, MPDM_A(0)); break;
-        case OP_HASH:       PUSH(m, MPDM_H(0)); break;
-        case OP_ROOT:       PUSH(m, mpdm_root()); break;
-        case OP_POP:        --m->sp; break;
-        case OP_HGET:       PUSH(m, mpdm_hget(TOS(m), POP(m))); break;
-        case OP_HSET:       PUSH(m, mpdm_hset(TOS(m), POP(m), POP(m))); break;
-        case OP_TPUSH:      mpdm_aset(m->symtbl, POP(m), m->tt++); break;
-        case OP_TPOP:       --m->tt; break;
-        case OP_CALL:       mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++); m->pc = IPOP(m); break;
-        case OP_RETURN:     m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
-        case OP_JMP:        m->pc = mpdm_ival(PC(m)); break;
-        case OP_JT:         if (mpsl_is_true(POP(m))) m->pc = mpdm_ival(PC(m)) else m->pc++; break;
-        case OP_JF:         if (!mpsl_is_true(POP(m))) m->pc = mpdm_ival(PC(m)) else m->pc++; break;
+        case OP_EOP: m->mode = VM_IDLE; break;
+        case OP_LIT: PUSH(m, mpdm_clone(PC(m))); break;
+        case OP_NUL: PUSH(m, NULL); break;
+        case OP_ARR: PUSH(m, MPDM_A(0)); break;
+        case OP_HSH: PUSH(m, MPDM_H(0)); break;
+        case OP_ROT: PUSH(m, mpdm_root()); break;
+        case OP_POP: --m->sp; break;
+        case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
+        case OP_HGT: PUSH(m, mpdm_hget(TOS(m), POP(m))); break;
+        case OP_HST: PUSH(m, mpdm_hset(TOS(m), POP(m), POP(m))); break;
+        case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
+        case OP_TPO: --m->tt; break;
+        case OP_CAL: mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++); m->pc = IPOP(m); break;
+        case OP_RET: m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
+        case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
+        case OP_JT:  if (mpsl_is_true(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
+        case OP_JF:  if (!mpsl_is_true(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
 
 
         case OP_ADD:
@@ -583,10 +585,10 @@ int main(int argc, char *argv[])
     prg = MPDM_A(0);
     mpsl_reset_vm(&m, prg);
 
-    add_ins(prg, OP_HASH);
-    add_ins(prg, OP_LITERAL); add_arg(prg, MPDM_LS(L"number_of_the_beast"));
-    add_ins(prg, OP_LITERAL); add_arg(prg, MPDM_I(666));
-    add_ins(prg, OP_HSET);
+    add_ins(prg, OP_HSH);
+    add_ins(prg, OP_LIT); add_arg(prg, MPDM_LS(L"number_of_the_beast"));
+    add_ins(prg, OP_LIT); add_arg(prg, MPDM_I(666));
+    add_ins(prg, OP_HST);
     add_ins(prg, OP_DUMP);
 
     mpsl_exec_vm(&m, 0);
