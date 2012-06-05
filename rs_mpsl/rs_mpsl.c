@@ -95,37 +95,59 @@ static void next_c(struct mpsl_lp *l)
     ds_poke(l->token_s, L'\0')
 
 
-static int token(struct mpsl_lp *l)
+static int tok_eop(struct mpsl_lp *l)
+{
+    if (l->c == L'\0' || l->c == WEOF) {
+        l->token = EOP;
+        return 0;
+    }
+
+    return 1;
+}
+
+
+static int tok_1c(struct mpsl_lp *l)
 {
     wchar_t *ptr;
 
-    /* reset token storage */
-    ds_rewind(l->token_s);
-
-    if (l->c == L'\0' || l->c == WEOF)
-        l->token = EOP;
-    else
     if ((ptr = wcschr(tokens_c, l->c)) != NULL) {
         next_c(l);
         l->token = (ptr - tokens_c) + LBRACE;
+        return 0;
     }
-    else
+
+    return 1;
+}
+
+
+static int tok_str(struct mpsl_lp *l)
+{
     if (l->c == L'"') {
     }
-    else
+
+    return 1;
+}
+
+
+static int tok_vstr(struct mpsl_lp *l)
+{
     if (l->c == L'\'') {
-        /* verbatim string */
         next_c(l);
-
         STORE(l->c != L'\'');
-
         l->token = LITERAL;
+
+        return 0;
     }
-    else
+
+    return 1;
+}
+
+
+static int tok_sym(struct mpsl_lp *l)
+{
     if (iswalpha(l->c)) {
         int n;
 
-        /* token */
         ds_poke(l->token_s, l->c);
         next_c(l);
 
@@ -141,15 +163,27 @@ static int token(struct mpsl_lp *l)
             l->token = SYMBOL;
         else
             l->token = n;
+
+        return 0;
     }
-    else
+
+    return 1;
+}
+
+static int tok_specialnum(struct mpsl_lp *l)
+{
+    if (l->c == L'0') {
+    }
+
+    return 1;
+}
+
+
+static int tok_num(struct mpsl_lp *l)
+{
     if (iswdigit(l->c)) {
         /* numbers */
         ds_poke(l->token_s, l->c);
-
-        if (l->c == L'0') {
-            /* binary, hexadecimal or octal numbers */
-        }
 
         /* store while digits */
         STORE(iswdigit(l->c));
@@ -162,8 +196,19 @@ static int token(struct mpsl_lp *l)
         }
 
         l->token = LITERAL;
+        return 0;
     }
-    else {
+
+    return 1;
+}
+
+
+static int token(struct mpsl_lp *l)
+{
+    ds_rewind(l->token_s);
+
+    if (tok_eop(l) && tok_1c(l) && tok_str(l) && tok_vstr(l) &&
+        tok_sym(l) && tok_specialnum(l) && tok_num(l)) {
         l->error = 1;
         l->token = ERROR;
     }
