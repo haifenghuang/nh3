@@ -21,15 +21,15 @@
 /** compiler **/
 
 enum {
+    EOP, ERROR,
+
     IF, ELSE, WHILE, BREAK,
     LOCAL, GLOBAL, SUB, RETURN, NULLT,
 
     LBRACE, RBRACE, LPAREN, RPAREN, LBRACK, RBRACK,
     COLON, SEMI, EQUAL, DOT,
 
-    SYMBOL, LITERAL,
-
-    EOP, ERROR
+    SYMBOL, LITERAL
 };
 
 /* should match token enum */
@@ -85,7 +85,7 @@ static void next_c(struct mpsl_lp *l)
         }
         else
             l->x++;
-    } while (wcschr(L" \t\r\n", l->c));
+    } while (l->c && wcschr(L" \t\r\n", l->c));
 }
 
 #define STORE(COND) while (COND) { \
@@ -162,7 +162,7 @@ static int tok_sym(struct mpsl_lp *l)
         if (tokens_s[n] == NULL)
             l->token = SYMBOL;
         else
-            l->token = n;
+            l->token = n + IF;
 
         return 0;
     }
@@ -491,11 +491,19 @@ static mpdm_t add_ins(mpdm_t prg, int opcode)
 int main(int argc, char *argv[])
 {
     mpdm_t prg;
+    struct mpsl_lp lp;
     struct mpsl_vm m;
 
     mpdm_startup();
 
     memset(&m, '\0', sizeof(m));
+    memset(&lp, '\0', sizeof(lp));
+
+    lp.ptr = L"a = 1000; b = NULL; while (c) { d; e; }";
+    next_c(&lp);
+    while (token(&lp) != EOP && lp.token != ERROR)
+        printf("%d\n", lp.token);
+    printf("%d.\n", lp.token);
 
     prg = MPDM_A(0);
     mpsl_reset_vm(&m, prg);
