@@ -170,15 +170,6 @@ static int tok_sym(struct mpsl_lp *l)
     return 1;
 }
 
-static int tok_specialnum(struct mpsl_lp *l)
-{
-    if (l->c == L'0') {
-    }
-
-    return 1;
-}
-
-
 static int tok_num(struct mpsl_lp *l)
 {
     if (iswdigit(l->c)) {
@@ -197,6 +188,46 @@ static int tok_num(struct mpsl_lp *l)
 
         l->token = LITERAL;
         return 0;
+    }
+
+    return 1;
+}
+
+
+static int tok_specialnum(struct mpsl_lp *l)
+{
+    if (l->c == L'0') {
+        ds_poke(l->token_s, l->c);
+        next_c(l);
+
+        if (l->c == L'.') {
+            ds_poke(l->token_s, l->c);
+            return tok_num(l);
+        }
+        else
+        if (l->c == L'b' || l->c == L'B') {
+            /* binary */
+            ds_poke(l->token_s, l->c);
+            next_c(l);
+            STORE(l->c == L'0' || l->c == L'1');
+            l->token = LITERAL;
+            return 0;
+        }
+        else
+        if (l->c == L'x' || l->c == L'X') {
+            /* hex */
+            ds_poke(l->token_s, l->c);
+            next_c(l);
+            STORE(iswxdigit(l->c));
+            l->token = LITERAL;
+            return 0;
+        }
+        else {
+            /* octal */
+            STORE(l->c >= L'0' && l->c <= L'7');
+            l->token = LITERAL;
+            return 0;
+        }
     }
 
     return 1;
