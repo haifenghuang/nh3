@@ -18,7 +18,7 @@
 #include <mpdm.h>
 
 
-/** compiler **/
+/** lexer **/
 
 enum {
     EOP, ERROR,
@@ -59,6 +59,7 @@ struct ds {
 struct mpsl_lp {
     int token;          /* token found */
     struct ds token_s;  /* token as string */
+    mpdm_t node;        /* generated nodes */
     mpdm_t prg;         /* generated program */
     int x;              /* x source position */
     int y;              /* y source position */
@@ -245,6 +246,98 @@ static int token(struct mpsl_lp *l)
     }
 
     return l->token;
+}
+
+
+/** parser **/
+
+enum {
+    N_LITERAL, N_NULL, N_IF, N_IFELSE, N_WHILE, N_NOP, N_SEQ, N_ASSIGN, N_EXPR, N_PROG
+};
+
+static mpdm_t node0(int type)
+{
+    mpdm_t r = mpdm_ref(MPDM_A(1));
+    mpdm_aset(r, MPDM_I(type), 0);
+    return mpdm_unrefnd(r);
+}
+
+
+static mpdm_t node1(int type, mpdm_t n1)
+{
+    mpdm_t r = mpdm_ref(MPDM_A(2));
+    mpdm_aset(r, MPDM_I(type), 0);
+    mpdm_aset(r, n1, 1);
+    return mpdm_unrefnd(r);
+}
+
+
+static mpdm_t expr(struct mpsl_lp *p)
+{
+    mpdm_t v = NULL;
+
+    if (p->token == SYMBOL) {
+        
+    }
+
+    return v;
+}
+
+
+static mpdm_t statement(struct mpsl_lp *p)
+{
+    mpdm_t v = NULL;
+
+    if (p->token == IF) {
+    }
+    else
+    if (p->token == WHILE) {
+    }
+    else
+    if (p->token == LOCAL) {
+    }
+    else
+    if (p->token == GLOBAL) {
+    }
+    else
+    if (p->token == SUB) {
+    }
+    else
+    if (p->token == RETURN) {
+    }
+    else
+    if (p->token == SEMI) {
+        /* compound statement */
+        v = node0(N_NOP);
+        token(p);
+    }
+    else
+    if (p->token == LBRACE) {
+        /* block */
+    }
+    else {
+        /* expression */
+        v = node1(N_EXPR, expr(p));
+
+        if (p->token == SEMI)
+            token(p);
+        else
+            p->error = 2;
+    }
+
+    return v;
+}
+
+
+static void parse(struct mpsl_lp *l)
+{
+    next_c(l);
+    token(l);
+
+    mpdm_set(&l->node, node1(N_PROG, statement(l)));
+
+    if (l->token != EOP)
+        l->error = 2;
 }
 
 
