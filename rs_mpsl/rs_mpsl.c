@@ -30,14 +30,16 @@ typedef enum {
     T_LPAREN, T_RPAREN,
     T_LBRACK, T_RBRACK,
     T_COLON, T_SEMI,
-    T_EQUAL, T_DOT, T_BANG, T_COMMA,
-    T_PLUS, T_MINUS, T_ASTERISK, T_SLASH,
+    T_DOT, T_COMMA,
+
+    T_EQUAL, T_BANG,
+    T_PLUS, T_MINUS, T_ASTERISK, T_SLASH, T_PERCENT,
 
     T_SYMBOL, T_LITERAL
 } mpsl_token_t;
 
 /* should match token enum */
-static wchar_t *tokens_c = L"{}()[]:;=.!,+-*/";
+static wchar_t *tokens_c = L"{}()[]:;.,=!+-*/%";
 
 static wchar_t *tokens_s[] = {
     /* should match token enum */
@@ -260,9 +262,8 @@ enum {
     N_SYMID, N_SYMVAL, N_ASSIGN,
     N_UMINUS, N_NOT,
     N_PARTOF, N_EXECSYM,
-    N_ADD, N_SUB, N_MUL, N_DIV,
-    N_ARRAY, N_HASH,
-    N_EXPR, N_PROG
+    N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
+    N_ARRAY, N_HASH
 };
 
 static mpdm_t node0(int type)
@@ -425,6 +426,7 @@ static mpdm_t expr(struct mpsl_c *c)
             case T_MINUS:     token(c); v = node2(N_SUB, v, expr(c)); break;
             case T_ASTERISK:  token(c); v = node2(N_MUL, v, expr(c)); break;
             case T_SLASH:     token(c); v = node2(N_DIV, v, expr(c)); break;
+            case T_PERCENT:   token(c); v = node2(N_MOD, v, expr(c)); break;
             default: break;
             }
         }
@@ -523,7 +525,7 @@ enum {
     OP_CAL, OP_RET,
     OP_JMP, OP_JT, OP_JF,
 
-    OP_ADD, OP_SUB, OP_MUL, OP_DIV,
+    OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_EQ, OP_NE, OP_LT, OP_LE, OP_GT, OP_GE,
     OP_DUMP
 };
@@ -594,29 +596,10 @@ void mpsl_reset_vm(struct mpsl_vm *m, mpdm_t prg)
 }
 
 
-static mpdm_t PUSH(struct mpsl_vm *m, mpdm_t v)
-{
-    return mpdm_aset(m->stack, v, m->sp++);
-}
-
-
-static mpdm_t POP(struct mpsl_vm *m)
-{
-    return mpdm_aget(m->stack, --m->sp);
-}
-
-
-static mpdm_t TOS(struct mpsl_vm *m)
-{
-    return mpdm_aget(m->stack, m->sp - 1);
-}
-
-
-static mpdm_t PC(struct mpsl_vm *m)
-{
-    return mpdm_aget(m->prg, m->pc++);
-}
-
+static mpdm_t PUSH(struct mpsl_vm *m, mpdm_t v) { return mpdm_aset(m->stack, v, m->sp++); }
+static mpdm_t POP(struct mpsl_vm *m) { return mpdm_aget(m->stack, --m->sp); }
+static mpdm_t TOS(struct mpsl_vm *m) { return mpdm_aget(m->stack, m->sp - 1); }
+static mpdm_t PC(struct mpsl_vm *m) { return mpdm_aget(m->prg, m->pc++); }
 
 #define IPOP(m) mpdm_ival(POP(m))
 #define RPOP(m) mpdm_rval(POP(m))
@@ -629,7 +612,6 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 {
     clock_t max;
     mpdm_t v, w;
-    double v1, v2, r;
 
     /* maximum running time */
     max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0x7fffffff;
@@ -661,47 +643,17 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
         case OP_JT:  if (mpsl_is_true(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
         case OP_JF:  if (!mpsl_is_true(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
-
-
-        case OP_ADD:
-        case OP_SUB:
-        case OP_MUL:
-        case OP_DIV:
-            v2 = RPOP(m);
-            v1 = RPOP(m);
-    
-            switch (opcode) {
-            case OP_ADD:    r = v1 + v2; break;
-            case OP_SUB:    r = v1 - v2; break;
-            case OP_MUL:    r = v1 * v2; break;
-            case OP_DIV:    r = v1 / v2; break;
-            }
-    
-            PUSH(m, MPDM_R(r));
-    
-            break;
-    
-        case OP_EQ:
-        case OP_NE:
-        case OP_LT:
-        case OP_LE:
-        case OP_GT:
-        case OP_GE:
-            v2 = RPOP(m);
-            v1 = RPOP(m);
-    
-            switch (opcode) {
-            case OP_EQ:     r = v1 == v2; break;
-            case OP_NE:     r = v1 != v2; break;
-            case OP_LT:     r = v1 <  v2; break;
-            case OP_LE:     r = v1 <= v2; break;
-            case OP_GT:     r = v1 >  v2; break;
-            case OP_GE:     r = v1 >= v2; break;
-            }
-    
-            PUSH(m, MPDM_I(r));
-    
-            break;
+        case OP_ADD: PUSH(m, MPDM_R(RPOP(m) + RPOP(m))); break;
+        case OP_SUB: PUSH(m, MPDM_R(RPOP(m) - RPOP(m))); break;
+        case OP_MUL: PUSH(m, MPDM_R(RPOP(m) * RPOP(m))); break;
+        case OP_DIV: PUSH(m, MPDM_R(RPOP(m) / RPOP(m))); break;
+        case OP_MOD: PUSH(m, MPDM_I(IPOP(m) % IPOP(m))); break;
+        case OP_EQ:  PUSH(m, MPDM_I(RPOP(m) == RPOP(m))); break;
+        case OP_NE:  PUSH(m, MPDM_I(RPOP(m) != RPOP(m))); break;
+        case OP_LT:  PUSH(m, MPDM_I(RPOP(m) <  RPOP(m))); break;
+        case OP_LE:  PUSH(m, MPDM_I(RPOP(m) <= RPOP(m))); break;
+        case OP_GT:  PUSH(m, MPDM_I(RPOP(m) >  RPOP(m))); break;
+        case OP_GE:  PUSH(m, MPDM_I(RPOP(m) >= RPOP(m))); break;
     
         case OP_DUMP:
             v = POP(m);
@@ -756,6 +708,12 @@ int main(int argc, char *argv[])
     add_ins(prg, OP_LIT); add_arg(prg, MPDM_LS(L"number_of_the_beast"));
     add_ins(prg, OP_LIT); add_arg(prg, MPDM_I(666));
     add_ins(prg, OP_HST);
+    add_ins(prg, OP_DUMP);
+    add_ins(prg, OP_LIT); add_arg(prg, MPDM_I(2));
+    add_ins(prg, OP_LIT); add_arg(prg, MPDM_I(20));
+    add_ins(prg, OP_DIV);
+    add_ins(prg, OP_LIT); add_arg(prg, MPDM_R(10));
+    add_ins(prg, OP_EQ);
     add_ins(prg, OP_DUMP);
 
     mpsl_exec_vm(&m, 0);
