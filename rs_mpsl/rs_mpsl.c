@@ -27,13 +27,14 @@ enum {
     LOCAL, GLOBAL, SUB, RETURN, NULLT,
 
     LBRACE, RBRACE, LPAREN, RPAREN, LBRACK, RBRACK,
-    COLON, SEMI, EQUAL, DOT,
+    COLON, SEMI, EQUAL, DOT, BANG,
+    PLUS, MINUS, ASTERISK, SLASH,
 
     SYMBOL, LITERAL
 };
 
 /* should match token enum */
-static wchar_t *tokens_c = L"{}()[]:;=.";
+static wchar_t *tokens_c = L"{}()[]:;=.!+-*/";
 
 static wchar_t *tokens_s[] = {
     /* should match token enum */
@@ -56,7 +57,7 @@ struct ds {
 #define ds_pokes(x,t) do { wchar_t *p = t; while(*p) ds_poke(x, *p++); } while(0)
 #endif                          /* ds_init */
 
-struct mpsl_lp {
+struct mpsl_c {
     int token;          /* token found */
     struct ds token_s;  /* token as string */
     mpdm_t node;        /* generated nodes */
@@ -70,7 +71,7 @@ struct mpsl_lp {
 };
 
 
-static void next_c(struct mpsl_lp *l)
+static void next_c(struct mpsl_c *l)
 /* gets the next char */
 {
     do {
@@ -96,7 +97,7 @@ static void next_c(struct mpsl_lp *l)
     ds_poke(l->token_s, L'\0')
 
 
-static int tok_eop(struct mpsl_lp *l)
+static int tok_eop(struct mpsl_c *l)
 {
     if (l->c == L'\0' || l->c == WEOF) {
         l->token = EOP;
@@ -107,7 +108,7 @@ static int tok_eop(struct mpsl_lp *l)
 }
 
 
-static int tok_1c(struct mpsl_lp *l)
+static int tok_1c(struct mpsl_c *l)
 {
     wchar_t *ptr;
 
@@ -121,7 +122,7 @@ static int tok_1c(struct mpsl_lp *l)
 }
 
 
-static int tok_str(struct mpsl_lp *l)
+static int tok_str(struct mpsl_c *l)
 {
     if (l->c == L'"') {
     }
@@ -130,7 +131,7 @@ static int tok_str(struct mpsl_lp *l)
 }
 
 
-static int tok_vstr(struct mpsl_lp *l)
+static int tok_vstr(struct mpsl_c *l)
 {
     if (l->c == L'\'') {
         next_c(l);
@@ -144,7 +145,7 @@ static int tok_vstr(struct mpsl_lp *l)
 }
 
 
-static int tok_sym(struct mpsl_lp *l)
+static int tok_sym(struct mpsl_c *l)
 {
     if (iswalpha(l->c)) {
         int n;
@@ -171,7 +172,7 @@ static int tok_sym(struct mpsl_lp *l)
     return 1;
 }
 
-static int tok_num(struct mpsl_lp *l)
+static int tok_num(struct mpsl_c *l)
 {
     if (iswdigit(l->c)) {
         /* numbers */
@@ -195,7 +196,7 @@ static int tok_num(struct mpsl_lp *l)
 }
 
 
-static int tok_specialnum(struct mpsl_lp *l)
+static int tok_specialnum(struct mpsl_c *l)
 {
     if (l->c == L'0') {
         ds_poke(l->token_s, l->c);
@@ -235,7 +236,7 @@ static int tok_specialnum(struct mpsl_lp *l)
 }
 
 
-static int token(struct mpsl_lp *l)
+static int token(struct mpsl_c *l)
 {
     ds_rewind(l->token_s);
 
@@ -252,7 +253,14 @@ static int token(struct mpsl_lp *l)
 /** parser **/
 
 enum {
-    N_LITERAL, N_NULL, N_IF, N_IFELSE, N_WHILE, N_NOP, N_SEQ, N_ASSIGN, N_EXPR, N_PROG
+    N_LITERAL, N_NULL,
+    N_IF, N_IFELSE, N_WHILE,
+    N_NOP, N_SEQ,
+    N_SYMID, N_SYMVAL, N_ASSIGN,
+    N_UMINUS, N_NOT,
+    N_PARTOF, N_EXECSYM,
+    N_ADD, N_SUB, N_MUL, N_DIV,
+    N_EXPR, N_PROG
 };
 
 static mpdm_t node0(int type)
@@ -272,19 +280,96 @@ static mpdm_t node1(int type, mpdm_t n1)
 }
 
 
-static mpdm_t expr(struct mpsl_lp *p)
+static mpdm_t node2(int type, mpdm_t n1, mpdm_t n2)
+{
+    mpdm_t r = mpdm_ref(MPDM_A(3));
+    mpdm_aset(r, MPDM_I(type), 0);
+    mpdm_aset(r, n1, 1);
+    mpdm_aset(r, n1, 2);
+    return mpdm_unrefnd(r);
+}
+
+
+static mpdm_t symid(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
 
-    if (p->token == SYMBOL) {
-        
+    if (c->token == SYMBOL) {
+        mpdm_t s = mpdm_ref(MPDM_S(c->token_s.d));
+        token(c);
+
+        if (c->token == DOT) {
+            token(c);
+
+            if ((v = symid(c)) != NULL)
+                v = node2(N_PARTOF, node1(N_SYMID, s), v);
+        }
+        else
+            v = node1(N_SYMID, s);
+
+        mpdm_unref(s);
     }
 
     return v;
 }
 
 
-static mpdm_t statement(struct mpsl_lp *p)
+static mpdm_t term(struct mpsl_c *c)
+{
+    mpdm_t v = NULL;
+
+    if (c->token == LPAREN) {
+        /* parenthesized expression */
+    }
+    else
+    if (c->token == LBRACE) {
+        /* inline hash */
+    }
+    else
+    if (c->token == LBRACK) {
+        /* inline array */
+    }
+    else
+    if (c->token == LITERAL) {
+        v = node1(N_LITERAL, MPDM_S(c->token_s.d));
+        token(c);
+    }
+
+    return v;
+}
+
+
+static mpdm_t expr(struct mpsl_c *c)
+{
+    mpdm_t v = NULL;
+
+    if ((v = symid(c)) != NULL && c->token == EQUAL) {
+        token(c);
+        v = node2(N_ASSIGN, v, expr(c));
+    }
+    else {
+        if (v == NULL) {
+            v = term(c);
+            token(c);
+        }
+        else
+            v = node1(N_SYMVAL, v);
+
+        if (v != NULL) {
+            switch (c->token) {
+            case PLUS:      token(c); v = node2(N_ADD, v, expr(c)); break;
+            case MINUS:     token(c); v = node2(N_SUB, v, expr(c)); break;
+            case ASTERISK:  token(c); v = node2(N_MUL, v, expr(c)); break;
+            case SLASH:     token(c); v = node2(N_DIV, v, expr(c)); break;
+            }
+        }
+    }
+
+    return v;
+}
+
+
+static mpdm_t statement(struct mpsl_c *p)
 {
     mpdm_t v = NULL;
 
@@ -329,7 +414,7 @@ static mpdm_t statement(struct mpsl_lp *p)
 }
 
 
-static void parse(struct mpsl_lp *l)
+static void parse(struct mpsl_c *l)
 {
     next_c(l);
     token(l);
@@ -568,7 +653,7 @@ static mpdm_t add_ins(mpdm_t prg, int opcode)
 int main(int argc, char *argv[])
 {
     mpdm_t prg;
-    struct mpsl_lp lp;
+    struct mpsl_c lp;
     struct mpsl_vm m;
 
     mpdm_startup();
