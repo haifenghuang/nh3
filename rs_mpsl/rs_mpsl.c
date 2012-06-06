@@ -100,7 +100,7 @@ static void next_c(struct mpsl_c *l)
     ds_poke(l->token_s, L'\0')
 
 
-static int tok_eop(struct mpsl_c *l)
+static int t_eop(struct mpsl_c *l)
 {
     if (l->c == L'\0' || l->c == WEOF) {
         l->token = T_EOP;
@@ -111,7 +111,7 @@ static int tok_eop(struct mpsl_c *l)
 }
 
 
-static int tok_1c(struct mpsl_c *l)
+static int t_1c(struct mpsl_c *l)
 {
     wchar_t *ptr;
 
@@ -125,7 +125,7 @@ static int tok_1c(struct mpsl_c *l)
 }
 
 
-static int tok_str(struct mpsl_c *l)
+static int t_str(struct mpsl_c *l)
 {
     if (l->c == L'"') {
     }
@@ -134,11 +134,12 @@ static int tok_str(struct mpsl_c *l)
 }
 
 
-static int tok_vstr(struct mpsl_c *l)
+static int t_vstr(struct mpsl_c *l)
 {
     if (l->c == L'\'') {
         next_c(l);
         STORE(l->c != L'\'');
+        next_c(l);
         l->token = T_LITERAL;
 
         return 0;
@@ -148,7 +149,7 @@ static int tok_vstr(struct mpsl_c *l)
 }
 
 
-static int tok_sym(struct mpsl_c *l)
+static int t_sym(struct mpsl_c *l)
 {
     if (iswalpha(l->c)) {
         int n;
@@ -175,7 +176,7 @@ static int tok_sym(struct mpsl_c *l)
     return 1;
 }
 
-static int tok_num(struct mpsl_c *l)
+static int t_num(struct mpsl_c *l)
 {
     if (iswdigit(l->c)) {
         /* numbers */
@@ -196,7 +197,7 @@ static int tok_num(struct mpsl_c *l)
 }
 
 
-static int tok_specialnum(struct mpsl_c *l)
+static int t_specialnum(struct mpsl_c *l)
 {
     if (l->c == L'0') {
         ds_poke(l->token_s, l->c);
@@ -204,7 +205,7 @@ static int tok_specialnum(struct mpsl_c *l)
 
         if (l->c == L'.') {
             ds_poke(l->token_s, l->c);
-            return tok_num(l);
+            return t_num(l);
         }
         else
         if (l->c == L'b' || l->c == L'B') {
@@ -240,8 +241,8 @@ static int token(struct mpsl_c *l)
 {
     ds_rewind(l->token_s);
 
-    if (tok_eop(l) && tok_1c(l) && tok_str(l) && tok_vstr(l) &&
-        tok_sym(l) && tok_specialnum(l) && tok_num(l)) {
+    if (t_eop(l) && t_1c(l) && t_str(l) && t_vstr(l) &&
+        t_sym(l) && t_specialnum(l) && t_num(l)) {
         l->error = 1;
         l->token = T_ERROR;
     }
@@ -295,6 +296,8 @@ static mpdm_t symid(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
 
+    if (c->error) {}
+    else
     if (c->token == T_SYMBOL) {
         mpdm_t s = mpdm_ref(MPDM_S(c->token_s.d));
         token(c);
@@ -321,6 +324,8 @@ static mpdm_t paren_term(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
 
+    if (c->error) {}
+    else
     if (c->token == T_LPAREN) {
         token(c);
         v = expr(c);
@@ -341,12 +346,35 @@ static mpdm_t term(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
 
+    if (c->error) {}
+    else
     if (c->token == T_LPAREN) {
         v = paren_term(c);
     }
     else
     if (c->token == T_LBRACE) {
         /* inline hash */
+        token(c);
+
+        v = mpdm_ref(node0(N_HASH));
+
+        while (!c->error && c->token != T_RBRACE) {
+            mpdm_push(v, expr(c));
+
+            if (c->token == T_COLON) {
+                token(c);
+
+                mpdm_push(v, expr(c));
+
+                if (c->token == T_COMMA)
+                    token(c);
+            }
+            else
+                c->error = 2;
+        }
+
+        mpdm_unrefnd(v);
+        token(c);
     }
     else
     if (c->token == T_LBRACK) {
@@ -355,8 +383,8 @@ static mpdm_t term(struct mpsl_c *c)
 
         v = mpdm_ref(node0(N_ARRAY));
 
-        while (c->token != T_RBRACK) {
-            mpdm_push(v, node1(N_EXPR, expr(c)));
+        while (!c->error && c->token != T_RBRACK) {
+            mpdm_push(v, expr(c));
 
             if (c->token == T_COMMA)
                 token(c);
@@ -379,6 +407,8 @@ static mpdm_t expr(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
 
+    if (c->error) {}
+    else
     if ((v = symid(c)) != NULL && c->token == T_EQUAL) {
         token(c);
         v = node2(N_ASSIGN, v, expr(c));
@@ -409,6 +439,8 @@ static mpdm_t statement(struct mpsl_c *c)
     mpdm_t v = NULL;
     mpdm_t w;
 
+    if (c->error) {}
+    else
     if (c->token == T_IF) {
         if ((w = paren_term(c)) != NULL) {
             v = node2(N_IF, w, statement(c));
@@ -443,7 +475,7 @@ static mpdm_t statement(struct mpsl_c *c)
         token(c);
         v = node0(N_NOP);
 
-        while (c->token != T_RBRACE)
+        while (!c->error && c->token != T_RBRACE)
             v = node2(N_SEQ, v, statement(c));
 
         token(c);
@@ -469,7 +501,7 @@ static void parse(struct mpsl_c *c)
 
     v = node0(N_NOP);
 
-    while (c->token != T_EOP)
+    while (!c->error && c->token != T_EOP)
         v = node2(N_SEQ, v, statement(c));
 
     mpdm_set(&c->node, v);
@@ -728,7 +760,7 @@ int main(int argc, char *argv[])
 
     mpsl_exec_vm(&m, 0);
 
-    c.ptr = L"a.c.d = 1000; b = 3;";
+    c.ptr = L"a.c.d = 1000; hash = { 'uno': 1, 'dos': 2 * 6 }; b = 3;";
     parse(&c);
 
     return 0;
