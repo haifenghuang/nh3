@@ -20,7 +20,7 @@
 
 /** lexer **/
 
-enum {
+typedef enum {
     T_EOP, T_ERROR,
 
     T_IF, T_ELSE, T_WHILE, T_BREAK,
@@ -34,10 +34,10 @@ enum {
     T_PLUS, T_MINUS, T_ASTERISK, T_SLASH,
 
     T_SYMBOL, T_LITERAL
-};
+} mpsl_token_t;
 
 /* should match token enum */
-static wchar_t *tokens_c = L"{}()[]:;=.!+-*/,";
+static wchar_t *tokens_c = L"{}()[]:;=.!,+-*/";
 
 static wchar_t *tokens_s[] = {
     /* should match token enum */
@@ -61,7 +61,7 @@ struct ds {
 #endif                          /* ds_init */
 
 struct mpsl_c {
-    int token;          /* token found */
+    mpsl_token_t token; /* token found */
     struct ds token_s;  /* token as string */
     mpdm_t node;        /* generated nodes */
     mpdm_t prg;         /* generated program */
@@ -179,9 +179,6 @@ static int tok_num(struct mpsl_c *l)
 {
     if (iswdigit(l->c)) {
         /* numbers */
-        ds_poke(l->token_s, l->c);
-
-        /* store while digits */
         STORE(iswdigit(l->c));
 
         /* is it a dot or scientific notation? */
@@ -257,7 +254,7 @@ static int token(struct mpsl_c *l)
 
 enum {
     N_LITERAL, N_NULL,
-    N_IF, N_IFELSE, N_WHILE,
+    N_IF, N_WHILE,
     N_NOP, N_SEQ,
     N_SYMID, N_SYMVAL, N_ASSIGN,
     N_UMINUS, N_NOT,
@@ -289,7 +286,7 @@ static mpdm_t node2(int type, mpdm_t n1, mpdm_t n2)
     mpdm_t r = mpdm_ref(MPDM_A(3));
     mpdm_aset(r, MPDM_I(type), 0);
     mpdm_aset(r, n1, 1);
-    mpdm_aset(r, n1, 2);
+    mpdm_aset(r, n2, 2);
     return mpdm_unrefnd(r);
 }
 
@@ -320,17 +317,32 @@ static mpdm_t symid(struct mpsl_c *c)
 
 static mpdm_t expr(struct mpsl_c *c);
 
+static mpdm_t paren_term(struct mpsl_c *c)
+{
+    mpdm_t v = NULL;
+
+    if (c->token == T_LPAREN) {
+        token(c);
+        v = expr(c);
+
+        if (c->token == T_RPAREN)
+            token(c);
+        else
+            c->error = 2;
+    }
+    else
+        c->error = 2;
+
+    return v;
+}
+
+
 static mpdm_t term(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
 
     if (c->token == T_LPAREN) {
-        /* parenthesized expression */
-        token(c);
-        v = expr(c);
-
-        if (c->token != T_RPAREN)
-            c->error = 2;
+        v = paren_term(c);
     }
     else
     if (c->token == T_LBRACE) {
@@ -351,6 +363,7 @@ static mpdm_t term(struct mpsl_c *c)
         }
 
         mpdm_unrefnd(v);
+        token(c);
     }
     else
     if (c->token == T_LITERAL) {
@@ -382,6 +395,7 @@ static mpdm_t expr(struct mpsl_c *c)
             case T_MINUS:     token(c); v = node2(N_SUB, v, expr(c)); break;
             case T_ASTERISK:  token(c); v = node2(N_MUL, v, expr(c)); break;
             case T_SLASH:     token(c); v = node2(N_DIV, v, expr(c)); break;
+            default: break;
             }
         }
     }
@@ -390,60 +404,75 @@ static mpdm_t expr(struct mpsl_c *c)
 }
 
 
-static mpdm_t statement(struct mpsl_c *p)
+static mpdm_t statement(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
+    mpdm_t w;
 
-    if (p->token == T_IF) {
+    if (c->token == T_IF) {
+        if ((w = paren_term(c)) != NULL) {
+            v = node2(N_IF, w, statement(c));
+
+            if (c->token == T_ELSE) {
+                token(c);
+                mpdm_ref(v);
+                mpdm_push(v, statement(c));
+                mpdm_unrefnd(v);
+            }
+        }
     }
     else
-    if (p->token == T_WHILE) {
+    if (c->token == T_WHILE) {
+        if ((w = paren_term(c)) != NULL)
+            v = node2(N_WHILE, w, statement(c));
     }
     else
-    if (p->token == T_LOCAL) {
+    if (c->token == T_LOCAL) {
     }
     else
-    if (p->token == T_GLOBAL) {
+    if (c->token == T_GLOBAL) {
     }
     else
-    if (p->token == T_SUB) {
+    if (c->token == T_SUB) {
     }
     else
-    if (p->token == T_RETURN) {
+    if (c->token == T_RETURN) {
     }
     else
-    if (p->token == T_SEMI) {
-        /* compound statement */
+    if (c->token == T_LBRACE) {
+        token(c);
         v = node0(N_NOP);
-        token(p);
-    }
-    else
-    if (p->token == T_LBRACE) {
-        /* block */
+
+        while (c->token != T_RBRACE)
+            v = node2(N_SEQ, v, statement(c));
+
+        token(c);
     }
     else {
         /* expression */
-        v = node1(N_EXPR, expr(p));
+        v = expr(c);
 
-        if (p->token == T_SEMI)
-            token(p);
-        else
-            p->error = 2;
+        if (c->token == T_SEMI)
+            token(c);
     }
 
     return v;
 }
 
 
-static void parse(struct mpsl_c *l)
+static void parse(struct mpsl_c *c)
 {
-    next_c(l);
-    token(l);
+    mpdm_t v;
 
-    mpdm_set(&l->node, node1(N_PROG, statement(l)));
+    next_c(c);
+    token(c);
 
-    if (l->token != T_EOP)
-        l->error = 2;
+    v = node0(N_NOP);
+
+    while (c->token != T_EOP)
+        v = node2(N_SEQ, v, statement(c));
+
+    mpdm_set(&c->node, v);
 }
 
 
@@ -699,7 +728,7 @@ int main(int argc, char *argv[])
 
     mpsl_exec_vm(&m, 0);
 
-    c.ptr = L"a = 1000;";
+    c.ptr = L"a.c.d = 1000; b = 3;";
     parse(&c);
 
     return 0;
