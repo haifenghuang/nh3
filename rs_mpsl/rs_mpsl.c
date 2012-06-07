@@ -304,7 +304,7 @@ static int token(struct mpsl_c *l)
 
 typedef enum {
     /* order matters (operator precedence) */
-    N_LITERAL,  N_NULL,
+    N_NULL,     N_LITERAL,
     N_ARRAY,    N_HASH,
 
     N_UMINUS,   N_NOT,
@@ -404,9 +404,18 @@ static mpdm_t term(struct mpsl_c *c)
 
     if (c->error) {}
     else
-    if (c->token == T_LPAREN) {
-        v = paren_term(c);
+    if (c->token == T_BANG) {
+        token(c);
+        v = node1(N_NOT, expr(c));
     }
+    else
+    if (c->token == T_MINUS) {
+        token(c);
+        v = node1(N_UMINUS, expr(c));
+    }
+    else
+    if (c->token == T_LPAREN)
+        v = paren_term(c);
     else
     if (c->token == T_LBRACE) {
         /* inline hash */
@@ -572,9 +581,6 @@ static mpdm_t statement(struct mpsl_c *c)
                 c->error = 2;
 
         } while (!c->error && c->token != T_SEMI);
-    }
-    else
-    if (c->token == T_GLOBAL) {
     }
     else
     if (c->token == T_SUB) {
@@ -823,7 +829,7 @@ int main(int argc, char *argv[])
 
     mpsl_exec_vm(&m, 0);
 
-    c.ptr = L"local aa, bcd = 1, cde; if (a == 1 || a == 10) { b = 3 + 4; }";
+    c.ptr = L"local aa, bcd = -1, cde; if (a == 1 || a == 10) { b = 3 + 4; }";
     parse(&c);
 
     return 0;
