@@ -317,6 +317,7 @@ typedef enum {
     N_SYMID,    N_SYMVAL,   N_ASSIGN,
     N_PARTOF,   N_EXECSYM,
     N_LOCAL,    N_GLOBAL,
+    N_SUBR,     N_RETURN,
 
     N_LAST
 } mpsl_node_t;
@@ -581,12 +582,28 @@ static mpdm_t statement(struct mpsl_c *c)
                 c->error = 2;
 
         } while (!c->error && c->token != T_SEMI);
+
+        token(c);
     }
     else
     if (c->token == T_SUB) {
     }
     else
     if (c->token == T_RETURN) {
+        token(c);
+        v = node0(N_RETURN);
+
+        if (c->token != T_SEMI) {
+            token(c);
+            mpdm_ref(v);
+            mpdm_push(v, expr(c));
+            mpdm_unref(v);
+        }
+
+        if (c->token == T_SEMI)
+            token(c);
+        else
+            c->error = 2;
     }
     else
     if (c->token == T_LBRACE) {
@@ -604,6 +621,8 @@ static mpdm_t statement(struct mpsl_c *c)
 
         if (c->token == T_SEMI)
             token(c);
+        else
+            c->error = 2;
     }
 
     return v;
