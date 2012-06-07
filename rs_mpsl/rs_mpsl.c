@@ -313,7 +313,10 @@ enum {
     N_ARRAY,    N_HASH,
     N_AND,      N_OR,
     N_EQ,       N_NE,       N_GT,  N_GE,  N_LT,  N_LE,
-    N_ADD,      N_SUB,      N_MUL, N_DIV, N_MOD
+    N_ADD,      N_SUB,      N_MUL, N_DIV, N_MOD,
+
+    /* must have precedence above all */
+    N_MAXPREC
 };
 
 static mpdm_t node0(int type)
@@ -458,27 +461,28 @@ static int binop_by_token(struct mpsl_c *c)
 {
     int ret = -1;
 
-    switch (c->c) {
-    case T_PLUS:       ret = N_ADD; break;
-    case T_MINUS:      ret = N_SUB; break;
-    case T_ASTERISK:   ret = N_MUL; break;
-    case T_SLASH:      ret = N_DIV; break;
-    case T_PERCENT:    ret = N_MOD; break;
-    case T_EQEQ:       ret = N_EQ;  break;
-    case T_BANGEQ:     ret = N_NE;  break;
-    case T_GT:         ret = N_GT;  break;
-    case T_GTEQ:       ret = N_GE;  break;
-    case T_LT:         ret = N_LT;  break;
-    case T_LTEQ:       ret = N_LE;  break;
-    case T_DAMPERSAND: ret = N_AND; break;
-    case T_DPIPE:      ret = N_OR;  break;
+    switch (c->token) {
+    case T_PLUS:        ret = N_ADD;    break;
+    case T_MINUS:       ret = N_SUB;    break;
+    case T_ASTERISK:    ret = N_MUL;    break;
+    case T_SLASH:       ret = N_DIV;    break;
+    case T_PERCENT:     ret = N_MOD;    break;
+    case T_EQEQ:        ret = N_EQ;     break;
+    case T_BANGEQ:      ret = N_NE;     break;
+    case T_GT:          ret = N_GT;     break;
+    case T_GTEQ:        ret = N_GE;     break;
+    case T_LT:          ret = N_LT;     break;
+    case T_LTEQ:        ret = N_LE;     break;
+    case T_DAMPERSAND:  ret = N_AND;    break;
+    case T_DPIPE:       ret = N_OR;     break;
+    default:            ret = -1;       break;
     }
 
     return ret;
 }
 
 
-static mpdm_t expr(struct mpsl_c *c)
+static mpdm_t expr_p(struct mpsl_c *c, int p_op)
 {
     mpdm_t v = NULL;
 
@@ -497,12 +501,20 @@ static mpdm_t expr(struct mpsl_c *c)
         if (v != NULL) {
             int op;
 
-            while ((op = binop_by_token(c)) > 0)
-                v = node2(op, v, expr(c));
+            while ((op = binop_by_token(c)) > 0 && op < p_op) {
+                token(c);
+                v = node2(op, v, expr_p(c, op));
+            }
         }
     }
 
     return v;
+}
+
+
+static mpdm_t expr(struct mpsl_c *c)
+{
+    return expr_p(c, N_MAXPREC);
 }
 
 
