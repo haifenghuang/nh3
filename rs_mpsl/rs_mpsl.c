@@ -302,22 +302,24 @@ static int token(struct mpsl_c *l)
 
 /** parser **/
 
-enum {
+typedef enum {
     /* order matters (operator precedence) */
     N_LITERAL,  N_NULL,
+    N_ARRAY,    N_HASH,
+
+    N_UMINUS,   N_NOT,
+    N_MOD,      N_DIV,      N_MUL,  N_SUB,  N_ADD,
+    N_EQ,       N_NE,       N_GT,  N_GE,  N_LT,  N_LE,
+    N_AND,      N_OR,
+
     N_IF,       N_WHILE,
     N_NOP,      N_SEQ,
     N_SYMID,    N_SYMVAL,   N_ASSIGN,
-    N_UMINUS,   N_NOT,
     N_PARTOF,   N_EXECSYM,
-    N_ARRAY,    N_HASH,
-    N_AND,      N_OR,
-    N_EQ,       N_NE,       N_GT,  N_GE,  N_LT,  N_LE,
-    N_ADD,      N_SUB,      N_MUL, N_DIV, N_MOD,
 
-    /* must have precedence above all */
-    N_MAXPREC
-};
+    /* must be last */
+    N_MINPREC
+} mpsl_node_t;
 
 static mpdm_t node0(int type)
 {
@@ -457,9 +459,9 @@ static mpdm_t term(struct mpsl_c *c)
 }
 
 
-static int binop_by_token(struct mpsl_c *c)
+static mpsl_node_t binop_by_token(struct mpsl_c *c)
 {
-    int ret = -1;
+    mpsl_node_t ret = -1;
 
     switch (c->token) {
     case T_PLUS:        ret = N_ADD;    break;
@@ -482,7 +484,7 @@ static int binop_by_token(struct mpsl_c *c)
 }
 
 
-static mpdm_t expr_p(struct mpsl_c *c, int p_op)
+static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
 {
     mpdm_t v = NULL;
 
@@ -499,7 +501,7 @@ static mpdm_t expr_p(struct mpsl_c *c, int p_op)
             v = term(c);
 
         if (v != NULL) {
-            int op;
+            mpsl_node_t op;
 
             while ((op = binop_by_token(c)) > 0 && op < p_op) {
                 token(c);
@@ -514,7 +516,7 @@ static mpdm_t expr_p(struct mpsl_c *c, int p_op)
 
 static mpdm_t expr(struct mpsl_c *c)
 {
-    return expr_p(c, N_MAXPREC);
+    return expr_p(c, N_MINPREC);
 }
 
 
