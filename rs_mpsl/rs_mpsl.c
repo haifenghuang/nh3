@@ -32,14 +32,19 @@ typedef enum {
     T_COLON, T_SEMI,
     T_DOT, T_COMMA,
 
-    T_EQUAL, T_BANG,
-    T_PLUS, T_MINUS, T_ASTERISK, T_SLASH, T_PERCENT,
+    T_EQUAL, T_DEQUAL,
+    T_BANG, T_BANGEQ,
+    T_GT, T_GTEQ,
+    T_LT, T_LTEQ,
+
+    T_PLUS, T_PLUSEQ,
+    T_MINUS, T_MINUSEQ,
+    T_ASTERISK, T_ASTEREQ,
+    T_SLASH, T_SLASHEQ,
+    T_PERCENT, T_PERCEQ,
 
     T_SYMBOL, T_LITERAL
 } mpsl_token_t;
-
-/* should match token enum */
-static wchar_t *tokens_c = L"{}()[]:;.,=!+-*/%";
 
 static wchar_t *tokens_s[] = {
     /* should match token enum */
@@ -103,6 +108,7 @@ static void next_c(struct mpsl_c *l)
 
 
 static int t_eop(struct mpsl_c *l)
+/* tokenize end of program */
 {
     if (l->c == L'\0' || l->c == WEOF) {
         l->token = T_EOP;
@@ -113,21 +119,86 @@ static int t_eop(struct mpsl_c *l)
 }
 
 
-static int t_1c(struct mpsl_c *l)
+static int t_martians(struct mpsl_c *c)
+/* tokenize funny characters */
 {
-    wchar_t *ptr;
+    int ret = 0;
 
-    if ((ptr = wcschr(tokens_c, l->c)) != NULL) {
-        next_c(l);
-        l->token = (ptr - tokens_c) + T_LBRACE;
-        return 0;
+    switch (c->c) {
+    case L'{': next_c(c); c->token = T_LBRACE; break;
+    case L'}': next_c(c); c->token = T_RBRACE; break;
+    case L'(': next_c(c); c->token = T_LPAREN; break;
+    case L')': next_c(c); c->token = T_RPAREN; break;
+    case L'[': next_c(c); c->token = T_LBRACK; break;
+    case L']': next_c(c); c->token = T_RBRACK; break;
+    case L':': next_c(c); c->token = T_COLON;  break;
+    case L';': next_c(c); c->token = T_SEMI;   break;
+    case L'.': next_c(c); c->token = T_DOT;    break;
+    case L',': next_c(c); c->token = T_COMMA;  break;
+    case L'=':
+        next_c(c);
+        if (c->c == L'=') { c->token = T_DEQUAL; next_c(c); }
+        else
+            c->token = T_EQUAL;
+        break;
+    case L'!':
+        next_c(c);
+        if (c->c == L'=') { c->token = T_BANGEQ; next_c(c); }
+        else
+            c->token = T_BANG;
+        break;
+    case L'>':
+        next_c(c);
+        if (c->c == L'=') { c->token = T_GTEQ; next_c(c); }
+        else
+            c->token = T_GT;
+        break;
+    case L'<':
+        next_c(c);
+        if (c->c == L'=') { c->token = T_LTEQ; next_c(c); }
+        else
+            c->token = T_LT;
+        break;
+    case L'+':
+        next_c(c);
+        if (c->c == L'=') { c->token = T_PLUSEQ; next_c(c); }
+        else
+            c->token = T_PLUS;
+        break;
+    case L'-':
+        next_c(c);
+        if (c->c == L'=') { c->token = T_MINUSEQ; next_c(c); }
+        else
+            c->token = T_MINUS;
+        break;
+    case L'*':
+        next_c(c);
+        if (c->c == L'=') { c->token = T_ASTEREQ; next_c(c); }
+        else
+            c->token = T_ASTERISK;
+        break;
+    case L'/':
+        next_c(c);
+        if (c->c == L'=') { c->token = T_SLASHEQ; next_c(c); }
+        else
+            c->token = T_SLASH;
+        break;
+    case L'%':
+        next_c(c);
+        if (c->c == L'=') { c->token = T_PERCEQ; next_c(c); }
+        else
+            c->token = T_PERCENT;
+        break;
+
+    default: ret = 1; break;
     }
 
-    return 1;
+    return ret;
 }
 
 
-static int t_str(struct mpsl_c *l)
+static int t_string(struct mpsl_c *l)
+/* tokenize strings */
 {
     if (l->c == L'"') {
     }
@@ -136,7 +207,8 @@ static int t_str(struct mpsl_c *l)
 }
 
 
-static int t_vstr(struct mpsl_c *l)
+static int t_vstring(struct mpsl_c *l)
+/* tokenize verbatim strings */
 {
     if (l->c == L'\'') {
         next_c(l);
@@ -151,7 +223,8 @@ static int t_vstr(struct mpsl_c *l)
 }
 
 
-static int t_sym(struct mpsl_c *l)
+static int t_symbol(struct mpsl_c *l)
+/* tokenize symbols and keywords */
 {
     if (iswalpha(l->c)) {
         int n;
@@ -178,7 +251,9 @@ static int t_sym(struct mpsl_c *l)
     return 1;
 }
 
-static int t_num(struct mpsl_c *l)
+
+static int t_number(struct mpsl_c *l)
+/* tokenize real, integer and scientific numbers */
 {
     if (iswdigit(l->c)) {
         /* numbers */
@@ -199,7 +274,8 @@ static int t_num(struct mpsl_c *l)
 }
 
 
-static int t_specialnum(struct mpsl_c *l)
+static int t_nd_number(struct mpsl_c *l)
+/* tokenize non-decimal base numbers */
 {
     if (l->c == L'0') {
         ds_poke(l->token_s, l->c);
@@ -207,7 +283,7 @@ static int t_specialnum(struct mpsl_c *l)
 
         if (l->c == L'.') {
             ds_poke(l->token_s, l->c);
-            return t_num(l);
+            return t_number(l);
         }
         else
         if (l->c == L'b' || l->c == L'B') {
@@ -243,8 +319,8 @@ static int token(struct mpsl_c *l)
 {
     ds_rewind(l->token_s);
 
-    if (t_eop(l) && t_1c(l) && t_str(l) && t_vstr(l) &&
-        t_sym(l) && t_specialnum(l) && t_num(l)) {
+    if (t_eop(l) && t_martians(l) && t_string(l) && t_vstring(l) &&
+        t_symbol(l) && t_nd_number(l) && t_number(l)) {
         l->error = 1;
         l->token = T_ERROR;
     }
