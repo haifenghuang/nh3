@@ -316,6 +316,7 @@ typedef enum {
     N_NOP,      N_SEQ,
     N_SYMID,    N_SYMVAL,   N_ASSIGN,
     N_PARTOF,   N_EXECSYM,
+    N_LOCAL,    N_GLOBAL,
 
     N_LAST
 } mpsl_node_t;
@@ -458,18 +459,18 @@ static mpdm_t term(struct mpsl_c *c)
 }
 
 
-static mpsl_node_t binop_by_token(struct mpsl_c *c)
+static mpsl_node_t op_by_token(struct mpsl_c *c)
 {
     int n;
     static int tokens[] = {
         T_PLUS, T_MINUS, T_ASTERISK, T_SLASH, T_PERCENT, 
         T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
-        T_DAMPERSAND, T_DPIPE, -1
+        T_DAMPERSAND, T_DPIPE, T_LOCAL, T_GLOBAL, -1
     };
     static mpsl_node_t binop[] = {
         N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
         N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
-        N_AND, N_OR, -1
+        N_AND, N_OR, N_LOCAL, N_GLOBAL, -1
     };
 
     for (n = 0; tokens[n] != -1; n++)
@@ -499,7 +500,7 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
         if (v != NULL) {
             mpsl_node_t op;
 
-            while ((op = binop_by_token(c)) > 0 && op < p_op) {
+            while ((op = op_by_token(c)) > 0 && op < p_op) {
                 token(c);
                 v = node2(op, v, expr_p(c, op));
             }
@@ -543,7 +544,34 @@ static mpdm_t statement(struct mpsl_c *c)
             v = node2(N_WHILE, w, statement(c));
     }
     else
-    if (c->token == T_LOCAL) {
+    if (c->token == T_LOCAL || c->token == T_GLOBAL) {
+        mpdm_t w1, w2;
+        mpsl_node_t op = op_by_token(c);
+
+        token(c);
+
+        do {
+            if ((w1 = symid(c)) != NULL) {
+                /* has initialization value? */
+                if (c->token == T_EQUAL) {
+                    token(c);
+                    w2 = expr(c);
+                }
+                else
+                    w2 = node0(N_NULL);
+
+                if (v == NULL)
+                    v = node2(op, w1, w2);
+                else
+                    v = node2(N_SEQ, v, node2(op, w1, w2));
+
+                if (c->token == T_COMMA)
+                    token(c);
+            }
+            else
+                c->error = 2;
+
+        } while (!c->error && c->token != T_SEMI);
     }
     else
     if (c->token == T_GLOBAL) {
@@ -795,7 +823,7 @@ int main(int argc, char *argv[])
 
     mpsl_exec_vm(&m, 0);
 
-    c.ptr = L"if (a == 1 || a == 10) { b = 3 + 4; }";
+    c.ptr = L"local aa, bcd = 1, cde; if (a == 1 || a == 10) { b = 3 + 4; }";
     parse(&c);
 
     return 0;
