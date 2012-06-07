@@ -32,16 +32,15 @@ typedef enum {
     T_COLON, T_SEMI,
     T_DOT, T_COMMA,
 
-    T_EQUAL, T_DEQUAL,
-    T_BANG, T_BANGEQ,
-    T_GT, T_GTEQ,
-    T_LT, T_LTEQ,
+    /* can be doubled */
+    T_GT,    T_LT,   T_PIPE,  T_AMPERSAND,
 
-    T_PLUS, T_PLUSEQ,
-    T_MINUS, T_MINUSEQ,
-    T_ASTERISK, T_ASTEREQ,
-    T_SLASH, T_SLASHEQ,
-    T_PERCENT, T_PERCEQ,
+    /* can be followed by = */
+    T_EQUAL, T_BANG, T_PLUS,  T_MINUS,      T_ASTERISK, T_SLASH, T_PERCENT,
+    T_DGT,   T_DLT,  T_DPIPE, T_DAMPERSAND,
+
+    T_EQEQ,  T_BANGEQ, T_PLUSEQ,  T_MINUSEQ, T_ASTEREQ, T_SLASHEQ, T_PERCEQ,
+    T_DGTEQ, T_DLTEQ,  T_DPIPEEQ, T_DAMPEREQ,
 
     T_SYMBOL, T_LITERAL
 } mpsl_token_t;
@@ -84,20 +83,18 @@ struct mpsl_c {
 static void next_c(struct mpsl_c *l)
 /* gets the next char */
 {
-    do {
-        if (l->ptr != NULL)
-            l->c = *(l->ptr++);
-        else
-            l->c = fgetwc(l->f);
+    if (l->ptr != NULL)
+        l->c = *(l->ptr++);
+    else
+        l->c = fgetwc(l->f);
 
-        /* update position in source */
-        if (l->c == L'\n') {
-            l->y++;
-            l->x = 0;
-        }
-        else
-            l->x++;
-    } while (l->c && wcschr(L" \t\r\n", l->c));
+    /* update position in source */
+    if (l->c == L'\n') {
+        l->y++;
+        l->x = -1;
+    }
+    else
+        l->x++;
 }
 
 #define STORE(COND) while (COND) { \
@@ -105,6 +102,16 @@ static void next_c(struct mpsl_c *l)
     next_c(l); \
     } \
     ds_poke(l->token_s, L'\0')
+
+
+static int t_blanks(struct mpsl_c *c)
+/* skip blanks */
+{
+    while (c->c == L' ' || c->c == L'\t' || c->c == L'\r' || c->c == L'\n')
+        next_c(c);
+
+    return 1;
+}
 
 
 static int t_eop(struct mpsl_c *l)
@@ -123,74 +130,45 @@ static int t_martians(struct mpsl_c *c)
 /* tokenize funny characters */
 {
     int ret = 0;
+    wchar_t i = c->c;
 
-    switch (c->c) {
-    case L'{': next_c(c); c->token = T_LBRACE; break;
-    case L'}': next_c(c); c->token = T_RBRACE; break;
-    case L'(': next_c(c); c->token = T_LPAREN; break;
-    case L')': next_c(c); c->token = T_RPAREN; break;
-    case L'[': next_c(c); c->token = T_LBRACK; break;
-    case L']': next_c(c); c->token = T_RBRACK; break;
-    case L':': next_c(c); c->token = T_COLON;  break;
-    case L';': next_c(c); c->token = T_SEMI;   break;
-    case L'.': next_c(c); c->token = T_DOT;    break;
-    case L',': next_c(c); c->token = T_COMMA;  break;
-    case L'=':
-        next_c(c);
-        if (c->c == L'=') { c->token = T_DEQUAL; next_c(c); }
-        else
-            c->token = T_EQUAL;
-        break;
-    case L'!':
-        next_c(c);
-        if (c->c == L'=') { c->token = T_BANGEQ; next_c(c); }
-        else
-            c->token = T_BANG;
-        break;
-    case L'>':
-        next_c(c);
-        if (c->c == L'=') { c->token = T_GTEQ; next_c(c); }
-        else
-            c->token = T_GT;
-        break;
-    case L'<':
-        next_c(c);
-        if (c->c == L'=') { c->token = T_LTEQ; next_c(c); }
-        else
-            c->token = T_LT;
-        break;
-    case L'+':
-        next_c(c);
-        if (c->c == L'=') { c->token = T_PLUSEQ; next_c(c); }
-        else
-            c->token = T_PLUS;
-        break;
-    case L'-':
-        next_c(c);
-        if (c->c == L'=') { c->token = T_MINUSEQ; next_c(c); }
-        else
-            c->token = T_MINUS;
-        break;
-    case L'*':
-        next_c(c);
-        if (c->c == L'=') { c->token = T_ASTEREQ; next_c(c); }
-        else
-            c->token = T_ASTERISK;
-        break;
-    case L'/':
-        next_c(c);
-        if (c->c == L'=') { c->token = T_SLASHEQ; next_c(c); }
-        else
-            c->token = T_SLASH;
-        break;
-    case L'%':
-        next_c(c);
-        if (c->c == L'=') { c->token = T_PERCEQ; next_c(c); }
-        else
-            c->token = T_PERCENT;
-        break;
-
+    switch (i) {
+    case L'{': next_c(c); c->token = T_LBRACE;      break;
+    case L'}': next_c(c); c->token = T_RBRACE;      break;
+    case L'(': next_c(c); c->token = T_LPAREN;      break;
+    case L')': next_c(c); c->token = T_RPAREN;      break;
+    case L'[': next_c(c); c->token = T_LBRACK;      break;
+    case L']': next_c(c); c->token = T_RBRACK;      break;
+    case L':': next_c(c); c->token = T_COLON;       break;
+    case L';': next_c(c); c->token = T_SEMI;        break;
+    case L'.': next_c(c); c->token = T_DOT;         break;
+    case L',': next_c(c); c->token = T_COMMA;       break;
+    case L'=': next_c(c); c->token = T_EQUAL;       break;
+    case L'!': next_c(c); c->token = T_BANG;        break;
+    case L'>': next_c(c); c->token = T_GT;          break;
+    case L'<': next_c(c); c->token = T_LT;          break;
+    case L'+': next_c(c); c->token = T_PLUS;        break;
+    case L'-': next_c(c); c->token = T_MINUS;       break;
+    case L'*': next_c(c); c->token = T_ASTERISK;    break;
+    case L'/': next_c(c); c->token = T_SLASH;       break;
+    case L'%': next_c(c); c->token = T_PERCENT;     break;
+    case L'|': next_c(c); c->token = T_PIPE;        break;
+    case L'&': next_c(c); c->token = T_AMPERSAND;   break;
     default: ret = 1; break;
+    }
+
+    if (!ret) {
+        /* is it doubled? */
+        if (c->c == i && c->token >= T_GT && c->token <= T_AMPERSAND) {
+            next_c(c);
+            c->token += (T_DGT - T_GT);
+        }
+
+        /* is it followed by = ? */
+        if (c->c == L'=' && c->token >= T_EQUAL && c->token <= T_DAMPERSAND) {
+            next_c(c);
+            c->token += (T_EQEQ - T_EQUAL);
+        }
     }
 
     return ret;
@@ -319,8 +297,8 @@ static int token(struct mpsl_c *l)
 {
     ds_rewind(l->token_s);
 
-    if (t_eop(l) && t_martians(l) && t_string(l) && t_vstring(l) &&
-        t_symbol(l) && t_nd_number(l) && t_number(l)) {
+    if (t_blanks(l) && t_eop(l) && t_martians(l) && t_string(l) &&
+        t_vstring(l) && t_symbol(l) && t_nd_number(l) && t_number(l)) {
         l->error = 1;
         l->token = T_ERROR;
     }
