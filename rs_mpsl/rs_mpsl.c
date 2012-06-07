@@ -309,7 +309,7 @@ typedef enum {
 
     N_UMINUS,   N_NOT,
     N_MOD,      N_DIV,      N_MUL,  N_SUB,  N_ADD,
-    N_EQ,       N_NE,       N_GT,  N_GE,  N_LT,  N_LE,
+    N_EQ,       N_NE,       N_GT,   N_GE,   N_LT,  N_LE,
     N_AND,      N_OR,
 
     N_IF,       N_WHILE,
@@ -317,8 +317,7 @@ typedef enum {
     N_SYMID,    N_SYMVAL,   N_ASSIGN,
     N_PARTOF,   N_EXECSYM,
 
-    /* must be last */
-    N_MINPREC
+    N_LAST
 } mpsl_node_t;
 
 static mpdm_t node0(int type)
@@ -461,26 +460,23 @@ static mpdm_t term(struct mpsl_c *c)
 
 static mpsl_node_t binop_by_token(struct mpsl_c *c)
 {
-    mpsl_node_t ret = -1;
+    int n;
+    static int tokens[] = {
+        T_PLUS, T_MINUS, T_ASTERISK, T_SLASH, T_PERCENT, 
+        T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
+        T_DAMPERSAND, T_DPIPE, -1
+    };
+    static mpsl_node_t binop[] = {
+        N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
+        N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
+        N_AND, N_OR, -1
+    };
 
-    switch (c->token) {
-    case T_PLUS:        ret = N_ADD;    break;
-    case T_MINUS:       ret = N_SUB;    break;
-    case T_ASTERISK:    ret = N_MUL;    break;
-    case T_SLASH:       ret = N_DIV;    break;
-    case T_PERCENT:     ret = N_MOD;    break;
-    case T_EQEQ:        ret = N_EQ;     break;
-    case T_BANGEQ:      ret = N_NE;     break;
-    case T_GT:          ret = N_GT;     break;
-    case T_GTEQ:        ret = N_GE;     break;
-    case T_LT:          ret = N_LT;     break;
-    case T_LTEQ:        ret = N_LE;     break;
-    case T_DAMPERSAND:  ret = N_AND;    break;
-    case T_DPIPE:       ret = N_OR;     break;
-    default:            ret = -1;       break;
-    }
+    for (n = 0; tokens[n] != -1; n++)
+        if (c->token == tokens[n])
+            return binop[n];
 
-    return ret;
+    return -1;
 }
 
 
@@ -516,7 +512,7 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
 
 static mpdm_t expr(struct mpsl_c *c)
 {
-    return expr_p(c, N_MINPREC);
+    return expr_p(c, N_LAST);
 }
 
 
