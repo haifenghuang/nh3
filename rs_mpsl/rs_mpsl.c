@@ -46,8 +46,8 @@ typedef enum {
     /* no more combinations */
     T_DPLUS,    T_DMINUS,
 
-    T_PLUSEQ,   T_MINUSEQ,
     T_GTEQ,     T_LTEQ,     T_PIPEEQ,  T_AMPEREQ,
+    T_PLUSEQ,   T_MINUSEQ,
     T_EQEQ,     T_BANGEQ,
     T_ASTEREQ,  T_SLASHEQ,  T_PERCEQ,
     T_DGTEQ,    T_DLTEQ,    T_DPIPEEQ, T_DAMPEREQ,
@@ -494,7 +494,7 @@ static mpdm_t expr(struct mpsl_c *c)
             case T_ASTERISK:   token(c); v = node2(N_MUL, v, expr(c)); break;
             case T_SLASH:      token(c); v = node2(N_DIV, v, expr(c)); break;
             case T_PERCENT:    token(c); v = node2(N_MOD, v, expr(c)); break;
-            case T_EQUAL:      token(c); v = node2(N_EQ, v, expr(c));  break;
+            case T_EQEQ:       token(c); v = node2(N_EQ, v, expr(c));  break;
             case T_BANGEQ:     token(c); v = node2(N_NE, v, expr(c));  break;
             case T_GT:         token(c); v = node2(N_GT, v, expr(c));  break;
             case T_GTEQ:       token(c); v = node2(N_GE, v, expr(c));  break;
@@ -519,6 +519,7 @@ static mpdm_t statement(struct mpsl_c *c)
     if (c->error) {}
     else
     if (c->token == T_IF) {
+        token(c);
         if ((w = paren_term(c)) != NULL) {
             v = node2(N_IF, w, statement(c));
 
@@ -532,6 +533,7 @@ static mpdm_t statement(struct mpsl_c *c)
     }
     else
     if (c->token == T_WHILE) {
+        token(c);
         if ((w = paren_term(c)) != NULL)
             v = node2(N_WHILE, w, statement(c));
     }
@@ -788,7 +790,7 @@ int main(int argc, char *argv[])
 
     mpsl_exec_vm(&m, 0);
 
-    c.ptr = L"a.c.d = 1000; hash = { 'uno': 1, 'dos': 2 * 6 }; b = 3;";
+    c.ptr = L"if (a == 1 || a == 10) { b = 3 + 4; }";
     parse(&c);
 
     return 0;
