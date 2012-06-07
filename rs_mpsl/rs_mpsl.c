@@ -454,6 +454,30 @@ static mpdm_t term(struct mpsl_c *c)
 }
 
 
+static int binop_by_token(struct mpsl_c *c)
+{
+    int ret = -1;
+
+    switch (c->c) {
+    case T_PLUS:       ret = N_ADD; break;
+    case T_MINUS:      ret = N_SUB; break;
+    case T_ASTERISK:   ret = N_MUL; break;
+    case T_SLASH:      ret = N_DIV; break;
+    case T_PERCENT:    ret = N_MOD; break;
+    case T_EQEQ:       ret = N_EQ;  break;
+    case T_BANGEQ:     ret = N_NE;  break;
+    case T_GT:         ret = N_GT;  break;
+    case T_GTEQ:       ret = N_GE;  break;
+    case T_LT:         ret = N_LT;  break;
+    case T_LTEQ:       ret = N_LE;  break;
+    case T_DAMPERSAND: ret = N_AND; break;
+    case T_DPIPE:      ret = N_OR;  break;
+    }
+
+    return ret;
+}
+
+
 static mpdm_t expr(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
@@ -465,28 +489,16 @@ static mpdm_t expr(struct mpsl_c *c)
         v = node2(N_ASSIGN, v, expr(c));
     }
     else {
-        if (v == NULL)
-            v = term(c);
-        else
+        if (v != NULL)
             v = node1(N_SYMVAL, v);
+        else
+            v = term(c);
 
         if (v != NULL) {
-            switch (c->token) {
-            case T_PLUS:       token(c); v = node2(N_ADD, v, expr(c)); break;
-            case T_MINUS:      token(c); v = node2(N_SUB, v, expr(c)); break;
-            case T_ASTERISK:   token(c); v = node2(N_MUL, v, expr(c)); break;
-            case T_SLASH:      token(c); v = node2(N_DIV, v, expr(c)); break;
-            case T_PERCENT:    token(c); v = node2(N_MOD, v, expr(c)); break;
-            case T_EQEQ:       token(c); v = node2(N_EQ, v, expr(c));  break;
-            case T_BANGEQ:     token(c); v = node2(N_NE, v, expr(c));  break;
-            case T_GT:         token(c); v = node2(N_GT, v, expr(c));  break;
-            case T_GTEQ:       token(c); v = node2(N_GE, v, expr(c));  break;
-            case T_LT:         token(c); v = node2(N_LT, v, expr(c));  break;
-            case T_LTEQ:       token(c); v = node2(N_LE, v, expr(c));  break;
-            case T_DAMPERSAND: token(c); v = node2(N_AND, v, expr(c)); break;
-            case T_DPIPE:      token(c); v = node2(N_OR, v, expr(c));  break;
-            default: break;
-            }
+            int op;
+
+            while ((op = binop_by_token(c)) > 0)
+                v = node2(op, v, expr(c));
         }
     }
 
