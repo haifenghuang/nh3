@@ -21,16 +21,17 @@
 /** lexer **/
 
 typedef enum {
-    T_EOP, T_ERROR,
+    /* caution: order matters */
+    T_EOP,      T_ERROR,
 
-    T_IF, T_ELSE, T_WHILE, T_BREAK,
-    T_LOCAL, T_GLOBAL, T_SUB, T_RETURN, T_NULL,
+    T_IF,       T_ELSE,     T_WHILE,    T_BREAK,
+    T_LOCAL,    T_GLOBAL,   T_SUB,      T_RETURN, T_NULL,
 
-    T_LBRACE, T_RBRACE,
-    T_LPAREN, T_RPAREN,
-    T_LBRACK, T_RBRACK,
-    T_COLON, T_SEMI,
-    T_DOT, T_COMMA,
+    T_LBRACE,   T_RBRACE,
+    T_LPAREN,   T_RPAREN,
+    T_LBRACK,   T_RBRACK,
+    T_COLON,    T_SEMI,
+    T_DOT,      T_COMMA,
 
     /* can be doubled and/or followed by = */
     T_GT,       T_LT,       T_PIPE,     T_AMPERSAND,
@@ -52,7 +53,7 @@ typedef enum {
     T_ASTEREQ,  T_SLASHEQ,  T_PERCEQ,
     T_DGTEQ,    T_DLTEQ,    T_DPIPEEQ, T_DAMPEREQ,
 
-    T_SYMBOL, T_LITERAL
+    T_SYMBOL,   T_LITERAL
 } mpsl_token_t;
 
 static wchar_t *tokens_s[] = {
@@ -141,33 +142,13 @@ static int t_martians(struct mpsl_c *c)
 {
     int ret = 0;
     wchar_t i = c->c;
+    wchar_t *ptr;
+    static wchar_t t[] = L"{}()[]:;.,><|&+-=!*/%";
 
-    switch (i) {
-    case L'{': next_c(c); c->token = T_LBRACE;      break;
-    case L'}': next_c(c); c->token = T_RBRACE;      break;
-    case L'(': next_c(c); c->token = T_LPAREN;      break;
-    case L')': next_c(c); c->token = T_RPAREN;      break;
-    case L'[': next_c(c); c->token = T_LBRACK;      break;
-    case L']': next_c(c); c->token = T_RBRACK;      break;
-    case L':': next_c(c); c->token = T_COLON;       break;
-    case L';': next_c(c); c->token = T_SEMI;        break;
-    case L'.': next_c(c); c->token = T_DOT;         break;
-    case L',': next_c(c); c->token = T_COMMA;       break;
-    case L'=': next_c(c); c->token = T_EQUAL;       break;
-    case L'!': next_c(c); c->token = T_BANG;        break;
-    case L'>': next_c(c); c->token = T_GT;          break;
-    case L'<': next_c(c); c->token = T_LT;          break;
-    case L'+': next_c(c); c->token = T_PLUS;        break;
-    case L'-': next_c(c); c->token = T_MINUS;       break;
-    case L'*': next_c(c); c->token = T_ASTERISK;    break;
-    case L'/': next_c(c); c->token = T_SLASH;       break;
-    case L'%': next_c(c); c->token = T_PERCENT;     break;
-    case L'|': next_c(c); c->token = T_PIPE;        break;
-    case L'&': next_c(c); c->token = T_AMPERSAND;   break;
-    default: ret = 1; break;
-    }
+    if ((ptr = wcschr(t, i)) != NULL) {
+        next_c(c);
+        c->token = (ptr - t) + T_LBRACE;
 
-    if (!ret) {
         /* is it doubled? */
         if (c->c == i && c->token >= T_GT && c->token <= T_MINUS) {
             next_c(c);
@@ -180,6 +161,8 @@ static int t_martians(struct mpsl_c *c)
             c->token += (T_PLUSEQ - T_PLUS);
         }
     }
+    else
+        ret = 1;
 
     return ret;
 }
@@ -320,17 +303,17 @@ static int token(struct mpsl_c *l)
 /** parser **/
 
 enum {
-    N_LITERAL, N_NULL,
-    N_IF, N_WHILE,
-    N_NOP, N_SEQ,
-    N_SYMID, N_SYMVAL, N_ASSIGN,
-    N_UMINUS, N_NOT,
-    N_PARTOF, N_EXECSYM,
-    N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
-    N_EQ,  N_NE,  N_GT,  N_GE,  N_LT,  N_LE,
-    N_AND, N_OR,
-
-    N_ARRAY, N_HASH
+    /* order matters (operator precedence) */
+    N_LITERAL,  N_NULL,
+    N_IF,       N_WHILE,
+    N_NOP,      N_SEQ,
+    N_SYMID,    N_SYMVAL,   N_ASSIGN,
+    N_UMINUS,   N_NOT,
+    N_PARTOF,   N_EXECSYM,
+    N_ARRAY,    N_HASH,
+    N_AND,      N_OR,
+    N_EQ,       N_NE,       N_GT,  N_GE,  N_LT,  N_LE,
+    N_ADD,      N_SUB,      N_MUL, N_DIV, N_MOD
 };
 
 static mpdm_t node0(int type)
