@@ -32,15 +32,25 @@ typedef enum {
     T_COLON, T_SEMI,
     T_DOT, T_COMMA,
 
-    /* can be doubled */
-    T_GT,    T_LT,   T_PIPE,  T_AMPERSAND,
+    /* can be doubled and/or followed by = */
+    T_GT,       T_LT,       T_PIPE,     T_AMPERSAND,
+
+    /* can be doubled or followed by = */
+    T_PLUS,     T_MINUS,
 
     /* can be followed by = */
-    T_EQUAL, T_BANG, T_PLUS,  T_MINUS,      T_ASTERISK, T_SLASH, T_PERCENT,
-    T_DGT,   T_DLT,  T_DPIPE, T_DAMPERSAND,
+    T_EQUAL,    T_BANG, 
+    T_ASTERISK, T_SLASH,    T_PERCENT,
+    T_DGT,      T_DLT,      T_DPIPE,    T_DAMPERSAND,
 
-    T_EQEQ,  T_BANGEQ, T_PLUSEQ,  T_MINUSEQ, T_ASTEREQ, T_SLASHEQ, T_PERCEQ,
-    T_DGTEQ, T_DLTEQ,  T_DPIPEEQ, T_DAMPEREQ,
+    /* no more combinations */
+    T_DPLUS,    T_DMINUS,
+
+    T_PLUSEQ,   T_MINUSEQ,
+    T_GTEQ,     T_LTEQ,     T_PIPEEQ,  T_AMPEREQ,
+    T_EQEQ,     T_BANGEQ,
+    T_ASTEREQ,  T_SLASHEQ,  T_PERCEQ,
+    T_DGTEQ,    T_DLTEQ,    T_DPIPEEQ, T_DAMPEREQ,
 
     T_SYMBOL, T_LITERAL
 } mpsl_token_t;
@@ -159,15 +169,15 @@ static int t_martians(struct mpsl_c *c)
 
     if (!ret) {
         /* is it doubled? */
-        if (c->c == i && c->token >= T_GT && c->token <= T_AMPERSAND) {
+        if (c->c == i && c->token >= T_GT && c->token <= T_MINUS) {
             next_c(c);
             c->token += (T_DGT - T_GT);
         }
 
         /* is it followed by = ? */
-        if (c->c == L'=' && c->token >= T_EQUAL && c->token <= T_DAMPERSAND) {
+        if (c->c == L'=' && c->token >= T_PLUS && c->token <= T_DAMPERSAND) {
             next_c(c);
-            c->token += (T_EQEQ - T_EQUAL);
+            c->token += (T_PLUSEQ - T_PLUS);
         }
     }
 
@@ -317,6 +327,9 @@ enum {
     N_UMINUS, N_NOT,
     N_PARTOF, N_EXECSYM,
     N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
+    N_EQ,  N_NE,  N_GT,  N_GE,  N_LT,  N_LE,
+    N_AND, N_OR,
+
     N_ARRAY, N_HASH
 };
 
@@ -476,11 +489,19 @@ static mpdm_t expr(struct mpsl_c *c)
 
         if (v != NULL) {
             switch (c->token) {
-            case T_PLUS:      token(c); v = node2(N_ADD, v, expr(c)); break;
-            case T_MINUS:     token(c); v = node2(N_SUB, v, expr(c)); break;
-            case T_ASTERISK:  token(c); v = node2(N_MUL, v, expr(c)); break;
-            case T_SLASH:     token(c); v = node2(N_DIV, v, expr(c)); break;
-            case T_PERCENT:   token(c); v = node2(N_MOD, v, expr(c)); break;
+            case T_PLUS:       token(c); v = node2(N_ADD, v, expr(c)); break;
+            case T_MINUS:      token(c); v = node2(N_SUB, v, expr(c)); break;
+            case T_ASTERISK:   token(c); v = node2(N_MUL, v, expr(c)); break;
+            case T_SLASH:      token(c); v = node2(N_DIV, v, expr(c)); break;
+            case T_PERCENT:    token(c); v = node2(N_MOD, v, expr(c)); break;
+            case T_EQUAL:      token(c); v = node2(N_EQ, v, expr(c));  break;
+            case T_BANGEQ:     token(c); v = node2(N_NE, v, expr(c));  break;
+            case T_GT:         token(c); v = node2(N_GT, v, expr(c));  break;
+            case T_GTEQ:       token(c); v = node2(N_GE, v, expr(c));  break;
+            case T_LT:         token(c); v = node2(N_LT, v, expr(c));  break;
+            case T_LTEQ:       token(c); v = node2(N_LE, v, expr(c));  break;
+            case T_DAMPERSAND: token(c); v = node2(N_AND, v, expr(c)); break;
+            case T_DPIPE:      token(c); v = node2(N_OR, v, expr(c));  break;
             default: break;
             }
         }
@@ -570,7 +591,7 @@ static void parse(struct mpsl_c *c)
 
 /** virtual machine **/
 
-enum {
+typedef enum {
     OP_EOP,
     OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROT,
     OP_POP, OP_SWP,
@@ -581,8 +602,9 @@ enum {
 
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_EQ, OP_NE, OP_LT, OP_LE, OP_GT, OP_GE,
-    OP_DUMP
-};
+    OP_AND, OP_OR,
+    OP_DMP
+} mpsl_op_t;
 
 enum {
     VM_IDLE, VM_RUNNING, VM_TIMEOUT, VM_ERROR
@@ -677,7 +699,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
     while (m->mode == VM_RUNNING) {
 
         /* get the opcode */
-        int opcode = mpdm_ival(PC(m));
+        mpsl_op_t opcode = (int) mpdm_ival(PC(m));
     
         switch (opcode) {
         case OP_EOP: m->mode = VM_IDLE; break;
@@ -708,13 +730,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_LE:  PUSH(m, MPDM_I(RPOP(m) <= RPOP(m))); break;
         case OP_GT:  PUSH(m, MPDM_I(RPOP(m) >  RPOP(m))); break;
         case OP_GE:  PUSH(m, MPDM_I(RPOP(m) >= RPOP(m))); break;
-    
-        case OP_DUMP:
-            v = POP(m);
-            mpdm_dump(v);
-            mpdm_void(v);
-
-            break;
+        case OP_DMP: mpdm_dump(POP(m)); break;
         }
 
         /* if out of slice time, break */        
@@ -762,13 +778,13 @@ int main(int argc, char *argv[])
     add_ins(prg, OP_LIT); add_arg(prg, MPDM_LS(L"number_of_the_beast"));
     add_ins(prg, OP_LIT); add_arg(prg, MPDM_I(666));
     add_ins(prg, OP_HST);
-    add_ins(prg, OP_DUMP);
+    add_ins(prg, OP_DMP);
     add_ins(prg, OP_LIT); add_arg(prg, MPDM_I(2));
     add_ins(prg, OP_LIT); add_arg(prg, MPDM_I(20));
     add_ins(prg, OP_DIV);
     add_ins(prg, OP_LIT); add_arg(prg, MPDM_R(10));
     add_ins(prg, OP_EQ);
-    add_ins(prg, OP_DUMP);
+    add_ins(prg, OP_DMP);
 
     mpsl_exec_vm(&m, 0);
 
