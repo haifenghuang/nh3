@@ -487,7 +487,7 @@ static mpsl_node_t op_by_token(struct mpsl_c *c)
         if (c->token == tokens[n])
             break;
 
-    return tokens[n];
+    return binop[n];
 }
 
 
