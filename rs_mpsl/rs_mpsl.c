@@ -346,6 +346,14 @@ static mpdm_t node2(int type, mpdm_t n1, mpdm_t n2)
 }
 
 
+static mpdm_t node3(int type, mpdm_t n1, mpdm_t n2, mpdm_t n3)
+{
+    mpdm_t r = mpdm_ref(node2(type, n1, n2));
+    mpdm_push(r, n3);
+    return mpdm_unrefnd(r);
+}
+
+
 static mpdm_t expr(struct mpsl_c *c);
 
 static mpdm_t symid(struct mpsl_c *c)
@@ -594,6 +602,30 @@ static mpdm_t statement(struct mpsl_c *c)
     }
     else
     if (c->token == T_SUB) {
+        token(c);
+        if ((w = symid(c)) != NULL) {
+            mpdm_t a = mpdm_ref(MPDM_A(0));
+
+            /* does it have arguments? */
+            if (c->token == T_LPAREN) {
+                token(c);
+
+                while (!c->error && c->token != T_RPAREN) {
+                    mpdm_push(a, symid(c));
+
+                    if (c->token == T_COMMA)
+                        token(c);
+                }
+
+                token(c);
+            }
+
+            mpdm_unref(a);
+
+            v = node3(N_SUBR, w, node1(N_LITERAL, a), statement(c));
+        }
+        else
+            c->error = 2;
     }
     else
     if (c->token == T_RETURN) {
