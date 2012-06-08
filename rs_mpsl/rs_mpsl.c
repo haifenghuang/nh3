@@ -91,7 +91,7 @@ struct mpsl_c {
 };
 
 
-static void next_c(struct mpsl_c *l)
+static void t_nextc(struct mpsl_c *l)
 /* gets the next char */
 {
     if (l->ptr != NULL)
@@ -110,7 +110,7 @@ static void next_c(struct mpsl_c *l)
 
 #define STORE(COND) while (COND) { \
     ds_poke(l->token_s, l->c); \
-    next_c(l); \
+    t_nextc(l); \
     } \
     ds_poke(l->token_s, L'\0')
 
@@ -119,7 +119,7 @@ static int t_blanks(struct mpsl_c *c)
 /* skip blanks */
 {
     while (c->c == L' ' || c->c == L'\t' || c->c == L'\r' || c->c == L'\n')
-        next_c(c);
+        t_nextc(c);
 
     return 1;
 }
@@ -146,18 +146,18 @@ static int t_martians(struct mpsl_c *c)
     static wchar_t t[] = L"{}()[]:;.,><|&+-=!*/%";
 
     if ((ptr = wcschr(t, i)) != NULL) {
-        next_c(c);
+        t_nextc(c);
         c->token = (ptr - t) + T_LBRACE;
 
         /* is it doubled? */
         if (c->c == i && c->token >= T_GT && c->token <= T_MINUS) {
-            next_c(c);
+            t_nextc(c);
             c->token += (T_DGT - T_GT);
         }
 
         /* is it followed by = ? */
         if (c->c == L'=' && c->token >= T_PLUS && c->token <= T_DAMPERSAND) {
-            next_c(c);
+            t_nextc(c);
             c->token += (T_PLUSEQ - T_PLUS);
         }
     }
@@ -182,9 +182,9 @@ static int t_vstring(struct mpsl_c *l)
 /* tokenize verbatim strings */
 {
     if (l->c == L'\'') {
-        next_c(l);
+        t_nextc(l);
         STORE(l->c != L'\'');
-        next_c(l);
+        t_nextc(l);
         l->token = T_LITERAL;
 
         return 0;
@@ -201,7 +201,7 @@ static int t_symbol(struct mpsl_c *l)
         int n;
 
         ds_poke(l->token_s, l->c);
-        next_c(l);
+        t_nextc(l);
 
         STORE(iswalnum(l->c));
 
@@ -250,7 +250,7 @@ static int t_nd_number(struct mpsl_c *l)
 {
     if (l->c == L'0') {
         ds_poke(l->token_s, l->c);
-        next_c(l);
+        t_nextc(l);
 
         if (l->c == L'.') {
             ds_poke(l->token_s, l->c);
@@ -260,7 +260,7 @@ static int t_nd_number(struct mpsl_c *l)
         if (l->c == L'b' || l->c == L'B') {
             /* binary */
             ds_poke(l->token_s, l->c);
-            next_c(l);
+            t_nextc(l);
             STORE(l->c == L'0' || l->c == L'1');
             l->token = T_LITERAL;
             return 0;
@@ -269,7 +269,7 @@ static int t_nd_number(struct mpsl_c *l)
         if (l->c == L'x' || l->c == L'X') {
             /* hex */
             ds_poke(l->token_s, l->c);
-            next_c(l);
+            t_nextc(l);
             STORE(iswxdigit(l->c));
             l->token = T_LITERAL;
             return 0;
@@ -485,9 +485,9 @@ static mpsl_node_t op_by_token(struct mpsl_c *c)
 
     for (n = 0; tokens[n] != -1; n++)
         if (c->token == tokens[n])
-            return binop[n];
+            break;
 
-    return -1;
+    return tokens[n];
 }
 
 
@@ -633,7 +633,7 @@ static void parse(struct mpsl_c *c)
 {
     mpdm_t v;
 
-    next_c(c);
+    t_nextc(c);
     token(c);
 
     v = node0(N_NOP);
@@ -826,7 +826,7 @@ int main(int argc, char *argv[])
     memset(&c, '\0', sizeof(c));
 
 /*    lp.ptr = L"a = 1000; b = NULL; while (c) { d; e; }";
-    next_c(&lp);
+    t_nextc(&lp);
     while (token(&lp) != EOP && lp.token != ERROR)
         printf("%d\n", lp.token);
     printf("%d.\n", lp.token);
