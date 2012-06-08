@@ -349,6 +349,8 @@ static mpdm_t node2(int type, mpdm_t n1, mpdm_t n2)
 }
 
 
+static mpdm_t expr(struct mpsl_c *c);
+
 static mpdm_t symid(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
@@ -356,26 +358,29 @@ static mpdm_t symid(struct mpsl_c *c)
     if (c->error) {}
     else
     if (c->token == T_SYMBOL) {
-        mpdm_t s = mpdm_ref(MPDM_S(c->token_s.d));
+        v = node1(N_SYMID, MPDM_S(c->token_s.d));
         token(c);
+
+        /* process subscripts */
+        while (c->token == T_LBRACK) {
+            token(c);
+            v = node2(N_PARTOF, v, expr(c));
+
+            if (c->token == T_RBRACK)
+                token(c);
+            else
+                c->error = 2;
+        }
 
         if (c->token == T_DOT) {
             token(c);
-
-            if ((v = symid(c)) != NULL)
-                v = node2(N_PARTOF, node1(N_SYMID, s), v);
+            v = node2(N_PARTOF, v, symid(c));
         }
-        else
-            v = node1(N_SYMID, s);
-
-        mpdm_unref(s);
     }
 
     return v;
 }
 
-
-static mpdm_t expr(struct mpsl_c *c);
 
 static mpdm_t paren_term(struct mpsl_c *c)
 {
@@ -848,7 +853,7 @@ int main(int argc, char *argv[])
 
     mpsl_exec_vm(&m, 0);
 
-    c.ptr = L"local aa, bcd = -1, cde; if (a == 1 || a == 10) { b = 3 + 4; }";
+    c.ptr = L"tokens[0] = 6; local aa, bcd = -1, cde; if (a == 1 || a == 10) { b = 3 + 4; }";
     parse(&c);
 
     return 0;
