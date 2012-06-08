@@ -332,19 +332,16 @@ static mpdm_t node0(int type)
 
 static mpdm_t node1(int type, mpdm_t n1)
 {
-    mpdm_t r = mpdm_ref(MPDM_A(2));
-    mpdm_aset(r, MPDM_I(type), 0);
-    mpdm_aset(r, n1, 1);
+    mpdm_t r = mpdm_ref(node0(type));
+    mpdm_push(r, n1);
     return mpdm_unrefnd(r);
 }
 
 
 static mpdm_t node2(int type, mpdm_t n1, mpdm_t n2)
 {
-    mpdm_t r = mpdm_ref(MPDM_A(3));
-    mpdm_aset(r, MPDM_I(type), 0);
-    mpdm_aset(r, n1, 1);
-    mpdm_aset(r, n2, 2);
+    mpdm_t r = mpdm_ref(node1(type, n1));
+    mpdm_push(r, n2);
     return mpdm_unrefnd(r);
 }
 
@@ -352,6 +349,7 @@ static mpdm_t node2(int type, mpdm_t n1, mpdm_t n2)
 static mpdm_t expr(struct mpsl_c *c);
 
 static mpdm_t symid(struct mpsl_c *c)
+/* parse symbol identifiers (possibly compound and with subscripts) */
 {
     mpdm_t v = NULL;
 
@@ -382,7 +380,8 @@ static mpdm_t symid(struct mpsl_c *c)
 }
 
 
-static mpdm_t paren_term(struct mpsl_c *c)
+static mpdm_t paren_expr(struct mpsl_c *c)
+/* parses a parenthesized expression */
 {
     mpdm_t v = NULL;
 
@@ -405,6 +404,7 @@ static mpdm_t paren_term(struct mpsl_c *c)
 
 
 static mpdm_t term(struct mpsl_c *c)
+/* parses a term of an expression */
 {
     mpdm_t v = NULL;
 
@@ -421,7 +421,7 @@ static mpdm_t term(struct mpsl_c *c)
     }
     else
     if (c->token == T_LPAREN)
-        v = paren_term(c);
+        v = paren_expr(c);
     else
     if (c->token == T_LBRACE) {
         /* inline hash */
@@ -475,6 +475,7 @@ static mpdm_t term(struct mpsl_c *c)
 
 
 static mpsl_node_t op_by_token(struct mpsl_c *c)
+/* returns the operand associated by a token */
 {
     int n;
     static int tokens[] = {
@@ -497,6 +498,7 @@ static mpsl_node_t op_by_token(struct mpsl_c *c)
 
 
 static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
+/* returns an expression, with the previous operand for precedence */
 {
     mpdm_t v = NULL;
 
@@ -527,12 +529,14 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
 
 
 static mpdm_t expr(struct mpsl_c *c)
+/* returns a complete expression */
 {
     return expr_p(c, N_LAST);
 }
 
 
 static mpdm_t statement(struct mpsl_c *c)
+/* returns a statement */
 {
     mpdm_t v = NULL;
     mpdm_t w;
@@ -541,7 +545,7 @@ static mpdm_t statement(struct mpsl_c *c)
     else
     if (c->token == T_IF) {
         token(c);
-        if ((w = paren_term(c)) != NULL) {
+        if ((w = paren_expr(c)) != NULL) {
             v = node2(N_IF, w, statement(c));
 
             if (c->token == T_ELSE) {
@@ -555,7 +559,7 @@ static mpdm_t statement(struct mpsl_c *c)
     else
     if (c->token == T_WHILE) {
         token(c);
-        if ((w = paren_term(c)) != NULL)
+        if ((w = paren_expr(c)) != NULL)
             v = node2(N_WHILE, w, statement(c));
     }
     else
@@ -564,6 +568,7 @@ static mpdm_t statement(struct mpsl_c *c)
         mpsl_node_t op = op_by_token(c);
 
         token(c);
+        v = node0(N_NOP);
 
         do {
             if ((w1 = symid(c)) != NULL) {
@@ -575,10 +580,7 @@ static mpdm_t statement(struct mpsl_c *c)
                 else
                     w2 = node0(N_NULL);
 
-                if (v == NULL)
-                    v = node2(op, w1, w2);
-                else
-                    v = node2(N_SEQ, v, node2(op, w1, w2));
+                v = node2(N_SEQ, v, node2(op, w1, w2));
 
                 if (c->token == T_COMMA)
                     token(c);
@@ -612,6 +614,7 @@ static mpdm_t statement(struct mpsl_c *c)
     }
     else
     if (c->token == T_LBRACE) {
+        /* code block */
         token(c);
         v = node0(N_NOP);
 
@@ -635,6 +638,7 @@ static mpdm_t statement(struct mpsl_c *c)
 
 
 static void parse(struct mpsl_c *c)
+/* parses the full program */
 {
     mpdm_t v;
 
@@ -649,10 +653,6 @@ static void parse(struct mpsl_c *c)
     mpdm_set(&c->node, v);
 }
 
-
-/** basic MPSL runtime **/
-
-#define mpsl_is_true(v) mpdm_ival(v)
 
 /** virtual machine **/
 
@@ -746,6 +746,7 @@ static mpdm_t PC(struct mpsl_vm *m) { return mpdm_aget(m->prg, m->pc++); }
 #define RPOP(m) mpdm_rval(POP(m))
 #define RF(v) mpdm_ref(v)
 #define UF(v) mpdm_unref(v)
+#define ISTRU(v) mpdm_ival(v)
 
 #include <time.h>
 
@@ -782,8 +783,8 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_CAL: mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++); m->pc = IPOP(m); break;
         case OP_RET: m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
         case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
-        case OP_JT:  if (mpsl_is_true(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
-        case OP_JF:  if (!mpsl_is_true(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
+        case OP_JT:  if (ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
+        case OP_JF:  if (!ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
         case OP_ADD: PUSH(m, MPDM_R(RPOP(m) + RPOP(m))); break;
         case OP_SUB: PUSH(m, MPDM_R(RPOP(m) - RPOP(m))); break;
         case OP_MUL: PUSH(m, MPDM_R(RPOP(m) * RPOP(m))); break;
