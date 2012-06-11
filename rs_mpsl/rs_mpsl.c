@@ -308,6 +308,7 @@ typedef enum {
     N_ARRAY,    N_HASH,
 
     N_UMINUS,   N_NOT,
+    N_PARTOF,
     N_MOD,      N_DIV,      N_MUL,  N_SUB,  N_ADD,
     N_EQ,       N_NE,       N_GT,   N_GE,   N_LT,  N_LE,
     N_AND,      N_OR,
@@ -315,7 +316,7 @@ typedef enum {
     N_IF,       N_WHILE,
     N_NOP,      N_SEQ,
     N_SYMID,    N_SYMVAL,   N_ASSIGN,
-    N_PARTOF,   N_EXECSYM,
+    N_EXECSYM,
     N_LOCAL,    N_GLOBAL,
     N_SUBR,     N_RETURN,
 
@@ -376,11 +377,6 @@ static mpdm_t symid(struct mpsl_c *c)
                 token(c);
             else
                 c->error = 2;
-        }
-
-        if (c->token == T_DOT) {
-            token(c);
-            v = node2(N_PARTOF, v, symid(c));
         }
     }
 
@@ -487,12 +483,12 @@ static mpsl_node_t op_by_token(struct mpsl_c *c)
 {
     int n;
     static int tokens[] = {
-        T_PLUS, T_MINUS, T_ASTERISK, T_SLASH, T_PERCENT, 
+        T_DOT, T_PLUS, T_MINUS, T_ASTERISK, T_SLASH, T_PERCENT, 
         T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
         T_DAMPERSAND, T_DPIPE, T_LOCAL, T_GLOBAL, -1
     };
     static mpsl_node_t binop[] = {
-        N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
+        N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
         N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
         N_AND, N_OR, N_LOCAL, N_GLOBAL, -1
     };
@@ -525,9 +521,14 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
         if (v != NULL) {
             mpsl_node_t op;
 
-            while ((op = op_by_token(c)) > 0 && op < p_op) {
+            while (!c->error && (op = op_by_token(c)) > 0 && op < p_op) {
                 token(c);
-                v = node2(op, v, expr_p(c, op));
+
+                /* special cases */
+                if (op == N_PARTOF && c->token != T_SYMBOL)
+                    c->error = 2;
+                else
+                    v = node2(op, v, expr_p(c, op));
             }
         }
     }
@@ -886,7 +887,7 @@ int main(int argc, char *argv[])
 
     mpsl_exec_vm(&m, 0);
 
-    c.ptr = L"tokens[0] = 6; local aa, bcd = -1, cde; if (a == 1 || a == 10) { b = 3 + 4; }";
+    c.ptr = L"a.b = c . d + 1; tokens[0] = 6; local aa, bcd = -1, cde; if (a == 1 || a == 10) { b = 3 + 4; }";
     parse(&c);
 
     return 0;
