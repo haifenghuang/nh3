@@ -357,6 +357,7 @@ static mpdm_t node3(int type, mpdm_t n1, mpdm_t n2, mpdm_t n3)
 
 
 static mpdm_t expr(struct mpsl_c *c);
+static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op);
 
 static mpdm_t symid(struct mpsl_c *c)
 /* parse symbol identifiers (possibly compound and with subscripts) */
@@ -411,7 +412,7 @@ static mpdm_t term(struct mpsl_c *c)
     else
     if (c->token == T_MINUS) {
         token(c);
-        v = node1(N_UMINUS, expr(c));
+        v = node1(N_UMINUS, expr_p(c, N_UMINUS));
     }
     else
     if (c->token == T_LPAREN)
@@ -698,8 +699,8 @@ static void parse(struct mpsl_c *c)
 
 typedef enum {
     OP_EOP,
-    OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROT,
-    OP_POP, OP_SWP,
+    OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROO,
+    OP_POP, OP_SWP, OP_DUP,
     OP_GET, OP_SET, OP_TBL,
     OP_TPU, OP_TPO,
     OP_CAL, OP_RET,
@@ -707,7 +708,7 @@ typedef enum {
 
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_EQ, OP_NE, OP_LT, OP_LE, OP_GT, OP_GE,
-    OP_DMP
+    OP_REM, OP_DMP
 } mpsl_op_t;
 
 
@@ -727,6 +728,8 @@ static int o(struct mpsl_c *c, mpsl_op_t op)
 
 static void gen(struct mpsl_c *c, mpdm_t node)
 {
+    int n;
+
     mpsl_node_t t = mpdm_ival(mpdm_aget(node, 0));
 
     switch (t) {
@@ -736,11 +739,37 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_LITERAL: o(c, OP_LIT); ov(c, mpdm_aget(node, 1)); break;
     case N_SEQ:     O(1); O(2); break;
     case N_ADD:     O(1); O(2); o(c, OP_ADD); break;
+    case N_SUB:     O(1); O(2); o(c, OP_SUB); break;
+    case N_MUL:     O(1); O(2); o(c, OP_MUL); break;
+    case N_DIV:     O(1); O(2); o(c, OP_DIV); break;
+    case N_MOD:     O(1); O(2); o(c, OP_MOD); break;
+    case N_UMINUS:  o(c, OP_LIT); ov(c, MPDM_I(-1)); O(1); o(c, OP_MUL); break;
     case N_EQ:      O(1); O(2); o(c, OP_EQ); break;
-    case N_ASSIGN:  O(1); o(c, OP_TBL); O(2); o(c, OP_SET); break;
+    case N_ASSIGN:  O(1); o(c, OP_DUP); o(c, OP_TBL); o(c, OP_SWP); O(2); o(c, OP_SET); break;
     case N_SYMVAL:  O(1); o(c, OP_GET); break;
-    case N_PARTOF:  O(1); O(2); o(c, OP_GET); break;
+    case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
+    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
+
+    case N_ARRAY:
+        o(c, OP_ARR);
+        for (n = 1; n < mpdm_size(node); n++) {
+            o(c, OP_DUP);
+            o(c, OP_LIT); ov(c, MPDM_I(n - 1));
+            O(n);
+            o(c, OP_SET);
+        }
+        break;
+
+    case N_HASH:
+        o(c, OP_HSH);
+        for (n = 1; n < mpdm_size(node); n += 2) {
+            o(c, OP_DUP);
+            O(n);
+            O(n + 1);
+            o(c, OP_SET);
+        }
+        break;
     }
 }
 
@@ -849,9 +878,10 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_NUL: PUSH(m, NULL); break;
         case OP_ARR: PUSH(m, MPDM_A(0)); break;
         case OP_HSH: PUSH(m, MPDM_H(0)); break;
-        case OP_ROT: PUSH(m, mpdm_root()); break;
+        case OP_ROO: PUSH(m, mpdm_root()); break;
         case OP_POP: --m->sp; break;
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
+        case OP_DUP: PUSH(m, TOS(m)); break;
         case OP_TBL: break;
         case OP_GET: PUSH(m, mpdm_hget(TOS(m), POP(m))); break;
         case OP_SET: PUSH(m, mpdm_hset(TOS(m), POP(m), POP(m))); break;
@@ -873,6 +903,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_LE:  PUSH(m, MPDM_I(RPOP(m) <= RPOP(m))); break;
         case OP_GT:  PUSH(m, MPDM_I(RPOP(m) >  RPOP(m))); break;
         case OP_GE:  PUSH(m, MPDM_I(RPOP(m) >= RPOP(m))); break;
+        case OP_REM: m->pc++; break;
         case OP_DMP: mpdm_dump(POP(m)); break;
         }
 
@@ -885,22 +916,12 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 }
 
 
-static mpdm_t add_arg(mpdm_t prg, mpdm_t arg)
-{
-    return mpdm_push(prg, arg);
-}
-
-static mpdm_t add_ins(mpdm_t prg, int opcode)
-{
-    return mpdm_push(prg, MPDM_I(opcode));
-}
-
 #include <string.h>
 
 char *ops[] = {
     "EOP",
-    "LIT", "NUL", "ARR", "HSH", "ROT",
-    "POP", "SWP",
+    "LIT", "NUL", "ARR", "HSH", "ROO",
+    "POP", "SWP", "DUP",
     "GET", "SET", "TBL",
     "TPU", "TPO",
     "CAL", "RET",
@@ -908,21 +929,21 @@ char *ops[] = {
 
     "ADD", "SUB", "MUL", "DIV", "MOD",
     "EQ", "NE", "LT", "LE", "GT", "GE",
-    "DMP"
+    "REM", "DMP"
 };
 
 void mpsl_disasm(mpdm_t prg)
 {
     int n;
 
-    for (n = 0; n < mpdm_size(prg);) {
-        mpsl_op_t i = mpdm_ival(mpdm_aget(prg, n++));
+    for (n = 0; n < mpdm_size(prg); n++) {
+        mpsl_op_t i = mpdm_ival(mpdm_aget(prg, n));
 
         printf("%4d: ", n);
         printf("%s", ops[i]);
 
         if (i == OP_LIT || i == OP_JMP || i == OP_JT || i == OP_JF)
-            printf(" \"%ls\"", mpdm_string(mpdm_aget(prg, n++)));
+            printf(" \"%ls\"", mpdm_string(mpdm_aget(prg, ++n)));
 
         printf("\n");
     }
@@ -931,7 +952,6 @@ void mpsl_disasm(mpdm_t prg)
 
 int main(int argc, char *argv[])
 {
-    mpdm_t prg;
     struct mpsl_c c;
     struct mpsl_vm m;
 
@@ -940,9 +960,8 @@ int main(int argc, char *argv[])
     memset(&m, '\0', sizeof(m));
     memset(&c, '\0', sizeof(c));
 
-    c.ptr = L"beast = 666; a = b = 1; c.d = e.f;";
+    c.ptr = L"global a1, a2 = 1; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', 'b', -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 };";
     parse(&c);
-    printf("error status: %d\n", c.error);
 
     mpdm_set(&c.prg, MPDM_A(0));
     gen(&c, c.node);
