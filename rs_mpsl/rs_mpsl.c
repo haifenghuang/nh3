@@ -319,6 +319,7 @@ typedef enum {
     N_EXECSYM,
     N_LOCAL,    N_GLOBAL,
     N_SUBR,     N_RETURN,
+    N_VOID,
 
     N_LAST
 } mpsl_node_t;
@@ -664,7 +665,7 @@ static mpdm_t statement(struct mpsl_c *c)
     }
     else {
         /* expression */
-        v = expr(c);
+        v = node1(N_VOID, expr(c));
 
         if (c->token == T_SEMI)
             token(c);
@@ -693,22 +694,58 @@ static void parse(struct mpsl_c *c)
 }
 
 
-/** virtual machine **/
+/** code generator ("assembler") **/
 
 typedef enum {
     OP_EOP,
     OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROT,
     OP_POP, OP_SWP,
-    OP_HGT, OP_HST,
+    OP_GET, OP_SET, OP_TBL,
     OP_TPU, OP_TPO,
     OP_CAL, OP_RET,
     OP_JMP, OP_JT, OP_JF,
 
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_EQ, OP_NE, OP_LT, OP_LE, OP_GT, OP_GE,
-    OP_AND, OP_OR,
     OP_DMP
 } mpsl_op_t;
+
+
+static int ov(struct mpsl_c *c, mpdm_t v)
+{
+    mpdm_push(c->prg, v);
+    return mpdm_size(c->prg);
+}
+
+static int o(struct mpsl_c *c, mpsl_op_t op)
+{
+    return ov(c, MPDM_I(op));
+}
+
+#define O(n) gen(c, mpdm_aget(node, n))
+
+
+static void gen(struct mpsl_c *c, mpdm_t node)
+{
+    mpsl_node_t t = mpdm_ival(mpdm_aget(node, 0));
+
+    switch (t) {
+    case N_NOP:     break;
+    case N_NULL:    o(c, OP_NUL); break;
+    case N_SYMID:
+    case N_LITERAL: o(c, OP_LIT); ov(c, mpdm_aget(node, 1)); break;
+    case N_SEQ:     O(1); O(2); break;
+    case N_ADD:     O(1); O(2); o(c, OP_ADD); break;
+    case N_EQ:      O(1); O(2); o(c, OP_EQ); break;
+    case N_ASSIGN:  O(1); o(c, OP_TBL); O(2); o(c, OP_SET); break;
+    case N_SYMVAL:  O(1); o(c, OP_GET); break;
+    case N_PARTOF:  O(1); O(2); o(c, OP_GET); break;
+    case N_VOID:    O(1); o(c, OP_POP); break;
+    }
+}
+
+
+/** virtual machine **/
 
 enum {
     VM_IDLE, VM_RUNNING, VM_TIMEOUT, VM_ERROR
@@ -815,8 +852,9 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_ROT: PUSH(m, mpdm_root()); break;
         case OP_POP: --m->sp; break;
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
-        case OP_HGT: PUSH(m, mpdm_hget(TOS(m), POP(m))); break;
-        case OP_HST: PUSH(m, mpdm_hset(TOS(m), POP(m), POP(m))); break;
+        case OP_TBL: break;
+        case OP_GET: PUSH(m, mpdm_hget(TOS(m), POP(m))); break;
+        case OP_SET: PUSH(m, mpdm_hset(TOS(m), POP(m), POP(m))); break;
         case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
         case OP_TPO: --m->tt; break;
         case OP_CAL: mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++); m->pc = IPOP(m); break;
@@ -859,6 +897,38 @@ static mpdm_t add_ins(mpdm_t prg, int opcode)
 
 #include <string.h>
 
+char *ops[] = {
+    "EOP",
+    "LIT", "NUL", "ARR", "HSH", "ROT",
+    "POP", "SWP",
+    "GET", "SET", "TBL",
+    "TPU", "TPO",
+    "CAL", "RET",
+    "JMP", "JT", "JF",
+
+    "ADD", "SUB", "MUL", "DIV", "MOD",
+    "EQ", "NE", "LT", "LE", "GT", "GE",
+    "DMP"
+};
+
+void mpsl_disasm(mpdm_t prg)
+{
+    int n;
+
+    for (n = 0; n < mpdm_size(prg);) {
+        mpsl_op_t i = mpdm_ival(mpdm_aget(prg, n++));
+
+        printf("%4d: ", n);
+        printf("%s", ops[i]);
+
+        if (i == OP_LIT || i == OP_JMP || i == OP_JT || i == OP_JF)
+            printf(" \"%ls\"", mpdm_string(mpdm_aget(prg, n++)));
+
+        printf("\n");
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
     mpdm_t prg;
@@ -870,31 +940,14 @@ int main(int argc, char *argv[])
     memset(&m, '\0', sizeof(m));
     memset(&c, '\0', sizeof(c));
 
-/*    lp.ptr = L"a = 1000; b = NULL; while (c) { d; e; }";
-    t_nextc(&lp);
-    while (token(&lp) != EOP && lp.token != ERROR)
-        printf("%d\n", lp.token);
-    printf("%d.\n", lp.token);
-*/
-    prg = MPDM_A(0);
-    mpsl_reset_vm(&m, prg);
-
-    add_ins(prg, OP_HSH);
-    add_ins(prg, OP_LIT); add_arg(prg, MPDM_LS(L"number_of_the_beast"));
-    add_ins(prg, OP_LIT); add_arg(prg, MPDM_I(666));
-    add_ins(prg, OP_HST);
-    add_ins(prg, OP_DMP);
-    add_ins(prg, OP_LIT); add_arg(prg, MPDM_I(2));
-    add_ins(prg, OP_LIT); add_arg(prg, MPDM_I(20));
-    add_ins(prg, OP_DIV);
-    add_ins(prg, OP_LIT); add_arg(prg, MPDM_R(10));
-    add_ins(prg, OP_EQ);
-    add_ins(prg, OP_DMP);
-
-    mpsl_exec_vm(&m, 0);
-
-    c.ptr = L"a = b = 1; a.b = c.d; tokens[0] = 6; local aa, bcd = -1, cde; if (a == 1 || a == 10) { b = 3 + 4; }";
+    c.ptr = L"beast = 666; a = b = 1; c.d = e.f;";
     parse(&c);
+    printf("error status: %d\n", c.error);
+
+    mpdm_set(&c.prg, MPDM_A(0));
+    gen(&c, c.node);
+
+    mpsl_disasm(c.prg);
 
     return 0;
 }
