@@ -636,19 +636,20 @@ static mpdm_t statement(struct mpsl_c *c)
     else
     if (c->token == T_RETURN) {
         token(c);
-        v = node0(N_RETURN);
 
-        if (c->token != T_SEMI) {
+        if (c->token == T_SEMI) {
+            v = node1(N_RETURN, node0(N_NULL));
             token(c);
-            mpdm_ref(v);
-            mpdm_push(v, expr(c));
-            mpdm_unref(v);
+        }
+        else {
+            v = node1(N_RETURN, expr(c));
+
+            if (c->token == T_SEMI)
+                token(c);
+            else
+                c->error = 2;
         }
 
-        if (c->token == T_SEMI)
-            token(c);
-        else
-            c->error = 2;
     }
     else
     if (c->token == T_LBRACE) {
