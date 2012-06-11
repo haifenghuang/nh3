@@ -367,17 +367,6 @@ static mpdm_t symid(struct mpsl_c *c)
     if (c->token == T_SYMBOL) {
         v = node1(N_SYMID, MPDM_S(c->token_s.d));
         token(c);
-
-        /* process subscripts */
-        while (c->token == T_LBRACK) {
-            token(c);
-            v = node2(N_PARTOF, v, expr(c));
-
-            if (c->token == T_RBRACK)
-                token(c);
-            else
-                c->error = 2;
-        }
     }
 
     return v;
@@ -473,6 +462,11 @@ static mpdm_t term(struct mpsl_c *c)
         v = node1(N_LITERAL, MPDM_S(c->token_s.d));
         token(c);
     }
+    else
+    if (c->token == T_SYMBOL) {
+        v = node1(N_SYMID, MPDM_S(c->token_s.d));
+        token(c);
+    }
 
     return v;
 }
@@ -483,14 +477,14 @@ static mpsl_node_t op_by_token(struct mpsl_c *c)
 {
     int n;
     static int tokens[] = {
-        T_DOT, T_PLUS, T_MINUS, T_ASTERISK, T_SLASH, T_PERCENT, 
+        T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTERISK, T_SLASH, T_PERCENT, 
         T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
-        T_DAMPERSAND, T_DPIPE, T_LOCAL, T_GLOBAL, -1
+        T_DAMPERSAND, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL, -1
     };
     static mpsl_node_t binop[] = {
-        N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
+        N_PARTOF, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
         N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
-        N_AND, N_OR, N_LOCAL, N_GLOBAL, -1
+        N_AND, N_OR, N_LOCAL, N_GLOBAL, N_ASSIGN, -1
     };
 
     for (n = 0; tokens[n] != -1; n++)
@@ -507,24 +501,30 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
     mpdm_t v = NULL;
 
     if (c->error) {}
-    else
-    if ((v = symid(c)) != NULL && c->token == T_EQUAL) {
-        token(c);
-        v = node2(N_ASSIGN, v, expr(c));
-    }
     else {
-        if (v != NULL)
+        mpsl_token_t t = c->token;
+        mpsl_node_t op;
+
+        v = term(c);
+
+        if (t == T_SYMBOL && c->token != T_EQUAL)
             v = node1(N_SYMVAL, v);
-        else
-            v = term(c);
 
-        if (v != NULL) {
-            mpsl_node_t op;
-
-            while (!c->error && (op = op_by_token(c)) > 0 && op < p_op) {
+        while (!c->error && (op = op_by_token(c)) > 0 && op <= p_op) {
+            /* subindexes */
+            if (c->token == T_LBRACK) {
                 token(c);
 
-                /* special cases */
+                v = node2(op, v, expr(c));
+
+                if (c->token == T_RBRACK)
+                    token(c);
+                else
+                c->error = 2;
+            }
+            else {
+                token(c);
+
                 if (op == N_PARTOF && c->token != T_SYMBOL)
                     c->error = 2;
                 else
@@ -887,7 +887,7 @@ int main(int argc, char *argv[])
 
     mpsl_exec_vm(&m, 0);
 
-    c.ptr = L"a.b = c . d + 1; tokens[0] = 6; local aa, bcd = -1, cde; if (a == 1 || a == 10) { b = 3 + 4; }";
+    c.ptr = L"a = b = 1; a.b = c.d; tokens[0] = 6; local aa, bcd = -1, cde; if (a == 1 || a == 10) { b = 3 + 4; }";
     parse(&c);
 
     return 0;
