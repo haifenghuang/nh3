@@ -580,7 +580,9 @@ static mpdm_t statement(struct mpsl_c *c)
         v = node0(N_NOP);
 
         do {
-            if ((w1 = symid(c)) != NULL) {
+            if (c->token == T_SYMBOL) {
+                w1 = term(c);
+
                 /* has initialization value? */
                 if (c->token == T_EQUAL) {
                     token(c);
@@ -611,14 +613,17 @@ static mpdm_t statement(struct mpsl_c *c)
             if (c->token == T_LPAREN) {
                 token(c);
 
-                while (!c->error && c->token != T_RPAREN) {
-                    mpdm_push(a, symid(c));
+                while (!c->error && c->token == T_SYMBOL) {
+                    mpdm_push(a, term(c));
 
                     if (c->token == T_COMMA)
                         token(c);
                 }
 
-                token(c);
+                if (c->token == T_RPAREN)
+                    token(c);
+                else
+                    c->error = 2;
             }
 
             mpdm_unref(a);
