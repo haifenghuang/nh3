@@ -769,18 +769,23 @@ static void gen(struct mpsl_c *c, mpdm_t node)
         break;
 
     case N_IF:
-        O(1);
-        n = o(c, OP_JF); ov(c, NULL);
-        O(2);
+        O(1); n = o(c, OP_JF); ov(c, NULL); O(2);
 
         if (mpdm_size(node) == 4) {
-            i = o(c, OP_JMP); ov(c, NULL);
-            oh(c, n);
-            O(3);
-            n = i;
+            i = o(c, OP_JMP); ov(c, NULL); oh(c, n); O(3); n = i;
         }
+
         oh(c, n);
+
         break;
+
+    case N_OR:
+        O(1); o(c, OP_DUP); n = o(c, OP_JT); ov(c, NULL);
+        o(c, OP_POP); O(2); oh(c, n); break;
+
+    case N_AND:
+        O(1); o(c, OP_DUP); n = o(c, OP_JF); ov(c, NULL);
+        o(c, OP_POP); O(2); oh(c, n); break;
     }
 }
 
@@ -995,7 +1000,7 @@ int main(int argc, char *argv[])
 
 //    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
 //    c.ptr = L"sub sum(a, b) { return a + b; }";
-    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; }";
+    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; } stored || ''; open && close;";
     parse(&c);
 
     mpdm_set(&c.prg, MPDM_A(0));
