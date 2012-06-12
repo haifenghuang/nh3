@@ -315,7 +315,7 @@ typedef enum {
     N_IF,       N_WHILE,
     N_NOP,      N_SEQ,
     N_SYMID,    N_SYMVAL,   N_ASSIGN,
-    N_PARTOF,
+    N_PARTOF,   N_SUBSCR,
     N_EXECSYM,
     N_LOCAL,    N_GLOBAL,
     N_SUBR,     N_RETURN,
@@ -468,7 +468,7 @@ static mpsl_node_t op_by_token(struct mpsl_c *c)
         T_DAMPERSAND, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL, -1
     };
     static mpsl_node_t binop[] = {
-        N_PARTOF, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
+        N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
         N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
         N_AND, N_OR, N_LOCAL, N_GLOBAL, N_ASSIGN, -1
     };
@@ -738,6 +738,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_ASSIGN:  O(1); o(c, OP_TBL); O(2); o(c, OP_SET); break;
     case N_SYMVAL:  O(1); o(c, OP_TBL); o(c, OP_GET); break;
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
+    case N_SUBSCR:  O(1); O(2); o(c, OP_GET); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
 
