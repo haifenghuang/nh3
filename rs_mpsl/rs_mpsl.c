@@ -359,22 +359,6 @@ static mpdm_t node3(int type, mpdm_t n1, mpdm_t n2, mpdm_t n3)
 static mpdm_t expr(struct mpsl_c *c);
 static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op);
 
-static mpdm_t symid(struct mpsl_c *c)
-/* parse symbol identifiers (possibly compound and with subscripts) */
-{
-    mpdm_t v = NULL;
-
-    if (c->error) {}
-    else
-    if (c->token == T_SYMBOL) {
-        v = node1(N_SYMID, MPDM_S(c->token_s.d));
-        token(c);
-    }
-
-    return v;
-}
-
-
 static mpdm_t paren_expr(struct mpsl_c *c)
 /* parses a parenthesized expression */
 {
@@ -608,7 +592,21 @@ static mpdm_t statement(struct mpsl_c *c)
     else
     if (c->token == T_SUB) {
         token(c);
-        if ((w = symid(c)) != NULL) {
+
+        if (c->token == T_SYMBOL) {
+            w = term(c);
+
+            /* new symbol name must have only symbols and dots */
+            while (!c->error && c->token == T_DOT) {
+                token(c);
+
+                if (c->token == T_SYMBOL)
+                    w = node2(N_PARTOF, w, term(c));
+                else
+                    c->error = 2;
+            }
+
+            /* argument name array */
             mpdm_t a = mpdm_ref(MPDM_A(0));
 
             /* does it have arguments? */
@@ -628,9 +626,8 @@ static mpdm_t statement(struct mpsl_c *c)
                     c->error = 2;
             }
 
-            mpdm_unref(a);
-
             v = node3(N_SUBR, w, node1(N_LITERAL, a), statement(c));
+            mpdm_unref(a);
         }
         else
             c->error = 2;
@@ -639,19 +636,12 @@ static mpdm_t statement(struct mpsl_c *c)
     if (c->token == T_RETURN) {
         token(c);
 
-        if (c->token == T_SEMI) {
-            v = node1(N_RETURN, node0(N_NULL));
+        v = node1(N_RETURN, c->token == T_SEMI ? node0(N_NULL) : expr(c));
+
+        if (c->token == T_SEMI)
             token(c);
-        }
-        else {
-            v = node1(N_RETURN, expr(c));
-
-            if (c->token == T_SEMI)
-                token(c);
-            else
-                c->error = 2;
-        }
-
+        else
+            c->error = 2;
     }
     else
     if (c->token == T_LBRACE) {
