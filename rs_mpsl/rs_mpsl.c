@@ -314,7 +314,7 @@ typedef enum {
 
     N_IF,       N_WHILE,
     N_NOP,      N_SEQ,
-    N_SYMID,    N_SYMVAL,   N_ASSIGN, N_SYMROOT,
+    N_SYMID,    N_SYMVAL,   N_ASSIGN,
     N_PARTOF,
     N_EXECSYM,
     N_LOCAL,    N_GLOBAL,
@@ -493,21 +493,15 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
 
         v = term(c);
 
-        if (t == T_SYMBOL) {
-            /* special manage of symbols */
-            if (p_op != N_PARTOF)
-                v = node1(N_SYMROOT, v);
-
-            if (c->token != T_EQUAL)
-                v = node1(N_SYMVAL, v);
-        }
+        if (t == T_SYMBOL && c->token != T_EQUAL)
+            v = node1(N_SYMVAL, v);
 
         while (!c->error && (op = op_by_token(c)) > 0 && op <= p_op) {
             /* subindexes */
             if (c->token == T_LBRACK) {
                 token(c);
 
-                v = node2(op, v, expr(c));
+                v = node2(op, v, expr_p(c, op));
 
                 if (c->token == T_RBRACK)
                     token(c);
@@ -742,8 +736,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_UMINUS:  o(c, OP_LIT); ov(c, MPDM_I(-1)); O(1); o(c, OP_MUL); break;
     case N_EQ:      O(1); O(2); o(c, OP_EQ); break;
     case N_ASSIGN:  O(1); O(2); o(c, OP_SET); break;
-    case N_SYMVAL:  O(1); o(c, OP_GET); break;
-    case N_SYMROOT: O(1); o(c, OP_DUP); o(c, OP_TBL); o(c, OP_SWP); break;
+    case N_SYMVAL:  O(1); o(c, OP_TBL); break;
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
@@ -957,7 +950,7 @@ int main(int argc, char *argv[])
     memset(&m, '\0', sizeof(m));
     memset(&c, '\0', sizeof(c));
 
-    c.ptr = L"global a1, a2 = 1; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C.D = 665 + 1";
+    c.ptr = L"global a1, a2 = 1; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
     parse(&c);
 
     mpdm_set(&c.prg, MPDM_A(0));
