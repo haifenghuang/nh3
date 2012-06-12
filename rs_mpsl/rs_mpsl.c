@@ -308,7 +308,6 @@ typedef enum {
     N_ARRAY,    N_HASH,
 
     N_UMINUS,   N_NOT,
-    N_PARTOF,
     N_MOD,      N_DIV,      N_MUL,  N_SUB,  N_ADD,
     N_EQ,       N_NE,       N_GT,   N_GE,   N_LT,  N_LE,
     N_AND,      N_OR,
@@ -316,6 +315,7 @@ typedef enum {
     N_IF,       N_WHILE,
     N_NOP,      N_SEQ,
     N_SYMID,    N_SYMVAL,   N_ASSIGN,
+    N_PARTOF,
     N_EXECSYM,
     N_LOCAL,    N_GLOBAL,
     N_SUBR,     N_RETURN,
@@ -950,7 +950,7 @@ int main(int argc, char *argv[])
     memset(&m, '\0', sizeof(m));
     memset(&c, '\0', sizeof(c));
 
-    c.ptr = L"global a1, a2 = 1; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', 'b', -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 };";
+    c.ptr = L"global a1, a2 = 1; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', 'b', -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B = 665 + 1";
     parse(&c);
 
     mpdm_set(&c.prg, MPDM_A(0));
