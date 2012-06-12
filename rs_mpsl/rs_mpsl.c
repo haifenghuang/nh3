@@ -703,17 +703,8 @@ typedef enum {
 } mpsl_op_t;
 
 
-static int ov(struct mpsl_c *c, mpdm_t v)
-{
-    mpdm_push(c->prg, v);
-    return mpdm_size(c->prg);
-}
-
-static int o(struct mpsl_c *c, mpsl_op_t op)
-{
-    return ov(c, MPDM_I(op));
-}
-
+static int ov(struct mpsl_c *c, mpdm_t v) { mpdm_push(c->prg, v); return mpdm_size(c->prg); }
+static int o(struct mpsl_c *c, mpsl_op_t op) { return ov(c, MPDM_I(op)); }
 #define O(n) gen(c, mpdm_aget(node, n))
 
 
@@ -736,6 +727,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_MOD:     O(1); O(2); o(c, OP_MOD); break;
     case N_UMINUS:  o(c, OP_LIT); ov(c, MPDM_I(-1)); O(1); o(c, OP_MUL); break;
     case N_EQ:      O(1); O(2); o(c, OP_EQ); break;
+    case N_NE:      O(1); O(2); o(c, OP_NE); break;
     case N_ASSIGN:  O(1); O(2); o(c, OP_SET); break;
     case N_SYMVAL:  O(1); o(c, OP_GET); break;
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
@@ -787,40 +779,6 @@ struct mpsl_vm {
 };
 
 
-static mpdm_t find_symtbl(struct mpsl_vm *m, mpdm_t s)
-/* finds the local symbol table that stores s */
-{
-    int n;
-    mpdm_t l = NULL;
-
-    for (n = m->tt - 1; n >= 0; n--) {
-        if ((l = mpdm_aget(m->symtbl, n)) == NULL)
-            break;
-
-        if (mpdm_exists(l, s))
-            break;
-    }
-
-    if (l == NULL || n < 0)
-        l = mpdm_root();
-
-    return l;
-}
-
-
-mpdm_t mpsl_get_symbol(struct mpsl_vm *m, mpdm_t s)
-{
-    return mpdm_hget(find_symtbl(m, s), s);
-}
-
-
-mpdm_t mpsl_set_symbol(struct mpsl_vm *m, mpdm_t s, mpdm_t v)
-{
-    return mpdm_hset(find_symtbl(m, s), s, v);
-}
-
-
-
 void mpsl_reset_vm(struct mpsl_vm *m, mpdm_t prg)
 {
     if (prg)
@@ -828,8 +786,10 @@ void mpsl_reset_vm(struct mpsl_vm *m, mpdm_t prg)
 
     mpdm_set(&m->stack,     MPDM_A(0));
     mpdm_set(&m->c_stack,   MPDM_A(0));
+    mpdm_set(&m->symtbl,    MPDM_A(0));
 
-    mpdm_push(mpdm_set(&m->symtbl, MPDM_A(0)), MPDM_H(0));
+    mpdm_push(m->symtbl,    mpdm_root());
+    mpdm_push(m->symtbl,    MPDM_H(0));
 
     m->pc = m->sp = m->cs = m->tt = 0;
     m->mode = VM_IDLE;
@@ -840,6 +800,59 @@ static mpdm_t PUSH(struct mpsl_vm *m, mpdm_t v) { return mpdm_aset(m->stack, v, 
 static mpdm_t POP(struct mpsl_vm *m) { return mpdm_aget(m->stack, --m->sp); }
 static mpdm_t TOS(struct mpsl_vm *m) { return mpdm_aget(m->stack, m->sp - 1); }
 static mpdm_t PC(struct mpsl_vm *m) { return mpdm_aget(m->prg, m->pc++); }
+
+static mpdm_t TBL(struct mpsl_vm *m)
+{
+    int n;
+    mpdm_t s = mpdm_ref(POP(m));
+    mpdm_t l = NULL;
+
+    /* local symtable */
+    for (n = m->tt - 1; n >= 0; n--) {
+        if ((l = mpdm_aget(m->symtbl, n)) || (l = mpdm_aget(m->symtbl, (n = 0))))
+            if (mpdm_exists(l, s))
+                break;
+    }
+
+    if (l == NULL) {
+        /* trigger an error */
+        /* ... */
+        m->mode = VM_ERROR;
+    }
+    else {
+        PUSH(m, l);
+        PUSH(m, s);
+    }
+
+    mpdm_unref(s);
+
+    return l;
+}
+
+static mpdm_t GET(mpdm_t m, mpdm_t k)
+{
+    mpdm_t r;
+
+    if (MPDM_IS_HASH(m))
+        r = mpdm_hget(m, k);
+    else
+        r = mpdm_aget(m, mpdm_ival(k));
+
+    return r;
+}
+
+static mpdm_t SET(mpdm_t m, mpdm_t k, mpdm_t v)
+{
+    mpdm_t r;
+
+    if (MPDM_IS_HASH(m))
+        r = mpdm_hset(m, k, v);
+    else
+        r = mpdm_aset(m, v, mpdm_ival(k));
+
+    return r;
+}
+
 
 #define IPOP(m) mpdm_ival(POP(m))
 #define RPOP(m) mpdm_rval(POP(m))
@@ -876,9 +889,9 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_POP: --m->sp; break;
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
         case OP_DUP: PUSH(m, TOS(m)); break;
-        case OP_TBL: break;
-        case OP_GET: PUSH(m, mpdm_hget(TOS(m), POP(m))); break;
-        case OP_SET: PUSH(m, mpdm_hset(TOS(m), POP(m), POP(m))); break;
+        case OP_TBL: TBL(m); break;
+        case OP_GET: PUSH(m, GET(TOS(m), POP(m))); break;
+        case OP_SET: PUSH(m, SET(TOS(m), POP(m), POP(m))); break;
         case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
         case OP_TPO: --m->tt; break;
         case OP_CAL: mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++); m->pc = IPOP(m); break;
@@ -954,7 +967,7 @@ int main(int argc, char *argv[])
     memset(&m, '\0', sizeof(m));
     memset(&c, '\0', sizeof(c));
 
-    c.ptr = L"global a1, a2 = 1; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
+    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
     parse(&c);
 
     mpdm_set(&c.prg, MPDM_A(0));
