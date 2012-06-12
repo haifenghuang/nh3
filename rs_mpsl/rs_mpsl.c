@@ -715,7 +715,7 @@ static void oh(struct mpsl_c *c, int n) { mpdm_aset(c->prg, MPDM_I(mpdm_size(c->
 
 static void gen(struct mpsl_c *c, mpdm_t node)
 {
-    int n;
+    int n, i;
 
     mpsl_node_t t = mpdm_ival(mpdm_aget(node, 0));
 
@@ -768,7 +768,19 @@ static void gen(struct mpsl_c *c, mpdm_t node)
         }
         break;
 
-    case N_IF: O(1); n = o(c, OP_JF); ov(c, NULL); O(2); oh(c, n); break;
+    case N_IF:
+        O(1);
+        n = o(c, OP_JF); ov(c, NULL);
+        O(2);
+
+        if (mpdm_size(node) == 4) {
+            i = o(c, OP_JMP); ov(c, NULL);
+            oh(c, n);
+            O(3);
+            n = i;
+        }
+        oh(c, n);
+        break;
     }
 }
 
@@ -983,7 +995,7 @@ int main(int argc, char *argv[])
 
 //    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
 //    c.ptr = L"sub sum(a, b) { return a + b; }";
-    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; }";
+    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; }";
     parse(&c);
 
     mpdm_set(&c.prg, MPDM_A(0));
