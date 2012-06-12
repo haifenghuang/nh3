@@ -735,8 +735,8 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_MOD:     O(1); O(2); o(c, OP_MOD); break;
     case N_UMINUS:  o(c, OP_LIT); ov(c, MPDM_I(-1)); O(1); o(c, OP_MUL); break;
     case N_EQ:      O(1); O(2); o(c, OP_EQ); break;
-    case N_ASSIGN:  O(1); O(2); o(c, OP_SET); break;
-    case N_SYMVAL:  O(1); o(c, OP_TBL); break;
+    case N_ASSIGN:  O(1); o(c, OP_TBL); O(2); o(c, OP_SET); break;
+    case N_SYMVAL:  O(1); o(c, OP_TBL); o(c, OP_GET); break;
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
