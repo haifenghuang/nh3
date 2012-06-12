@@ -501,7 +501,7 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
             if (c->token == T_LBRACK) {
                 token(c);
 
-                v = node2(op, v, expr_p(c, op));
+                v = node2(op, v, expr(c));
 
                 if (c->token == T_RBRACK)
                     token(c);
