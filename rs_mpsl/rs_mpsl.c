@@ -707,8 +707,19 @@ typedef enum {
 } mpsl_op_t;
 
 
-static int ov(struct mpsl_c *c, mpdm_t v) { mpdm_push(c->prg, v); return mpdm_size(c->prg); }
-static int o(struct mpsl_c *c, mpsl_op_t op) { return ov(c, MPDM_I(op)); }
+static int o(struct mpsl_c *c, mpsl_op_t op)
+{
+    mpdm_push(c->prg, MPDM_I(op));
+    return mpdm_size(c->prg);
+}
+
+static int o2(struct mpsl_c *c, mpsl_op_t op, mpdm_t v)
+{
+    int r = o(c, op);
+    mpdm_push(c->prg, v);
+    return r;
+}
+
 static void fix(struct mpsl_c *c, int n) { mpdm_aset(c->prg, MPDM_I(mpdm_size(c->prg)), n); }
 #define O(n) gen(c, mpdm_aget(node, n))
 
@@ -723,15 +734,15 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_NOP:     break;
     case N_EOP:     o(c, OP_EOP); break;
     case N_NULL:    o(c, OP_NUL); break;
-    case N_SYMID:   o(c, OP_LIT); ov(c, mpdm_aget(node, 1)); o(c, OP_TBL); break;
-    case N_LITERAL: o(c, OP_LIT); ov(c, mpdm_aget(node, 1)); break;
+    case N_SYMID:   o2(c, OP_LIT, mpdm_aget(node, 1)); o(c, OP_TBL); break;
+    case N_LITERAL: o2(c, OP_LIT, mpdm_aget(node, 1)); break;
     case N_SEQ:     O(1); O(2); break;
     case N_ADD:     O(1); O(2); o(c, OP_ADD); break;
     case N_SUB:     O(1); O(2); o(c, OP_SUB); break;
     case N_MUL:     O(1); O(2); o(c, OP_MUL); break;
     case N_DIV:     O(1); O(2); o(c, OP_DIV); break;
     case N_MOD:     O(1); O(2); o(c, OP_MOD); break;
-    case N_UMINUS:  o(c, OP_LIT); ov(c, MPDM_I(-1)); O(1); o(c, OP_MUL); break;
+    case N_UMINUS:  o2(c, OP_LIT, MPDM_I(-1)); O(1); o(c, OP_MUL); break;
     case N_EQ:      O(1); O(2); o(c, OP_EQ); break;
     case N_NE:      O(1); O(2); o(c, OP_NE); break;
     case N_GT:      O(1); O(2); o(c, OP_GT); break;
@@ -751,7 +762,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
         o(c, OP_ARR);
         for (n = 1; n < mpdm_size(node); n++) {
             o(c, OP_DUP);
-            o(c, OP_LIT); ov(c, MPDM_I(n - 1));
+            o2(c, OP_LIT, MPDM_I(n - 1));
             O(n);
             o(c, OP_SET);
             o(c, OP_POP);
@@ -770,10 +781,10 @@ static void gen(struct mpsl_c *c, mpdm_t node)
         break;
 
     case N_IF:
-        O(1); n = o(c, OP_JF); ov(c, NULL); O(2);
+        O(1); n = o2(c, OP_JF, NULL); O(2);
 
         if (mpdm_size(node) == 4) {
-            i = o(c, OP_JMP); ov(c, NULL); fix(c, n); O(3); n = i;
+            i = o2(c, OP_JMP, NULL); fix(c, n); O(3); n = i;
         }
 
         fix(c, n);
@@ -781,15 +792,15 @@ static void gen(struct mpsl_c *c, mpdm_t node)
         break;
 
     case N_OR:
-        O(1); o(c, OP_DUP); n = o(c, OP_JT); ov(c, NULL);
+        O(1); o(c, OP_DUP); n = o2(c, OP_JT, NULL);
         o(c, OP_POP); O(2); fix(c, n); break;
 
     case N_AND:
-        O(1); o(c, OP_DUP); n = o(c, OP_JF); ov(c, NULL);
+        O(1); o(c, OP_DUP); n = o2(c, OP_JF, NULL);
         o(c, OP_POP); O(2); fix(c, n); break;
 
     case N_SUBDEF:
-        O(1); n = o(c, OP_LIT); ov(c, NULL); o(c, OP_SET); i = o(c, OP_JMP); ov(c, NULL);
+        O(1); n = o2(c, OP_LIT, NULL); o(c, OP_SET); i = o2(c, OP_JMP, NULL);
         fix(c, n); O(2); o(c, OP_ARG); O(3); fix(c, i); break;
     }
 }
