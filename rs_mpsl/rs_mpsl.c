@@ -321,6 +321,7 @@ typedef enum {
     N_SUBR,     N_RETURN,
     N_VOID,
 
+    N_EOP,
     N_LAST
 } mpsl_node_t;
 
@@ -683,6 +684,8 @@ static void parse(struct mpsl_c *c)
     while (!c->error && c->token != T_EOP)
         v = node2(N_SEQ, v, statement(c));
 
+    v = node2(N_SEQ, v, node0(N_EOP));
+
     mpdm_set(&c->node, v);
 }
 
@@ -706,6 +709,7 @@ typedef enum {
 
 static int ov(struct mpsl_c *c, mpdm_t v) { mpdm_push(c->prg, v); return mpdm_size(c->prg); }
 static int o(struct mpsl_c *c, mpsl_op_t op) { return ov(c, MPDM_I(op)); }
+static void oh(struct mpsl_c *c, int n) { mpdm_aset(c->prg, MPDM_I(mpdm_size(c->prg)), n); }
 #define O(n) gen(c, mpdm_aget(node, n))
 
 
@@ -717,6 +721,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
 
     switch (t) {
     case N_NOP:     break;
+    case N_EOP:     o(c, OP_EOP); break;
     case N_NULL:    o(c, OP_NUL); break;
     case N_SYMID:   o(c, OP_LIT); ov(c, mpdm_aget(node, 1)); o(c, OP_TBL); break;
     case N_LITERAL: o(c, OP_LIT); ov(c, mpdm_aget(node, 1)); break;
@@ -762,6 +767,8 @@ static void gen(struct mpsl_c *c, mpdm_t node)
             o(c, OP_POP);
         }
         break;
+
+    case N_IF: O(1); n = o(c, OP_JF); ov(c, NULL); O(2); oh(c, n); break;
     }
 }
 
@@ -954,8 +961,10 @@ void mpsl_disasm(mpdm_t prg)
         printf("%4d: ", n);
         printf("%s", ops[i]);
 
-        if (i == OP_LIT || i == OP_JMP || i == OP_JT || i == OP_JF)
+        if (i == OP_LIT || i == OP_REM)
             printf(" \"%ls\"", mpdm_string(mpdm_aget(prg, ++n)));
+        if (i == OP_JMP || i == OP_JT || i == OP_JF)
+            printf(" %d", mpdm_ival(mpdm_aget(prg, ++n)));
 
         printf("\n");
     }
@@ -974,7 +983,7 @@ int main(int argc, char *argv[])
 
 //    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
 //    c.ptr = L"sub sum(a, b) { return a + b; }";
-    c.ptr = L"local a, b, c = [], d;";
+    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; }";
     parse(&c);
 
     mpdm_set(&c.prg, MPDM_A(0));
