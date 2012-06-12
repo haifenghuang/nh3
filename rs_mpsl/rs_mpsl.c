@@ -615,7 +615,8 @@ static mpdm_t statement(struct mpsl_c *c)
                 token(c);
 
                 while (!c->error && c->token == T_SYMBOL) {
-                    mpdm_push(a, term(c));
+                    mpdm_push(a, MPDM_S(c->token_s.d));
+                    token(c);
 
                     if (c->token == T_COMMA)
                         token(c);
