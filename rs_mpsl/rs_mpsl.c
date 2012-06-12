@@ -694,7 +694,7 @@ typedef enum {
     OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROO,
     OP_POP, OP_SWP, OP_DUP,
     OP_GET, OP_SET, OP_TBL,
-    OP_TPU, OP_TPO,
+    OP_TPU, OP_TPO, OP_TLT,
     OP_CAL, OP_RET,
     OP_JMP, OP_JT, OP_JF,
 
@@ -739,6 +739,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_SUBSCR:  O(1); O(2); o(c, OP_GET); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
+    case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
 
     case N_ARRAY:
         o(c, OP_ARR);
@@ -899,6 +900,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SET: PUSH(m, SET(TOS(m), POP(m), POP(m))); break;
         case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
         case OP_TPO: --m->tt; break;
+        case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
         case OP_CAL: mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++); m->pc = IPOP(m); break;
         case OP_RET: m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
         case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
@@ -933,7 +935,7 @@ char *ops[] = {
     "LIT", "NUL", "ARR", "HSH", "ROO",
     "POP", "SWP", "DUP",
     "GET", "SET", "TBL",
-    "TPU", "TPO",
+    "TPU", "TPO", "TLT",
     "CAL", "RET",
     "JMP", "JT", "JF",
 
@@ -970,7 +972,9 @@ int main(int argc, char *argv[])
     memset(&m, '\0', sizeof(m));
     memset(&c, '\0', sizeof(c));
 
-    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
+//    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
+//    c.ptr = L"sub sum(a, b) { return a + b; }";
+    c.ptr = L"local a, b, c = [], d;";
     parse(&c);
 
     mpdm_set(&c.prg, MPDM_A(0));
