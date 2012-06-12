@@ -741,7 +741,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
     case N_SUBSCR:  O(1); O(2); o(c, OP_GET); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
-    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); break;
+    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
 
     case N_ARRAY:
         o(c, OP_ARR);
@@ -750,6 +750,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
             o(c, OP_LIT); ov(c, MPDM_I(n - 1));
             O(n);
             o(c, OP_SET);
+            o(c, OP_POP);
         }
         break;
 
@@ -760,6 +761,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
             O(n);
             O(n + 1);
             o(c, OP_SET);
+            o(c, OP_POP);
         }
         break;
     }
