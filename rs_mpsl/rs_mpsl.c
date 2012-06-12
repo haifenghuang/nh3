@@ -567,7 +567,8 @@ static mpdm_t statement(struct mpsl_c *c)
 
         do {
             if (c->token == T_SYMBOL) {
-                w1 = term(c);
+                w1 = node1(N_LITERAL, MPDM_S(c->token_s.d));
+                token(c);
 
                 /* has initialization value? */
                 if (c->token == T_EQUAL) {
@@ -725,7 +726,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     switch (t) {
     case N_NOP:     break;
     case N_NULL:    o(c, OP_NUL); break;
-    case N_SYMID:
+    case N_SYMID:   o(c, OP_LIT); ov(c, mpdm_aget(node, 1)); o(c, OP_TBL); break;
     case N_LITERAL: o(c, OP_LIT); ov(c, mpdm_aget(node, 1)); break;
     case N_SEQ:     O(1); O(2); break;
     case N_ADD:     O(1); O(2); o(c, OP_ADD); break;
@@ -735,12 +736,12 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_MOD:     O(1); O(2); o(c, OP_MOD); break;
     case N_UMINUS:  o(c, OP_LIT); ov(c, MPDM_I(-1)); O(1); o(c, OP_MUL); break;
     case N_EQ:      O(1); O(2); o(c, OP_EQ); break;
-    case N_ASSIGN:  O(1); o(c, OP_TBL); O(2); o(c, OP_SET); break;
-    case N_SYMVAL:  O(1); o(c, OP_TBL); o(c, OP_GET); break;
+    case N_ASSIGN:  O(1); O(2); o(c, OP_SET); break;
+    case N_SYMVAL:  O(1); o(c, OP_GET); break;
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
     case N_SUBSCR:  O(1); O(2); o(c, OP_GET); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
-    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
+    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); break;
 
     case N_ARRAY:
         o(c, OP_ARR);
