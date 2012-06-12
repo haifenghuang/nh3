@@ -745,6 +745,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_VOID:    O(1); o(c, OP_POP); break;
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
     case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
+    case N_RETURN:  O(1); o(c, OP_RET); break;
 
     case N_ARRAY:
         o(c, OP_ARR);
@@ -1000,7 +1001,7 @@ int main(int argc, char *argv[])
 
 //    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
 //    c.ptr = L"sub sum(a, b) { return a + b; }";
-    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; } stored || ''; open && close;";
+    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; } stored || ''; open && close; return a * b;";
     parse(&c);
 
     mpdm_set(&c.prg, MPDM_A(0));
