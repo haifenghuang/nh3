@@ -493,8 +493,14 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
 
         v = term(c);
 
-        if (t == T_SYMBOL && c->token != T_EQUAL)
-            v = node1(N_SYMVAL, v);
+        if (t == T_SYMBOL) {
+            /* special manage of symbols */
+            if (p_op != N_PARTOF)
+                v = node1(N_SYMROOT, v);
+
+            if (c->token != T_EQUAL)
+                v = node1(N_SYMVAL, v);
+        }
 
         while (!c->error && (op = op_by_token(c)) > 0 && op <= p_op) {
             /* subindexes */
@@ -510,9 +516,6 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
             }
             else {
                 token(c);
-
-                if (op != N_PARTOF && t == T_SYMBOL)
-                    v = node1(N_SYMROOT, v);
 
                 if (op == N_PARTOF && c->token != T_SYMBOL)
                     c->error = 2;
@@ -954,7 +957,7 @@ int main(int argc, char *argv[])
     memset(&m, '\0', sizeof(m));
     memset(&c, '\0', sizeof(c));
 
-    c.ptr = L"global a1, a2 = 1; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B = 665 + 1";
+    c.ptr = L"global a1, a2 = 1; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C.D = 665 + 1";
     parse(&c);
 
     mpdm_set(&c.prg, MPDM_A(0));
