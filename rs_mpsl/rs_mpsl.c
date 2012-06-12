@@ -696,7 +696,7 @@ typedef enum {
     OP_EOP,
     OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROO,
     OP_POP, OP_SWP, OP_DUP,
-    OP_GET, OP_SET, OP_TBL,
+    OP_GET, OP_SET, OP_STI, OP_TBL,
     OP_TPU, OP_TPO, OP_TLT,
     OP_CAL, OP_RET, OP_ARG,
     OP_JMP, OP_JT, OP_JF,
@@ -752,10 +752,10 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_ASSIGN:  O(1); O(2); o(c, OP_SET); break;
     case N_SYMVAL:  O(1); o(c, OP_GET); break;
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
-    case N_SUBSCR:  O(1); O(2); o(c, OP_GET); break;
+    case N_SUBSCR:  O(1); O(2); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
-    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
-    case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
+    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_STI); break;
+    case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_STI); break;
     case N_RETURN:  O(1); o(c, OP_TPO); o(c, OP_RET); break;
 
     case N_ARRAY:
@@ -764,8 +764,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
             o(c, OP_DUP);
             o2(c, OP_LIT, MPDM_I(n - 1));
             O(n);
-            o(c, OP_SET);
-            o(c, OP_POP);
+            o(c, OP_STI);
         }
         break;
 
@@ -775,8 +774,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
             o(c, OP_DUP);
             O(n);
             O(n + 1);
-            o(c, OP_SET);
-            o(c, OP_POP);
+            o(c, OP_STI);
         }
         break;
 
@@ -936,8 +934,9 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
         case OP_DUP: PUSH(m, TOS(m)); break;
         case OP_TBL: TBL(m); break;
-        case OP_GET: PUSH(m, GET(TOS(m), POP(m))); break;
-        case OP_SET: PUSH(m, SET(TOS(m), POP(m), POP(m))); break;
+        case OP_GET: PUSH(m, GET(POP(m), POP(m))); break;
+        case OP_SET: PUSH(m, SET(POP(m), POP(m), POP(m))); break;
+        case OP_STI: SET(POP(m), POP(m), POP(m)); break;
         case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
         case OP_TPO: --m->tt; break;
         case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
@@ -975,7 +974,7 @@ char *ops[] = {
     "EOP",
     "LIT", "NUL", "ARR", "HSH", "ROO",
     "POP", "SWP", "DUP",
-    "GET", "SET", "TBL",
+    "GET", "SET", "STI", "TBL",
     "TPU", "TPO", "TLT",
     "CAL", "RET", "ARG",
     "JMP", "JT", "JF",
@@ -1016,7 +1015,7 @@ int main(int argc, char *argv[])
     memset(&c, '\0', sizeof(c));
 
 //    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
-    c.ptr = L"sub sum(a, b) { return a + b; }";
+    c.ptr = L"sub sum(a, b) { return a + b; } global v1, v2, v3 = {}, v4;";
 //    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; } stored || ''; open && close; return a * b;";
     parse(&c);
 
