@@ -318,7 +318,7 @@ typedef enum {
     N_PARTOF,   N_SUBSCR,
     N_EXECSYM,
     N_LOCAL,    N_GLOBAL,
-    N_SUBR,     N_RETURN,
+    N_SUBDEF,   N_RETURN,
     N_VOID,
 
     N_EOP,
@@ -629,7 +629,7 @@ static mpdm_t statement(struct mpsl_c *c)
                     c->error = 2;
             }
 
-            v = node3(N_SUBR, w, node1(N_LITERAL, a), statement(c));
+            v = node3(N_SUBDEF, w, node1(N_LITERAL, a), statement(c));
             mpdm_unref(a);
         }
         else
@@ -698,7 +698,7 @@ typedef enum {
     OP_POP, OP_SWP, OP_DUP,
     OP_GET, OP_SET, OP_TBL,
     OP_TPU, OP_TPO, OP_TLT,
-    OP_CAL, OP_RET,
+    OP_CAL, OP_RET, OP_ARG,
     OP_JMP, OP_JT, OP_JF,
 
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
@@ -709,7 +709,7 @@ typedef enum {
 
 static int ov(struct mpsl_c *c, mpdm_t v) { mpdm_push(c->prg, v); return mpdm_size(c->prg); }
 static int o(struct mpsl_c *c, mpsl_op_t op) { return ov(c, MPDM_I(op)); }
-static void oh(struct mpsl_c *c, int n) { mpdm_aset(c->prg, MPDM_I(mpdm_size(c->prg)), n); }
+static void fix(struct mpsl_c *c, int n) { mpdm_aset(c->prg, MPDM_I(mpdm_size(c->prg)), n); }
 #define O(n) gen(c, mpdm_aget(node, n))
 
 
@@ -745,7 +745,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_VOID:    O(1); o(c, OP_POP); break;
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
     case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_SET); o(c, OP_POP); break;
-    case N_RETURN:  O(1); o(c, OP_RET); break;
+    case N_RETURN:  O(1); o(c, OP_TPO); o(c, OP_RET); break;
 
     case N_ARRAY:
         o(c, OP_ARR);
@@ -773,20 +773,24 @@ static void gen(struct mpsl_c *c, mpdm_t node)
         O(1); n = o(c, OP_JF); ov(c, NULL); O(2);
 
         if (mpdm_size(node) == 4) {
-            i = o(c, OP_JMP); ov(c, NULL); oh(c, n); O(3); n = i;
+            i = o(c, OP_JMP); ov(c, NULL); fix(c, n); O(3); n = i;
         }
 
-        oh(c, n);
+        fix(c, n);
 
         break;
 
     case N_OR:
         O(1); o(c, OP_DUP); n = o(c, OP_JT); ov(c, NULL);
-        o(c, OP_POP); O(2); oh(c, n); break;
+        o(c, OP_POP); O(2); fix(c, n); break;
 
     case N_AND:
         O(1); o(c, OP_DUP); n = o(c, OP_JF); ov(c, NULL);
-        o(c, OP_POP); O(2); oh(c, n); break;
+        o(c, OP_POP); O(2); fix(c, n); break;
+
+    case N_SUBDEF:
+        O(1); n = o(c, OP_LIT); ov(c, NULL); o(c, OP_SET); i = o(c, OP_JMP); ov(c, NULL);
+        fix(c, n); O(2); o(c, OP_ARG); O(3); fix(c, i); break;
     }
 }
 
@@ -928,6 +932,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
         case OP_CAL: mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++); m->pc = IPOP(m); break;
         case OP_RET: m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
+        case OP_ARG: break;
         case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
         case OP_JT:  if (ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
         case OP_JF:  if (!ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
@@ -961,7 +966,7 @@ char *ops[] = {
     "POP", "SWP", "DUP",
     "GET", "SET", "TBL",
     "TPU", "TPO", "TLT",
-    "CAL", "RET",
+    "CAL", "RET", "ARG",
     "JMP", "JT", "JF",
 
     "ADD", "SUB", "MUL", "DIV", "MOD",
@@ -1000,8 +1005,8 @@ int main(int argc, char *argv[])
     memset(&c, '\0', sizeof(c));
 
 //    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
-//    c.ptr = L"sub sum(a, b) { return a + b; }";
-    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; } stored || ''; open && close; return a * b;";
+    c.ptr = L"sub sum(a, b) { return a + b; }";
+//    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; } stored || ''; open && close; return a * b;";
     parse(&c);
 
     mpdm_set(&c.prg, MPDM_A(0));
