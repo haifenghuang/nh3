@@ -1,20 +1,15 @@
 /*
 
-    Reverse Stack MPSL
+    MPSL 3.x
 
     Angel Ortega <angel@triptico.com>
-
-    This is an experiment of a reverse-stack MPSL.
-
-    Also, the executor includes a maximum number of
-    milliseconds before yielding, with the capability
-    of restarting where it left in the subsequent call.
 
 */
 
 #include <stdio.h>
 #include <wchar.h>
 #include <wctype.h>
+
 #include <mpdm.h>
 
 
@@ -172,6 +167,12 @@ static int t_string(struct mpsl_c *l)
 /* tokenize strings */
 {
     if (l->c == L'"') {
+        t_nextc(l);
+        STORE(l->c != L'"');
+        t_nextc(l);
+        l->token = T_LITERAL;
+
+        return 0;
     }
 
     return 1;
@@ -199,9 +200,6 @@ static int t_symbol(struct mpsl_c *l)
 {
     if (iswalpha(l->c)) {
         int n;
-
-        ds_poke(l->token_s, l->c);
-        t_nextc(l);
 
         STORE(iswalnum(l->c));
 
@@ -392,7 +390,7 @@ static mpdm_t term(struct mpsl_c *c)
     else
     if (c->token == T_BANG) {
         token(c);
-        v = node1(N_NOT, expr(c));
+        v = node1(N_NOT, expr_p(c, N_NOT));
     }
     else
     if (c->token == T_MINUS) {
@@ -672,7 +670,7 @@ static mpdm_t statement(struct mpsl_c *c)
 
 
 static void parse(struct mpsl_c *c)
-/* parses the full program */
+/* parses an MPSL program and creates a tree of nodes */
 {
     mpdm_t v;
 
@@ -702,7 +700,7 @@ typedef enum {
     OP_JMP, OP_JT, OP_JF,
 
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
-    OP_EQ, OP_NE, OP_GT, OP_GE,
+    OP_NOT, OP_EQ, OP_NE, OP_GT, OP_GE,
     OP_REM, OP_DMP
 } mpsl_op_t;
 
@@ -725,12 +723,13 @@ static void fix(struct mpsl_c *c, int n) { mpdm_aset(c->prg, MPDM_I(mpdm_size(c-
 
 
 static void gen(struct mpsl_c *c, mpdm_t node)
+/* generates MPSL VM code from a tree of nodes */
 {
     int n, i;
 
-    mpsl_node_t t = mpdm_ival(mpdm_aget(node, 0));
+    mpsl_node_t nt = mpdm_ival(mpdm_aget(node, 0));
 
-    switch (t) {
+    switch (nt) {
     case N_NOP:     break;
     case N_EOP:     o(c, OP_EOP); break;
     case N_NULL:    o(c, OP_NUL); break;
@@ -743,6 +742,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_DIV:     O(1); O(2); o(c, OP_DIV); break;
     case N_MOD:     O(1); O(2); o(c, OP_MOD); break;
     case N_UMINUS:  o2(c, OP_LIT, MPDM_I(-1)); O(1); o(c, OP_MUL); break;
+    case N_NOT:     O(1); o(c, OP_NOT); break;
     case N_EQ:      O(1); O(2); o(c, OP_EQ); break;
     case N_NE:      O(1); O(2); o(c, OP_NE); break;
     case N_GT:      O(1); O(2); o(c, OP_GT); break;
@@ -820,6 +820,7 @@ struct mpsl_vm {
     int cs;                 /* call stack pointer */
     int tt;                 /* symbol table top */
     int mode;               /* running mode */
+    int ins;                /* # of executed instructions */
 };
 
 
@@ -844,6 +845,8 @@ static mpdm_t PUSH(struct mpsl_vm *m, mpdm_t v) { return mpdm_aset(m->stack, v, 
 static mpdm_t POP(struct mpsl_vm *m) { return mpdm_aget(m->stack, --m->sp); }
 static mpdm_t TOS(struct mpsl_vm *m) { return mpdm_aget(m->stack, m->sp - 1); }
 static mpdm_t PC(struct mpsl_vm *m) { return mpdm_aget(m->prg, m->pc++); }
+static mpdm_t GET(mpdm_t m, mpdm_t k) { return MPDM_IS_HASH(m) ? mpdm_hget(m, k) : mpdm_aget(m, mpdm_ival(k)); }
+static mpdm_t SET(mpdm_t m, mpdm_t k, mpdm_t v) { return MPDM_IS_HASH(m) ? mpdm_hset(m, k, v) : mpdm_aset(m, v, mpdm_ival(k)); }
 
 static mpdm_t TBL(struct mpsl_vm *m)
 {
@@ -873,31 +876,6 @@ static mpdm_t TBL(struct mpsl_vm *m)
     return l;
 }
 
-static mpdm_t GET(mpdm_t m, mpdm_t k)
-{
-    mpdm_t r;
-
-    if (MPDM_IS_HASH(m))
-        r = mpdm_hget(m, k);
-    else
-        r = mpdm_aget(m, mpdm_ival(k));
-
-    return r;
-}
-
-static mpdm_t SET(mpdm_t m, mpdm_t k, mpdm_t v)
-{
-    mpdm_t r;
-
-    if (MPDM_IS_HASH(m))
-        r = mpdm_hset(m, k, v);
-    else
-        r = mpdm_aset(m, v, mpdm_ival(k));
-
-    return r;
-}
-
-
 #define IPOP(m) mpdm_ival(POP(m))
 #define RPOP(m) mpdm_rval(POP(m))
 #define RF(v) mpdm_ref(v)
@@ -918,10 +896,12 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
     if (m->mode != VM_ERROR)
         m->mode = VM_RUNNING;
 
+    m->ins = 0;
+
     while (m->mode == VM_RUNNING) {
 
         /* get the opcode */
-        mpsl_op_t opcode = (int) mpdm_ival(PC(m));
+        mpsl_op_t opcode = mpdm_ival(PC(m));
     
         switch (opcode) {
         case OP_EOP: m->mode = VM_IDLE; break;
@@ -951,6 +931,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_MUL: PUSH(m, MPDM_R(RPOP(m) * RPOP(m))); break;
         case OP_DIV: PUSH(m, MPDM_R(RPOP(m) / RPOP(m))); break;
         case OP_MOD: PUSH(m, MPDM_I(IPOP(m) % IPOP(m))); break;
+        case OP_NOT: PUSH(m, MPDM_I(!ISTRU(POP(m)))); break;
         case OP_EQ:  PUSH(m, MPDM_I(RPOP(m) == RPOP(m))); break;
         case OP_NE:  PUSH(m, MPDM_I(RPOP(m) != RPOP(m))); break;
         case OP_GT:  PUSH(m, MPDM_I(RPOP(m) >  RPOP(m))); break;
@@ -958,6 +939,8 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_REM: m->pc++; break;
         case OP_DMP: mpdm_dump(POP(m)); break;
         }
+
+        m->ins++;
 
         /* if out of slice time, break */        
         if (clock() > max)
@@ -980,7 +963,7 @@ char *ops[] = {
     "JMP", "JT", "JF",
 
     "ADD", "SUB", "MUL", "DIV", "MOD",
-    "EQ", "NE", "GT", "GE",
+    "NOT", "EQ", "NE", "GT", "GE",
     "REM", "DMP"
 };
 
