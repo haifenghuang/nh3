@@ -726,20 +726,10 @@ typedef enum {
 } mpsl_op_t;
 
 
-static int o(struct mpsl_c *c, mpsl_op_t op)
-{
-    mpdm_push(c->prg, MPDM_I(op));
-    return mpdm_size(c->prg);
-}
-
-static int o2(struct mpsl_c *c, mpsl_op_t op, mpdm_t v)
-{
-    int r = o(c, op);
-    mpdm_push(c->prg, v);
-    return r;
-}
-
+static int o(struct mpsl_c *c, mpsl_op_t op) { mpdm_push(c->prg, MPDM_I(op)); return mpdm_size(c->prg); }
+static int o2(struct mpsl_c *c, mpsl_op_t op, mpdm_t v) { int r = o(c, op); mpdm_push(c->prg, v); return r; }
 static void fix(struct mpsl_c *c, int n) { mpdm_aset(c->prg, MPDM_I(mpdm_size(c->prg)), n); }
+static int here(struct mpsl_c *c) { return mpdm_size(c->prg); }
 #define O(n) gen(c, mpdm_aget(node, n))
 
 
@@ -810,6 +800,9 @@ static void gen(struct mpsl_c *c, mpdm_t node)
         fix(c, n);
 
         break;
+
+    case N_WHILE:
+        n = here(c); O(1); i = o2(c, OP_JF, NULL); O(2); o2(c, OP_JMP, MPDM_I(n)); fix(c, i); break;
 
     case N_OR:
         O(1); o(c, OP_DUP); n = o2(c, OP_JT, NULL);
@@ -1020,7 +1013,7 @@ int main(int argc, char *argv[])
     memset(&c, '\0', sizeof(c));
 
 //    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
-    c.ptr = L"mp.init(); sub sum(a, b) { return a + b; } global v1, v2, v3 = {}, v4; sum(1, 2);";
+    c.ptr = L"while (n > 0) { n = n - 1; } mp.init(); sub sum(a, b) { return a + b; } global v1, v2, v3 = {}, v4; sum(1, 2);";
 //    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; } stored || ''; open && close; return a * b;";
     parse(&c);
 
