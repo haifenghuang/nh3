@@ -313,14 +313,13 @@ typedef enum {
     N_IF,       N_WHILE,
     N_NOP,      N_SEQ,
     N_SYMID,    N_SYMVAL,   N_ASSIGN,
+    N_FUNCAL,
     N_PARTOF,   N_SUBSCR,
-    N_EXECSYM,
     N_LOCAL,    N_GLOBAL,
     N_SUBDEF,   N_RETURN,
     N_VOID,
 
-    N_EOP,
-    N_LAST
+    N_EOP
 } mpsl_node_t;
 
 static mpdm_t node0(int type)
@@ -463,12 +462,12 @@ static mpsl_node_t op_by_token(struct mpsl_c *c)
     int n;
     static int tokens[] = {
         T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTERISK, T_SLASH, T_PERCENT, 
-        T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
+        T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
         T_DAMPERSAND, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL, -1
     };
     static mpsl_node_t binop[] = {
         N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
-        N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
+        N_FUNCAL, N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
         N_AND, N_OR, N_LOCAL, N_GLOBAL, N_ASSIGN, -1
     };
 
@@ -496,8 +495,8 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
             v = node1(N_SYMVAL, v);
 
         while (!c->error && (op = op_by_token(c)) > 0 && op <= p_op) {
-            /* subindexes */
             if (c->token == T_LBRACK) {
+                /* subindexes */
                 token(c);
 
                 v = node2(op, v, expr(c));
@@ -506,6 +505,27 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
                     token(c);
                 else
                 c->error = 2;
+            }
+            else
+            if (c->token == T_LPAREN) {
+                mpdm_t a;
+
+                /* function call */
+                token(c);
+
+                a = mpdm_ref(node0(N_ARRAY));
+
+                while (!c->error && c->token != T_RPAREN) {
+                    mpdm_push(a, expr(c));
+
+                    if (c->token == T_COMMA)
+                        token(c);
+                }
+
+                token(c);
+                mpdm_unrefnd(a);
+
+                v = node2(N_FUNCAL, a, v);
             }
             else {
                 token(c);
@@ -525,7 +545,8 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
 static mpdm_t expr(struct mpsl_c *c)
 /* returns a complete expression */
 {
-    return expr_p(c, N_LAST);
+    /* call expr_p with the lower precedence */
+    return expr_p(c, N_EOP);
 }
 
 
@@ -757,6 +778,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_STI); break;
     case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_STI); break;
     case N_RETURN:  O(1); o(c, OP_TPO); o(c, OP_RET); break;
+    case N_FUNCAL:  O(1); O(2); o(c, OP_CAL); break;
 
     case N_ARRAY:
         o(c, OP_ARR);
@@ -998,7 +1020,7 @@ int main(int argc, char *argv[])
     memset(&c, '\0', sizeof(c));
 
 //    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
-    c.ptr = L"sub sum(a, b) { return a + b; } global v1, v2, v3 = {}, v4;";
+    c.ptr = L"mp.init(); sub sum(a, b) { return a + b; } global v1, v2, v3 = {}, v4; sum(1, 2);";
 //    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; } stored || ''; open && close; return a * b;";
     parse(&c);
 
