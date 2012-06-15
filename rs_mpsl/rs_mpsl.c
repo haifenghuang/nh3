@@ -29,24 +29,24 @@ typedef enum {
     T_DOT,      T_COMMA,
 
     /* can be doubled and/or followed by = */
-    T_GT,       T_LT,       T_PIPE,     T_AMPERSAND,
+    T_GT,       T_LT,       T_PIPE,     T_AMP,
 
     /* can be doubled or followed by = */
     T_PLUS,     T_MINUS,
 
     /* can be followed by = */
     T_EQUAL,    T_BANG, 
-    T_ASTERISK, T_SLASH,    T_PERCENT,  T_CARET,
-    T_DGT,      T_DLT,      T_DPIPE,    T_DAMPERSAND,
+    T_ASTER,    T_SLASH,    T_PERCENT,  T_CARET,
+    T_DGT,      T_DLT,      T_DPIPE,    T_DAMP,
 
     /* no more combinations */
     T_DPLUS,    T_DMINUS,
 
-    T_GTEQ,     T_LTEQ,     T_PIPEEQ,  T_AMPEREQ,
+    T_GTEQ,     T_LTEQ,     T_PIPEEQ,  T_AMPEQ,
     T_PLUSEQ,   T_MINUSEQ,
     T_EQEQ,     T_BANGEQ,
     T_ASTEREQ,  T_SLASHEQ,  T_PERCEQ,   T_CARETEQ,
-    T_DGTEQ,    T_DLTEQ,    T_DPIPEEQ, T_DAMPEREQ,
+    T_DGTEQ,    T_DLTEQ,    T_DPIPEEQ, T_DAMPEQ,
 
     T_SYMBOL,   T_LITERAL
 } mpsl_token_t;
@@ -86,29 +86,90 @@ struct mpsl_c {
 };
 
 
-static void t_nextc(struct mpsl_c *l)
+static wchar_t t_nextc(struct mpsl_c *c)
 /* gets the next char */
 {
-    if (l->ptr != NULL)
-        l->c = *(l->ptr++);
+    if (c->ptr != NULL)
+        c->c = *(c->ptr++);
     else
-        l->c = fgetwc(l->f);
+        c->c = fgetwc(c->f);
 
     /* update position in source */
-    if (l->c == L'\n') {
-        l->y++;
-        l->x = -1;
+    if (c->c == L'\n') {
+        c->y++;
+        c->x = -1;
     }
     else
-        l->x++;
+        c->x++;
+
+    return c->c;
 }
 
 #define STORE(COND) while (COND) { \
-    ds_poke(l->token_s, l->c); \
-    t_nextc(l); \
+    ds_poke(c->token_s, c->c); \
+    t_nextc(c); \
     } \
-    ds_poke(l->token_s, L'\0')
+    ds_poke(c->token_s, L'\0')
 
+#define COMP(d,e,de) \
+    if (c->c == i) { \
+        if (d != -1) { t_nextc(c); t = d; } \
+        if (c->c == L'=' && de != -1) { t_nextc(c); t = de; } \
+    } else if (c->c == L'=' && e != -1) { t_nextc(c); t = e; }
+
+
+static int token2(struct mpsl_c *c)
+{
+    mpsl_token_t t = T_ERROR;
+    wchar_t i;
+
+    ds_rewind(c->token_s);
+
+again:
+    i = c->c;
+
+    switch (i) {
+    case L' ': case L'\t': case L'\r': case L'\n': t_nextc(c); goto again;
+    case L'\0': case WEOF: t = T_EOP; break;
+    case L'\'': t_nextc(c); STORE(c->c != L'\''); t_nextc(c); c->token = T_LITERAL; break;
+    case L'{':  t = T_LBRACE;   t_nextc(c); break;
+    case L'}':  t = T_RBRACE;   t_nextc(c); break;
+    case L'(':  t = T_LPAREN;   t_nextc(c); break;
+    case L')':  t = T_RPAREN;   t_nextc(c); break;
+    case L'[':  t = T_LBRACK;   t_nextc(c); break;
+    case L']':  t = T_RBRACK;   t_nextc(c); break;
+    case L':':  t = T_COLON;    t_nextc(c); break;
+    case L';':  t = T_SEMI;     t_nextc(c); break;
+    case L'.':  t = T_DOT;      t_nextc(c); break;
+    case L',':  t = T_COMMA;    t_nextc(c); break;
+    case L'>':  t = T_GT;       t_nextc(c); COMP(T_DGT, T_GTEQ, T_DGTEQ); break;
+    case L'<':  t = T_LT;       t_nextc(c); COMP(T_DLT, T_LTEQ, T_DLTEQ); break;
+    case L'|':  t = T_PIPE;     t_nextc(c); COMP(T_DPIPE, T_PIPEEQ, T_DPIPEEQ); break;
+    case L'&':  t = T_AMP;      t_nextc(c); COMP(T_DAMP, T_AMPEQ, T_DAMPEQ); break;
+    case L'+':  t = T_PLUS;     t_nextc(c); COMP(T_DPLUS, T_PLUSEQ, -1); break;
+    case L'-':  t = T_MINUS;    t_nextc(c); COMP(T_DMINUS, T_MINUSEQ, -1); break;
+    case L'=':  t = T_EQUAL;    t_nextc(c); COMP(-1, T_EQEQ, -1); break;
+    case L'!':  t = T_BANG;     t_nextc(c); COMP(-1, T_BANGEQ, -1); break;
+    case L'*':  t = T_ASTER;    t_nextc(c); COMP(-1, T_EQEQ, -1); break;
+    case L'%':  t = T_PERCENT;  t_nextc(c); COMP(-1, T_PERCEQ, -1); break;
+    case L'^':  t = T_CARET;    t_nextc(c); COMP(-1, T_CARETEQ, -1); break;
+    case L'/':  t = T_SLASH;    t_nextc(c);
+        if (c->c == L'*') {
+            /* C-style comments */
+            t_nextc(c);
+            while (c->c != L'\0' && c->c != WEOF) {
+                if (c->c == L'*' && t_nextc(c) == L'/') break;
+                t_nextc(c);
+            }
+            goto again;
+        }
+        COMP(-1, T_SLASHEQ, -1); break;
+    default:
+        break;
+    }
+
+    return c->token = t;
+}
 
 static int t_blanks(struct mpsl_c *c)
 /* skip blanks */
@@ -151,7 +212,7 @@ static int t_martians(struct mpsl_c *c)
         }
 
         /* is it followed by = ? */
-        if (c->c == L'=' && c->token >= T_PLUS && c->token <= T_DAMPERSAND) {
+        if (c->c == L'=' && c->token >= T_PLUS && c->token <= T_DAMP) {
             t_nextc(c);
             c->token += (T_PLUSEQ - T_PLUS);
         }
@@ -204,14 +265,14 @@ static int t_string(struct mpsl_c *l)
 }
 
 
-static int t_vstring(struct mpsl_c *l)
+static int t_vstring(struct mpsl_c *c)
 /* tokenize verbatim strings */
 {
-    if (l->c == L'\'') {
-        t_nextc(l);
-        STORE(l->c != L'\'');
-        t_nextc(l);
-        l->token = T_LITERAL;
+    if (c->c == L'\'') {
+        t_nextc(c);
+        STORE(c->c != L'\'');
+        t_nextc(c);
+        c->token = T_LITERAL;
 
         return 0;
     }
@@ -220,24 +281,24 @@ static int t_vstring(struct mpsl_c *l)
 }
 
 
-static int t_symbol(struct mpsl_c *l)
+static int t_symbol(struct mpsl_c *c)
 /* tokenize symbols and keywords */
 {
-    if (iswalpha(l->c)) {
+    if (iswalpha(c->c)) {
         int n;
 
-        STORE(iswalnum(l->c));
+        STORE(iswalnum(c->c));
 
         /* is it a special token? */
         for (n = 0; tokens_s[n] != NULL; n++) {
-            if (wcscmp(l->token_s.d, tokens_s[n]) == 0)
+            if (wcscmp(c->token_s.d, tokens_s[n]) == 0)
                 break;
         }
 
         if (tokens_s[n] == NULL)
-            l->token = T_SYMBOL;
+            c->token = T_SYMBOL;
         else
-            l->token = n + T_IF;
+            c->token = n + T_IF;
 
         return 0;
     }
@@ -246,21 +307,21 @@ static int t_symbol(struct mpsl_c *l)
 }
 
 
-static int t_number(struct mpsl_c *l)
+static int t_number(struct mpsl_c *c)
 /* tokenize real, integer and scientific numbers */
 {
-    if (iswdigit(l->c)) {
+    if (iswdigit(c->c)) {
         /* numbers */
-        STORE(iswdigit(l->c));
+        STORE(iswdigit(c->c));
 
         /* is it a dot or scientific notation? */
-        if (l->c == L'.' || l->c == L'e' || l->c == L'E') {
+        if (c->c == L'.' || c->c == L'e' || c->c == L'E') {
             /* store it and another set of digits */
-            ds_poke(l->token_s, l->c);
-            STORE(iswdigit(l->c));
+            ds_poke(c->token_s, c->c);
+            STORE(iswdigit(c->c));
         }
 
-        l->token = T_LITERAL;
+        c->token = T_LITERAL;
         return 0;
     }
 
@@ -268,39 +329,39 @@ static int t_number(struct mpsl_c *l)
 }
 
 
-static int t_nd_number(struct mpsl_c *l)
+static int t_nd_number(struct mpsl_c *c)
 /* tokenize non-decimal base numbers */
 {
-    if (l->c == L'0') {
-        ds_poke(l->token_s, l->c);
-        t_nextc(l);
+    if (c->c == L'0') {
+        ds_poke(c->token_s, c->c);
+        t_nextc(c);
 
-        if (l->c == L'.') {
-            ds_poke(l->token_s, l->c);
-            return t_number(l);
+        if (c->c == L'.') {
+            ds_poke(c->token_s, c->c);
+            return t_number(c);
         }
         else
-        if (l->c == L'b' || l->c == L'B') {
+        if (c->c == L'b' || c->c == L'B') {
             /* binary */
-            ds_poke(l->token_s, l->c);
-            t_nextc(l);
-            STORE(l->c == L'0' || l->c == L'1');
-            l->token = T_LITERAL;
+            ds_poke(c->token_s, c->c);
+            t_nextc(c);
+            STORE(c->c == L'0' || c->c == L'1');
+            c->token = T_LITERAL;
             return 0;
         }
         else
-        if (l->c == L'x' || l->c == L'X') {
+        if (c->c == L'x' || c->c == L'X') {
             /* hex */
-            ds_poke(l->token_s, l->c);
-            t_nextc(l);
-            STORE(iswxdigit(l->c));
-            l->token = T_LITERAL;
+            ds_poke(c->token_s, c->c);
+            t_nextc(c);
+            STORE(iswxdigit(c->c));
+            c->token = T_LITERAL;
             return 0;
         }
         else {
             /* octal */
-            STORE(l->c >= L'0' && l->c <= L'7');
-            l->token = T_LITERAL;
+            STORE(c->c >= L'0' && c->c <= L'7');
+            c->token = T_LITERAL;
             return 0;
         }
     }
@@ -487,10 +548,10 @@ static mpsl_node_t op_by_token(struct mpsl_c *c)
 {
     int n;
     static int tokens[] = {
-        T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTERISK, T_SLASH, T_PERCENT, 
+        T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTER, T_SLASH, T_PERCENT, 
         T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
-        T_DAMPERSAND, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL,
-        T_AMPERSAND, T_PIPE, T_CARET, T_DLT, T_DGT, -1
+        T_DAMP, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL,
+        T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, -1
     };
     static mpsl_node_t binop[] = {
         N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
