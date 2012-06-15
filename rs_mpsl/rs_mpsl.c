@@ -12,51 +12,6 @@
 
 #include <mpdm.h>
 
-
-/** lexer **/
-
-typedef enum {
-    /* caution: order matters */
-    T_EOP,      T_ERROR,
-
-    T_IF,       T_ELSE,     T_WHILE,    T_BREAK,
-    T_LOCAL,    T_GLOBAL,   T_SUB,      T_RETURN, T_NULL,
-
-    T_LBRACE,   T_RBRACE,
-    T_LPAREN,   T_RPAREN,
-    T_LBRACK,   T_RBRACK,
-    T_COLON,    T_SEMI,
-    T_DOT,      T_COMMA,
-
-    /* can be doubled and/or followed by = */
-    T_GT,       T_LT,       T_PIPE,     T_AMP,
-
-    /* can be doubled or followed by = */
-    T_PLUS,     T_MINUS,
-
-    /* can be followed by = */
-    T_EQUAL,    T_BANG, 
-    T_ASTER,    T_SLASH,    T_PERCENT,  T_CARET,
-    T_DGT,      T_DLT,      T_DPIPE,    T_DAMP,
-
-    /* no more combinations */
-    T_DPLUS,    T_DMINUS,
-
-    T_GTEQ,     T_LTEQ,     T_PIPEEQ,  T_AMPEQ,
-    T_PLUSEQ,   T_MINUSEQ,
-    T_EQEQ,     T_BANGEQ,
-    T_ASTEREQ,  T_SLASHEQ,  T_PERCEQ,   T_CARETEQ,
-    T_DGTEQ,    T_DLTEQ,    T_DPIPEEQ, T_DAMPEQ,
-
-    T_SYMBOL,   T_LITERAL
-} mpsl_token_t;
-
-static wchar_t *tokens_s[] = {
-    /* should match token enum */
-    L"if", L"else", L"while", L"break",
-    L"local", L"global", L"sub", L"return", L"NULL", NULL
-};
-
 /* dynamic string manipulation macros */
 #ifndef ds_init
 struct ds {
@@ -72,6 +27,29 @@ struct ds {
 #define ds_pokes(x,t) do { wchar_t *p = t; while(*p) ds_poke(x, *p++); } while(0)
 #endif                          /* ds_init */
 
+
+/** tokens **/
+
+typedef enum {
+    T_EOP,    T_ERROR,
+    T_IF,     T_ELSE,    T_WHILE,   T_BREAK,
+    T_LOCAL,  T_GLOBAL,  T_SUB,     T_RETURN,  T_NULL,
+    T_LBRACE, T_RBRACE,  T_LPAREN,  T_RPAREN,  T_LBRACK,  T_RBRACK,
+    T_COLON,  T_SEMI,    T_DOT,     T_COMMA,
+    T_GT,     T_LT,      T_PIPE,    T_AMP,
+    T_PLUS,   T_MINUS,   T_ASTER,   T_SLASH,   T_PERCENT,  
+    T_EQUAL,  T_BANG,    T_CARET,
+    T_DGT,    T_DLT,     T_DPIPE,   T_DAMP,    T_DPLUS,   T_DMINUS,
+    T_GTEQ,   T_LTEQ,    T_PIPEEQ,  T_AMPEQ,
+    T_PLUSEQ, T_MINUSEQ, T_ASTEREQ, T_SLASHEQ, T_PERCEQ,
+    T_EQEQ,   T_BANGEQ,  T_CARETEQ,
+    T_DGTEQ,  T_DLTEQ,   T_DPIPEEQ, T_DAMPEQ,
+    T_SYMBOL, T_LITERAL
+} mpsl_token_t;
+
+
+/** compiler structure **/
+
 struct mpsl_c {
     mpsl_token_t token; /* token found */
     struct ds token_s;  /* token as string */
@@ -86,13 +64,12 @@ struct mpsl_c {
 };
 
 
+/** lexer **/
+
 static wchar_t t_nextc(struct mpsl_c *c)
 /* gets the next char */
 {
-    if (c->ptr != NULL)
-        c->c = *(c->ptr++);
-    else
-        c->c = fgetwc(c->f);
+    c->c = c->ptr ? *(c->ptr++) : fgetwc(c->f);
 
     /* update position in source */
     if (c->c == L'\n') {
@@ -120,7 +97,8 @@ static wchar_t t_nextc(struct mpsl_c *c)
 #define HEXDG(h) (DIGIT(h) || ((h) >= L'a' && (h) <= L'f') || ((h) >= L'A' && (h) <= L'F'))
 #define OCTDG(h) ((h) >= L'0' && (h) <= L'7')
 
-static mpsl_token_t token2(struct mpsl_c *c)
+
+static mpsl_token_t token(struct mpsl_c *c)
 {
     mpsl_token_t t = T_ERROR;
     wchar_t i;
@@ -242,219 +220,10 @@ again:
         break;
     }
 
+    if (t == T_ERROR)
+        c->error = 1;
+
     return c->token = t;
-}
-
-static int t_blanks(struct mpsl_c *c)
-/* skip blanks */
-{
-    while (c->c == L' ' || c->c == L'\t' || c->c == L'\r' || c->c == L'\n')
-        t_nextc(c);
-
-    return 1;
-}
-
-
-static int t_eop(struct mpsl_c *l)
-/* tokenize end of program */
-{
-    if (l->c == L'\0' || l->c == WEOF) {
-        l->token = T_EOP;
-        return 0;
-    }
-
-    return 1;
-}
-
-
-static int t_martians(struct mpsl_c *c)
-/* tokenize funny characters */
-{
-    int ret = 0;
-    wchar_t i = c->c;
-    wchar_t *ptr;
-    static wchar_t t[] = L"{}()[]:;.,><|&+-=!*/%^";
-
-    if ((ptr = wcschr(t, i)) != NULL) {
-        t_nextc(c);
-        c->token = (ptr - t) + T_LBRACE;
-
-        /* is it doubled? */
-        if (c->c == i && c->token >= T_GT && c->token <= T_MINUS) {
-            t_nextc(c);
-            c->token += (T_DGT - T_GT);
-        }
-
-        /* is it followed by = ? */
-        if (c->c == L'=' && c->token >= T_PLUS && c->token <= T_DAMP) {
-            t_nextc(c);
-            c->token += (T_PLUSEQ - T_PLUS);
-        }
-    }
-    else
-        ret = 1;
-
-    return ret;
-}
-
-
-static int t_string(struct mpsl_c *l)
-/* tokenize strings */
-{
-    if (l->c == L'"') {
-        t_nextc(l);
-
-        while (l->c != L'"') {
-            wchar_t c = l->c;
-
-            if (c == L'\\') {
-                t_nextc(l);
-                c = l->c;
-                switch (c) {
-                case L'n': c = L'\n';   break;
-                case L'r': c = L'\r';   break;
-                case L't': c = L'\t';   break;
-                case L'e': c = 27;      break;
-                case L'\\': c = L'\\';  break;
-                case L'"': c = L'"';    break;
-                case L'x':
-                    /* parse hexquad */
-                    /* FIXME */
-                    break;
-                }
-            }
-
-            ds_poke(l->token_s, c);
-            t_nextc(l);
-        }
-        ds_poke(l->token_s, L'\0');
-
-        t_nextc(l);
-        l->token = T_LITERAL;
-
-        return 0;
-    }
-
-    return 1;
-}
-
-
-static int t_vstring(struct mpsl_c *c)
-/* tokenize verbatim strings */
-{
-    if (c->c == L'\'') {
-        t_nextc(c);
-        STORE(c->c != L'\'');
-        t_nextc(c);
-        c->token = T_LITERAL;
-
-        return 0;
-    }
-
-    return 1;
-}
-
-
-static int t_symbol(struct mpsl_c *c)
-/* tokenize symbols and keywords */
-{
-    if (iswalpha(c->c)) {
-        int n;
-
-        STORE(iswalnum(c->c));
-
-        /* is it a special token? */
-        for (n = 0; tokens_s[n] != NULL; n++) {
-            if (wcscmp(c->token_s.d, tokens_s[n]) == 0)
-                break;
-        }
-
-        if (tokens_s[n] == NULL)
-            c->token = T_SYMBOL;
-        else
-            c->token = n + T_IF;
-
-        return 0;
-    }
-
-    return 1;
-}
-
-
-static int t_number(struct mpsl_c *c)
-/* tokenize real, integer and scientific numbers */
-{
-    if (iswdigit(c->c)) {
-        /* numbers */
-        STORE(iswdigit(c->c));
-
-        /* is it a dot or scientific notation? */
-        if (c->c == L'.' || c->c == L'e' || c->c == L'E') {
-            /* store it and another set of digits */
-            ds_poke(c->token_s, c->c);
-            STORE(iswdigit(c->c));
-        }
-
-        c->token = T_LITERAL;
-        return 0;
-    }
-
-    return 1;
-}
-
-
-static int t_nd_number(struct mpsl_c *c)
-/* tokenize non-decimal base numbers */
-{
-    if (c->c == L'0') {
-        ds_poke(c->token_s, c->c);
-        t_nextc(c);
-
-        if (c->c == L'.') {
-            ds_poke(c->token_s, c->c);
-            return t_number(c);
-        }
-        else
-        if (c->c == L'b' || c->c == L'B') {
-            /* binary */
-            ds_poke(c->token_s, c->c);
-            t_nextc(c);
-            STORE(c->c == L'0' || c->c == L'1');
-            c->token = T_LITERAL;
-            return 0;
-        }
-        else
-        if (c->c == L'x' || c->c == L'X') {
-            /* hex */
-            ds_poke(c->token_s, c->c);
-            t_nextc(c);
-            STORE(iswxdigit(c->c));
-            c->token = T_LITERAL;
-            return 0;
-        }
-        else {
-            /* octal */
-            STORE(c->c >= L'0' && c->c <= L'7');
-            c->token = T_LITERAL;
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
-
-static int token(struct mpsl_c *l)
-{
-    ds_rewind(l->token_s);
-
-    if (t_blanks(l) && t_eop(l) && t_martians(l) && t_string(l) &&
-        t_vstring(l) && t_symbol(l) && t_nd_number(l) && t_number(l)) {
-        l->error = 1;
-        l->token = T_ERROR;
-    }
-
-    return l->token;
 }
 
 
@@ -462,26 +231,24 @@ static int token(struct mpsl_c *l)
 
 typedef enum {
     /* order matters (operator precedence) */
-    N_NULL,     N_LITERAL,
-    N_ARRAY,    N_HASH,
-
-    N_UMINUS,   N_NOT,
-    N_MOD,      N_DIV,      N_MUL,  N_SUB,  N_ADD,
-    N_EQ,       N_NE,       N_GT,   N_GE,   N_LT,  N_LE,
-    N_AND,      N_OR,
-    N_BINAND,   N_BINOR,    N_XOR,  N_SHL,  N_SHR,
-
-    N_IF,       N_WHILE,
-    N_NOP,      N_SEQ,
-    N_SYMID,    N_SYMVAL,   N_ASSIGN,
+    N_NULL,   N_LITERAL,
+    N_ARRAY,  N_HASH,
+    N_UMINUS, N_NOT,
+    N_MOD,    N_DIV,    N_MUL,  N_SUB,  N_ADD,
+    N_EQ,     N_NE,     N_GT,   N_GE,   N_LT,  N_LE,
+    N_AND,    N_OR,
+    N_BINAND, N_BINOR,  N_XOR,  N_SHL,  N_SHR,
+    N_IF,     N_WHILE,
+    N_NOP,    N_SEQ,
+    N_SYMID,  N_SYMVAL, N_ASSIGN,
     N_FUNCAL,
-    N_PARTOF,   N_SUBSCR,
-    N_LOCAL,    N_GLOBAL,
-    N_SUBDEF,   N_RETURN,
+    N_PARTOF, N_SUBSCR,
+    N_LOCAL,  N_GLOBAL,
+    N_SUBDEF, N_RETURN,
     N_VOID,
-
     N_EOP
 } mpsl_node_t;
+
 
 static mpdm_t node0(int type)
 {
