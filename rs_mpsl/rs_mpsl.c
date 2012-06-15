@@ -111,14 +111,20 @@ static wchar_t t_nextc(struct mpsl_c *c)
     } \
     ds_poke(c->token_s, L'\0')
 
-#define COMP(d,e,de) \
-    if (c->c == i) { \
+#define COMP(d,e,de) if (c->c == i) { \
         if (d != -1) { t_nextc(c); t = d; } \
         if (c->c == L'=' && de != -1) { t_nextc(c); t = de; } \
     } else if (c->c == L'=' && e != -1) { t_nextc(c); t = e; }
 
+#define STOKEN(s,v) if (t == T_ERROR && wcscmp(c->token_s.d, s) == 0) t = v
 
-static int token2(struct mpsl_c *c)
+#define DIGIT(d) ((d) >= L'0' && (d) <= L'9')
+#define ALPHA(a) ((a) == L'_' || (((a) >= L'a') && ((a) <= L'z')) || (((a) >= L'A') && ((a) <= L'Z')))
+#define ALNUM(d) (DIGIT(d) || ALPHA(d))
+#define HEXDG(h) (DIGIT(d) || ((h) >= L'a' && (h) <= L'f') || ((h) >= L'A' && (h) <= L'F'))
+
+
+static mpsl_token_t token2(struct mpsl_c *c)
 {
     mpsl_token_t t = T_ERROR;
     wchar_t i;
@@ -165,6 +171,23 @@ again:
         }
         COMP(-1, T_SLASHEQ, -1); break;
     default:
+        if (DIGIT(c->c)) {
+        }
+        if (ALPHA(c->c)) {
+            STORE(ALNUM(c->c));
+            STOKEN(L"if",       T_IF);
+            STOKEN(L"else",     T_ELSE);
+            STOKEN(L"while",    T_WHILE);
+            STOKEN(L"break",    T_BREAK);
+            STOKEN(L"local",    T_LOCAL);
+            STOKEN(L"global",   T_GLOBAL);
+            STOKEN(L"sub",      T_SUB);
+            STOKEN(L"return",   T_RETURN);
+            STOKEN(L"NULL",     T_NULL);
+
+            if (t == T_ERROR) t = T_SYMBOL;
+        }
+
         break;
     }
 
