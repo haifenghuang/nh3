@@ -822,7 +822,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
 
     case N_SUBDEF:
         O(1); n = o2(c, OP_LIT, NULL); o(c, OP_SET); i = o2(c, OP_JMP, NULL);
-        fix(c, n); O(2); o(c, OP_ARG); O(3); fix(c, i); break;
+        fix(c, n); O(2); o(c, OP_ARG); O(3); o(c, OP_RET); fix(c, i); break;
     }
 }
 
