@@ -168,7 +168,32 @@ static int t_string(struct mpsl_c *l)
 {
     if (l->c == L'"') {
         t_nextc(l);
-        STORE(l->c != L'"');
+
+        while (l->c != L'"') {
+            wchar_t c = l->c;
+
+            if (c == L'\\') {
+                t_nextc(l);
+                c = l->c;
+                switch (c) {
+                case L'n': c = L'\n';   break;
+                case L'r': c = L'\r';   break;
+                case L't': c = L'\t';   break;
+                case L'e': c = 27;      break;
+                case L'\\': c = L'\\';  break;
+                case L'"': c = L'"';    break;
+                case L'x':
+                    /* parse hexquad */
+                    /* FIXME */
+                    break;
+                }
+            }
+
+            ds_poke(l->token_s, c);
+            t_nextc(l);
+        }
+        ds_poke(l->token_s, L'\0');
+
         t_nextc(l);
         l->token = T_LITERAL;
 
