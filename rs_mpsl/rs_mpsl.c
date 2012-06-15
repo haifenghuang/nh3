@@ -105,11 +105,7 @@ static wchar_t t_nextc(struct mpsl_c *c)
     return c->c;
 }
 
-#define STORE(COND) while (COND) { \
-    ds_poke(c->token_s, c->c); \
-    t_nextc(c); \
-    } \
-    ds_poke(c->token_s, L'\0')
+#define STORE(COND) while (COND) { ds_poke(c->token_s, c->c); t_nextc(c); } ds_poke(c->token_s, L'\0')
 
 #define COMP(d,e,de) if (c->c == i) { \
         if (d != -1) { t_nextc(c); t = d; } \
@@ -121,8 +117,8 @@ static wchar_t t_nextc(struct mpsl_c *c)
 #define DIGIT(d) ((d) >= L'0' && (d) <= L'9')
 #define ALPHA(a) ((a) == L'_' || (((a) >= L'a') && ((a) <= L'z')) || (((a) >= L'A') && ((a) <= L'Z')))
 #define ALNUM(d) (DIGIT(d) || ALPHA(d))
-#define HEXDG(h) (DIGIT(d) || ((h) >= L'a' && (h) <= L'f') || ((h) >= L'A' && (h) <= L'F'))
-
+#define HEXDG(h) (DIGIT(h) || ((h) >= L'a' && (h) <= L'f') || ((h) >= L'A' && (h) <= L'F'))
+#define OCTDG(h) ((h) >= L'0' && (h) <= L'7')
 
 static mpsl_token_t token2(struct mpsl_c *c)
 {
@@ -171,9 +167,40 @@ again:
         }
         COMP(-1, T_SLASHEQ, -1); break;
     default:
-        if (DIGIT(c->c)) {
+        if (DIGIT(i)) {
+            t = T_LITERAL;
+
+            if (i == L'0') {
+                ds_poke(c->token_s, c->c); t_nextc(c);
+
+                if (c->c == L'b' || c->c == L'B') {
+                    ds_poke(c->token_s, c->c); t_nextc(c);
+                    STORE(c->c == L'0' || c->c == L'1');
+                    break;
+                }
+                else
+                if (c->c == L'x' || c->c == L'X') {
+                    ds_poke(c->token_s, c->c); t_nextc(c);
+                    STORE(HEXDG(c->c));
+                    break;
+                }
+                else
+                if (OCTDG(c->c)) {
+                    STORE(OCTDG(c->c));
+                    break;
+                }
+                else
+                if (c->c != L'.')
+                    break;
+            }
+
+            STORE(DIGIT(c->c));
+            if (c->c == L'.' || c->c == L'e' || c->c == L'E') {
+                ds_poke(c->token_s, c->c); t_nextc(c);
+                STORE(DIGIT(c->c));
+            }
         }
-        if (ALPHA(c->c)) {
+        if (ALPHA(i)) {
             STORE(ALNUM(c->c));
             STOKEN(L"if",       T_IF);
             STOKEN(L"else",     T_ELSE);
