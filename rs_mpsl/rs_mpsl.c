@@ -943,7 +943,6 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
         case OP_TPO: --m->tt; break;
         case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
-        case OP_CAL: mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++); m->pc = IPOP(m); break;
         case OP_RET: m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
         case OP_ARG: break;
         case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
@@ -966,6 +965,14 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SHR: PUSH(m, MPDM_I(IPOP(m) >> IPOP(m))); break;
         case OP_REM: m->pc++; break;
         case OP_DMP: mpdm_dump(POP(m)); break;
+        case OP_CAL:
+            if (MPDM_IS_EXEC((v = POP(m))))
+                mpdm_exec(v, POP(m), NULL);
+            else {
+                mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++);
+                m->pc = mpdm_ival(v);
+            }
+            break;
         }
 
         m->ins++;
