@@ -133,7 +133,7 @@ again:
     switch (i) {
     case L' ': case L'\t': case L'\r': case L'\n': t_nextc(c); goto again;
     case L'\0': case WEOF: t = T_EOP; break;
-    case L'\'': t_nextc(c); STORE(c->c != L'\''); t_nextc(c); c->token = T_LITERAL; break;
+    case L'\'': t_nextc(c); STORE(c->c != L'\''); t_nextc(c); t = T_LITERAL; break;
     case L'{':  t = T_LBRACE;   t_nextc(c); break;
     case L'}':  t = T_RBRACE;   t_nextc(c); break;
     case L'(':  t = T_LPAREN;   t_nextc(c); break;
@@ -165,7 +165,31 @@ again:
             }
             goto again;
         }
-        COMP(-1, T_SLASHEQ, -1); break;
+        COMP(-1, T_SLASHEQ, -1);
+        break;
+    case L'"':
+        while (t_nextc(c) != L'"') {
+            wchar_t m = c->c;
+
+            if (m == L'\\') {
+                m = t_nextc(c);
+                switch (m) {
+                case L'n': m = L'\n';   break;
+                case L'r': m = L'\r';   break;
+                case L't': m = L'\t';   break;
+                case L'e': m = 27;      break;
+                case L'\\': m = L'\\';  break;
+                case L'"': m = L'"';    break;
+                case L'x':
+                    break;
+                }
+            }
+            ds_poke(c->token_s, m);
+        }
+        ds_poke(c->token_s, L'\0');
+        t = T_LITERAL;
+        break;
+
     default:
         if (DIGIT(i)) {
             t = T_LITERAL;
