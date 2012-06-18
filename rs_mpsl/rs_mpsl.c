@@ -17,7 +17,7 @@
 typedef enum {
     T_EOP,    T_ERROR,
     T_IF,     T_ELSE,    T_WHILE,   T_BREAK,
-    T_LOCAL,  T_GLOBAL,  T_SUB,     T_RETURN,  T_NULL,
+    T_LOCAL,  T_GLOBAL,  T_SUB,     T_RETURN,  T_NULL,    T_THIS,
     T_LBRACE, T_RBRACE,  T_LPAREN,  T_RPAREN,  T_LBRACK,  T_RBRACK,
     T_COLON,  T_SEMI,    T_DOT,     T_COMMA,
     T_GT,     T_LT,      T_PIPE,    T_AMP,
@@ -202,6 +202,7 @@ again:
             STOKEN(L"sub",      T_SUB);
             STOKEN(L"return",   T_RETURN);
             STOKEN(L"NULL",     T_NULL);
+            STOKEN(L"this",     T_THIS);
 
             if (t == T_ERROR) t = T_SYMBOL;
         }
@@ -231,7 +232,7 @@ typedef enum {
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
     N_FUNCAL,
-    N_PARTOF, N_SUBSCR,
+    N_PARTOF, N_SUBSCR, N_THIS,
     N_LOCAL,  N_GLOBAL,
     N_SUBDEF, N_RETURN,
     N_VOID,
@@ -312,6 +313,11 @@ static mpdm_t term(struct mpsl_c *c)
     if (c->token == T_MINUS) {
         token(c);
         v = node1(N_UMINUS, expr_p(c, N_UMINUS));
+    }
+    else
+    if (c->token == T_THIS) {
+        token(c);
+        v = node0(N_THIS);
     }
     else
     if (c->token == T_LPAREN)
@@ -635,7 +641,7 @@ typedef enum {
     OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROO,
     OP_POP, OP_SWP, OP_DUP,
     OP_GET, OP_SET, OP_STI, OP_TBL,
-    OP_TPU, OP_TPO, OP_TLT,
+    OP_TPU, OP_TPO, OP_TLT, OP_THS,
     OP_CAL, OP_RET, OP_ARG,
     OP_JMP, OP_JT, OP_JF,
     OP_AND, OP_OR, OP_XOR, OP_SHL, OP_SHR,
@@ -682,6 +688,7 @@ static void gen(struct mpsl_c *c, mpdm_t node)
     case N_ASSIGN:  O(1); O(2); o(c, OP_SET); break;
     case N_SYMVAL:  O(1); o(c, OP_GET); break;
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
+    case N_THIS:    o(c, OP_THS); break;
     case N_SUBSCR:  O(1); O(2); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_STI); break;
@@ -859,6 +866,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
         case OP_TPO: --m->tt; break;
         case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
+        case OP_THS: PUSH(m, mpdm_aget(m->symtbl, m->tt - 2)); break;
         case OP_RET: m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
         case OP_ARG: break;
         case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
@@ -909,7 +917,7 @@ char *ops[] = {
     "LIT", "NUL", "ARR", "HSH", "ROO",
     "POP", "SWP", "DUP",
     "GET", "SET", "STI", "TBL",
-    "TPU", "TPO", "TLT",
+    "TPU", "TPO", "TLT", "THS",
     "CAL", "RET", "ARG",
     "JMP", "JT", "JF",
     "AND", "OR", "XOR", "SHL", "SHR",
@@ -949,7 +957,7 @@ int main(int argc, char *argv[])
     memset(&c, '\0', sizeof(c));
 
 //    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
-    c.ptr = L"while (n > 0) { n = n - 1; } mp.init(); sub sum(a, b) { return a + b; } global v1, v2, v3 = {}, v4; sum(1, 2);";
+    c.ptr = L"this.x = 0; while (n > 0) { n = n - 1; } mp.init(); sub sum(a, b) { return a + b; } global v1, v2, v3 = {}, v4; sum(1, 2);";
 //    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; } stored || ''; open && close; return a * b;";
     parse(&c);
 
