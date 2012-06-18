@@ -12,21 +12,6 @@
 
 #include <mpdm.h>
 
-/* dynamic string manipulation macros */
-#ifndef ds_init
-struct ds {
-    wchar_t *d;
-    int p;
-    int s;
-};
-#define ds_init(x) do { x.d = (wchar_t *)0; x.p = x.s = 0; } while(0)
-#define ds_rewind(x) x.p = 0;
-#define ds_free(x) do { if(x.d) free(x.d); ds_init(x); } while(0)
-#define ds_redim(x) do { if(x.p >= x.s) x.d = realloc(x.d, ++x.s * sizeof(wchar_t)); } while(0)
-#define ds_poke(x,c) do { ds_redim(x); x.d[x.p++] = c; } while(0)
-#define ds_pokes(x,t) do { wchar_t *p = t; while(*p) ds_poke(x, *p++); } while(0)
-#endif                          /* ds_init */
-
 
 /** tokens **/
 
@@ -52,7 +37,9 @@ typedef enum {
 
 struct mpsl_c {
     mpsl_token_t token; /* token found */
-    struct ds token_s;  /* token as string */
+    wchar_t *token_s;   /* token as string */
+    int token_i;        /* token size */
+    int token_o;        /* offset to end of token */
     mpdm_t node;        /* generated nodes */
     mpdm_t prg;         /* generated program */
     int x;              /* x source position */
@@ -82,14 +69,16 @@ static wchar_t t_nextc(struct mpsl_c *c)
     return c->c;
 }
 
-#define STORE(COND) while (COND) { ds_poke(c->token_s, c->c); t_nextc(c); } ds_poke(c->token_s, L'\0')
+void POKE(struct mpsl_c *c, wchar_t k) { c->token_s = mpdm_poke_o(c->token_s, &c->token_i, &c->token_o, &k, sizeof(wchar_t), 1); }
+
+#define STORE(COND) while (COND) { POKE(c, c->c); t_nextc(c); } POKE(c, L'\0')
 
 #define COMP(d,e,de) if (c->c == i) { \
         if (d != -1) { t_nextc(c); t = d; } \
         if (c->c == L'=' && de != -1) { t_nextc(c); t = de; } \
     } else if (c->c == L'=' && e != -1) { t_nextc(c); t = e; }
 
-#define STOKEN(s,v) if (t == T_ERROR && wcscmp(c->token_s.d, s) == 0) t = v
+#define STOKEN(s,v) if (t == T_ERROR && wcscmp(c->token_s, s) == 0) t = v
 
 #define DIGIT(d) ((d) >= L'0' && (d) <= L'9')
 #define ALPHA(a) ((a) == L'_' || (((a) >= L'a') && ((a) <= L'z')) || (((a) >= L'A') && ((a) <= L'Z')))
@@ -103,7 +92,7 @@ static mpsl_token_t token(struct mpsl_c *c)
     mpsl_token_t t = T_ERROR;
     wchar_t i;
 
-    ds_rewind(c->token_s);
+    c->token_o = 0;
 
 again:
     i = c->c;
@@ -162,9 +151,9 @@ again:
                     break;
                 }
             }
-            ds_poke(c->token_s, m);
+            POKE(c, m);
         }
-        ds_poke(c->token_s, L'\0');
+        POKE(c, L'\0');
         t = T_LITERAL;
         break;
 
@@ -173,16 +162,16 @@ again:
             t = T_LITERAL;
 
             if (i == L'0') {
-                ds_poke(c->token_s, c->c); t_nextc(c);
+                POKE(c, c->c); t_nextc(c);
 
                 if (c->c == L'b' || c->c == L'B') {
-                    ds_poke(c->token_s, c->c); t_nextc(c);
+                    POKE(c, c->c); t_nextc(c);
                     STORE(c->c == L'0' || c->c == L'1');
                     break;
                 }
                 else
                 if (c->c == L'x' || c->c == L'X') {
-                    ds_poke(c->token_s, c->c); t_nextc(c);
+                    POKE(c, c->c); t_nextc(c);
                     STORE(HEXDG(c->c));
                     break;
                 }
@@ -198,7 +187,7 @@ again:
 
             STORE(DIGIT(c->c));
             if (c->c == L'.' || c->c == L'e' || c->c == L'E') {
-                ds_poke(c->token_s, c->c); t_nextc(c);
+                POKE(c, c->c); t_nextc(c);
                 STORE(DIGIT(c->c));
             }
         }
@@ -372,12 +361,12 @@ static mpdm_t term(struct mpsl_c *c)
     }
     else
     if (c->token == T_LITERAL) {
-        v = node1(N_LITERAL, MPDM_S(c->token_s.d));
+        v = node1(N_LITERAL, MPDM_S(c->token_s));
         token(c);
     }
     else
     if (c->token == T_SYMBOL) {
-        v = node1(N_SYMID, MPDM_S(c->token_s.d));
+        v = node1(N_SYMID, MPDM_S(c->token_s));
         token(c);
     }
 
@@ -518,7 +507,7 @@ static mpdm_t statement(struct mpsl_c *c)
 
         do {
             if (c->token == T_SYMBOL) {
-                w1 = node1(N_LITERAL, MPDM_S(c->token_s.d));
+                w1 = node1(N_LITERAL, MPDM_S(c->token_s));
                 token(c);
 
                 /* has initialization value? */
@@ -566,7 +555,7 @@ static mpdm_t statement(struct mpsl_c *c)
                 token(c);
 
                 while (!c->error && c->token == T_SYMBOL) {
-                    mpdm_push(a, MPDM_S(c->token_s.d));
+                    mpdm_push(a, MPDM_S(c->token_s));
                     token(c);
 
                     if (c->token == T_COMMA)
