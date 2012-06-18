@@ -912,23 +912,22 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 
 #include <string.h>
 
-char *ops[] = {
-    "EOP",
-    "LIT", "NUL", "ARR", "HSH", "ROO",
-    "POP", "SWP", "DUP",
-    "GET", "SET", "STI", "TBL",
-    "TPU", "TPO", "TLT", "THS",
-    "CAL", "RET", "ARG",
-    "JMP", "JT", "JF",
-    "AND", "OR", "XOR", "SHL", "SHR",
-    "ADD", "SUB", "MUL", "DIV", "MOD",
-    "NOT", "EQ", "NE", "GT", "GE",
-    "REM", "DMP"
-};
-
 void mpsl_disasm(mpdm_t prg)
 {
     int n;
+    static char *ops[] = {
+        "EOP",
+        "LIT", "NUL", "ARR", "HSH", "ROO",
+        "POP", "SWP", "DUP",
+        "GET", "SET", "STI", "TBL",
+        "TPU", "TPO", "TLT", "THS",
+        "CAL", "RET", "ARG",
+        "JMP", "JT", "JF",
+        "AND", "OR", "XOR", "SHL", "SHR",
+        "ADD", "SUB", "MUL", "DIV", "MOD",
+        "NOT", "EQ", "NE", "GT", "GE",
+        "REM", "DMP"
+    };
 
     for (n = 0; n < mpdm_size(prg); n++) {
         mpsl_op_t i = mpdm_ival(mpdm_aget(prg, n));
