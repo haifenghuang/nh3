@@ -202,6 +202,7 @@ again:
                 STORE(DIGIT(c->c));
             }
         }
+        else
         if (ALPHA(i)) {
             STORE(ALNUM(c->c));
             STOKEN(L"if",       T_IF);
