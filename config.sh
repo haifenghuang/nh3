@@ -2,7 +2,7 @@
 
 # Configuration shell script
 
-TARGET=mpsl
+TARGET=mpsl2
 
 # gets program version
 VERSION=`cut -f2 -d\" VERSION`
