@@ -7,7 +7,7 @@ doc/*.html
 doc/*.ps
 lex.yy.c
 makefile.opts
-mpsl
+mpsl2
 *.[oa]
 y.tab.c
 y.tab.h
