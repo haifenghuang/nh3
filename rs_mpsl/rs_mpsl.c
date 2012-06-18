@@ -52,7 +52,7 @@ struct mpsl_c {
 
 /** lexer **/
 
-static wchar_t t_nextc(struct mpsl_c *c)
+static wchar_t nc(struct mpsl_c *c)
 /* gets the next char */
 {
     c->c = c->ptr ? *(c->ptr++) : fgetwc(c->f);
@@ -70,12 +70,12 @@ static wchar_t t_nextc(struct mpsl_c *c)
 
 void POKE(struct mpsl_c *c, wchar_t k) { c->token_s = mpdm_poke_o(c->token_s, &c->token_i, &c->token_o, &k, sizeof(wchar_t), 1); }
 
-#define STORE(COND) while (COND) { POKE(c, c->c); t_nextc(c); } POKE(c, L'\0')
+#define STORE(COND) while (COND) { POKE(c, c->c); nc(c); } POKE(c, L'\0')
 
 #define COMP(d,e,de) if (c->c == i) { \
-        if (d != -1) { t_nextc(c); t = d; } \
-        if (c->c == L'=' && de != -1) { t_nextc(c); t = de; } \
-    } else if (c->c == L'=' && e != -1) { t_nextc(c); t = e; }
+        if (d != -1) { nc(c); t = d; } \
+        if (c->c == L'=' && de != -1) { nc(c); t = de; } \
+    } else if (c->c == L'=' && e != -1) { nc(c); t = e; }
 
 #define STOKEN(s,v) if (t == T_ERROR && wcscmp(c->token_s, s) == 0) t = v
 
@@ -97,48 +97,48 @@ again:
     i = c->c;
 
     switch (i) {
-    case L' ': case L'\t': case L'\r': case L'\n': t_nextc(c); goto again;
+    case L' ': case L'\t': case L'\r': case L'\n': nc(c); goto again;
     case L'\0': case WEOF: t = T_EOP; break;
-    case L'\'': t_nextc(c); STORE(c->c != L'\''); t_nextc(c); t = T_LITERAL; break;
-    case L'{':  t = T_LBRACE;   t_nextc(c); break;
-    case L'}':  t = T_RBRACE;   t_nextc(c); break;
-    case L'(':  t = T_LPAREN;   t_nextc(c); break;
-    case L')':  t = T_RPAREN;   t_nextc(c); break;
-    case L'[':  t = T_LBRACK;   t_nextc(c); break;
-    case L']':  t = T_RBRACK;   t_nextc(c); break;
-    case L':':  t = T_COLON;    t_nextc(c); break;
-    case L';':  t = T_SEMI;     t_nextc(c); break;
-    case L'.':  t = T_DOT;      t_nextc(c); break;
-    case L',':  t = T_COMMA;    t_nextc(c); break;
-    case L'>':  t = T_GT;       t_nextc(c); COMP(T_DGT, T_GTEQ, T_DGTEQ); break;
-    case L'<':  t = T_LT;       t_nextc(c); COMP(T_DLT, T_LTEQ, T_DLTEQ); break;
-    case L'|':  t = T_PIPE;     t_nextc(c); COMP(T_DPIPE, T_PIPEEQ, T_DPIPEEQ); break;
-    case L'&':  t = T_AMP;      t_nextc(c); COMP(T_DAMP, T_AMPEQ, T_DAMPEQ); break;
-    case L'+':  t = T_PLUS;     t_nextc(c); COMP(T_DPLUS, T_PLUSEQ, -1); break;
-    case L'-':  t = T_MINUS;    t_nextc(c); COMP(T_DMINUS, T_MINUSEQ, -1); break;
-    case L'=':  t = T_EQUAL;    t_nextc(c); COMP(-1, T_EQEQ, -1); break;
-    case L'!':  t = T_BANG;     t_nextc(c); COMP(-1, T_BANGEQ, -1); break;
-    case L'*':  t = T_ASTER;    t_nextc(c); COMP(-1, T_EQEQ, -1); break;
-    case L'%':  t = T_PERCENT;  t_nextc(c); COMP(-1, T_PERCEQ, -1); break;
-    case L'^':  t = T_CARET;    t_nextc(c); COMP(-1, T_CARETEQ, -1); break;
-    case L'/':  t = T_SLASH;    t_nextc(c);
+    case L'\'': nc(c); STORE(c->c != L'\''); nc(c); t = T_LITERAL; break;
+    case L'{':  t = T_LBRACE;  nc(c); break;
+    case L'}':  t = T_RBRACE;  nc(c); break;
+    case L'(':  t = T_LPAREN;  nc(c); break;
+    case L')':  t = T_RPAREN;  nc(c); break;
+    case L'[':  t = T_LBRACK;  nc(c); break;
+    case L']':  t = T_RBRACK;  nc(c); break;
+    case L':':  t = T_COLON;   nc(c); break;
+    case L';':  t = T_SEMI;    nc(c); break;
+    case L'.':  t = T_DOT;     nc(c); break;
+    case L',':  t = T_COMMA;   nc(c); break;
+    case L'>':  t = T_GT;      nc(c); COMP(T_DGT, T_GTEQ, T_DGTEQ); break;
+    case L'<':  t = T_LT;      nc(c); COMP(T_DLT, T_LTEQ, T_DLTEQ); break;
+    case L'|':  t = T_PIPE;    nc(c); COMP(T_DPIPE, T_PIPEEQ, T_DPIPEEQ); break;
+    case L'&':  t = T_AMP;     nc(c); COMP(T_DAMP, T_AMPEQ, T_DAMPEQ); break;
+    case L'+':  t = T_PLUS;    nc(c); COMP(T_DPLUS, T_PLUSEQ, -1); break;
+    case L'-':  t = T_MINUS;   nc(c); COMP(T_DMINUS, T_MINUSEQ, -1); break;
+    case L'=':  t = T_EQUAL;   nc(c); COMP(-1, T_EQEQ, -1); break;
+    case L'!':  t = T_BANG;    nc(c); COMP(-1, T_BANGEQ, -1); break;
+    case L'*':  t = T_ASTER;   nc(c); COMP(-1, T_EQEQ, -1); break;
+    case L'%':  t = T_PERCENT; nc(c); COMP(-1, T_PERCEQ, -1); break;
+    case L'^':  t = T_CARET;   nc(c); COMP(-1, T_CARETEQ, -1); break;
+    case L'/':  t = T_SLASH;   nc(c);
         if (c->c == L'*') {
             /* C-style comments */
-            t_nextc(c);
+            nc(c);
             while (c->c != L'\0' && c->c != WEOF) {
-                if (c->c == L'*' && t_nextc(c) == L'/') break;
-                t_nextc(c);
+                if (c->c == L'*' && nc(c) == L'/') break;
+                nc(c);
             }
             goto again;
         }
         COMP(-1, T_SLASHEQ, -1);
         break;
     case L'"':
-        while (t_nextc(c) != L'"') {
+        while (nc(c) != L'"') {
             wchar_t m = c->c;
 
             if (m == L'\\') {
-                m = t_nextc(c);
+                m = nc(c);
                 switch (m) {
                 case L'n': m = L'\n';   break;
                 case L'r': m = L'\r';   break;
@@ -161,16 +161,16 @@ again:
             t = T_LITERAL;
 
             if (i == L'0') {
-                POKE(c, c->c); t_nextc(c);
+                POKE(c, c->c); nc(c);
 
                 if (c->c == L'b' || c->c == L'B') {
-                    POKE(c, c->c); t_nextc(c);
+                    POKE(c, c->c); nc(c);
                     STORE(c->c == L'0' || c->c == L'1');
                     break;
                 }
                 else
                 if (c->c == L'x' || c->c == L'X') {
-                    POKE(c, c->c); t_nextc(c);
+                    POKE(c, c->c); nc(c);
                     STORE(HEXDG(c->c));
                     break;
                 }
@@ -186,7 +186,7 @@ again:
 
             STORE(DIGIT(c->c));
             if (c->c == L'.' || c->c == L'e' || c->c == L'E') {
-                POKE(c, c->c); t_nextc(c);
+                POKE(c, c->c); nc(c);
                 STORE(DIGIT(c->c));
             }
         }
@@ -379,7 +379,7 @@ static mpdm_t term(struct mpsl_c *c)
 }
 
 
-static mpsl_node_t op_by_token(struct mpsl_c *c)
+static mpsl_node_t node_by_token(struct mpsl_c *c)
 /* returns the operand associated by a token */
 {
     int n;
@@ -419,7 +419,7 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
         if (t == T_SYMBOL && c->token != T_EQUAL)
             v = node1(N_SYMVAL, v);
 
-        while (!c->error && (op = op_by_token(c)) > 0 && op <= p_op) {
+        while (!c->error && (op = node_by_token(c)) > 0 && op <= p_op) {
             if (c->token == T_LBRACK) {
                 /* subindexes */
                 token(c);
@@ -505,7 +505,7 @@ static mpdm_t statement(struct mpsl_c *c)
     else
     if (c->token == T_LOCAL || c->token == T_GLOBAL) {
         mpdm_t w1, w2;
-        mpsl_node_t op = op_by_token(c);
+        mpsl_node_t op = node_by_token(c);
 
         token(c);
         v = node0(N_NOP);
@@ -620,7 +620,7 @@ static void parse(struct mpsl_c *c)
 {
     mpdm_t v;
 
-    t_nextc(c);
+    nc(c);
     token(c);
 
     v = node0(N_NOP);
