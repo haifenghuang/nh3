@@ -776,6 +776,7 @@ enum {
 
 struct mpsl_vm {
     mpdm_t prg;             /* program */
+    mpdm_t ctxt;            /* context */
     mpdm_t stack;           /* stack */
     mpdm_t c_stack;         /* call stack */
     mpdm_t symtbl;          /* local symbol table */
@@ -793,12 +794,14 @@ void mpsl_reset_vm(struct mpsl_vm *m, mpdm_t prg)
     if (prg)
         mpdm_set(&m->prg, prg);
 
-    mpdm_set(&m->stack,     MPDM_A(0));
-    mpdm_set(&m->c_stack,   MPDM_A(0));
-    mpdm_set(&m->symtbl,    MPDM_A(0));
+    mpdm_set(&m->ctxt, MPDM_A(0));
 
-    mpdm_push(m->symtbl,    mpdm_root());
-    mpdm_push(m->symtbl,    MPDM_H(0));
+    m->stack    = mpdm_push(m->ctxt, MPDM_A(0));
+    m->c_stack  = mpdm_push(m->ctxt, MPDM_A(0));
+    m->symtbl   = mpdm_push(m->ctxt, MPDM_A(0));
+
+    mpdm_push(m->symtbl, mpdm_root());
+    mpdm_push(m->symtbl, MPDM_H(0));
 
     m->pc = m->sp = m->cs = m->tt = 0;
     m->mode = VM_IDLE;
