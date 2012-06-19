@@ -633,7 +633,7 @@ static mpdm_t statement(struct mpsl_c *c)
 }
 
 
-static void parse(struct mpsl_c *c)
+static int parse(struct mpsl_c *c)
 /* parses an MPSL program and creates a tree of nodes */
 {
     mpdm_t v;
@@ -649,6 +649,8 @@ static void parse(struct mpsl_c *c)
     v = node2(N_SEQ, v, node0(N_EOP));
 
     mpdm_set(&c->node, v);
+
+    return c->error;
 }
 
 
@@ -676,7 +678,7 @@ static int here(struct mpsl_c *c) { return mpdm_size(c->prg); }
 #define O(n) gen(c, mpdm_aget(node, n))
 
 
-static void gen(struct mpsl_c *c, mpdm_t node)
+static int gen(struct mpsl_c *c, mpdm_t node)
 /* generates MPSL VM code from a tree of nodes */
 {
     int n, i;
@@ -765,6 +767,8 @@ static void gen(struct mpsl_c *c, mpdm_t node)
         O(1); n = o2(c, OP_LIT, NULL); o(c, OP_SET); i = o2(c, OP_JMP, NULL);
         fix(c, n); O(2); o(c, OP_ARG); O(3); o(c, OP_RET); fix(c, i); break;
     }
+
+    return c->error;
 }
 
 
@@ -948,6 +952,8 @@ void mpsl_disasm(mpdm_t prg)
         "REM", "DMP"
     };
 
+    mpdm_ref(prg);
+
     for (n = 0; n < mpdm_size(prg); n++) {
         mpsl_op_t i = mpdm_ival(mpdm_aget(prg, n));
 
@@ -961,29 +967,58 @@ void mpsl_disasm(mpdm_t prg)
 
         printf("\n");
     }
+
+    mpdm_unref(prg);
 }
+
 
 #include <string.h>
 
-int main(int argc, char *argv[])
+mpdm_t mpsl_compile(mpdm_t src)
+/* compiles an MPSL source to MPSL VM code */
 {
     struct mpsl_c c;
+    FILE *f;
+
+    mpdm_ref(src);
+
+    memset(&c, '\0', sizeof(c));
+
+    /* src can be a file or a string */
+    if ((f = mpdm_get_filehandle(src)) != NULL)
+        c.f = f;
+    else
+        c.ptr = mpdm_string(src);
+
+    if (parse(&c) == 0) {
+        mpdm_set(&c.prg, MPDM_A(0));
+
+        if (gen(&c, c.node))
+            mpdm_set(&c.prg, NULL);
+    }
+
+    mpdm_set(&c.node, NULL);
+
+    mpdm_unref(src);
+
+    return mpdm_unrefnd(c.prg);
+}
+
+
+int main(int argc, char *argv[])
+{
     struct mpsl_vm m;
+    mpdm_t prg;
+    wchar_t *ptr;
 
     mpdm_startup();
 
     memset(&m, '\0', sizeof(m));
-    memset(&c, '\0', sizeof(c));
 
-//    c.ptr = L"global a1, a2 = 1, a3; a1 = 1 + 2 * 3; a2 = 1 * 2 + 3; a3 = (1 + 2) * 3; values = ['a', a2, -3 * 4, 'cdr']; global emp = []; global mp = { 'a': 1, 'b': [1,2,3], 'c': 2 }; A.B.C = 665 + 1; A['B'].C = 665 + 1;";
-    c.ptr = L"this.x = 0; while (n > 0) { n = n - 1; } mp.init(); sub sum(a, b) { return a + b; } global v1, v2, v3 = {}, v4; sum(1, 2);";
-//    c.ptr = L"local a, b, c = [], d; if (a > 10) { a = 10; } else { a = 20; } stored || ''; open && close; return a * b;";
-    parse(&c);
+    ptr = L"this.x = 0; while (n > 0) { n = n - 1; } mp.init(); sub sum(a, b) { return a + b; } global v1, v2, v3 = {}, v4; sum(1, 2);";
 
-    mpdm_set(&c.prg, MPDM_A(0));
-    gen(&c, c.node);
-
-    mpsl_disasm(c.prg);
+    prg = mpsl_compile(MPDM_LS(ptr));
+    mpsl_disasm(prg);
 
     return 0;
 }
