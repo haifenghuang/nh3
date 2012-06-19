@@ -1,4 +1,4 @@
-stress: rs_mpsl.c
+stress: mpsl_c.c
 	gcc -g -Wall -I../../mpdm -L../../mpdm $< -lmpdm -o $@
 
 clean:
