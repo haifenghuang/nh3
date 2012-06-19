@@ -3,7 +3,7 @@
     MPSL - Minimum Profit Scripting Language
     Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
 
-    mpsl_c.c - Minimum Profit Scripting Language Core:
+    mpsl_c.c - Minimum Profit Scripting Language 3.x Core:
     Lexer, Parser, Code Generator and Virtual Machine.
 
     This program is free software; you can redistribute it and/or
@@ -928,8 +928,6 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
 }
 
 
-#include <string.h>
-
 void mpsl_disasm(mpdm_t prg)
 {
     int n;
@@ -962,6 +960,7 @@ void mpsl_disasm(mpdm_t prg)
     }
 }
 
+#include <string.h>
 
 int main(int argc, char *argv[])
 {
