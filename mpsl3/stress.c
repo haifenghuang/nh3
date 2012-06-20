@@ -169,6 +169,11 @@ int main(int argc, char *argv[])
     do_test("TT.german.ein = 222; T = TT.german.ein;", MPDM_I(222));
     do_test("global L = [10, 20, 30];", NULL);
     do_test("T = L[1];", MPDM_I(20));
+    do_test("L[2] = 1000; T = L[2];", MPDM_I(1000));
+    do_test("L = [10, 20, 30, [1, 2, 3]];", NULL);
+    do_test("L[3][0] = 123; T = L[3][0];", MPDM_I(123));
+    do_test("T = TT['host'];", MPDM_LS(L"localhost"));
+    do_test("T = L[1 + 1];", MPDM_I(30));
 
     test_summary();
 

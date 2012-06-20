@@ -450,6 +450,9 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
                     token(c);
                 else
                     c_error(c);
+
+                if (c->token != T_EQUAL)
+                    v = node1(N_SYMVAL, v);
             }
             else
             if (c->token == T_LPAREN) {
@@ -711,7 +714,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_SYMVAL:  O(1); o(c, OP_GET); break;
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
     case N_THIS:    o(c, OP_THS); break;
-    case N_SUBSCR:  O(1); O(2); o(c, OP_GET); break;
+    case N_SUBSCR:  O(1); O(2); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_STI); break;
     case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_STI); break;
