@@ -851,12 +851,14 @@ static mpdm_t TBL(struct mpsl_vm *m)
 #define IPOP(m) mpdm_ival(POP(m))
 #define RPOP(m) mpdm_rval(POP(m))
 #define ISTRU(v) mpdm_ival(v)
-
+#define BOOL(i) MPDM_I(i)
 
 static int exec_vm(struct mpsl_vm *m, int msecs)
 {
     clock_t max;
     mpdm_t v, w;
+    double r1, r2;
+    int i1, i2;
 
     /* maximum running time */
     max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0;
@@ -883,9 +885,9 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
         case OP_DUP: PUSH(m, TOS(m)); break;
         case OP_TBL: TBL(m); break;
-        case OP_GET: PUSH(m, GET(POP(m), POP(m))); break;
-        case OP_SET: PUSH(m, SET(POP(m), POP(m), POP(m))); break;
-        case OP_STI: SET(POP(m), POP(m), POP(m)); break;
+        case OP_GET: w = POP(m); v = POP(m); PUSH(m, GET(v, w)); break;
+        case OP_SET: w = POP(m); v = POP(m); PUSH(m, SET(POP(m), v, w)); break;
+        case OP_STI: w = POP(m); v = POP(m); SET(POP(m), v, w); break;
         case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
         case OP_TPO: --m->tt; break;
         case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
@@ -895,21 +897,21 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
         case OP_JT:  if (ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
         case OP_JF:  if (!ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
-        case OP_ADD: PUSH(m, MPDM_R(RPOP(m) + RPOP(m))); break;
-        case OP_SUB: PUSH(m, MPDM_R(RPOP(m) - RPOP(m))); break;
-        case OP_MUL: PUSH(m, MPDM_R(RPOP(m) * RPOP(m))); break;
-        case OP_DIV: PUSH(m, MPDM_R(RPOP(m) / RPOP(m))); break;
-        case OP_MOD: PUSH(m, MPDM_I(IPOP(m) % IPOP(m))); break;
+        case OP_ADD: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 + r2)); break;
+        case OP_SUB: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 - r2)); break;
+        case OP_MUL: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 * r2)); break;
+        case OP_DIV: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 / r2)); break;
+        case OP_MOD: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 % i2)); break;
         case OP_NOT: PUSH(m, MPDM_I(!ISTRU(POP(m)))); break;
-        case OP_EQ:  PUSH(m, MPDM_I(RPOP(m) == RPOP(m))); break;
-        case OP_NE:  PUSH(m, MPDM_I(RPOP(m) != RPOP(m))); break;
-        case OP_GT:  PUSH(m, MPDM_I(RPOP(m) >  RPOP(m))); break;
-        case OP_GE:  PUSH(m, MPDM_I(RPOP(m) >= RPOP(m))); break;
-        case OP_AND: PUSH(m, MPDM_I(IPOP(m) & IPOP(m))); break;
-        case OP_OR:  PUSH(m, MPDM_I(IPOP(m) | IPOP(m))); break;
-        case OP_XOR: PUSH(m, MPDM_I(IPOP(m) ^ IPOP(m))); break;
-        case OP_SHL: PUSH(m, MPDM_I(IPOP(m) << IPOP(m))); break;
-        case OP_SHR: PUSH(m, MPDM_I(IPOP(m) >> IPOP(m))); break;
+        case OP_EQ:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 == r2)); break;
+        case OP_NE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 != r2)); break;
+        case OP_GT:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 >  r2)); break;
+        case OP_GE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 >= r2)); break;
+        case OP_AND: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 &  i2)); break;
+        case OP_OR:  i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 |  i2)); break;
+        case OP_XOR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 ^  i2)); break;
+        case OP_SHL: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 << i2)); break;
+        case OP_SHR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 >> i2)); break;
         case OP_REM: m->pc++; break;
         case OP_DMP: mpdm_dump(POP(m)); break;
         case OP_CAL:
