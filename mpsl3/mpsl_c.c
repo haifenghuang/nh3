@@ -818,6 +818,8 @@ static void reset_vm(struct mpsl_vm *m, mpdm_t prg)
 }
 
 
+static void vm_error(struct mpsl_vm *m, mpdm_t s1, mpdm_t s2) { m->mode = VM_ERROR; s_error(s1, s2); }
+
 static mpdm_t PUSH(struct mpsl_vm *m, mpdm_t v) { return mpdm_aset(m->stack, v, m->sp++); }
 static mpdm_t POP(struct mpsl_vm *m) { return mpdm_aget(m->stack, --m->sp); }
 static mpdm_t TOS(struct mpsl_vm *m) { return mpdm_aget(m->stack, m->sp - 1); }
@@ -838,11 +840,8 @@ static mpdm_t TBL(struct mpsl_vm *m)
                 break;
     }
 
-    if (l == NULL) {
-        /* trigger an error */
-        /* ... */
-        m->mode = VM_ERROR;
-    }
+    if (l == NULL)
+        vm_error(m, MPDM_LS(L"undefined symbol "), s);
     else {
         PUSH(m, l);
         PUSH(m, s);
