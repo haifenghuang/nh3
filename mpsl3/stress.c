@@ -167,6 +167,8 @@ int main(int argc, char *argv[])
     do_test("T = TT.one + 2;", MPDM_I(3));
     do_test("TT.one = 111; T = TT.one;", MPDM_I(111));
     do_test("TT.german.ein = 222; T = TT.german.ein;", MPDM_I(222));
+    do_test("global L = [10, 20, 30];", NULL);
+    do_test("T = L[1];", MPDM_I(20));
 
     test_summary();
 

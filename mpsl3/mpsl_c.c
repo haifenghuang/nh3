@@ -253,7 +253,7 @@ again:
 typedef enum {
     /* order matters (operator precedence) */
     N_NULL,   N_LITERAL,
-    N_ARRAY,  N_HASH,   N_PARTOF,
+    N_ARRAY,  N_HASH,   N_PARTOF, N_SUBSCR,
     N_UMINUS, N_NOT,
     N_MOD,    N_DIV,    N_MUL,  N_SUB,  N_ADD,
     N_EQ,     N_NE,     N_GT,   N_GE,   N_LT,  N_LE,
@@ -263,7 +263,7 @@ typedef enum {
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
     N_FUNCAL,
-    N_SUBSCR, N_THIS,
+    N_THIS,
     N_LOCAL,  N_GLOBAL,
     N_SUBDEF, N_RETURN,
     N_VOID,
@@ -711,7 +711,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_SYMVAL:  O(1); o(c, OP_GET); break;
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
     case N_THIS:    o(c, OP_THS); break;
-    case N_SUBSCR:  O(1); O(2); break;
+    case N_SUBSCR:  O(1); O(2); o(c, OP_GET); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_STI); break;
     case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_STI); break;
