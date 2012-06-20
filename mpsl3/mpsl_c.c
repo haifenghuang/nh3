@@ -1,10 +1,9 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language
+    MPSL - Minimum Profit Scripting Language 3.x
     Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
 
-    mpsl_c.c - Minimum Profit Scripting Language 3.x Core:
-    Lexer, Parser, Code Generator and Virtual Machine.
+    mpsl_c.c - Lexer, Parser, Code Generator and Virtual Machine.
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -29,7 +28,7 @@
 #include <string.h>
 #include <time.h> /* for clock() */
 
-#include "mpdm.h"
+#include "mpsl.h"
 
 
 /** tokens **/
@@ -777,10 +776,6 @@ static int gen(struct mpsl_c *c, mpdm_t node)
 
 /** virtual machine **/
 
-enum {
-    VM_IDLE, VM_RUNNING, VM_TIMEOUT, VM_ERROR
-};
-
 struct mpsl_vm {
     mpdm_t prg;             /* program */
     mpdm_t ctxt;            /* context */
@@ -810,7 +805,8 @@ static void reset_vm(struct mpsl_vm *m, mpdm_t prg)
         mpdm_push(m->symtbl, mpdm_root());
         mpdm_push(m->symtbl, MPDM_H(0));
 
-        m->pc = m->sp = m->cs = m->tt = 0;
+        m->pc = m->sp = m->cs = 0;
+        m->tt = mpdm_size(m->symtbl);
         m->mode = VM_IDLE;
     }
     else
@@ -1018,25 +1014,4 @@ void mpsl_disasm(mpdm_t prg)
     }
 
     mpdm_unref(prg);
-}
-
-
-int main(int argc, char *argv[])
-{
-    struct mpsl_vm m;
-    mpdm_t prg;
-    wchar_t *ptr;
-
-    mpdm_startup();
-
-    memset(&m, '\0', sizeof(m));
-
-    ptr = L"this.x = 0; while (n > 0) { n = n - 1; } mp.init(); sub sum(a, b) { return a + b; } global v1, v2, v3 = {}, v4; sum(1, 2);";
-
-    prg = mpsl_compile(MPDM_LS(ptr));
-    mpsl_disasm(mpdm_aget(prg, 1));
-
-    mpdm_dump(mpdm_exec(mpsl_compile(MPDM_LS(L"2 + 3;")), NULL, NULL));
-
-    return 0;
 }

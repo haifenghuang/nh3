@@ -1,5 +1,11 @@
-stress: mpsl_c.c
-	gcc -g -Wall -I../../mpdm -L../../mpdm $< -lmpdm -o $@
+mpsl_c.o: mpsl_c.c
+	gcc -g -Wall -I../../mpdm -c $<
+
+stress: stress.c mpsl_c.o
+	gcc -g -Wall -I../../mpdm -L../../mpdm mpsl_c.o $< -lmpdm -o $@
 
 clean:
-	rm -f stress Makefile
+	rm -f stress
+
+distclean:
+	rm -f Makefile
