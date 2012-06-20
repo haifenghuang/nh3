@@ -88,6 +88,18 @@ static wchar_t nc(struct mpsl_c *c)
     return c->c;
 }
 
+static void s_error(mpdm_t s1, mpdm_t s2) { mpdm_hset_s(mpdm_root(), L"ERROR", mpdm_strcat(s1, s2)); }
+
+static void c_error(struct mpsl_c *c)
+{
+    char tmp[64];
+
+    sprintf(tmp, "%d:%d: ", c->y, c->x);
+    s_error(MPDM_MBS(tmp), MPDM_LS(L"syntax error"));
+
+    c->error = 1;
+}
+
 void POKE(struct mpsl_c *c, wchar_t k) { c->token_s = mpdm_poke_o(c->token_s, &c->token_i, &c->token_o, &k, sizeof(wchar_t), 1); }
 
 #define STORE(COND) while (COND) { POKE(c, c->c); nc(c); } POKE(c, L'\0')
@@ -231,7 +243,7 @@ again:
     }
 
     if (t == T_ERROR)
-        c->error = 1;
+        c_error(c);
 
     return c->token = t;
 }
@@ -298,10 +310,10 @@ static mpdm_t paren_expr(struct mpsl_c *c)
         if (c->token == T_RPAREN)
             token(c);
         else
-            c->error = 2;
+            c_error(c);
     }
     else
-        c->error = 2;
+        c_error(c);
 
     return v;
 }
@@ -350,7 +362,7 @@ static mpdm_t term(struct mpsl_c *c)
                     token(c);
             }
             else
-                c->error = 2;
+                c_error(c);
         }
 
         mpdm_unrefnd(v);
@@ -438,7 +450,7 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
                 if (c->token == T_RBRACK)
                     token(c);
                 else
-                c->error = 2;
+                    c_error(c);
             }
             else
             if (c->token == T_LPAREN) {
@@ -465,7 +477,7 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
                 token(c);
 
                 if (op == N_PARTOF && c->token != T_SYMBOL)
-                    c->error = 2;
+                    c_error(c);
                 else
                     v = node2(op, v, expr_p(c, op));
             }
@@ -538,7 +550,7 @@ static mpdm_t statement(struct mpsl_c *c)
                     token(c);
             }
             else
-                c->error = 2;
+                c_error(c);
 
         } while (!c->error && c->token != T_SEMI);
 
@@ -558,7 +570,7 @@ static mpdm_t statement(struct mpsl_c *c)
                 if (c->token == T_SYMBOL)
                     w = node2(N_PARTOF, w, term(c));
                 else
-                    c->error = 2;
+                    c_error(c);
             }
 
             /* argument name array */
@@ -579,14 +591,14 @@ static mpdm_t statement(struct mpsl_c *c)
                 if (c->token == T_RPAREN)
                     token(c);
                 else
-                    c->error = 2;
+                    c_error(c);
             }
 
             v = node3(N_SUBDEF, w, node1(N_LITERAL, a), statement(c));
             mpdm_unref(a);
         }
         else
-            c->error = 2;
+            c_error(c);
     }
     else
     if (c->token == T_RETURN) {
@@ -597,7 +609,7 @@ static mpdm_t statement(struct mpsl_c *c)
         if (c->token == T_SEMI)
             token(c);
         else
-            c->error = 2;
+            c_error(c);
     }
     else
     if (c->token == T_LBRACE) {
@@ -617,7 +629,7 @@ static mpdm_t statement(struct mpsl_c *c)
         if (c->token == T_SEMI)
             token(c);
         else
-            c->error = 2;
+            c_error(c);
     }
 
     return v;
