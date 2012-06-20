@@ -787,17 +787,22 @@ struct mpsl_vm {
 static void reset_vm(struct mpsl_vm *m, mpdm_t prg)
 {
     mpdm_set(&m->prg,   prg);
-    mpdm_set(&m->ctxt,  MPDM_A(0));
 
-    m->stack    = mpdm_push(m->ctxt, MPDM_A(0));
-    m->c_stack  = mpdm_push(m->ctxt, MPDM_A(0));
-    m->symtbl   = mpdm_push(m->ctxt, MPDM_A(0));
+    if (prg != NULL) {
+        mpdm_set(&m->ctxt,  MPDM_A(0));
 
-    mpdm_push(m->symtbl, mpdm_root());
-    mpdm_push(m->symtbl, MPDM_H(0));
+        m->stack    = mpdm_push(m->ctxt, MPDM_A(0));
+        m->c_stack  = mpdm_push(m->ctxt, MPDM_A(0));
+        m->symtbl   = mpdm_push(m->ctxt, MPDM_A(0));
 
-    m->pc = m->sp = m->cs = m->tt = 0;
-    m->mode = VM_IDLE;
+        mpdm_push(m->symtbl, mpdm_root());
+        mpdm_push(m->symtbl, MPDM_H(0));
+
+        m->pc = m->sp = m->cs = m->tt = 0;
+        m->mode = VM_IDLE;
+    }
+    else
+        mpdm_set(&m->ctxt, NULL);
 }
 
 
@@ -921,6 +926,53 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
 }
 
 
+static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
+{
+    mpdm_t r = NULL;
+    struct mpsl_vm m;
+
+    memset(&m, '\0', sizeof(m));
+    reset_vm(&m, c);
+
+    r = MPDM_I(exec_vm(&m, 0));
+
+    reset_vm(&m, NULL);
+
+    return r;
+}
+
+
+mpdm_t mpsl_compile(mpdm_t src)
+/* compiles an MPSL source to MPSL VM code */
+{
+    mpdm_t r = NULL;
+    struct mpsl_c c;
+    FILE *f;
+
+    mpdm_ref(src);
+
+    memset(&c, '\0', sizeof(c));
+    mpdm_set(&c.prg, MPDM_A(0));
+
+    /* src can be a file or a string */
+    if ((f = mpdm_get_filehandle(src)) != NULL)
+        c.f = f;
+    else
+        c.ptr = mpdm_string(src);
+
+    if (parse(&c) == 0 && gen(&c, c.node) == 0)
+        r = MPDM_X2(exec_vm_a0, c.prg);
+
+    mpdm_unref(src);
+
+    /* cleanup */
+    mpdm_set(&c.node,   NULL);
+    mpdm_set(&c.prg,    NULL);
+
+    return r;
+}
+
+
 void mpsl_disasm(mpdm_t prg)
 {
     int n;
@@ -955,56 +1007,6 @@ void mpsl_disasm(mpdm_t prg)
     }
 
     mpdm_unref(prg);
-}
-
-
-static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
-{
-    mpdm_t r = NULL;
-    struct mpsl_vm m;
-
-    /* create a new virtual machine */
-    memset(&m, '\0', sizeof(m));
-    reset_vm(&m, c);
-
-    r = MPDM_I(exec_vm(&m, 0));
-
-    /* clean the virtual machine */
-    mpdm_set(&m.prg,    NULL);
-    mpdm_set(&m.ctxt,   NULL);
-
-    return r;
-}
-
-
-mpdm_t mpsl_compile(mpdm_t src)
-/* compiles an MPSL source to MPSL VM code */
-{
-    mpdm_t r = NULL;
-    struct mpsl_c c;
-    FILE *f;
-
-    mpdm_ref(src);
-
-    memset(&c, '\0', sizeof(c));
-    mpdm_set(&c.prg, MPDM_A(0));
-
-    /* src can be a file or a string */
-    if ((f = mpdm_get_filehandle(src)) != NULL)
-        c.f = f;
-    else
-        c.ptr = mpdm_string(src);
-
-    if (parse(&c) == 0 && gen(&c, c.node) == 0)
-        r = MPDM_X2(exec_vm_a0, c.prg);
-
-    mpdm_unref(src);
-
-    /* cleanup */
-    mpdm_set(&c.node,   NULL);
-    mpdm_set(&c.prg,    NULL);
-
-    return r;
 }
 
 
