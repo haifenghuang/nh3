@@ -872,7 +872,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
     mpdm_t v, w;
 
     /* maximum running time */
-    max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0x7fffffff;
+    max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0;
 
     /* start running if there is no error */
     if (m->mode != VM_ERROR)
@@ -938,7 +938,7 @@ int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
         m->ins++;
 
         /* if out of slice time, break */        
-        if (clock() > max)
+        if (max && clock() > max)
             m->mode = VM_TIMEOUT;
     }
 
