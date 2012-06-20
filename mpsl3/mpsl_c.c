@@ -26,8 +26,9 @@
 
 #include <stdio.h>
 #include <wchar.h>
+#include <string.h>
 
-#include <mpdm.h>
+#include "mpdm.h"
 
 
 /** tokens **/
@@ -316,6 +317,18 @@ static mpdm_t paren_expr(struct mpsl_c *c)
 }
 
 
+static mpdm_t tstr(struct mpsl_c *c)
+/* returns the current token as a string */
+{
+    mpdm_t r = MPDM_ENS(c->token_s, c->token_o);
+
+    c->token_s = NULL;
+    c->token_i = c->token_o = 0;
+
+    return r;
+}
+
+
 static mpdm_t term(struct mpsl_c *c)
 /* parses a term of an expression */
 {
@@ -384,12 +397,12 @@ static mpdm_t term(struct mpsl_c *c)
     }
     else
     if (c->token == T_LITERAL) {
-        v = node1(N_LITERAL, MPDM_S(c->token_s));
+        v = node1(N_LITERAL, tstr(c));
         token(c);
     }
     else
     if (c->token == T_SYMBOL) {
-        v = node1(N_SYMID, MPDM_S(c->token_s));
+        v = node1(N_SYMID, tstr(c));
         token(c);
     }
 
@@ -530,7 +543,7 @@ static mpdm_t statement(struct mpsl_c *c)
 
         do {
             if (c->token == T_SYMBOL) {
-                w1 = node1(N_LITERAL, MPDM_S(c->token_s));
+                w1 = node1(N_LITERAL, tstr(c));
                 token(c);
 
                 /* has initialization value? */
@@ -578,7 +591,7 @@ static mpdm_t statement(struct mpsl_c *c)
                 token(c);
 
                 while (!c->error && c->token == T_SYMBOL) {
-                    mpdm_push(a, MPDM_S(c->token_s));
+                    mpdm_push(a, tstr(c));
                     token(c);
 
                     if (c->token == T_COMMA)
@@ -971,8 +984,6 @@ void mpsl_disasm(mpdm_t prg)
     mpdm_unref(prg);
 }
 
-
-#include <string.h>
 
 mpdm_t mpsl_compile(mpdm_t src)
 /* compiles an MPSL source to MPSL VM code */
