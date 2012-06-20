@@ -163,6 +163,8 @@ int main(int argc, char *argv[])
     do_test("global TT = { 'name': 'me', 'host': 'localhost', 'one': 1, 'two': 2 }; T = 1;", MPDM_I(1));
     do_test("T = TT.name;", MPDM_LS(L"me"));
     do_test("T = TT.one + TT.two;", MPDM_I(3));
+    do_test("T = 1 + TT.two;", MPDM_I(3));
+    do_test("T = TT.one + 2;", MPDM_I(3));
 
     test_summary();
 
