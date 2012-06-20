@@ -215,11 +215,14 @@ again:
                     break;
             }
 
-            STORE(DIGIT(c->c));
+            while (DIGIT(c->c)) { POKE(c, c->c); nc(c); };
+
             if (c->c == L'.' || c->c == L'e' || c->c == L'E') {
                 POKE(c, c->c); nc(c);
-                STORE(DIGIT(c->c));
+                while (DIGIT(c->c)) { POKE(c, c->c); nc(c); };
             }
+
+            POKE(c, '\0');
         }
         else
         if (ALPHA(i)) {
