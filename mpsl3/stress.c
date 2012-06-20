@@ -52,7 +52,7 @@ void _do_test(char *prg, mpdm_t t_value, int line)
 
     mpdm_hset_s(mpdm_root(), L"ERROR", NULL);
 
-    v = mpsl_compile(MPDM_MBS(prg));
+    v = mpdm_ref(mpsl_compile(MPDM_MBS(prg)));
 
     if (v != NULL) {
         int i = mpdm_ival(mpdm_exec(v, NULL, NULL));
@@ -71,8 +71,12 @@ void _do_test(char *prg, mpdm_t t_value, int line)
 	printf("%s", tmp);
 
     if (!ok) {
+        printf("ERROR:\n");
         mpdm_dump(mpdm_hget_s(mpdm_root(), L"ERROR"));
+        printf("T:\n");
         mpdm_dump(mpdm_hget_s(mpdm_root(), L"T"));
+        printf("Disasm:\n");
+        mpsl_disasm(mpdm_aget(v, 1));
     }
 
 	tests++;
@@ -82,6 +86,7 @@ void _do_test(char *prg, mpdm_t t_value, int line)
 	else
 		failed_msgs[i_failed_msgs++] = strdup(tmp);
 
+    mpdm_unref(v);
     mpdm_unref(t_value);
 }
 
@@ -116,10 +121,10 @@ int main(int argc, char *argv[])
     do_test("1;", NULL);
     do_test("1 + 2;", NULL);
     do_test("T = 1;", MPDM_I(1));
-    do_test("T = 1 + 3;", MPDM_I(4));
-    do_test("T = 1 + 3 * 5;", MPDM_I(16));
-    do_test("T = (1 + 3) * 5;", MPDM_I(20));
-    do_test("T = 1 + (3 * 5);", MPDM_I(16));
+    do_test("T = 1 + 3;", MPDM_I(1 + 3));
+    do_test("T = 1 + 3 * 5;", MPDM_I(1 + 3 * 5));
+    do_test("T = (1 + 3) * 5;", MPDM_I((1 + 3) * 5));
+    do_test("T = 1 + (3 * 5);", MPDM_I(1 + (3 * 5)));
 
     v = mpdm_ref(MPDM_A(0));
     mpdm_push(v, MPDM_I(1));
@@ -148,7 +153,16 @@ int main(int argc, char *argv[])
 
     do_test("T = { 'ones': 111, 'twos': 222, 'array': [ 'name', 'surname'] };", v);
 
+    mpdm_hset_s(v, L"twos", MPDM_I(2 + 3 * 5));
+
+    do_test("T = { 'ones': 111, 'twos': 2 + 3 * 5, 'array': [ 'name', 'surname'] };", v);
+
     mpdm_unref(v);
+
+    do_test("local tt = 1234; T = tt;", MPDM_I(1234));
+    do_test("global TT = { 'name': 'me', 'host': 'localhost', 'one': 1, 'two': 2 }; T = 1;", MPDM_I(1));
+    do_test("T = TT.name;", MPDM_LS(L"me"));
+    do_test("T = TT.one + TT.two;", MPDM_I(3));
 
     test_summary();
 
