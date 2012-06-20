@@ -174,6 +174,7 @@ int main(int argc, char *argv[])
     do_test("L[3][0] = 123; T = L[3][0];", MPDM_I(123));
     do_test("T = TT['host'];", MPDM_LS(L"localhost"));
     do_test("T = L[1 + 1];", MPDM_I(30));
+    do_test("TT['three'] = 3; T = TT.three;", MPDM_I(3));
 
     test_summary();
 
