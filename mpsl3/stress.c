@@ -176,6 +176,8 @@ int main(int argc, char *argv[])
     do_test("T = L[1 + 1];", MPDM_I(30));
     do_test("TT['three'] = 3; T = TT.three;", MPDM_I(3));
 
+    do_test("local n = 0; while (n < 10) n = n + 1; T = n;", MPDM_I(10));
+
     test_summary();
 
     return 0;

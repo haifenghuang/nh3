@@ -671,7 +671,7 @@ typedef enum {
     OP_JMP, OP_JT,  OP_JF,
     OP_AND, OP_OR,  OP_XOR, OP_SHL, OP_SHR,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
-    OP_NOT, OP_EQ,  OP_NE,  OP_GT,  OP_GE,
+    OP_NOT, OP_EQ,  OP_NE,  OP_GT,  OP_GE,  OP_LT, OP_LE,
     OP_REM, OP_DMP
 } mpsl_op_t;
 
@@ -708,8 +708,8 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_NE:      O(1); O(2); o(c, OP_NE); break;
     case N_GT:      O(1); O(2); o(c, OP_GT); break;
     case N_GE:      O(1); O(2); o(c, OP_GE); break;
-    case N_LT:      O(1); O(2); o(c, OP_SWP); o(c, OP_GE); break;
-    case N_LE:      O(1); O(2); o(c, OP_SWP); o(c, OP_GT); break;
+    case N_LT:      O(1); O(2); o(c, OP_LT); break;
+    case N_LE:      O(1); O(2); o(c, OP_LE); break;
     case N_ASSIGN:  O(1); O(2); o(c, OP_SET); break;
     case N_SYMVAL:  O(1); o(c, OP_GET); break;
     case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
@@ -910,6 +910,8 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_NE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 != r2)); break;
         case OP_GT:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 >  r2)); break;
         case OP_GE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 >= r2)); break;
+        case OP_LT:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 <  r2)); break;
+        case OP_LE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 <= r2)); break;
         case OP_AND: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 &  i2)); break;
         case OP_OR:  i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 |  i2)); break;
         case OP_XOR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 ^  i2)); break;
