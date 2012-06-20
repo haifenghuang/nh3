@@ -260,35 +260,24 @@ typedef enum {
 } mpsl_node_t;
 
 
-static mpdm_t node0(int type)
+#define RF(v) mpdm_ref(v)
+#define UF(v) mpdm_unref(v)
+#define UFND(v) mpdm_unrefnd(v)
+
+static mpdm_t node0(int t) { mpdm_t r = RF(MPDM_A(1)); mpdm_aset(r, MPDM_I(t), 0); return UFND(r); }
+static mpdm_t node1(int t, mpdm_t n1) { mpdm_t r = RF(node0(t)); mpdm_push(r, n1); return UFND(r); }
+static mpdm_t node2(int t, mpdm_t n1, mpdm_t n2) { mpdm_t r = RF(node1(t, n1)); mpdm_push(r, n2); return UFND(r); }
+static mpdm_t node3(int t, mpdm_t n1, mpdm_t n2, mpdm_t n3) { mpdm_t r = RF(node2(t, n1, n2)); mpdm_push(r, n3); return UFND(r); }
+
+static mpdm_t tstr(struct mpsl_c *c)
+/* returns the current token as a string */
 {
-    mpdm_t r = mpdm_ref(MPDM_A(1));
-    mpdm_aset(r, MPDM_I(type), 0);
-    return mpdm_unrefnd(r);
-}
+    mpdm_t r = MPDM_ENS(c->token_s, c->token_o);
 
+    c->token_s = NULL;
+    c->token_i = c->token_o = 0;
 
-static mpdm_t node1(int type, mpdm_t n1)
-{
-    mpdm_t r = mpdm_ref(node0(type));
-    mpdm_push(r, n1);
-    return mpdm_unrefnd(r);
-}
-
-
-static mpdm_t node2(int type, mpdm_t n1, mpdm_t n2)
-{
-    mpdm_t r = mpdm_ref(node1(type, n1));
-    mpdm_push(r, n2);
-    return mpdm_unrefnd(r);
-}
-
-
-static mpdm_t node3(int type, mpdm_t n1, mpdm_t n2, mpdm_t n3)
-{
-    mpdm_t r = mpdm_ref(node2(type, n1, n2));
-    mpdm_push(r, n3);
-    return mpdm_unrefnd(r);
+    return r;
 }
 
 
@@ -315,18 +304,6 @@ static mpdm_t paren_expr(struct mpsl_c *c)
         c->error = 2;
 
     return v;
-}
-
-
-static mpdm_t tstr(struct mpsl_c *c)
-/* returns the current token as a string */
-{
-    mpdm_t r = MPDM_ENS(c->token_s, c->token_o);
-
-    c->token_s = NULL;
-    c->token_i = c->token_o = 0;
-
-    return r;
 }
 
 
@@ -677,10 +654,10 @@ typedef enum {
     OP_GET, OP_SET, OP_STI, OP_TBL,
     OP_TPU, OP_TPO, OP_TLT, OP_THS,
     OP_CAL, OP_RET, OP_ARG,
-    OP_JMP, OP_JT, OP_JF,
-    OP_AND, OP_OR, OP_XOR, OP_SHL, OP_SHR,
+    OP_JMP, OP_JT,  OP_JF,
+    OP_AND, OP_OR,  OP_XOR, OP_SHL, OP_SHR,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
-    OP_NOT, OP_EQ, OP_NE, OP_GT, OP_GE,
+    OP_NOT, OP_EQ,  OP_NE,  OP_GT,  OP_GE,
     OP_REM, OP_DMP
 } mpsl_op_t;
 
@@ -861,12 +838,10 @@ static mpdm_t TBL(struct mpsl_vm *m)
 
 #define IPOP(m) mpdm_ival(POP(m))
 #define RPOP(m) mpdm_rval(POP(m))
-#define RF(v) mpdm_ref(v)
-#define UF(v) mpdm_unref(v)
 #define ISTRU(v) mpdm_ival(v)
 
 
-int mpsl_exec_vm(struct mpsl_vm *m, int msecs)
+static int exec_vm(struct mpsl_vm *m, int msecs)
 {
     clock_t max;
     mpdm_t v, w;
@@ -983,7 +958,7 @@ void mpsl_disasm(mpdm_t prg)
 }
 
 
-static mpdm_t exec_runtime(mpdm_t c, mpdm_t a, mpdm_t ctxt)
+static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
 {
     mpdm_t r = NULL;
     struct mpsl_vm m;
@@ -992,7 +967,7 @@ static mpdm_t exec_runtime(mpdm_t c, mpdm_t a, mpdm_t ctxt)
     memset(&m, '\0', sizeof(m));
     reset_vm(&m, c);
 
-    r = MPDM_I(mpsl_exec_vm(&m, 0));
+    r = MPDM_I(exec_vm(&m, 0));
 
     /* clean the virtual machine */
     mpdm_set(&m.prg,    NULL);
@@ -1021,7 +996,7 @@ mpdm_t mpsl_compile(mpdm_t src)
         c.ptr = mpdm_string(src);
 
     if (parse(&c) == 0 && gen(&c, c.node) == 0)
-        r = MPDM_X2(exec_runtime, c.prg);
+        r = MPDM_X2(exec_vm_a0, c.prg);
 
     mpdm_unref(src);
 
