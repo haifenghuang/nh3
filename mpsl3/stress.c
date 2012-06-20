@@ -181,7 +181,9 @@ int main(int argc, char *argv[])
     do_test("local n = 123; if (n < 200) { T = 1; } else T = 2;", MPDM_I(1));
     do_test("local n = 123; if (n > 200) { T = 1; } else T = 2;", MPDM_I(2));
 
-//    do_test("global sum; sub sum(a, b) { return a + b; } T = sum(5, 6);", NULL);
+    do_test("local pi; sub pi { return 3.14; } T = pi();", MPDM_R(3.14));
+    do_test("local pi; sub pi() { return 3.14; } T = pi();", MPDM_R(3.14));
+    do_test("local sum; sub sum(a, b) { return a + b; } T = sum(5, 6);", MPDM_I(11));
 
     test_summary();
 

@@ -854,6 +854,27 @@ static mpdm_t TBL(struct mpsl_vm *m)
     return l;
 }
 
+
+static void ARG(struct mpsl_vm *m)
+{
+    mpdm_t h, k, v;
+    int n;
+
+    h = mpdm_ref(MPDM_H(0));
+    k = POP(m);
+    v = POP(m);
+
+    for (n = 0; n < mpdm_size(k); n++)
+        mpdm_hset(h, mpdm_aget(k, n), mpdm_aget(v, n));
+    for (; n < mpdm_size(k); n++)
+        mpdm_hset(h, mpdm_aget(k, n), NULL);
+
+    mpdm_aset(m->symtbl, h, m->tt++); 
+
+    mpdm_unref(h);
+}
+
+
 #define IPOP(m) mpdm_ival(POP(m))
 #define RPOP(m) mpdm_rval(POP(m))
 #define ISTRU(v) mpdm_ival(v)
@@ -899,7 +920,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
         case OP_THS: PUSH(m, mpdm_aget(m->symtbl, m->tt - 2)); break;
         case OP_RET: m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
-        case OP_ARG: break;
+        case OP_ARG: ARG(m); break;
         case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
         case OP_JT:  if (ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
         case OP_JF:  if (!ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
