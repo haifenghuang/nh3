@@ -253,7 +253,8 @@ again:
 typedef enum {
     /* order matters (operator precedence) */
     N_NULL,   N_LITERAL,
-    N_ARRAY,  N_HASH,   N_PARTOF, N_SUBSCR,
+    N_ARRAY,  N_HASH,   N_PARTOF,
+    N_SUBSCR, N_FUNCAL,
     N_UMINUS, N_NOT,
     N_MOD,    N_DIV,    N_MUL,  N_SUB,  N_ADD,
     N_EQ,     N_NE,     N_GT,   N_GE,   N_LT,  N_LE,
@@ -262,7 +263,6 @@ typedef enum {
     N_IF,     N_WHILE,
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
-    N_FUNCAL,
     N_THIS,
     N_LOCAL,  N_GLOBAL,
     N_SUBDEF, N_RETURN,
@@ -920,7 +920,8 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_REM: m->pc++; break;
         case OP_DMP: mpdm_dump(POP(m)); break;
         case OP_CAL:
-            if (MPDM_IS_EXEC((v = POP(m))))
+            v = POP(m);
+            if (MPDM_IS_EXEC(v))
                 mpdm_exec(v, POP(m), NULL);
             else {
                 mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++);
