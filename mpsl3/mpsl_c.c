@@ -836,7 +836,7 @@ static mpdm_t TBL(struct mpsl_vm *m)
                 break;
     }
 
-    if (l == NULL)
+    if (n < 0)
         vm_error(m, MPDM_LS(L"undefined symbol "), s);
     else {
         PUSH(m, l);

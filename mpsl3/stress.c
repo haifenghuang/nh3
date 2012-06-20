@@ -160,11 +160,13 @@ int main(int argc, char *argv[])
     mpdm_unref(v);
 
     do_test("local tt = 1234; T = tt;", MPDM_I(1234));
-    do_test("global TT = { 'name': 'me', 'host': 'localhost', 'one': 1, 'two': 2 }; T = 1;", MPDM_I(1));
+    do_test("global TT = { 'name': 'me', 'host': 'localhost', 'one': 1, 'two': 2, 'german': { 'ein': 1, 'zwei': 2 } }; T = 1;", MPDM_I(1));
     do_test("T = TT.name;", MPDM_LS(L"me"));
     do_test("T = TT.one + TT.two;", MPDM_I(3));
     do_test("T = 1 + TT.two;", MPDM_I(3));
     do_test("T = TT.one + 2;", MPDM_I(3));
+    do_test("TT.one = 111; T = TT.one;", MPDM_I(111));
+    do_test("TT.german.ein = 222; T = TT.german.ein;", MPDM_I(222));
 
     test_summary();
 
