@@ -209,6 +209,11 @@ int main(int argc, char *argv[])
     do_test("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return this.x; } T = obj.get_x();", MPDM_I(1234));
     do_test("global obj = { x: 2, y: 3, size: NULL }; sub obj.size { return this.x * this.y; } T = obj.size();", MPDM_I(6));
 
+    do_test("local pi = sub () { return 3.14; }; T = pi();", MPDM_R(3.14));
+    do_test("local obj = { x: 1234, get_x: sub { return this.x; }}; T = obj.get_x();", MPDM_I(1234));
+    do_test("local obj = { x: 1234, get_x: sub () { return this.x; }}; T = obj.get_x();", MPDM_I(1234));
+    do_test("local obj = { x: 1234, get_fx: sub (f) { return f * this.x; }}; T = obj.get_fx(10);", MPDM_I(12340));
+
     test_summary();
 
     return 0;

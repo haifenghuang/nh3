@@ -74,7 +74,7 @@ struct mpsl_c {
 static wchar_t nc(struct mpsl_c *c)
 /* gets the next char */
 {
-    c->c = c->ptr ? *(c->ptr++) : fgetwc(c->f);
+    c->c = c->f ? fgetwc(c->f) : *(c->ptr++);
 
     /* update position in source */
     if (c->c == L'\n') {
@@ -270,7 +270,7 @@ typedef enum {
     N_SYMID,  N_SYMVAL, N_ASSIGN,
     N_THIS,
     N_LOCAL,  N_GLOBAL,
-    N_SUBDEF, N_RETURN,
+    N_SUBDEF, N_ANONSB, N_RETURN,
     N_VOID,
     N_EOP
 } mpsl_node_t;
@@ -299,6 +299,7 @@ static mpdm_t tstr(struct mpsl_c *c)
 
 static mpdm_t expr(struct mpsl_c *c);
 static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op);
+static mpdm_t statement(struct mpsl_c *c);
 
 static mpdm_t paren_expr(struct mpsl_c *c)
 /* parses a parenthesized expression */
@@ -399,6 +400,34 @@ static mpdm_t term(struct mpsl_c *c)
 
         mpdm_unrefnd(v);
         token(c);
+    }
+    else
+    if (c->token == T_SUB) {
+        token(c);
+
+        /* argument name array */
+        mpdm_t a = mpdm_ref(MPDM_A(0));
+
+        /* does it have arguments? */
+        if (c->token == T_LPAREN) {
+            token(c);
+
+            while (!c->error && c->token == T_SYMBOL) {
+                mpdm_push(a, tstr(c));
+                token(c);
+
+                if (c->token == T_COMMA)
+                    token(c);
+            }
+
+            if (c->token == T_RPAREN)
+                token(c);
+            else
+                c_error(c);
+        }
+
+        v = node2(N_ANONSB, node1(N_LITERAL, a), statement(c));
+        mpdm_unref(a);
     }
     else
     if (c->token == T_LITERAL) {
@@ -787,6 +816,10 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_SUBDEF:
         O(1); n = o2(c, OP_LIT, NULL); o(c, OP_SET); i = o2(c, OP_JMP, NULL);
         fix(c, n); O(2); o(c, OP_ARG); O(3); o(c, OP_RET); fix(c, i); break;
+
+    case N_ANONSB:
+        n = o2(c, OP_LIT, NULL); i = o2(c, OP_JMP, NULL);
+        fix(c, n); O(1); o(c, OP_ARG); O(2); o(c, OP_RET); fix(c, i); break;
     }
 
     return c->error;
@@ -1027,7 +1060,6 @@ mpdm_t mpsl_compile(mpdm_t src)
 {
     mpdm_t r = NULL;
     struct mpsl_c c;
-    FILE *f;
 
     mpdm_ref(src);
 
@@ -1035,9 +1067,7 @@ mpdm_t mpsl_compile(mpdm_t src)
     mpdm_set(&c.prg, MPDM_A(0));
 
     /* src can be a file or a string */
-    if ((f = mpdm_get_filehandle(src)) != NULL)
-        c.f = f;
-    else
+    if ((c.f = mpdm_get_filehandle(src)) == NULL)
         c.ptr = mpdm_string(src);
 
     if (parse(&c) == 0 && gen(&c, c.node) == 0)
