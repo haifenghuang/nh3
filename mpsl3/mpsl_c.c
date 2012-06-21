@@ -256,8 +256,8 @@ again:
 typedef enum {
     /* order matters (operator precedence) */
     N_NULL,   N_LITERAL,
-    N_ARRAY,  N_HASH,   N_PARTOF,
-    N_SUBSCR, N_FUNCAL,
+    N_ARRAY,  N_HASH,   N_FUNCAL,
+    N_PARTOF, N_SUBSCR, 
     N_UMINUS, N_NOT,
     N_MOD,    N_DIV,    N_MUL,  N_SUB,  N_ADD,
     N_EQ,     N_NE,     N_GT,   N_GE,   N_LT,  N_LE,

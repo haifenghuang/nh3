@@ -203,8 +203,9 @@ int main(int argc, char *argv[])
     do_test("local t = NULL; T = (t == NULL);", MPDM_I(1));
     do_test("local t = NULL; T = (t != NULL);", MPDM_I(0));
 
-    do_disasm("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return x; } T = obj.get_x();");
-//    do_test("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return x; } T = obj.get_x();", MPDM_I(1234));
+//    do_disasm("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return x; } T = obj.get_x();");
+    do_test("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return x; } T = obj.get_x();", MPDM_I(1234));
+    do_test("global obj = { x: 2, y: 3, size: NULL }; sub obj.size { return x * y; } T = obj.size();", MPDM_I(6));
 
     test_summary();
 
