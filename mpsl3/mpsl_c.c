@@ -584,7 +584,7 @@ static mpdm_t statement(struct mpsl_c *c)
                 token(c);
 
                 if (c->token == T_SYMBOL)
-                    w = node2(N_PARTOF, w, term(c));
+                    w = node2(N_PARTOF, node1(N_SYMVAL, w), term(c));
                 else
                     c_error(c);
             }

@@ -42,6 +42,12 @@ int i_failed_msgs = 0;
 
 #define do_test(s, o) _do_test(s, o ,__LINE__)
 
+void do_disasm(char *prg)
+{
+    mpsl_disasm(mpdm_aget(mpsl_compile(MPDM_MBS(prg)), 1));
+}
+
+
 void _do_test(char *prg, mpdm_t t_value, int line)
 {
     mpdm_t v;
@@ -196,6 +202,9 @@ int main(int argc, char *argv[])
     do_test("T = (1 == 2 || 2 == 2.000);", MPDM_I(1));
     do_test("local t = NULL; T = (t == NULL);", MPDM_I(1));
     do_test("local t = NULL; T = (t != NULL);", MPDM_I(0));
+
+    do_disasm("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return x; } T = obj.get_x();");
+//    do_test("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return x; } T = obj.get_x();", MPDM_I(1234));
 
     test_summary();
 
