@@ -343,6 +343,11 @@ static mpdm_t term(struct mpsl_c *c)
         v = node0(N_THIS);
     }
     else
+    if (c->token == T_NULL) {
+        token(c);
+        v = node0(N_NULL);
+    }
+    else
     if (c->token == T_LPAREN)
         v = paren_expr(c);
     else
