@@ -1014,7 +1014,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_CAL:
             v = POP(m);
             if (MPDM_IS_EXEC(v))
-                mpdm_exec(v, POP(m), NULL);
+                PUSH(m, mpdm_exec(v, POP(m), NULL));
             else {
                 mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++);
                 m->pc = mpdm_ival(v);
