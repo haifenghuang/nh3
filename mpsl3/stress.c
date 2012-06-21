@@ -187,6 +187,8 @@ int main(int argc, char *argv[])
     do_test("local pi; sub pi() { return 3.14; } T = pi();", MPDM_R(3.14));
     do_test("local sum; sub sum(a, b) { return a + b; } T = sum(5, 6);", MPDM_I(11));
 
+    do_test("T = (1 == 1);", MPDM_I(1));
+
     test_summary();
 
     return 0;

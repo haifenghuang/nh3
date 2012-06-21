@@ -5,7 +5,7 @@ stress: stress.c mpsl_c.o
 	gcc -g -Wall -I../../mpdm -L../../mpdm mpsl_c.o $< -lmpdm -o $@
 
 clean:
-	rm -f stress
+	rm -f *.o stress
 
 distclean:
 	rm -f Makefile
