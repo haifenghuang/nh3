@@ -211,8 +211,10 @@ again:
                     break;
                 }
                 else
-                if (c->c != L'.')
+                if (c->c != L'.') {
+                    POKE(c, L'\0');
                     break;
+                }
             }
 
             while (DIGIT(c->c)) { POKE(c, c->c); nc(c); };

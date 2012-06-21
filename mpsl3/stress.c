@@ -206,6 +206,8 @@ int main(int argc, char *argv[])
 //    do_disasm("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return x; } T = obj.get_x();");
     do_test("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return x; } T = obj.get_x();", MPDM_I(1234));
     do_test("global obj = { x: 2, y: 3, size: NULL }; sub obj.size { return x * y; } T = obj.size();", MPDM_I(6));
+    do_test("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return this.x; } T = obj.get_x();", MPDM_I(1234));
+    do_test("global obj = { x: 2, y: 3, size: NULL }; sub obj.size { return this.x * this.y; } T = obj.size();", MPDM_I(6));
 
     test_summary();
 
