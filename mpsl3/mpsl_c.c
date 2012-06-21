@@ -147,7 +147,7 @@ again:
     case L'&':  t = T_AMP;     nc(c); COMP(T_DAMP, T_AMPEQ, T_DAMPEQ); break;
     case L'+':  t = T_PLUS;    nc(c); COMP(T_DPLUS, T_PLUSEQ, -1); break;
     case L'-':  t = T_MINUS;   nc(c); COMP(T_DMINUS, T_MINUSEQ, -1); break;
-    case L'=':  t = T_EQUAL;   nc(c); COMP(-1, T_EQEQ, -1); break;
+    case L'=':  t = T_EQUAL;   nc(c); COMP(T_EQEQ, T_EQEQ, -1); break;
     case L'!':  t = T_BANG;    nc(c); COMP(-1, T_BANGEQ, -1); break;
     case L'*':  t = T_ASTER;   nc(c); COMP(-1, T_EQEQ, -1); break;
     case L'%':  t = T_PERCENT; nc(c); COMP(-1, T_PERCEQ, -1); break;
