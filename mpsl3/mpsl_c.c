@@ -832,8 +832,36 @@ static mpdm_t PUSH(struct mpsl_vm *m, mpdm_t v) { return mpdm_aset(m->stack, v, 
 static mpdm_t POP(struct mpsl_vm *m) { return mpdm_aget(m->stack, --m->sp); }
 static mpdm_t TOS(struct mpsl_vm *m) { return mpdm_aget(m->stack, m->sp - 1); }
 static mpdm_t PC(struct mpsl_vm *m) { return mpdm_aget(m->prg, m->pc++); }
-static mpdm_t GET(mpdm_t m, mpdm_t k) { return MPDM_IS_HASH(m) ? mpdm_hget(m, k) : mpdm_aget(m, mpdm_ival(k)); }
-static mpdm_t SET(mpdm_t m, mpdm_t k, mpdm_t v) { return MPDM_IS_HASH(m) ? mpdm_hset(m, k, v) : mpdm_aset(m, v, mpdm_ival(k)); }
+
+static mpdm_t GET(struct mpsl_vm *m, mpdm_t h, mpdm_t k)
+{
+    mpdm_t r = NULL;
+
+    if (MPDM_IS_HASH(h))
+        r = mpdm_hget(h, k);
+    else
+    if (MPDM_IS_ARRAY(h))
+        r = mpdm_aget(h, mpdm_ival(k)); 
+    else
+        vm_error(m, MPDM_LS(L"bad holder in get for key "), k);
+
+    return r;
+}
+
+static mpdm_t SET(struct mpsl_vm *m, mpdm_t h, mpdm_t k, mpdm_t v)
+{
+    mpdm_t r = NULL;
+
+    if (MPDM_IS_HASH(h))
+        r = mpdm_hset(h, k, v);
+    else
+    if (MPDM_IS_ARRAY(h))
+        r = mpdm_aset(h, v, mpdm_ival(k)); 
+    else
+        vm_error(m, MPDM_LS(L"bad holder in set for key "), k);
+
+    return r;
+}
 
 static mpdm_t TBL(struct mpsl_vm *m)
 {
@@ -918,9 +946,9 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
         case OP_DUP: PUSH(m, TOS(m)); break;
         case OP_TBL: TBL(m); break;
-        case OP_GET: w = POP(m); v = POP(m); PUSH(m, GET(v, w)); break;
-        case OP_SET: w = POP(m); v = POP(m); PUSH(m, SET(POP(m), v, w)); break;
-        case OP_STI: w = POP(m); v = POP(m); SET(POP(m), v, w); break;
+        case OP_GET: w = POP(m); v = POP(m); PUSH(m, GET(m, v, w)); break;
+        case OP_SET: w = POP(m); v = POP(m); PUSH(m, SET(m, POP(m), v, w)); break;
+        case OP_STI: w = POP(m); v = POP(m); SET(m, POP(m), v, w); break;
         case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
         case OP_TPO: --m->tt; break;
         case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
