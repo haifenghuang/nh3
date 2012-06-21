@@ -160,6 +160,8 @@ int main(int argc, char *argv[])
 
     mpdm_unref(v);
 
+    do_test("local addr = { name: 'angel', email: 'angel@triptico.com' };", NULL);
+
     do_test("local tt = 1234; T = tt;", MPDM_I(1234));
     do_test("global TT = { 'name': 'me', 'host': 'localhost', 'one': 1, 'two': 2, 'german': { 'ein': 1, 'zwei': 2 } }; T = 1;", MPDM_I(1));
     do_test("T = TT.name;", MPDM_LS(L"me"));

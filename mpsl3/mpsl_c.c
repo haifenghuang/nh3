@@ -278,10 +278,10 @@ typedef enum {
 #define UF(v) mpdm_unref(v)
 #define UFND(v) mpdm_unrefnd(v)
 
-static mpdm_t node0(int t) { mpdm_t r = RF(MPDM_A(1)); mpdm_aset(r, MPDM_I(t), 0); return UFND(r); }
-static mpdm_t node1(int t, mpdm_t n1) { mpdm_t r = RF(node0(t)); mpdm_push(r, n1); return UFND(r); }
-static mpdm_t node2(int t, mpdm_t n1, mpdm_t n2) { mpdm_t r = RF(node1(t, n1)); mpdm_push(r, n2); return UFND(r); }
-static mpdm_t node3(int t, mpdm_t n1, mpdm_t n2, mpdm_t n3) { mpdm_t r = RF(node2(t, n1, n2)); mpdm_push(r, n3); return UFND(r); }
+static mpdm_t node0(mpsl_node_t t) { mpdm_t r = RF(MPDM_A(1)); mpdm_aset(r, MPDM_I(t), 0); return UFND(r); }
+static mpdm_t node1(mpsl_node_t t, mpdm_t n1) { mpdm_t r = RF(node0(t)); mpdm_push(r, n1); return UFND(r); }
+static mpdm_t node2(mpsl_node_t t, mpdm_t n1, mpdm_t n2) { mpdm_t r = RF(node1(t, n1)); mpdm_push(r, n2); return UFND(r); }
+static mpdm_t node3(mpsl_node_t t, mpdm_t n1, mpdm_t n2, mpdm_t n3) { mpdm_t r = RF(node2(t, n1, n2)); mpdm_push(r, n3); return UFND(r); }
 
 static mpdm_t tstr(struct mpsl_c *c)
 /* returns the current token as a string */
@@ -353,7 +353,13 @@ static mpdm_t term(struct mpsl_c *c)
         v = mpdm_ref(node0(N_HASH));
 
         while (!c->error && c->token != T_RBRACE) {
-            mpdm_push(v, expr(c));
+
+            if (c->token == T_SYMBOL) {
+                mpdm_push(v, node1(N_LITERAL, tstr(c)));
+                token(c);
+            }
+            else
+                mpdm_push(v, expr(c));
 
             if (c->token == T_COLON) {
                 token(c);
