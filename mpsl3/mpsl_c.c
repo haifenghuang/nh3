@@ -934,18 +934,12 @@ static void ARG(struct mpsl_vm *m)
     mpdm_t h, k, v;
     int n;
 
-    h = mpdm_ref(MPDM_H(0));
+    h = mpdm_aset(m->symtbl, MPDM_H(0), m->tt++); 
     k = POP(m);
     v = POP(m);
 
     for (n = 0; n < mpdm_size(k); n++)
         mpdm_hset(h, mpdm_aget(k, n), mpdm_aget(v, n));
-    for (; n < mpdm_size(k); n++)
-        mpdm_hset(h, mpdm_aget(k, n), NULL);
-
-    mpdm_aset(m->symtbl, h, m->tt++); 
-
-    mpdm_unref(h);
 }
 
 
