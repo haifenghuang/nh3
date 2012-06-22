@@ -184,6 +184,7 @@ again:
             POKE(c, m);
         }
         POKE(c, L'\0');
+        nc(c);
         t = T_LITERAL;
         break;
 
@@ -1112,3 +1113,23 @@ void mpsl_disasm(mpdm_t prg)
 
     mpdm_unref(prg);
 }
+
+
+static mpdm_t F_print(mpdm_t a, mpdm_t l)
+{
+    int n;
+
+    for (n = 0; n < mpdm_size(a); n++)
+        mpdm_write_wcs(stdout, mpdm_string(mpdm_aget(a, n)));
+
+    return NULL;
+}
+
+
+void mpsl_startup(void)
+{
+    mpdm_startup();
+
+    mpdm_hset_s(mpdm_root(), L"print", MPDM_X(F_print));
+}
+

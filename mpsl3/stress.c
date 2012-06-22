@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 {
     mpdm_t v, w;
 
-    mpdm_startup();
+    mpsl_startup();
 
     /* create the T global variable */
     mpdm_hset_s(mpdm_root(), L"T", NULL);
@@ -213,6 +213,8 @@ int main(int argc, char *argv[])
     do_test("local obj = { x: 1234, get_x: sub { return this.x; }}; T = obj.get_x();", MPDM_I(1234));
     do_test("local obj = { x: 1234, get_x: sub () { return this.x; }}; T = obj.get_x();", MPDM_I(1234));
     do_test("local obj = { x: 1234, get_fx: sub (f) { return f * this.x; }}; T = obj.get_fx(10);", MPDM_I(12340));
+
+    do_test("print(1234, 5678, \"--hello\\n\");", NULL);
 
     test_summary();
 

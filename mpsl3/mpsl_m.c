@@ -84,7 +84,7 @@ int mpsl_main(int argc, char *argv[])
         argc--;
     }
 
-    mpdm_startup();
+    mpsl_startup();
 
     /* set arguments */
 //    mpsl_argv(argc, argv);
