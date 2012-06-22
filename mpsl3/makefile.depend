@@ -1,0 +1,2 @@
+mpsl_c.o: mpsl_c.c mpsl.h $(MPDM)/mpdm.h
+stress.o: stress.c mpsl.h $(MPDM)/mpdm.h
