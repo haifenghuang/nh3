@@ -1090,7 +1090,7 @@ void mpsl_disasm(mpdm_t prg)
         "JMP", "JT", "JF",
         "AND", "OR", "XOR", "SHL", "SHR",
         "ADD", "SUB", "MUL", "DIV", "MOD",
-        "NOT", "EQ", "NE", "GT", "GE",
+        "NOT", "EQ", "NE", "GT", "GE", "LT", "LE",
         "REM", "DMP"
     };
 
