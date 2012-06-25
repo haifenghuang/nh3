@@ -780,8 +780,8 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_THIS:    o(c, OP_THS); break;
     case N_SUBSCR:  O(1); O(2); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
-    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_STI); break;
-    case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_STI); break;
+    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_STI); o(c, OP_POP); break;
+    case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_STI); o(c, OP_POP); break;
     case N_RETURN:  O(1); o(c, OP_TPO); o(c, OP_RET); break;
     case N_FUNCAL:  O(1); O(2); o(c, OP_CAL); break;
     case N_BINAND:  O(1); O(2); o(c, OP_AND); break;
@@ -793,7 +793,6 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_ARRAY:
         o(c, OP_ARR);
         for (n = 1; n < mpdm_size(node); n++) {
-            o(c, OP_DUP);
             o2(c, OP_LIT, MPDM_I(n - 1));
             O(n);
             o(c, OP_STI);
@@ -803,7 +802,6 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_HASH:
         o(c, OP_HSH);
         for (n = 1; n < mpdm_size(node); n += 2) {
-            o(c, OP_DUP);
             O(n);
             O(n + 1);
             o(c, OP_STI);
@@ -1011,7 +1009,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_TBL: TBL(m); break;
         case OP_GET: w = POP(m); v = POP(m); PUSH(m, GET(m, v, w)); break;
         case OP_SET: w = POP(m); v = POP(m); PUSH(m, SET(m, POP(m), v, w)); break;
-        case OP_STI: w = POP(m); v = POP(m); SET(m, POP(m), v, w); break;
+        case OP_STI: w = POP(m); v = POP(m); SET(m, TOS(m), v, w); break;
         case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
         case OP_TPO: --m->tt; break;
         case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
