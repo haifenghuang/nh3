@@ -220,6 +220,14 @@ int main(int argc, char *argv[])
     do_test("local n = 3; n *= 7; T = n;", MPDM_I(3 * 7));
     do_test("local n = 12345678; n &= 0xff; T = n;", MPDM_I(12345678 & 0xff));
 
+    do_test("/* comment */ T = 1;", MPDM_I(1));
+    do_test("T /* comment */ = 1;", MPDM_I(1));
+    do_test("T =/* comment */ 1;", MPDM_I(1));
+    do_test("T = /* comment */ 1;", MPDM_I(1));
+    do_test("T = /* comment */1;", MPDM_I(1));
+    do_test("T = 1 /* comment */;", MPDM_I(1));
+    do_test("T = 1; /* comment */", MPDM_I(1));
+
     test_summary();
 
     return 0;

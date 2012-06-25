@@ -119,12 +119,13 @@ void POKE(struct mpsl_c *c, wchar_t k) { c->token_s = mpdm_poke_o(c->token_s, &c
 
 static mpsl_token_t token(struct mpsl_c *c)
 {
-    mpsl_token_t t = T_ERROR;
+    mpsl_token_t t;
     wchar_t i;
 
     c->token_o = 0;
 
 again:
+    t = T_ERROR;
     i = c->c;
 
     switch (i) {
@@ -160,6 +161,7 @@ again:
                 if (c->c == L'*' && nc(c) == L'/') break;
                 nc(c);
             }
+            nc(c);
             goto again;
         }
         COMP(-1, T_SLASHEQ, -1);
