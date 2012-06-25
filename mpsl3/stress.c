@@ -216,6 +216,10 @@ int main(int argc, char *argv[])
 
     do_test("print(1234, 5678, \"--hello\\n\");", NULL);
 
+    do_test("local n = 0; while (n < 10) n += 1; T = n;", MPDM_I(10));
+    do_test("local n = 3; n *= 7; T = n;", MPDM_I(3 * 7));
+    do_test("local n = 12345678; n &= 0xff; T = n;", MPDM_I(12345678 & 0xff));
+
     test_summary();
 
     return 0;
