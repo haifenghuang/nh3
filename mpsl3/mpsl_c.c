@@ -269,6 +269,7 @@ typedef enum {
     N_IF,     N_WHILE,
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
+    N_IADD,
     N_THIS,
     N_LOCAL,  N_GLOBAL,
     N_SUBDEF, N_ANONSB, N_RETURN,
@@ -450,12 +451,14 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
 {
     int n;
     static int tokens[] = {
+        T_PLUSEQ,
         T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTER, T_SLASH, T_PERCENT, 
         T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
         T_DAMP, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL,
         T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, -1
     };
     static mpsl_node_t binop[] = {
+        N_IADD,
         N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
         N_FUNCAL, N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
         N_AND, N_OR, N_LOCAL, N_GLOBAL, N_ASSIGN,
@@ -467,6 +470,14 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
             break;
 
     return binop[n];
+}
+
+
+static int is_assign(struct mpsl_c *c)
+{
+    mpsl_node_t node = node_by_token(c);
+
+    return node == N_ASSIGN || node == N_IADD;
 }
 
 
@@ -482,7 +493,7 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
 
         v = term(c);
 
-        if (t == T_SYMBOL && c->token != T_EQUAL)
+        if (t == T_SYMBOL && !is_assign(c))
             v = node1(N_SYMVAL, v);
 
         while (!c->error && (op = node_by_token(c)) > 0 && op <= p_op) {
@@ -497,7 +508,7 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
                 else
                     c_error(c);
 
-                if (c->token != T_EQUAL)
+                if (!is_assign(c))
                     v = node1(N_SYMVAL, v);
             }
             else
@@ -821,6 +832,9 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_ANONSB:
         n = o2(c, OP_LIT, NULL); i = o2(c, OP_JMP, NULL);
         fix(c, n); O(1); o(c, OP_ARG); O(2); o(c, OP_RET); fix(c, i); break;
+
+    case N_IADD:
+        O(1); O(2); break;
     }
 
     return c->error;
