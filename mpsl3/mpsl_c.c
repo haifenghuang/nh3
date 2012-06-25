@@ -149,7 +149,7 @@ again:
     case L'-':  t = T_MINUS;   nc(c); COMP(T_DMINUS, T_MINUSEQ, -1); break;
     case L'=':  t = T_EQUAL;   nc(c); COMP(T_EQEQ, T_EQEQ, -1); break;
     case L'!':  t = T_BANG;    nc(c); COMP(-1, T_BANGEQ, -1); break;
-    case L'*':  t = T_ASTER;   nc(c); COMP(-1, T_EQEQ, -1); break;
+    case L'*':  t = T_ASTER;   nc(c); COMP(-1, T_ASTEREQ, -1); break;
     case L'%':  t = T_PERCENT; nc(c); COMP(-1, T_PERCEQ, -1); break;
     case L'^':  t = T_CARET;   nc(c); COMP(-1, T_CARETEQ, -1); break;
     case L'/':  t = T_SLASH;   nc(c);
@@ -269,7 +269,8 @@ typedef enum {
     N_IF,     N_WHILE,
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
-    N_IADD,
+    N_IADD,   N_ISUB,   N_IMUL, N_IDIV, N_IMOD,
+    N_IBAND,  N_IBOR,   N_IXOR,
     N_THIS,
     N_LOCAL,  N_GLOBAL,
     N_SUBDEF, N_ANONSB, N_RETURN,
@@ -451,14 +452,16 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
 {
     int n;
     static int tokens[] = {
-        T_PLUSEQ,
+        T_PLUSEQ, T_MINUSEQ, T_ASTEREQ, T_SLASHEQ, T_PERCEQ,
+        T_AMPEQ, T_PIPEEQ, T_CARETEQ,
         T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTER, T_SLASH, T_PERCENT, 
         T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
         T_DAMP, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL,
         T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, -1
     };
     static mpsl_node_t binop[] = {
-        N_IADD,
+        N_IADD, N_ISUB, N_IMUL, N_IDIV, N_IMOD,
+        N_IBAND, N_IBOR, N_IXOR,
         N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
         N_FUNCAL, N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
         N_AND, N_OR, N_LOCAL, N_GLOBAL, N_ASSIGN,
@@ -477,7 +480,7 @@ static int is_assign(struct mpsl_c *c)
 {
     mpsl_node_t node = node_by_token(c);
 
-    return node == N_ASSIGN || node == N_IADD;
+    return node >= N_ASSIGN && node <= N_IXOR;
 }
 
 
@@ -721,7 +724,7 @@ static int parse(struct mpsl_c *c)
 typedef enum {
     OP_EOP,
     OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROO,
-    OP_POP, OP_SWP, OP_DUP,
+    OP_POP, OP_SWP, OP_DUP, OP_DP2,
     OP_GET, OP_SET, OP_STI, OP_TBL,
     OP_TPU, OP_TPO, OP_TLT, OP_THS,
     OP_CAL, OP_RET, OP_ARG,
@@ -833,8 +836,14 @@ static int gen(struct mpsl_c *c, mpdm_t node)
         n = o2(c, OP_LIT, NULL); i = o2(c, OP_JMP, NULL);
         fix(c, n); O(1); o(c, OP_ARG); O(2); o(c, OP_RET); fix(c, i); break;
 
-    case N_IADD:
-        O(1); O(2); break;
+    case N_IADD: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_ADD); o(c, OP_SET); break;
+    case N_ISUB: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_SUB); o(c, OP_SET); break;
+    case N_IMUL: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_MUL); o(c, OP_SET); break;
+    case N_IDIV: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_DIV); o(c, OP_SET); break;
+    case N_IMOD: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_MOD); o(c, OP_SET); break;
+    case N_IBAND: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_AND); o(c, OP_SET); break;
+    case N_IBOR: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_OR); o(c, OP_SET); break;
+    case N_IXOR: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_XOR); o(c, OP_SET); break;
     }
 
     return c->error;
@@ -994,6 +1003,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_POP: --m->sp; break;
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
         case OP_DUP: PUSH(m, TOS(m)); break;
+        case OP_DP2: PUSH(m, mpdm_aget(m->stack, m->sp - 2)); break;
         case OP_TBL: TBL(m); break;
         case OP_GET: w = POP(m); v = POP(m); PUSH(m, GET(m, v, w)); break;
         case OP_SET: w = POP(m); v = POP(m); PUSH(m, SET(m, POP(m), v, w)); break;
@@ -1098,7 +1108,7 @@ void mpsl_disasm(mpdm_t prg)
     static char *ops[] = {
         "EOP",
         "LIT", "NUL", "ARR", "HSH", "ROO",
-        "POP", "SWP", "DUP",
+        "POP", "SWP", "DUP", "DP2",
         "GET", "SET", "STI", "TBL",
         "TPU", "TPO", "TLT", "THS",
         "CAL", "RET", "ARG",
