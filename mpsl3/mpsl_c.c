@@ -711,6 +711,11 @@ static mpdm_t statement(struct mpsl_c *c)
 
         token(c);
     }
+    else
+    if (c->token == T_SEMI) {
+        token(c);
+        v = node0(N_NOP);
+    }
     else {
         /* expression */
         v = node1(N_VOID, expr(c));
