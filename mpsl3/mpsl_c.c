@@ -275,6 +275,7 @@ typedef enum {
     N_SYMID,  N_SYMVAL, N_ASSIGN,
     N_IADD,   N_ISUB,   N_IMUL, N_IDIV, N_IMOD,
     N_IBAND,  N_IBOR,   N_IXOR,
+    N_PINC,   N_PDEC,   N_SINC, N_SDEC,
     N_THIS,
     N_LOCAL,  N_GLOBAL,
     N_SUBDEF, N_ANONSB, N_RETURN,
@@ -346,6 +347,28 @@ static mpdm_t term(struct mpsl_c *c)
     if (c->token == T_MINUS) {
         token(c);
         v = node1(N_UMINUS, expr_p(c, N_UMINUS));
+    }
+    else
+    if (c->token == T_DPLUS) {
+        token(c);
+
+        if (c->token == T_SYMBOL) {
+            v = node1(N_PINC, node1(N_SYMID, tstr(c)));
+            token(c);
+        }
+        else
+            c_error(c);
+    }
+    else
+    if (c->token == T_DMINUS) {
+        token(c);
+
+        if (c->token == T_SYMBOL) {
+            v = node1(N_PDEC, node1(N_SYMID, tstr(c)));
+            token(c);
+        }
+        else
+            c_error(c);
     }
     else
     if (c->token == T_THIS) {
@@ -484,7 +507,7 @@ static int is_assign(struct mpsl_c *c)
 {
     mpsl_node_t node = node_by_token(c);
 
-    return node >= N_ASSIGN && node <= N_IXOR;
+    return node >= N_ASSIGN && node <= N_SDEC;
 }
 
 
@@ -846,6 +869,9 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_IBAND: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_AND); o(c, OP_SET); break;
     case N_IBOR: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_OR); o(c, OP_SET); break;
     case N_IXOR: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_XOR); o(c, OP_SET); break;
+
+    case N_PINC: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); o2(c, OP_LIT, MPDM_I(1)); o(c, OP_ADD); o(c, OP_SET); break;
+    case N_PDEC: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); o2(c, OP_LIT, MPDM_I(1)); o(c, OP_SUB); o(c, OP_SET); break;
     }
 
     return c->error;

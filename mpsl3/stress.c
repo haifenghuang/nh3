@@ -228,6 +228,11 @@ int main(int argc, char *argv[])
     do_test("T = 1 /* comment */;", MPDM_I(1));
     do_test("T = 1; /* comment */", MPDM_I(1));
 
+    do_test("local n = 1; ++n; T = n;", MPDM_I(2));
+    do_test("local n = 10; T = ++n;", MPDM_I(11));
+    do_test("local n = 1; --n; T = n;", MPDM_I(0));
+    do_test("local n = 10; T = --n;", MPDM_I(9));
+
     test_summary();
 
     return 0;
