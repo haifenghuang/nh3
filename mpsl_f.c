@@ -1337,8 +1337,10 @@ static mpdm_t F_random(F_ARGS)
     int r = 0;
     int range = mpdm_ival(mpdm_aget(a, 0));
 
-    if (range == 0 || seed == 0)
+    if (range == 0 || seed == 0) {
         seed = time(NULL) ^ getpid();
+        r = seed % range;
+    }
     else {
         seed = (seed * 58321) + 11113;
         r = (seed >> 16) % range;

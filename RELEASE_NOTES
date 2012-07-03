@@ -1,6 +1,11 @@
 MPSL Release Notes
 ==================
 
+2.2.1
+-----
+
+ - Fixed bug in random().
+
 2.2.0
 -----
 
