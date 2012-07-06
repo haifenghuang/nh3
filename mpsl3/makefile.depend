@@ -1,3 +1,4 @@
 mpsl_c.o: mpsl_c.c config.h mpsl.h $(MPDM)/mpdm.h
+mpsl_f.o: mpsl_f.c config.h mpsl.h $(MPDM)/mpdm.h
 mpsl_m.o: mpsl_m.c config.h mpsl.h $(MPDM)/mpdm.h
 stress.o: stress.c mpsl.h $(MPDM)/mpdm.h

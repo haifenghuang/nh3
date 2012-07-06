@@ -37,7 +37,8 @@ enum {
 
 mpdm_t mpsl_compile(mpdm_t src);
 
-void mpsl_startup(void);
+void mpsl_startup(int argc, char *argv[]);
+void mpsl_shutdown(void);
 
 #ifdef __cplusplus
 }

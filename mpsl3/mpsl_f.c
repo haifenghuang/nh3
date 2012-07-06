@@ -1317,11 +1317,24 @@ static mpdm_t F_new(F_ARGS)
 
 /** init **/
 
-void mpsl_library_init(mpdm_t r)
+void mpsl_library_init(mpdm_t r, int argc, char *argv[])
 /* inits the library */
 {
+    int n;
+    mpdm_t v;
+
     mpdm_ref(r);
 
+    /* standard file descriptors */
+    mpdm_hset_s(r, L"STDIN",    MPDM_F(stdin));
+    mpdm_hset_s(r, L"STDOUT",   MPDM_F(stdout));
+    mpdm_hset_s(r, L"STDERR",   MPDM_F(stderr));
+
+    /* home and application directories */
+    mpdm_hset_s(r, L"HOMEDIR",  mpdm_home_dir());
+    mpdm_hset_s(r, L"APPDIR",   mpdm_app_dir());
+
+    /* library functions */
     mpdm_hset_s(r, L"size",     MPDM_X(F_size));
     mpdm_hset_s(r, L"clone",    MPDM_X(F_clone));
     mpdm_hset_s(r, L"dump",     MPDM_X(F_dump));
@@ -1403,6 +1416,16 @@ void mpsl_library_init(mpdm_t r)
     mpdm_hset_s(r, L"bincall",  MPDM_X(F_bincall));
 
     mpdm_hset_s(r, L"new",      MPDM_X(F_new));
+
+    /* version */
+    v = mpdm_hset_s(r, L"MPSL", MPDM_H(0));
+    mpdm_hset_s(v, L"VERSION",  MPDM_MBS(VERSION));
+
+    /* command line arguments */
+    v = mpdm_hset_s(r, L"ARGV", MPDM_A(0));
+
+    for (n = 0; n < argc; n++)
+        mpdm_push(v, MPDM_MBS(argv[n]));
 
     mpdm_unref(r);
 }

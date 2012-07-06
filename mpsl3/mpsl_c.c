@@ -764,7 +764,7 @@ typedef enum {
     OP_AND, OP_OR,  OP_XOR, OP_SHL, OP_SHR,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_NOT, OP_EQ,  OP_NE,  OP_GT,  OP_GE,  OP_LT, OP_LE,
-    OP_REM, OP_DMP
+    OP_REM
 } mpsl_op_t;
 
 
@@ -1068,7 +1068,6 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SHL: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 << i2)); break;
         case OP_SHR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 >> i2)); break;
         case OP_REM: m->pc++; break;
-        case OP_DMP: mpdm_dump(POP(m)); break;
         case OP_CAL:
             v = POP(m);
             if (MPDM_IS_EXEC(v))
@@ -1172,10 +1171,17 @@ void mpsl_disasm(mpdm_t prg)
 }
 
 
-void mpsl_library_init(mpdm_t r);
+/** start / stop **/
 
-void mpsl_startup(void)
+void mpsl_library_init(mpdm_t r, int argc, char *argv[]);
+
+void mpsl_startup(int argc, char *argv[])
 {
     mpdm_startup();
-    mpsl_library_init(mpdm_root());
+    mpsl_library_init(mpdm_root(), argc, argv);
+}
+
+
+void mpsl_shutdown(void)
+{
 }
