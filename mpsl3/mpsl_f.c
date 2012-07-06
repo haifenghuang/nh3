@@ -1308,6 +1308,9 @@ static mpdm_t F_new(F_ARGS)
 
         w = mpdm_ref(A(n));
 
+        if (MPDM_IS_EXEC(w))
+            w = mpdm_ref(mpdm_exec(mpdm_unrefnd(w), NULL, NULL));
+
         if (MPDM_IS_HASH(w)) {
             while (mpdm_iterator(w, &m, &k, &v))
                 mpdm_hset(r, k, mpdm_clone(v));
