@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 {
     mpdm_t v, w;
 
-    mpsl_startup();
+    mpsl_startup(argc, argv);
 
     /* create the T global variable */
     mpdm_hset_s(mpdm_root(), L"T", NULL);
