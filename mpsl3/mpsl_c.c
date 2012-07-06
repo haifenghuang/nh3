@@ -1172,21 +1172,10 @@ void mpsl_disasm(mpdm_t prg)
 }
 
 
-static mpdm_t F_print(mpdm_t a, mpdm_t l)
-{
-    int n;
-
-    for (n = 0; n < mpdm_size(a); n++)
-        mpdm_write_wcs(stdout, mpdm_string(mpdm_aget(a, n)));
-
-    return NULL;
-}
-
+void mpsl_library_init(mpdm_t r);
 
 void mpsl_startup(void)
 {
     mpdm_startup();
-
-    mpdm_hset_s(mpdm_root(), L"print", MPDM_X(F_print));
+    mpsl_library_init(mpdm_root());
 }
-
