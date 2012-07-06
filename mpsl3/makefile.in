@@ -6,7 +6,7 @@ all: $(TARGET)
 
 PROJ=mpsl
 
-ADD_DOCS=doc/mpsl_quickref.ps
+#ADD_DOCS=doc/mpsl_quickref.ps
 GRUTATXT_DOCS=doc/mpsl_index.html doc/mpsl_overview.html doc/mpsl_internals.html
 MP_DOCCER_DOCS=doc/mpsl_api.txt doc/mpsl_reference.txt
 G_AND_MP_DOCS=doc/mpsl_api.html doc/mpsl_reference.html
@@ -60,8 +60,8 @@ realdistclean: realclean
 doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
 	-./mpsl scripts/mkquickref.mpsl < $< > $@
 
-doc/mpsl_api.txt: mpsl_c.c mpsl.y
-	mp_doccer mpsl_c.c mpsl.y -o doc/mpsl_api -f grutatxt \
+doc/mpsl_api.txt: mpsl_c.c
+	mp_doccer mpsl_c.c -o doc/mpsl_api -f grutatxt \
 	-t "MPSL C API" \
 	-b "This reference documents version $(VERSION) of the C API." \
 	-a 'Angel Ortega - angel@triptico.com'
