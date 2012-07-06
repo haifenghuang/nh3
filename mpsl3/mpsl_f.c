@@ -1122,46 +1122,50 @@ static mpdm_t F_sleep(F_ARGS)
 
 
 /**
- * mutex - Returns a new mutex.
- *
- * Returns a new mutex.
- * [Threading]
- */
-/** var = mutex(); */
-static mpdm_t F_mutex(F_ARGS)
-{
-    return mpdm_new_mutex();
-}
-
-
-/**
- * mutex_lock - Locks a mutex (possibly waiting).
- * @mtx: the mutex
+ * mutex.lock - Locks a mutex (possibly waiting).
  *
  * Locks a mutex. If the mutex is already locked by
  * another process, it waits until it's unlocked.
  * [Threading]
  */
-/** mutex_lock(mtx); */
+/** mutex.lock(); */
 static mpdm_t F_mutex_lock(F_ARGS)
 {
-    mpdm_mutex_lock(A0);
-    return NULL;
+    mpdm_mutex_lock(mpdm_hget_s(l, L"v"));
+    return l;
 }
 
 
 /**
- * mutex_unlock - Unlocks a mutex.
- * @mtx: the mutex
+ * mutex.unlock - Unlocks a mutex.
  *
  * Unlocks a mutex.
  * [Threading]
  */
-/** mutex_unlock(mtx); */
+/** mutex.unlock(); */
 static mpdm_t F_mutex_unlock(F_ARGS)
 {
-    mpdm_mutex_unlock(A0);
-    return NULL;
+    mpdm_mutex_unlock(mpdm_hget_s(l, L"v"));
+    return l;
+}
+
+
+/**
+ * mutex - Returns a new mutex object.
+ *
+ * Returns a new mutex object.
+ * [Threading]
+ */
+/** local m = mutex(); */
+static mpdm_t F_mutex(F_ARGS)
+{
+    mpdm_t o = mpdm_ref(MPDM_H(0));
+
+    mpdm_hset_s(o, L"v",        mpdm_new_mutex());
+    mpdm_hset_s(o, L"lock",     MPDM_X(F_mutex_lock));
+    mpdm_hset_s(o, L"unlock",   MPDM_X(F_mutex_unlock));
+
+    return mpdm_unrefnd(o);
 }
 
 
@@ -1404,8 +1408,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(r, L"sleep",    MPDM_X(F_sleep));
 
     mpdm_hset_s(r, L"mutex",        MPDM_X(F_mutex));
-    mpdm_hset_s(r, L"mutex_lock",   MPDM_X(F_mutex_lock));
-    mpdm_hset_s(r, L"mutex_unlock", MPDM_X(F_mutex_unlock));
 
     mpdm_hset_s(r, L"semaphore",        MPDM_X(F_semaphore));
     mpdm_hset_s(r, L"semaphore_wait",   MPDM_X(F_semaphore_wait));
