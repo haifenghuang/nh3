@@ -1170,47 +1170,52 @@ static mpdm_t F_mutex(F_ARGS)
 
 
 /**
+ * semaphore.wait - Waits for a semaphore to be ready.
+ *
+ * Waits for the value of a semaphore to be > 0. If it's
+ * not, the thread waits until it is.
+ * [Threading]
+ */
+/** semaphore.wait(); */
+static mpdm_t F_semaphore_wait(F_ARGS)
+{
+    mpdm_semaphore_wait(mpdm_hget_s(l, L"v"));
+    return NULL;
+}
+
+
+/**
+ * semaphore.post - Increments the value of a semaphore.
+ *
+ * Increments by 1 the value of a semaphore.
+ * [Threading]
+ */
+/** semaphore.post(); */
+static mpdm_t F_semaphore_post(F_ARGS)
+{
+    mpdm_semaphore_post(mpdm_hget_s(l, L"v"));
+    return NULL;
+}
+
+
+/**
  * semaphore - Returns a new semaphore.
  * cnt: the initial count of the semaphore.
  *
  * Returns a new semaphore.
  * [Threading]
  */
-/** var = semaphore(cnt); */
+/** local s = semaphore(); */
+/** local s = semaphore(cnt); */
 static mpdm_t F_semaphore(F_ARGS)
 {
-    return mpdm_new_semaphore(IA0);
-}
+    mpdm_t o = mpdm_ref(MPDM_H(0));
 
+    mpdm_hset_s(o, L"v",    mpdm_new_semaphore(IA0));
+    mpdm_hset_s(o, L"post", MPDM_X(F_semaphore_post));
+    mpdm_hset_s(o, L"wait", MPDM_X(F_semaphore_wait));
 
-/**
- * semaphore_wait - Waits for a semaphore to be ready.
- * @sem: the semaphore to wait onto
- *
- * Waits for the value of a semaphore to be > 0. If it's
- * not, the thread waits until it is.
- * [Threading]
- */
-/** semaphore_wait(sem); */
-static mpdm_t F_semaphore_wait(F_ARGS)
-{
-    mpdm_semaphore_wait(A0);
-    return NULL;
-}
-
-
-/**
- * semaphore_post - Increments the value of a semaphore.
- * @sem: the semaphore to increment
- *
- * Increments by 1 the value of a semaphore.
- * [Threading]
- */
-/** semaphore_post(mtx); */
-static mpdm_t F_semaphore_post(F_ARGS)
-{
-    mpdm_semaphore_post(A0);
-    return NULL;
+    return mpdm_unrefnd(o);
 }
 
 
@@ -1410,11 +1415,8 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(r, L"random",   MPDM_X(F_random));
     mpdm_hset_s(r, L"sleep",    MPDM_X(F_sleep));
 
-    mpdm_hset_s(r, L"mutex",        MPDM_X(F_mutex));
-
-    mpdm_hset_s(r, L"semaphore",        MPDM_X(F_semaphore));
-    mpdm_hset_s(r, L"semaphore_wait",   MPDM_X(F_semaphore_wait));
-    mpdm_hset_s(r, L"semaphore_post",   MPDM_X(F_semaphore_post));
+    mpdm_hset_s(r, L"mutex",     MPDM_X(F_mutex));
+    mpdm_hset_s(r, L"semaphore", MPDM_X(F_semaphore));
 
     mpdm_hset_s(r, L"connect",     MPDM_X(F_connect));
 
