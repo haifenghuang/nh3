@@ -2,7 +2,7 @@
 
 # Configuration shell script
 
-TARGET=mpsl2
+TARGET=mpsl3
 
 # gets program version
 VERSION=`cut -f2 -d\" VERSION`
@@ -19,50 +19,42 @@ CONF_ARGS="$*"
 # parse arguments
 while [ $# -gt 0 ] ; do
 
-	case $1 in
-	--help)			CONFIG_HELP=1 ;;
+    case $1 in
+    --help)     CONFIG_HELP=1 ;;
 
-	--mingw32)		CC=i586-mingw32msvc-cc
-				WINDRES=i586-mingw32msvc-windres
-				AR=i586-mingw32msvc-ar
-				;;
+    --mingw32)  CC=i586-mingw32msvc-cc
+                WINDRES=i586-mingw32msvc-windres
+                AR=i586-mingw32msvc-ar
+                ;;
 
-	--prefix)		PREFIX=$2 ; shift ;;
-	--prefix=*)		PREFIX=`echo $1 | sed -e 's/--prefix=//'` ;;
+    --prefix)   PREFIX=$2 ; shift ;;
+    --prefix=*) PREFIX=`echo $1 | sed -e 's/--prefix=//'` ;;
 
-	--docdir)		DOCDIR=$2 ; shift ;;
-	--docdir=*)		DOCDIR=`echo $1 | sed -e 's/--docdir=//'` ;;
+    --docdir)   DOCDIR=$2 ; shift ;;
+    --docdir=*) DOCDIR=`echo $1 | sed -e 's/--docdir=//'` ;;
 
-	esac
+    esac
 
-	shift
+    shift
 done
 
 if [ "$CONFIG_HELP" = "1" ] ; then
 
-	echo "Available options:"
-	echo "--prefix=PREFIX       Installation prefix ($PREFIX)."
-	echo "--docdir=DOCDIR       Instalation directory for documentation."
-	echo "--without-win32       Disable win32 interface detection."
-	echo "--without-unix-glob   Disable glob.h usage (use workaround)."
-	echo "--with-included-regex Use included regex code (gnu_regex.c)."
-	echo "--with-pcre           Enable PCRE library detection."
-	echo "--without-gettext     Disable gettext usage."
-	echo "--without-iconv       Disable iconv usage."
-	echo "--without-wcwidth     Disable system wcwidth() (use workaround)."
-	echo "--mingw32             Build using the mingw32 compiler."
+    echo "Available options:"
+    echo "--prefix=PREFIX       Installation prefix ($PREFIX)."
+    echo "--docdir=DOCDIR       Instalation directory for documentation."
+    echo "--mingw32             Build using the mingw32 compiler."
 
-	echo
-	echo "Environment variables:"
-	echo "CC                    C Compiler."
-	echo "AR                    Library Archiver."
-	echo "YACC                  Parser."
+    echo
+    echo "Environment variables:"
+    echo "CC                    C Compiler."
+    echo "AR                    Library Archiver."
 
-	exit 1
+    exit 1
 fi
 
 if [ "$DOCDIR" = "" ] ; then
-	DOCDIR=$PREFIX/share/doc/mpsl
+    DOCDIR=$PREFIX/share/doc/mpsl
 fi
 
 echo "Configuring MPSL..."
@@ -75,30 +67,23 @@ echo "# automatically created by config.sh - do not modify" > makefile.opts
 
 # set compiler
 if [ "$CC" = "" ] ; then
-	CC=cc
-	# if CC is unset, try if gcc is available
-	which gcc > /dev/null 2>&1
+    CC=cc
+    # if CC is unset, try if gcc is available
+    which gcc > /dev/null 2>&1
 
-	if [ $? = 0 ] ; then
-		CC=gcc
-	fi
+    if [ $? = 0 ] ; then
+        CC=gcc
+    fi
 fi
 
 echo "CC=$CC" >> makefile.opts
 
 # set archiver
 if [ "$AR" = "" ] ; then
-	AR=ar
+    AR=ar
 fi
 
 echo "AR=$AR" >> makefile.opts
-
-# set parser
-if [ "$YACC" = "" ] ; then
-	YACC=yacc
-fi
-
-echo "YACC=$YACC" >> makefile.opts
 
 # add version
 cat VERSION >> config.h
@@ -135,24 +120,24 @@ CC="$CC $CFLAGS"
 # MPDM
 echo -n "Looking for MPDM... "
 
-for MPDM in ./mpdm ../mpdm NOTFOUND ; do
+for MPDM in ./mpdm ../mpdm ../../mpdm NOTFOUND ; do
 	if [ -d $MPDM ] && [ -f $MPDM/mpdm.h ] ; then
 		break
 	fi
 done
 
 if [ "$MPDM" != "NOTFOUND" ] ; then
-	echo "-I$MPDM" >> config.cflags
-	echo "-L$MPDM -lmpdm" >> config.ldflags
-	echo "OK ($MPDM)"
+    echo "-I$MPDM" >> config.cflags
+    echo "-L$MPDM -lmpdm" >> config.ldflags
+    echo "OK ($MPDM)"
 else
-	echo "No"
-	exit 1
+    echo "No"
+    exit 1
 fi
 
 # If MPDM is not configured, do it
 if [ ! -f $MPDM/Makefile ] ; then
-	( echo ; cd $MPDM ; ./config.sh $CONF_ARGS ; echo )
+    ( echo ; cd $MPDM ; ./config.sh $CONF_ARGS ; echo )
 fi
 
 cat $MPDM/config.ldflags >> config.ldflags

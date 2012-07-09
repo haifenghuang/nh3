@@ -1,9 +1,9 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language
+    MPSL - Minimum Profit Scripting Language 3.x
     Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
 
-    mpsl_c.c - Minimum Profit Scripting Language Core
+    mpsl_c.c - Lexer, Parser, Code Generator and Virtual Machine.
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -27,1023 +27,1161 @@
 
 #include <stdio.h>
 #include <wchar.h>
-#include <math.h>
-#include "mpdm.h"
+#include <string.h>
+#include <time.h> /* for clock() */
+
 #include "mpsl.h"
 
 
-/** data **/
-
-/* global abort flag */
-int mpsl_abort = 0;
-
-/* temporary storage for the opcode table
-   (only usable while compiling) */
-mpdm_t mpsl_opcodes = NULL;
-
-/* pointer to a trap function */
-static mpdm_t mpsl_trap_func = NULL;
-
-
-/** code **/
-
-/**
- * mpsl_is_true - Tests if a value is true.
- * @v: the value
- *
- * If @v is a valid MPSL 'false' value (NULL, "" or the "0" string),
- * returns zero, or nonzero otherwise.
- */
-int mpsl_is_true(mpdm_t v)
-{
-    /* if value is NULL, it's false */
-    if (v == NULL)
-        return 0;
-
-    /* if it's a printable string... */
-    if (v->flags & MPDM_STRING) {
-        wchar_t *ptr = mpdm_string(v);
-
-        /* ... and it's "" or the "0" string, it's false */
-        if (*ptr == L'\0' || (*ptr == L'0' && *(ptr + 1) == L'\0'))
-            return 0;
-    }
-
-    /* any other case is true */
-    return 1;
-}
-
-
-/**
- * mpsl_boolean - Returns 'true' or 'false' MPSL stock values.
- * @b: boolean selector
- *
- * Returns MPSL's 'false' or 'true' values depending on the value in @b.
- */
-mpdm_t mpsl_boolean(int b)
-{
-    return b ? mpdm_hget_s(mpdm_root(), L"TRUE") : NULL;
-}
-
-
-static mpdm_t find_local_symtbl(mpdm_t s, mpdm_t l)
-/* finds the local symbol table hash that holds l */
-{
-    int n;
-    mpdm_t v = NULL;
-
-    if (l != NULL) {
-        /* if s is multiple, take just the first element */
-        if (MPDM_IS_ARRAY(s))
-            s = mpdm_aget(s, 0);
-
-        /* travel the local symbol table trying to find it */
-        for (n = mpdm_size(l) - 1; n >= 0; n--) {
-            mpdm_t h = mpdm_aget(l, n);
-
-            if (mpdm_exists(h, s)) {
-                v = h;
-                break;
-            }
-        }
-    }
-
-    return v;
-}
-
-
-static void set_local_symbols(mpdm_t s, mpdm_t v, mpdm_t l)
-/* sets (or creates) a list of local symbols with a list of values */
-{
-    if (l != NULL) {
-        mpdm_t h;
-
-        mpdm_ref(s);
-        mpdm_ref(v);
-        mpdm_ref(l);
-
-        /* gets the top local variable frame */
-        h = mpdm_aget(l, -1);
-
-        if (MPDM_IS_ARRAY(s) || MPDM_IS_ARRAY(v)) {
-            int n;
-            mpdm_t a;
-
-            for (n = 0; n < mpdm_size(s); n++)
-                mpdm_hset(h, mpdm_aget(s, n), mpdm_aget(v, n));
-
-            if (n < mpdm_size(v)) {
-                /* store the rest of arguments into _ */
-                a = mpdm_hset_s(h, L"_", MPDM_A(0));
-
-                for (; n < mpdm_size(v); n++)
-                    mpdm_push(a, mpdm_aget(v, n));
-            }
-        }
-        else
-            mpdm_hset(h, s, v);
-
-        mpdm_unref(l);
-        mpdm_unref(v);
-        mpdm_unref(s);
-    }
-}
-
-
-/**
- * mpsl_set_symbol - Sets value to a symbol.
- * @s: symbol name
- * @v: value
- * @l: local symbol table
- *
- * Assigns the value @v to the @s symbol. If the value exists as
- * a local symbol, it's assigned to it; otherwise, it's set as a global
- * symbol (and created if it does not exist).
- */
-mpdm_t mpsl_set_symbol(mpdm_t s, mpdm_t v, mpdm_t l)
-{
-    int n;
-    mpdm_t r, p, w;
-
-    mpdm_ref(l);
-    mpdm_ref(s);
-    mpdm_ref(v);
-
-    /* get the local or global symbol table */
-    if ((r = find_local_symtbl(s, l)) == NULL)
-        r = mpdm_root();
-
-    /* splits the path, if needed */
-    if (MPDM_IS_ARRAY(s))
-        p = mpdm_ref(s);
-    else
-        p = mpdm_ref(mpdm_split_s(s, L"."));
-
-    w = r;
-
-    for (n = 0; w != NULL && n < mpdm_size(p); n++) {
-        /* is executable? run it and take its output */
-        while (MPDM_IS_EXEC(w))
-            w = mpdm_exec(w, NULL, NULL);
-
-        /* last component? */
-        if (n == mpdm_size(p) - 1) {
-            /* yes; do the setting */
-            if (MPDM_IS_HASH(w))
-                w = mpdm_hset(w, mpdm_aget(p, n), v);
-            else
-            if (MPDM_IS_ARRAY(w))
-                w = mpdm_aset(w, v, mpdm_ival(mpdm_aget(p, n)));
-        }
-        else {
-            if (MPDM_IS_HASH(w))
-                w = mpdm_hget(w, mpdm_aget(p, n));
-            else
-            if (MPDM_IS_ARRAY(w))
-                w = mpdm_aget(w, mpdm_ival(mpdm_aget(p, n)));
-            else {
-                mpdm_void(w);
-                w = NULL;
-            }
-        }
-    }
-
-    mpdm_unref(p);
-    mpdm_unref(v);
-    mpdm_unref(s);
-    mpdm_unref(l);
-
-    return w;
-}
-
-
-/**
- * mpsl_get_symbol - Gets the value of a symbol.
- * @s: symbol name
- * @l: local symbol table
- *
- * Gets the value of a symbol. The symbol can be local or global
- * (if the symbol exists in both tables, the local value will be returned).
- */
-mpdm_t mpsl_get_symbol(mpdm_t s, mpdm_t l)
-{
-    int n;
-    mpdm_t r, p, w;
-
-    mpdm_ref(l);
-    mpdm_ref(s);
-
-    /* get the local or global symbol table */
-    if ((r = find_local_symtbl(s, l)) == NULL)
-        r = mpdm_root();
-
-    /* splits the path, if needed */
-    if (MPDM_IS_ARRAY(s))
-        p = mpdm_ref(s);
-    else
-        p = mpdm_ref(mpdm_split_s(s, L"."));
-
-    w = r;
-
-    for (n = 0; w != NULL && n < mpdm_size(p); n++) {
-        /* is executable? run it and take its output */
-        while (MPDM_IS_EXEC(w))
-            w = mpdm_exec(w, NULL, NULL);
-
-        if (MPDM_IS_HASH(w))
-            w = mpdm_hget(w, mpdm_aget(p, n));
-        else
-        if (MPDM_IS_ARRAY(w))
-            w = mpdm_aget(w, mpdm_ival(mpdm_aget(p, n)));
-        else {
-            mpdm_void(w);
-            w = NULL;
-        }
-    }
-
-    mpdm_unref(p);
-    mpdm_unref(s);
-    mpdm_unref(l);
-
-    return w;
-}
-
-
-/**
- * mpsl_error - Generates an error.
- * @err: the error message
- *
- * Generates an error. The @err error message is stored in the ERROR
- * mpsl variable and the mpsl_abort global flag is set, so no further
- * mpsl code can be executed until reset.
- */
-mpdm_t mpsl_error(mpdm_t err)
-{
-    /* abort further execution */
-    mpsl_abort = 1;
-
-    /* set the error */
-    return mpdm_hset_s(mpdm_root(), L"ERROR", err);
-}
-
-
-/** opcode macro helpers **/
-
-#define O_TYPE static mpdm_t
-#define O_ARGS mpdm_t c, mpdm_t a, mpdm_t l, int * f
-
-O_TYPE mpsl_exec_i(O_ARGS);
-
-#define C(n) mpdm_aget(c, n)
-#define C0 C(0)
-#define C1 C(1)
-
-#define M(n) mpsl_exec_i(C(n), a, l, f)
-#define M1 M(1)
-#define M2 M(2)
-#define M3 M(3)
-#define M4 M(4)
-
-#define R(x) mpdm_rval(x)
-#define I(x) mpdm_ival(x)
-
-#define RM1 mpdm_rval(M(1))
-#define RM2 mpdm_rval(M(2))
-#define IM1 mpdm_ival(M(1))
-#define IM2 mpdm_ival(M(2))
-
-#define GET(m) mpsl_get_symbol(m, l)
-#define SET(m, v) mpsl_set_symbol(m, v, l)
-#define BOOL mpsl_boolean
-
-#define RF(v) mpdm_ref(v)
-#define UF(v) v = mpdm_unref(v)
-#define UFND(v) mpdm_unrefnd(v)
-
-static int is_true_uf(mpdm_t v)
-{
-    int r;
-
-    RF(v);
-    r = mpsl_is_true(v);
-    UF(v);
-
-    return r;
-}
-
-/** opcodes **/
-
-O_TYPE O_literal(O_ARGS)
-{
-    return mpdm_clone(C1);
-}
-
-O_TYPE O_multi(O_ARGS)
-{
-    mpdm_t v = M1;
-
-    if (!*f) {
-        mpdm_void(v);
-        v = M2;
-    }
-
-    return v;
-}
-
-O_TYPE O_imulti(O_ARGS)
-{
-    mpdm_t v = RF(M1);
-
-    if (!*f)
-        mpdm_void(M2);
-
-    return UFND(v);
-}
-
-O_TYPE O_symval(O_ARGS)
-{
-    return GET(M1);
-}
-
-O_TYPE O_assign(O_ARGS)
-{
-    return SET(M1, M2);
-}
-
-O_TYPE O_if(O_ARGS)
-{
-    return is_true_uf(M1) ? M2 : M3;
-}
-
-O_TYPE O_local(O_ARGS)
-{
-    set_local_symbols(M1, NULL, l);
-
-    return NULL;
-}
-
-O_TYPE O_global(O_ARGS)
-{
-    mpdm_t v = RF(M1);
-
-    if (MPDM_IS_ARRAY(v)) {
-        int n;
-
-        for (n = 0; n < mpdm_size(v); n++)
-            mpdm_hset(mpdm_root(), mpdm_aget(v, n), NULL);
-    }
-    else
-        mpdm_hset(mpdm_root(), v, NULL);
-
-    UF(v);
-
-    return NULL;
-}
-
-
-O_TYPE O_uminus(O_ARGS)
-{
-    return MPDM_R(-mpdm_rval(M1));
-}
-
-O_TYPE O_add(O_ARGS)
-{
-    return MPDM_R(RM1 + RM2);
-}
-
-O_TYPE O_sub(O_ARGS)
-{
-    return MPDM_R(RM1 - RM2);
-}
-
-O_TYPE O_mul(O_ARGS)
-{
-    return MPDM_R(RM1 * RM2);
-}
-
-O_TYPE O_div(O_ARGS)
-{
-    return MPDM_R(RM1 / RM2);
-}
-
-O_TYPE O_mod(O_ARGS)
-{
-    return MPDM_I(IM1 % IM2);
-}
-
-O_TYPE O_not(O_ARGS)
-{
-    return BOOL(!is_true_uf(M1));
-}
-
-O_TYPE O_and(O_ARGS)
-{
-    mpdm_t v = M1;
-    mpdm_t r;
-
-    if (mpsl_is_true(v)) {
-        mpdm_void(v);
-        r = M2;
-    }
-    else
-        r = v;
-
-    return r;
-}
-
-O_TYPE O_or(O_ARGS)
-{
-    mpdm_t v = M1;
-    mpdm_t r;
-
-    if (!mpsl_is_true(v)) {
-        mpdm_void(v);
-        r = M2;
-    }
-    else
-        r = v;
-
-    return r;
-}
-
-O_TYPE O_bitand(O_ARGS)
-{
-    return MPDM_I(IM1 & IM2);
-}
-
-O_TYPE O_bitor(O_ARGS)
-{
-    return MPDM_I(IM1 | IM2);
-}
-
-O_TYPE O_bitxor(O_ARGS)
-{
-    return MPDM_I(IM1 ^ IM2);
-}
-
-O_TYPE O_shl(O_ARGS)
-{
-    return MPDM_I(IM1 << IM2);
-}
-
-O_TYPE O_shr(O_ARGS)
-{
-    return MPDM_I(IM1 >> IM2);
-}
-
-O_TYPE O_pow(O_ARGS)
-{
-    return MPDM_R(pow(RM1, RM2));
-}
-
-O_TYPE O_numlt(O_ARGS)
-{
-    return BOOL(RM1 < RM2);
-}
-
-O_TYPE O_numle(O_ARGS)
-{
-    return BOOL(RM1 <= RM2);
-}
-
-O_TYPE O_numgt(O_ARGS)
-{
-    return BOOL(RM1 > RM2);
-}
-
-O_TYPE O_numge(O_ARGS)
-{
-    return BOOL(RM1 >= RM2);
-}
-
-O_TYPE O_strcat(O_ARGS)
-{
-    return mpdm_strcat(M1, M2);
-}
-
-O_TYPE O_streq(O_ARGS)
-{
-    return BOOL(mpdm_cmp(M1, M2) == 0);
-}
-
-O_TYPE O_numeq(O_ARGS)
-{
-    mpdm_t v1 = RF(M1);
-    mpdm_t v2 = RF(M2);
-
-    mpdm_t r = BOOL((v1 == NULL || v2 == NULL) ?
-                    (v1 == v2) : (R(v1) == R(v2))
-        );
-
-    UF(v2);
-    UF(v1);
-
-    return r;
-}
-
-O_TYPE O_break(O_ARGS)
-{
-    *f = 1;
-
-    return NULL;
-}
-
-O_TYPE O_return(O_ARGS)
-{
-    mpdm_t v = M1;
-
-    *f = -1;
-
-    return v;
-}
-
-O_TYPE execsym(O_ARGS, int th, int m)
-{
-    mpdm_t s, v, p, o = NULL, r = NULL;
-
-    /* gets the symbol name */
-    s = RF(M1);
-
-    /* gets the arguments */
-    p = RF(M2);
-
-    /* if it's to be called as a method, the object
-       should be inserted into the local symtable
-       before searching the symbol */
-    if (m && (o = mpdm_aget(p, 0)) && MPDM_IS_HASH(o)) {
-        mpdm_push(l, o);
-    }
-    else
-        m = 0;
-
-    /* gets the symbol value */
-    v = GET(s);
-
-    if (!MPDM_IS_EXEC(v)) {
-        /* not found or NULL value? error */
-        mpdm_t t, w;
-        char tmp[128];
-
-        w = RF(mpdm_join_s(s, L"."));
-        t = RF(MPDM_2MBS((wchar_t *) w->data));
-
-        snprintf(tmp, sizeof(tmp), "Undefined function %s()",
-                 (char *) t->data);
-
-        mpsl_error(MPDM_MBS(tmp));
-
-        UF(w);
-        UF(t);
-    }
-    else {
-        /* execute */
-        r = RF(th ? mpdm_exec_thread(v, p, l) : mpdm_exec(v, p, l));
-    }
-
-    UF(s);
-    UF(p);
-
-    /* drop the object from the local symtable */
-    if (m)
-        mpdm_adel(l, -1);
-
-    return UFND(r);
-}
-
-
-O_TYPE O_execsym(O_ARGS)
-/* executes the value of a symbol */
-{
-    return execsym(c, a, l, f, 0, 0);
-}
-
-
-O_TYPE O_threadsym(O_ARGS)
-/* executes the value of a symbol in a new thread */
-{
-    return execsym(c, a, l, f, 1, 0);
-}
-
-
-O_TYPE O_method(O_ARGS)
-/* executes the value of a symbol including
-   the first argument in the symtable */
-{
-    return execsym(c, a, l, f, 0, 1);
-}
-
-
-O_TYPE O_while(O_ARGS)
-/* while/for loop */
-{
-    mpdm_t r = NULL;
-
-    for (mpdm_void(M3); !*f && is_true_uf(M1); mpdm_void(M4)) {
-        UF(r);
-        r = RF(M2);
-    }
-
-    if (*f == 1)
-        *f = 0;
-
-    return UFND(r);
-}
-
-
-O_TYPE O_foreach(O_ARGS)
-/* foreach loop */
-{
-    mpdm_t s = RF(M1);
-    mpdm_t v = RF(M2);
-    mpdm_t r = NULL;
-    int n;
-
-    for (n = 0; n < mpdm_size(v) && !*f; n++) {
-        SET(s, mpdm_aget(v, n));
-        UF(r);
-        r = RF(M3);
-    }
-
-    if (*f == 1)
-        *f = 0;
-
-    UF(s);
-    UF(v);
-
-    return UFND(r);
-}
-
-
-O_TYPE O_range(O_ARGS)
-/* build list from range of two numeric values */
-{
-    double v1 = RM1;
-    double v2 = RM2;
-    mpdm_t r = RF(MPDM_A(0));
-
-    if (v1 < v2)
-        while (v1 <= v2) {
-            mpdm_push(r, MPDM_R(v1));
-            v1 += 1.0;
-        }
-    else
-        while (v1 >= v2) {
-            mpdm_push(r, MPDM_R(v1));
-            v1 -= 1.0;
-        }
-
-    UFND(r);
-
-    return r;
-}
-
-
-O_TYPE O_list(O_ARGS)
-/* build list from instructions */
-{
-    mpdm_t ret = RF(mpdm_size(c) == 2 ? MPDM_A(0) : M(2));
-
-    mpdm_push(ret, M(1));
-
-    return UFND(ret);
-}
-
-
-O_TYPE O_ilist(O_ARGS)
-/* build and inverse list from instructions */
-{
-    mpdm_t ret = RF(mpdm_size(c) == 2 ? MPDM_A(0) : M(2));
-
-    mpdm_ins(ret, M(1), 0);
-
-    return UFND(ret);
-}
-
-
-O_TYPE O_hash(O_ARGS)
-/* build hash from instructions */
-{
-    mpdm_t ret = RF(mpdm_size(c) == 3 ? MPDM_H(0) : M(3));
-
-    mpdm_hset(ret, M1, M2);
-
-    return UFND(ret);
-}
-
-
-O_TYPE O_blkframe(O_ARGS)
-/* runs an instruction under a block frame */
-{
-    mpdm_t ret;
-
-    /* no context? create one */
-    if (l == NULL)
-        l = MPDM_A(0);
-
-    RF(l);
-
-    /* create a new local symbol table */
-    mpdm_push(l, MPDM_H(0));
-
-    /* creates the arguments (if any) as local variables */
-    set_local_symbols(M2, a, l);
-
-    /* execute instruction */
-    ret = RF(M1);
-
-    /* destroy the local symbol table */
-    mpdm_adel(l, -1);
-
-    UF(l);
-
-    return UFND(ret);
-}
-
-
-O_TYPE O_subframe(O_ARGS)
-/* runs an instruction inside a subroutine frame */
-{
-    /* like a block frame, but with its own symbol table */
-    return O_blkframe(c, a, MPDM_A(0), f);
-}
-
-
-static struct mpsl_op_s {
-    wchar_t *name;
-    int foldable;
-     mpdm_t(*func) (O_ARGS);
-} op_table[] = {
-    { L"LITERAL",   0, O_literal },  /* *must* be the zeroth */
-    { L"MULTI",     0, O_multi },
-    { L"IMULTI",    0, O_imulti },
-    { L"SYMVAL",    0, O_symval },
-    { L"ASSIGN",    0, O_assign },
-    { L"EXECSYM",   0, O_execsym },
-    { L"THREADSYM", 0, O_threadsym },
-    { L"METHOD",    0, O_method },
-    { L"IF",        0, O_if },
-    { L"WHILE",     0, O_while },
-    { L"FOREACH",   0, O_foreach },
-    { L"SUBFRAME",  0, O_subframe },
-    { L"BLKFRAME",  0, O_blkframe },
-    { L"BREAK",     0, O_break },
-    { L"RETURN",    0, O_return },
-    { L"LOCAL",     0, O_local },
-    { L"GLOBAL",    0, O_global },
-    { L"LIST",      1, O_list },
-    { L"ILIST",     1, O_ilist },
-    { L"HASH",      1, O_hash },
-    { L"RANGE",     1, O_range },
-    { L"UMINUS",    1, O_uminus },
-    { L"ADD",       1, O_add },
-    { L"SUB",       1, O_sub },
-    { L"MUL",       1, O_mul },
-    { L"DIV",       1, O_div },
-    { L"MOD",       1, O_mod },
-    { L"NOT",       1, O_not },
-    { L"AND",       1, O_and },
-    { L"OR",        1, O_or },
-    { L"NUMEQ",     1, O_numeq },
-    { L"NUMLT",     1, O_numlt },
-    { L"NUMLE",     1, O_numle },
-    { L"NUMGT",     1, O_numgt },
-    { L"NUMGE",     1, O_numge },
-    { L"STRCAT",    1, O_strcat },
-    { L"STREQ",     1, O_streq },
-    { L"BITAND",    1, O_bitand },
-    { L"BITOR",     1, O_bitor },
-    { L"BITXOR",    1, O_bitxor },
-    { L"SHL",       1, O_shl },
-    { L"SHR",       1, O_shr },
-    { L"POW",       1, O_pow },
-    { NULL,         0, NULL }
+/** tokens **/
+
+typedef enum {
+    T_EOP,    T_ERROR,
+    T_IF,     T_ELSE,    T_WHILE,   T_BREAK,
+    T_LOCAL,  T_GLOBAL,  T_SUB,     T_RETURN,  T_NULL,    T_THIS,
+    T_LBRACE, T_RBRACE,  T_LPAREN,  T_RPAREN,  T_LBRACK,  T_RBRACK,
+    T_COLON,  T_SEMI,    T_DOT,     T_COMMA,
+    T_GT,     T_LT,      T_PIPE,    T_AMP,
+    T_PLUS,   T_MINUS,   T_ASTER,   T_SLASH,   T_PERCENT,  
+    T_EQUAL,  T_BANG,    T_CARET,
+    T_DGT,    T_DLT,     T_DPIPE,   T_DAMP,    T_DPLUS,   T_DMINUS,
+    T_GTEQ,   T_LTEQ,    T_PIPEEQ,  T_AMPEQ,
+    T_PLUSEQ, T_MINUSEQ, T_ASTEREQ, T_SLASHEQ, T_PERCEQ,
+    T_EQEQ,   T_BANGEQ,  T_CARETEQ,
+    T_DGTEQ,  T_DLTEQ,   T_DPIPEEQ, T_DAMPEQ,
+    T_SYMBOL, T_LITERAL
+} mpsl_token_t;
+
+
+/** compiler structure **/
+
+struct mpsl_c {
+    mpsl_token_t token; /* token found */
+    wchar_t *token_s;   /* token as string */
+    int token_i;        /* token size */
+    int token_o;        /* offset to end of token */
+    mpdm_t node;        /* generated nodes */
+    mpdm_t prg;         /* generated program */
+    int x;              /* x source position */
+    int y;              /* y source position */
+    wchar_t c;          /* last char read from input */
+    wchar_t *ptr;       /* program source */
+    FILE *f;            /* program file */
+    int error;          /* non-zero if syntax error */
 };
 
 
-O_TYPE mpsl_exec_i(O_ARGS)
-/* Executes one MPSL instruction in the MPSL virtual machine. Called
-   from mpsl_exec_p() (which holds the flow control status variable) */
+/** lexer **/
+
+static wchar_t nc(struct mpsl_c *c)
+/* gets the next char */
 {
-    mpdm_t ret = NULL;
+    c->c = c->f ? fgetwc(c->f) : *(c->ptr++);
 
-    mpdm_ref(c);
-    mpdm_ref(a);
-    mpdm_ref(l);
+    /* update position in source */
+    if (c->c == L'\n') {
+        c->y++;
+        c->x = -1;
+    }
+    else
+        c->x++;
 
-    /* if aborted or NULL, do nothing */
-    if (!mpsl_abort && c != NULL) {
-        /* gets the opcode and calls it */
-        ret = op_table[mpdm_ival(C0)].func(c, a, l, f);
+    return c->c;
+}
 
-        if (mpsl_trap_func != NULL) {
-            mpdm_t f = mpsl_trap_func;
+static void s_error(mpdm_t s1, mpdm_t s2) { mpdm_hset_s(mpdm_root(), L"ERROR", mpdm_strcat(s1, s2)); }
 
-            mpdm_ref(ret);
+static void c_error(struct mpsl_c *c)
+{
+    char tmp[64];
 
-            mpsl_trap_func = NULL;
-            mpdm_exec_3(f, c, a, ret, l);
-            mpsl_trap_func = f;
+    sprintf(tmp, "%d:%d: ", c->y, c->x);
+    s_error(MPDM_MBS(tmp), MPDM_LS(L"syntax error"));
 
-            mpdm_unrefnd(ret);
+    c->error = 1;
+}
+
+void POKE(struct mpsl_c *c, wchar_t k) { c->token_s = mpdm_poke_o(c->token_s, &c->token_i, &c->token_o, &k, sizeof(wchar_t), 1); }
+
+#define STORE(COND) while (COND) { POKE(c, c->c); nc(c); } POKE(c, L'\0')
+
+#define COMP(d,e,de) if (c->c == i) { \
+        if (d != -1) { nc(c); t = d; } \
+        if (c->c == L'=' && de != -1) { nc(c); t = de; } \
+    } else if (c->c == L'=' && e != -1) { nc(c); t = e; }
+
+#define STOKEN(s,v) if (t == T_ERROR && wcscmp(c->token_s, s) == 0) t = v
+
+#define DIGIT(d) ((d) >= L'0' && (d) <= L'9')
+#define ALPHA(a) ((a) == L'_' || (((a) >= L'a') && ((a) <= L'z')) || (((a) >= L'A') && ((a) <= L'Z')))
+#define ALNUM(d) (DIGIT(d) || ALPHA(d))
+#define HEXDG(h) (DIGIT(h) || ((h) >= L'a' && (h) <= L'f') || ((h) >= L'A' && (h) <= L'F'))
+#define OCTDG(h) ((h) >= L'0' && (h) <= L'7')
+
+
+static mpsl_token_t token(struct mpsl_c *c)
+{
+    mpsl_token_t t;
+    wchar_t i;
+
+    c->token_o = 0;
+
+again:
+    t = T_ERROR;
+    i = c->c;
+
+    switch (i) {
+    case L' ': case L'\t': case L'\r': case L'\n': nc(c); goto again;
+    case L'\0': case WEOF: t = T_EOP; break;
+    case L'\'': nc(c); STORE(c->c != L'\''); nc(c); t = T_LITERAL; break;
+    case L'{':  t = T_LBRACE;  nc(c); break;
+    case L'}':  t = T_RBRACE;  nc(c); break;
+    case L'(':  t = T_LPAREN;  nc(c); break;
+    case L')':  t = T_RPAREN;  nc(c); break;
+    case L'[':  t = T_LBRACK;  nc(c); break;
+    case L']':  t = T_RBRACK;  nc(c); break;
+    case L':':  t = T_COLON;   nc(c); break;
+    case L';':  t = T_SEMI;    nc(c); break;
+    case L'.':  t = T_DOT;     nc(c); break;
+    case L',':  t = T_COMMA;   nc(c); break;
+    case L'>':  t = T_GT;      nc(c); COMP(T_DGT, T_GTEQ, T_DGTEQ); break;
+    case L'<':  t = T_LT;      nc(c); COMP(T_DLT, T_LTEQ, T_DLTEQ); break;
+    case L'|':  t = T_PIPE;    nc(c); COMP(T_DPIPE, T_PIPEEQ, T_DPIPEEQ); break;
+    case L'&':  t = T_AMP;     nc(c); COMP(T_DAMP, T_AMPEQ, T_DAMPEQ); break;
+    case L'+':  t = T_PLUS;    nc(c); COMP(T_DPLUS, T_PLUSEQ, -1); break;
+    case L'-':  t = T_MINUS;   nc(c); COMP(T_DMINUS, T_MINUSEQ, -1); break;
+    case L'=':  t = T_EQUAL;   nc(c); COMP(T_EQEQ, T_EQEQ, -1); break;
+    case L'!':  t = T_BANG;    nc(c); COMP(-1, T_BANGEQ, -1); break;
+    case L'*':  t = T_ASTER;   nc(c); COMP(-1, T_ASTEREQ, -1); break;
+    case L'%':  t = T_PERCENT; nc(c); COMP(-1, T_PERCEQ, -1); break;
+    case L'^':  t = T_CARET;   nc(c); COMP(-1, T_CARETEQ, -1); break;
+    case L'/':  t = T_SLASH;   nc(c);
+        if (c->c == L'*') {
+            /* C-style comments */
+            nc(c);
+            while (c->c != L'\0' && c->c != WEOF) {
+                if (c->c == L'*' && nc(c) == L'/') break;
+                nc(c);
+            }
+            nc(c);
+            goto again;
         }
-    }
+        COMP(-1, T_SLASHEQ, -1);
+        break;
+    case L'"':
+        while (nc(c) != L'"') {
+            wchar_t m = c->c;
 
-    mpdm_unref(l);
-    mpdm_unref(a);
-    mpdm_unref(c);
+            if (m == L'\\') {
+                m = nc(c);
+                switch (m) {
+                case L'n': m = L'\n';   break;
+                case L'r': m = L'\r';   break;
+                case L't': m = L'\t';   break;
+                case L'e': m = 27;      break;
+                case L'\\': m = L'\\';  break;
+                case L'"': m = L'"';    break;
+                case L'x':
+                    break;
+                }
+            }
+            POKE(c, m);
+        }
+        POKE(c, L'\0');
+        nc(c);
+        t = T_LITERAL;
+        break;
 
-    return ret;
-}
+    default:
+        if (DIGIT(i)) {
+            t = T_LITERAL;
 
+            if (i == L'0') {
+                POKE(c, c->c); nc(c);
 
-mpdm_t mpsl_exec_p(mpdm_t c, mpdm_t a, mpdm_t ctxt)
-/* executes an MPSL instruction stream */
-{
-    int f = 0;
+                if (c->c == L'b' || c->c == L'B') {
+                    POKE(c, c->c); nc(c);
+                    STORE(c->c == L'0' || c->c == L'1');
+                    break;
+                }
+                else
+                if (c->c == L'x' || c->c == L'X') {
+                    POKE(c, c->c); nc(c);
+                    STORE(HEXDG(c->c));
+                    break;
+                }
+                else
+                if (OCTDG(c->c)) {
+                    STORE(OCTDG(c->c));
+                    break;
+                }
+                else
+                if (c->c != L'.') {
+                    POKE(c, L'\0');
+                    break;
+                }
+            }
 
-    /* execute first instruction with a new flow control variable */
-    return mpsl_exec_i(c, a, ctxt, &f);
-}
+            while (DIGIT(c->c)) { POKE(c, c->c); nc(c); };
 
+            if (c->c == L'.' || c->c == L'e' || c->c == L'E') {
+                POKE(c, c->c); nc(c);
+                while (DIGIT(c->c)) { POKE(c, c->c); nc(c); };
+            }
 
-static mpdm_t constant_fold(mpdm_t i)
-/* tries to fold complex but constant expressions into a literal */
-{
-    int n;
-    mpdm_t v;
+            POKE(c, '\0');
+        }
+        else
+        if (ALPHA(i)) {
+            STORE(ALNUM(c->c));
+            STOKEN(L"if",       T_IF);
+            STOKEN(L"else",     T_ELSE);
+            STOKEN(L"while",    T_WHILE);
+            STOKEN(L"break",    T_BREAK);
+            STOKEN(L"local",    T_LOCAL);
+            STOKEN(L"global",   T_GLOBAL);
+            STOKEN(L"sub",      T_SUB);
+            STOKEN(L"return",   T_RETURN);
+            STOKEN(L"NULL",     T_NULL);
+            STOKEN(L"this",     T_THIS);
 
-    /* get the number opcode */
-    n = mpdm_ival(mpdm_aget(i, 0));
-
-    if (op_table[n].foldable) {
-        /* test if all arguments are literal (opcode 0) */
-        for (n = 1; n < mpdm_size(i); n++) {
-            mpdm_t t = mpdm_aget(i, n);
-
-            /* if it's not LITERAL, abort immediately */
-            if (mpdm_ival(mpdm_aget(t, 0)) != 0)
-                return i;
+            if (t == T_ERROR) t = T_SYMBOL;
         }
 
-        /* execute the instruction and convert to LITERAL */
-        v = mpsl_exec_p(i, NULL, NULL);
-        i = mpsl_mkins(L"LITERAL", 1, v, NULL, NULL, NULL);
+        break;
     }
 
-    return i;
+    if (t == T_ERROR)
+        c_error(c);
+
+    return c->token = t;
 }
 
 
-mpdm_t mpsl_mkins(wchar_t * opcode, int args, mpdm_t a1, mpdm_t a2,
-                  mpdm_t a3, mpdm_t a4)
-/* creates an instruction */
+/** parser **/
+
+typedef enum {
+    /* order matters (operator precedence) */
+    N_NULL,   N_LITERAL,
+    N_ARRAY,  N_HASH,   N_FUNCAL,
+    N_PARTOF, N_SUBSCR, 
+    N_UMINUS, N_NOT,
+    N_MOD,    N_DIV,    N_MUL,  N_SUB,  N_ADD,
+    N_EQ,     N_NE,     N_GT,   N_GE,   N_LT,  N_LE,
+    N_AND,    N_OR,
+    N_BINAND, N_BINOR,  N_XOR,  N_SHL,  N_SHR,
+    N_IF,     N_WHILE,
+    N_NOP,    N_SEQ,
+    N_SYMID,  N_SYMVAL, N_ASSIGN,
+    N_IADD,   N_ISUB,   N_IMUL, N_IDIV, N_IMOD,
+    N_IBAND,  N_IBOR,   N_IXOR,
+    N_PINC,   N_PDEC,   N_SINC, N_SDEC,
+    N_THIS,
+    N_LOCAL,  N_GLOBAL,
+    N_SUBDEF, N_ANONSB, N_RETURN,
+    N_VOID,
+    N_EOP
+} mpsl_node_t;
+
+
+#define RF(v) mpdm_ref(v)
+#define UF(v) mpdm_unref(v)
+#define UFND(v) mpdm_unrefnd(v)
+
+static mpdm_t node0(mpsl_node_t t) { mpdm_t r = RF(MPDM_A(1)); mpdm_aset(r, MPDM_I(t), 0); return UFND(r); }
+static mpdm_t node1(mpsl_node_t t, mpdm_t n1) { mpdm_t r = RF(node0(t)); mpdm_push(r, n1); return UFND(r); }
+static mpdm_t node2(mpsl_node_t t, mpdm_t n1, mpdm_t n2) { mpdm_t r = RF(node1(t, n1)); mpdm_push(r, n2); return UFND(r); }
+static mpdm_t node3(mpsl_node_t t, mpdm_t n1, mpdm_t n2, mpdm_t n3) { mpdm_t r = RF(node2(t, n1, n2)); mpdm_push(r, n3); return UFND(r); }
+
+static mpdm_t tstr(struct mpsl_c *c)
+/* returns the current token as a string */
 {
-    mpdm_t o;
-    mpdm_t v;
+    mpdm_t r = MPDM_ENS(c->token_s, c->token_o);
 
-    v = MPDM_A(args + 1);
-    mpdm_ref(v);
-
-    /* inserts the opcode */
-    o = mpdm_hget_s(mpsl_opcodes, opcode);
-    mpdm_aset(v, o, 0);
-
-    switch (args) {
-    case 4: mpdm_aset(v, a4, 4); /* no break */
-    case 3: mpdm_aset(v, a3, 3); /* no break */
-    case 2: mpdm_aset(v, a2, 2); /* no break */
-    case 1: mpdm_aset(v, a1, 1); /* no break */
-    }
-
-    mpdm_unrefnd(v);
-
-    v = constant_fold(v);
-
-    return v;
-}
-
-
-mpdm_t mpsl_build_opcodes(void)
-/* builds the table of opcodes */
-{
-    int n;
-    mpdm_t r = MPDM_H(0);
-
-    mpdm_ref(r);
-
-    for (n = 0; op_table[n].name != NULL; n++) {
-        mpdm_t v = MPDM_LS(op_table[n].name);
-
-        mpdm_set_ival(v, n);
-
-        /* keys and values are the same */
-        mpdm_hset(r, v, v);
-    }
-
-    mpdm_unrefnd(r);
+    c->token_s = NULL;
+    c->token_i = c->token_o = 0;
 
     return r;
 }
 
 
-/**
- * mpsl_trap - Install a trapping function.
- * @trap_func: The trapping MPSL code
- *
- * Installs a trapping function. The function is an MPSL
- * executable value receiving 3 arguments: the code stream,
- * the arguments and the return value of the executed code.
- *
- * Returns NULL (previous versions returned the previous
- * trapping function).
- */
-mpdm_t mpsl_trap(mpdm_t trap_func)
-{
-    mpdm_set(&mpsl_trap_func, trap_func);
+static mpdm_t expr(struct mpsl_c *c);
+static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op);
+static mpdm_t statement(struct mpsl_c *c);
 
-    return NULL;
+static mpdm_t paren_expr(struct mpsl_c *c)
+/* parses a parenthesized expression */
+{
+    mpdm_t v = NULL;
+
+    if (c->error) {}
+    else
+    if (c->token == T_LPAREN) {
+        token(c);
+        v = expr(c);
+
+        if (c->token == T_RPAREN)
+            token(c);
+        else
+            c_error(c);
+    }
+    else
+        c_error(c);
+
+    return v;
 }
 
 
-/**
- * mpsl_argv - Fills the ARGV global array.
- * @argc: number of arguments
- * @argv: array of string values
- *
- * Fills the ARGV global MPSL array with an array of arguments. These
- * are usually the ones sent to main().
- */
-void mpsl_argv(int argc, char *argv[])
+static mpdm_t term(struct mpsl_c *c)
+/* parses a term of an expression */
+{
+    mpdm_t v = NULL;
+
+    if (c->error) {}
+    else
+    if (c->token == T_BANG) {
+        token(c);
+        v = node1(N_NOT, expr_p(c, N_NOT));
+    }
+    else
+    if (c->token == T_MINUS) {
+        token(c);
+        v = node1(N_UMINUS, expr_p(c, N_UMINUS));
+    }
+    else
+    if (c->token == T_DPLUS) {
+        token(c);
+
+        if (c->token == T_SYMBOL) {
+            v = node1(N_PINC, node1(N_SYMID, tstr(c)));
+            token(c);
+        }
+        else
+            c_error(c);
+    }
+    else
+    if (c->token == T_DMINUS) {
+        token(c);
+
+        if (c->token == T_SYMBOL) {
+            v = node1(N_PDEC, node1(N_SYMID, tstr(c)));
+            token(c);
+        }
+        else
+            c_error(c);
+    }
+    else
+    if (c->token == T_THIS) {
+        token(c);
+        v = node0(N_THIS);
+    }
+    else
+    if (c->token == T_NULL) {
+        token(c);
+        v = node0(N_NULL);
+    }
+    else
+    if (c->token == T_LPAREN)
+        v = paren_expr(c);
+    else
+    if (c->token == T_LBRACE) {
+        /* inline hash */
+        token(c);
+
+        v = mpdm_ref(node0(N_HASH));
+
+        while (!c->error && c->token != T_RBRACE) {
+
+            if (c->token == T_SYMBOL) {
+                mpdm_push(v, node1(N_LITERAL, tstr(c)));
+                token(c);
+            }
+            else
+                mpdm_push(v, expr(c));
+
+            if (c->token == T_COLON) {
+                token(c);
+
+                mpdm_push(v, expr(c));
+
+                if (c->token == T_COMMA)
+                    token(c);
+            }
+            else
+                c_error(c);
+        }
+
+        mpdm_unrefnd(v);
+        token(c);
+    }
+    else
+    if (c->token == T_LBRACK) {
+        /* inline array */
+        token(c);
+
+        v = mpdm_ref(node0(N_ARRAY));
+
+        while (!c->error && c->token != T_RBRACK) {
+            mpdm_push(v, expr(c));
+
+            if (c->token == T_COMMA)
+                token(c);
+        }
+
+        mpdm_unrefnd(v);
+        token(c);
+    }
+    else
+    if (c->token == T_SUB) {
+        token(c);
+
+        /* argument name array */
+        mpdm_t a = mpdm_ref(MPDM_A(0));
+
+        /* does it have arguments? */
+        if (c->token == T_LPAREN) {
+            token(c);
+
+            while (!c->error && c->token == T_SYMBOL) {
+                mpdm_push(a, tstr(c));
+                token(c);
+
+                if (c->token == T_COMMA)
+                    token(c);
+            }
+
+            if (c->token == T_RPAREN)
+                token(c);
+            else
+                c_error(c);
+        }
+
+        v = node2(N_ANONSB, node1(N_LITERAL, a), statement(c));
+        mpdm_unref(a);
+    }
+    else
+    if (c->token == T_LITERAL) {
+        v = node1(N_LITERAL, tstr(c));
+        token(c);
+    }
+    else
+    if (c->token == T_SYMBOL) {
+        v = node1(N_SYMID, tstr(c));
+        token(c);
+    }
+
+    return v;
+}
+
+
+static mpsl_node_t node_by_token(struct mpsl_c *c)
+/* returns the operand associated by a token */
 {
     int n;
-    mpdm_t ARGV;
+    static int tokens[] = {
+        T_PLUSEQ, T_MINUSEQ, T_ASTEREQ, T_SLASHEQ, T_PERCEQ,
+        T_AMPEQ, T_PIPEEQ, T_CARETEQ,
+        T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTER, T_SLASH, T_PERCENT, 
+        T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
+        T_DAMP, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL,
+        T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, -1
+    };
+    static mpsl_node_t binop[] = {
+        N_IADD, N_ISUB, N_IMUL, N_IDIV, N_IMOD,
+        N_IBAND, N_IBOR, N_IXOR,
+        N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
+        N_FUNCAL, N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
+        N_AND, N_OR, N_LOCAL, N_GLOBAL, N_ASSIGN,
+        N_BINAND, N_BINOR, N_XOR, N_SHL, N_SHR, -1
+    };
 
-    /* create the ARGV array */
-    ARGV = mpdm_hset_s(mpdm_root(), L"ARGV", MPDM_A(0));
+    for (n = 0; tokens[n] != -1; n++)
+        if (c->token == tokens[n])
+            break;
 
-    for (n = 0; n < argc; n++)
-        mpdm_push(ARGV, MPDM_MBS(argv[n]));
+    return binop[n];
 }
 
 
-/* in mpsl_f.c */
-mpdm_t mpsl_build_funcs(void);
-
-
-/**
- * mpsl_startup - Initializes MPSL.
- *
- * Initializes the Minimum Profit Scripting Language. Returns 0 if
- * everything went OK.
- */
-int mpsl_startup(void)
+static int is_assign(struct mpsl_c *c)
 {
-    mpdm_t r;
-    mpdm_t m;
+    mpsl_node_t node = node_by_token(c);
 
-    /* startup MPDM */
-    mpdm_startup();
-
-    r = mpdm_root();
-
-    /* creates INC, unless already defined */
-    if (mpdm_hget_s(r, L"INC") == NULL)
-        mpdm_hset_s(r, L"INC", MPDM_A(0));
-
-    /* the TRUE value */
-    mpdm_hset_s(r, L"TRUE", MPDM_I(1));
-
-    /* standard file descriptors */
-    mpdm_hset_s(r, L"STDIN",    MPDM_F(stdin));
-    mpdm_hset_s(r, L"STDOUT",   MPDM_F(stdout));
-    mpdm_hset_s(r, L"STDERR",   MPDM_F(stderr));
-
-    /* home and application directories */
-    mpdm_hset_s(r, L"HOMEDIR",  mpdm_home_dir());
-    mpdm_hset_s(r, L"APPDIR",   mpdm_app_dir());
-
-    /* fill now the MPSL hash */
-    m = MPDM_H(0);
-    mpdm_hset_s(r, L"MPSL", m);
-
-    /* store things there */
-    mpdm_hset_s(m, L"VERSION",  MPDM_MBS(VERSION));
-    mpdm_hset_s(m, L"OPCODE",   mpsl_build_opcodes());
-    mpdm_hset_s(m, L"LC",       MPDM_H(0));
-    mpdm_hset_s(m, L"CORE",     mpsl_build_funcs());
-
-    mpdm_dump_1 = mpsl_dump_1;
-
-    return 0;
+    return node >= N_ASSIGN && node <= N_SDEC;
 }
 
 
-/**
- * mpsl_shutdown - Shuts down MPSL.
- *
- * Shuts down MPSL. No MPSL functions should be used from now on.
- */
+static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
+/* returns an expression, with the previous operand for precedence */
+{
+    mpdm_t v = NULL;
+
+    if (c->error) {}
+    else {
+        mpsl_token_t t = c->token;
+        mpsl_node_t op;
+
+        v = term(c);
+
+        if (t == T_SYMBOL && !is_assign(c))
+            v = node1(N_SYMVAL, v);
+
+        while (!c->error && (op = node_by_token(c)) > 0 && op <= p_op) {
+            if (c->token == T_LBRACK) {
+                /* subindexes */
+                token(c);
+
+                v = node2(op, v, expr(c));
+
+                if (c->token == T_RBRACK)
+                    token(c);
+                else
+                    c_error(c);
+
+                if (!is_assign(c))
+                    v = node1(N_SYMVAL, v);
+            }
+            else
+            if (c->token == T_LPAREN) {
+                mpdm_t a;
+
+                /* function call */
+                token(c);
+
+                a = mpdm_ref(node0(N_ARRAY));
+
+                while (!c->error && c->token != T_RPAREN) {
+                    mpdm_push(a, expr(c));
+
+                    if (c->token == T_COMMA)
+                        token(c);
+                }
+
+                token(c);
+                mpdm_unrefnd(a);
+
+                v = node2(N_FUNCAL, a, v);
+            }
+            else {
+                token(c);
+
+                if (op == N_PARTOF && c->token != T_SYMBOL)
+                    c_error(c);
+                else
+                    v = node2(op, v, expr_p(c, op));
+            }
+        }
+    }
+
+    return v;
+}
+
+
+static mpdm_t expr(struct mpsl_c *c)
+/* returns a complete expression */
+{
+    /* call expr_p with the lower precedence */
+    return expr_p(c, N_EOP);
+}
+
+
+static mpdm_t statement(struct mpsl_c *c)
+/* returns a statement */
+{
+    mpdm_t v = NULL;
+    mpdm_t w;
+
+    if (c->error) {}
+    else
+    if (c->token == T_IF) {
+        token(c);
+        if ((w = paren_expr(c)) != NULL) {
+            v = node2(N_IF, w, statement(c));
+
+            if (c->token == T_ELSE) {
+                token(c);
+                mpdm_ref(v);
+                mpdm_push(v, statement(c));
+                mpdm_unrefnd(v);
+            }
+        }
+    }
+    else
+    if (c->token == T_WHILE) {
+        token(c);
+        if ((w = paren_expr(c)) != NULL)
+            v = node2(N_WHILE, w, statement(c));
+    }
+    else
+    if (c->token == T_LOCAL || c->token == T_GLOBAL) {
+        mpdm_t w1, w2;
+        mpsl_node_t op = node_by_token(c);
+
+        token(c);
+        v = node0(N_NOP);
+
+        do {
+            if (c->token == T_SYMBOL) {
+                w1 = node1(N_LITERAL, tstr(c));
+                token(c);
+
+                /* has initialization value? */
+                if (c->token == T_EQUAL) {
+                    token(c);
+                    w2 = expr(c);
+                }
+                else
+                    w2 = node0(N_NULL);
+
+                v = node2(N_SEQ, v, node2(op, w1, w2));
+
+                if (c->token == T_COMMA)
+                    token(c);
+            }
+            else
+                c_error(c);
+
+        } while (!c->error && c->token != T_SEMI);
+
+        token(c);
+    }
+    else
+    if (c->token == T_SUB) {
+        token(c);
+
+        if (c->token == T_SYMBOL) {
+            w = term(c);
+
+            /* new symbol name must have only symbols and dots */
+            while (!c->error && c->token == T_DOT) {
+                token(c);
+
+                if (c->token == T_SYMBOL)
+                    w = node2(N_PARTOF, node1(N_SYMVAL, w), term(c));
+                else
+                    c_error(c);
+            }
+
+            /* argument name array */
+            mpdm_t a = mpdm_ref(MPDM_A(0));
+
+            /* does it have arguments? */
+            if (c->token == T_LPAREN) {
+                token(c);
+
+                while (!c->error && c->token == T_SYMBOL) {
+                    mpdm_push(a, tstr(c));
+                    token(c);
+
+                    if (c->token == T_COMMA)
+                        token(c);
+                }
+
+                if (c->token == T_RPAREN)
+                    token(c);
+                else
+                    c_error(c);
+            }
+
+            v = node3(N_SUBDEF, w, node1(N_LITERAL, a), statement(c));
+            mpdm_unref(a);
+        }
+        else
+            c_error(c);
+    }
+    else
+    if (c->token == T_RETURN) {
+        token(c);
+
+        v = node1(N_RETURN, c->token == T_SEMI ? node0(N_NULL) : expr(c));
+
+        if (c->token == T_SEMI)
+            token(c);
+        else
+            c_error(c);
+    }
+    else
+    if (c->token == T_LBRACE) {
+        /* code block */
+        token(c);
+        v = node0(N_NOP);
+
+        while (!c->error && c->token != T_RBRACE)
+            v = node2(N_SEQ, v, statement(c));
+
+        token(c);
+    }
+    else
+    if (c->token == T_SEMI) {
+        token(c);
+        v = node0(N_NOP);
+    }
+    else {
+        /* expression */
+        v = node1(N_VOID, expr(c));
+
+        if (c->token == T_SEMI)
+            token(c);
+        else
+            c_error(c);
+    }
+
+    return v;
+}
+
+
+static int parse(struct mpsl_c *c)
+/* parses an MPSL program and creates a tree of nodes */
+{
+    mpdm_t v;
+
+    nc(c);
+    token(c);
+
+    v = node0(N_NOP);
+
+    while (!c->error && c->token != T_EOP)
+        v = node2(N_SEQ, v, statement(c));
+
+    v = node2(N_SEQ, v, node0(N_EOP));
+
+    mpdm_set(&c->node, v);
+
+    return c->error;
+}
+
+
+/** code generator ("assembler") **/
+
+typedef enum {
+    OP_EOP,
+    OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROO,
+    OP_POP, OP_SWP, OP_DUP, OP_DP2,
+    OP_GET, OP_SET, OP_STI, OP_TBL,
+    OP_TPU, OP_TPO, OP_TLT, OP_THS,
+    OP_CAL, OP_RET, OP_ARG,
+    OP_JMP, OP_JT,  OP_JF,
+    OP_AND, OP_OR,  OP_XOR, OP_SHL, OP_SHR,
+    OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
+    OP_NOT, OP_EQ,  OP_NE,  OP_GT,  OP_GE,  OP_LT, OP_LE,
+    OP_REM
+} mpsl_op_t;
+
+
+static int o(struct mpsl_c *c, mpsl_op_t op) { mpdm_push(c->prg, MPDM_I(op)); return mpdm_size(c->prg); }
+static int o2(struct mpsl_c *c, mpsl_op_t op, mpdm_t v) { int r = o(c, op); mpdm_push(c->prg, v); return r; }
+static void fix(struct mpsl_c *c, int n) { mpdm_aset(c->prg, MPDM_I(mpdm_size(c->prg)), n); }
+static int here(struct mpsl_c *c) { return mpdm_size(c->prg); }
+#define O(n) gen(c, mpdm_aget(node, n))
+
+
+static int gen(struct mpsl_c *c, mpdm_t node)
+/* generates MPSL VM code from a tree of nodes */
+{
+    int n, i;
+
+    mpsl_node_t nt = mpdm_ival(mpdm_aget(node, 0));
+
+    switch (nt) {
+    case N_NOP:     break;
+    case N_EOP:     o(c, OP_EOP); break;
+    case N_NULL:    o(c, OP_NUL); break;
+    case N_SYMID:   o2(c, OP_LIT, mpdm_aget(node, 1)); o(c, OP_TBL); break;
+    case N_LITERAL: o2(c, OP_LIT, mpdm_aget(node, 1)); break;
+    case N_SEQ:     O(1); O(2); break;
+    case N_ADD:     O(1); O(2); o(c, OP_ADD); break;
+    case N_SUB:     O(1); O(2); o(c, OP_SUB); break;
+    case N_MUL:     O(1); O(2); o(c, OP_MUL); break;
+    case N_DIV:     O(1); O(2); o(c, OP_DIV); break;
+    case N_MOD:     O(1); O(2); o(c, OP_MOD); break;
+    case N_UMINUS:  o2(c, OP_LIT, MPDM_I(-1)); O(1); o(c, OP_MUL); break;
+    case N_NOT:     O(1); o(c, OP_NOT); break;
+    case N_EQ:      O(1); O(2); o(c, OP_EQ); break;
+    case N_NE:      O(1); O(2); o(c, OP_NE); break;
+    case N_GT:      O(1); O(2); o(c, OP_GT); break;
+    case N_GE:      O(1); O(2); o(c, OP_GE); break;
+    case N_LT:      O(1); O(2); o(c, OP_LT); break;
+    case N_LE:      O(1); O(2); o(c, OP_LE); break;
+    case N_ASSIGN:  O(1); O(2); o(c, OP_SET); break;
+    case N_SYMVAL:  O(1); o(c, OP_GET); break;
+    case N_PARTOF:  O(1); o(c, OP_TPU); O(2); o(c, OP_TPO); break;
+    case N_THIS:    o(c, OP_THS); break;
+    case N_SUBSCR:  O(1); O(2); break;
+    case N_VOID:    O(1); o(c, OP_POP); break;
+    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_STI); o(c, OP_POP); break;
+    case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_STI); o(c, OP_POP); break;
+    case N_RETURN:  O(1); o(c, OP_TPO); o(c, OP_RET); break;
+    case N_FUNCAL:  O(1); O(2); o(c, OP_CAL); break;
+    case N_BINAND:  O(1); O(2); o(c, OP_AND); break;
+    case N_BINOR:   O(1); O(2); o(c, OP_OR); break;
+    case N_XOR:     O(1); O(2); o(c, OP_XOR); break;
+    case N_SHL:     O(1); O(2); o(c, OP_SHL); break;
+    case N_SHR:     O(1); O(2); o(c, OP_SHR); break;
+
+    case N_ARRAY:
+        o(c, OP_ARR);
+        for (n = 1; n < mpdm_size(node); n++) {
+            o2(c, OP_LIT, MPDM_I(n - 1));
+            O(n);
+            o(c, OP_STI);
+        }
+        break;
+
+    case N_HASH:
+        o(c, OP_HSH);
+        for (n = 1; n < mpdm_size(node); n += 2) {
+            O(n);
+            O(n + 1);
+            o(c, OP_STI);
+        }
+        break;
+
+    case N_IF:
+        O(1); n = o2(c, OP_JF, NULL); O(2);
+
+        if (mpdm_size(node) == 4) {
+            i = o2(c, OP_JMP, NULL); fix(c, n); O(3); n = i;
+        }
+
+        fix(c, n);
+
+        break;
+
+    case N_WHILE:
+        n = here(c); O(1); i = o2(c, OP_JF, NULL); O(2); o2(c, OP_JMP, MPDM_I(n)); fix(c, i); break;
+
+    case N_OR:
+        O(1); o(c, OP_DUP); n = o2(c, OP_JT, NULL);
+        o(c, OP_POP); O(2); fix(c, n); break;
+
+    case N_AND:
+        O(1); o(c, OP_DUP); n = o2(c, OP_JF, NULL);
+        o(c, OP_POP); O(2); fix(c, n); break;
+
+    case N_SUBDEF:
+        O(1); n = o2(c, OP_LIT, NULL); o(c, OP_SET); i = o2(c, OP_JMP, NULL);
+        fix(c, n); O(2); o(c, OP_ARG); O(3); o(c, OP_RET); fix(c, i); break;
+
+    case N_ANONSB:
+        n = o2(c, OP_LIT, NULL); i = o2(c, OP_JMP, NULL);
+        fix(c, n); O(1); o(c, OP_ARG); O(2); o(c, OP_RET); fix(c, i); break;
+
+    case N_IADD: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_ADD); o(c, OP_SET); break;
+    case N_ISUB: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_SUB); o(c, OP_SET); break;
+    case N_IMUL: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_MUL); o(c, OP_SET); break;
+    case N_IDIV: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_DIV); o(c, OP_SET); break;
+    case N_IMOD: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_MOD); o(c, OP_SET); break;
+    case N_IBAND: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_AND); o(c, OP_SET); break;
+    case N_IBOR: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_OR); o(c, OP_SET); break;
+    case N_IXOR: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_XOR); o(c, OP_SET); break;
+
+    case N_PINC: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); o2(c, OP_LIT, MPDM_I(1)); o(c, OP_ADD); o(c, OP_SET); break;
+    case N_PDEC: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); o2(c, OP_LIT, MPDM_I(1)); o(c, OP_SUB); o(c, OP_SET); break;
+    }
+
+    return c->error;
+}
+
+
+/** virtual machine **/
+
+struct mpsl_vm {
+    mpdm_t prg;             /* program */
+    mpdm_t ctxt;            /* context */
+    mpdm_t stack;           /* stack */
+    mpdm_t c_stack;         /* call stack */
+    mpdm_t symtbl;          /* local symbol table */
+    int pc;                 /* program counter */
+    int sp;                 /* stack pointer */
+    int cs;                 /* call stack pointer */
+    int tt;                 /* symbol table top */
+    int mode;               /* running mode */
+    int ins;                /* # of executed instructions */
+};
+
+
+static void reset_vm(struct mpsl_vm *m, mpdm_t prg)
+{
+    mpdm_set(&m->prg,   prg);
+
+    if (prg != NULL) {
+        mpdm_set(&m->ctxt,  MPDM_A(0));
+
+        m->stack    = mpdm_push(m->ctxt, MPDM_A(0));
+        m->c_stack  = mpdm_push(m->ctxt, MPDM_A(0));
+        m->symtbl   = mpdm_push(m->ctxt, MPDM_A(0));
+
+        mpdm_push(m->symtbl, mpdm_root());
+        mpdm_push(m->symtbl, MPDM_H(0));
+
+        m->pc = m->sp = m->cs = 0;
+        m->tt = mpdm_size(m->symtbl);
+        m->mode = VM_IDLE;
+    }
+    else
+        mpdm_set(&m->ctxt, NULL);
+}
+
+
+static void vm_error(struct mpsl_vm *m, mpdm_t s1, mpdm_t s2) { m->mode = VM_ERROR; s_error(s1, s2); }
+
+static mpdm_t PUSH(struct mpsl_vm *m, mpdm_t v) { return mpdm_aset(m->stack, v, m->sp++); }
+static mpdm_t POP(struct mpsl_vm *m) { return mpdm_aget(m->stack, --m->sp); }
+static mpdm_t TOS(struct mpsl_vm *m) { return mpdm_aget(m->stack, m->sp - 1); }
+static mpdm_t PC(struct mpsl_vm *m) { return mpdm_aget(m->prg, m->pc++); }
+
+static mpdm_t GET(struct mpsl_vm *m, mpdm_t h, mpdm_t k)
+{
+    mpdm_t r = NULL;
+
+    if (MPDM_IS_HASH(h))
+        r = mpdm_hget(h, k);
+    else
+    if (MPDM_IS_ARRAY(h))
+        r = mpdm_aget(h, mpdm_ival(k)); 
+    else
+        vm_error(m, MPDM_LS(L"bad holder in get for key "), k);
+
+    return r;
+}
+
+static mpdm_t SET(struct mpsl_vm *m, mpdm_t h, mpdm_t k, mpdm_t v)
+{
+    mpdm_t r = NULL;
+
+    if (MPDM_IS_HASH(h))
+        r = mpdm_hset(h, k, v);
+    else
+    if (MPDM_IS_ARRAY(h))
+        r = mpdm_aset(h, v, mpdm_ival(k)); 
+    else
+        vm_error(m, MPDM_LS(L"bad holder in set for key "), k);
+
+    return r;
+}
+
+static mpdm_t TBL(struct mpsl_vm *m)
+{
+    int n;
+    mpdm_t s = mpdm_ref(POP(m));
+    mpdm_t l = NULL;
+
+    /* local symtable */
+    for (n = m->tt - 1; n >= 0; n--) {
+        if ((l = mpdm_aget(m->symtbl, n)) || (l = mpdm_aget(m->symtbl, (n = 0))))
+            if (mpdm_exists(l, s))
+                break;
+    }
+
+    if (n < 0)
+        vm_error(m, MPDM_LS(L"undefined symbol "), s);
+    else {
+        PUSH(m, l);
+        PUSH(m, s);
+    }
+
+    mpdm_unref(s);
+
+    return l;
+}
+
+
+static void ARG(struct mpsl_vm *m)
+{
+    mpdm_t h, k, v;
+    int n;
+
+    h = mpdm_aset(m->symtbl, MPDM_H(0), m->tt++); 
+    k = POP(m);
+    v = POP(m);
+
+    for (n = 0; n < mpdm_size(k); n++)
+        mpdm_hset(h, mpdm_aget(k, n), mpdm_aget(v, n));
+}
+
+
+#define IPOP(m) mpdm_ival(POP(m))
+#define RPOP(m) mpdm_rval(POP(m))
+#define ISTRU(v) mpdm_ival(v)
+#define BOOL(i) MPDM_I(i)
+
+static int exec_vm(struct mpsl_vm *m, int msecs)
+{
+    clock_t max;
+    mpdm_t v, w;
+    double r1, r2;
+    int i1, i2;
+
+    /* maximum running time */
+    max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0;
+
+    /* start running if there is no error */
+    if (m->mode != VM_ERROR)
+        m->mode = VM_RUNNING;
+
+    m->ins = 0;
+
+    while (m->mode == VM_RUNNING) {
+
+        /* get the opcode */
+        mpsl_op_t opcode = mpdm_ival(PC(m));
+    
+        switch (opcode) {
+        case OP_EOP: m->mode = VM_IDLE; break;
+        case OP_LIT: PUSH(m, mpdm_clone(PC(m))); break;
+        case OP_NUL: PUSH(m, NULL); break;
+        case OP_ARR: PUSH(m, MPDM_A(0)); break;
+        case OP_HSH: PUSH(m, MPDM_H(0)); break;
+        case OP_ROO: PUSH(m, mpdm_root()); break;
+        case OP_POP: --m->sp; break;
+        case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
+        case OP_DUP: PUSH(m, TOS(m)); break;
+        case OP_DP2: PUSH(m, mpdm_aget(m->stack, m->sp - 2)); break;
+        case OP_TBL: TBL(m); break;
+        case OP_GET: w = POP(m); v = POP(m); PUSH(m, GET(m, v, w)); break;
+        case OP_SET: w = POP(m); v = POP(m); PUSH(m, SET(m, POP(m), v, w)); break;
+        case OP_STI: w = POP(m); v = POP(m); SET(m, TOS(m), v, w); break;
+        case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
+        case OP_TPO: --m->tt; break;
+        case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
+        case OP_THS: PUSH(m, mpdm_aget(m->symtbl, m->tt - 2)); break;
+        case OP_RET: m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
+        case OP_ARG: ARG(m); break;
+        case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
+        case OP_JT:  if (ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
+        case OP_JF:  if (!ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
+        case OP_ADD: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 + r2)); break;
+        case OP_SUB: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 - r2)); break;
+        case OP_MUL: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 * r2)); break;
+        case OP_DIV: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 / r2)); break;
+        case OP_MOD: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 % i2)); break;
+        case OP_NOT: PUSH(m, MPDM_I(!ISTRU(POP(m)))); break;
+        case OP_EQ:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 == r2)); break;
+        case OP_NE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 != r2)); break;
+        case OP_GT:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 >  r2)); break;
+        case OP_GE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 >= r2)); break;
+        case OP_LT:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 <  r2)); break;
+        case OP_LE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 <= r2)); break;
+        case OP_AND: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 &  i2)); break;
+        case OP_OR:  i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 |  i2)); break;
+        case OP_XOR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 ^  i2)); break;
+        case OP_SHL: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 << i2)); break;
+        case OP_SHR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 >> i2)); break;
+        case OP_REM: m->pc++; break;
+        case OP_CAL:
+            v = POP(m);
+            if (MPDM_IS_EXEC(v))
+                PUSH(m, mpdm_exec(v, POP(m), mpdm_aget(m->symtbl, m->tt - 1)));
+            else {
+                mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++);
+                m->pc = mpdm_ival(v);
+            }
+            break;
+        }
+
+        m->ins++;
+
+        /* if out of slice time, break */        
+        if (max && clock() > max)
+            m->mode = VM_TIMEOUT;
+    }
+
+    return m->mode;
+}
+
+
+static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
+{
+    mpdm_t r = NULL;
+    struct mpsl_vm m;
+
+    memset(&m, '\0', sizeof(m));
+    reset_vm(&m, c);
+
+    r = MPDM_I(exec_vm(&m, 0));
+
+    reset_vm(&m, NULL);
+
+    return r;
+}
+
+
+mpdm_t mpsl_compile(mpdm_t src)
+/* compiles an MPSL source to MPSL VM code */
+{
+    mpdm_t r = NULL;
+    struct mpsl_c c;
+
+    mpdm_ref(src);
+
+    memset(&c, '\0', sizeof(c));
+    mpdm_set(&c.prg, MPDM_A(0));
+
+    /* src can be a file or a string */
+    if ((c.f = mpdm_get_filehandle(src)) == NULL)
+        c.ptr = mpdm_string(src);
+
+    if (parse(&c) == 0 && gen(&c, c.node) == 0)
+        r = MPDM_X2(exec_vm_a0, c.prg);
+
+    mpdm_unref(src);
+
+    /* cleanup */
+    mpdm_set(&c.node,   NULL);
+    mpdm_set(&c.prg,    NULL);
+
+    return r;
+}
+
+
+void mpsl_disasm(mpdm_t prg)
+{
+    int n;
+    static char *ops[] = {
+        "EOP",
+        "LIT", "NUL", "ARR", "HSH", "ROO",
+        "POP", "SWP", "DUP", "DP2",
+        "GET", "SET", "STI", "TBL",
+        "TPU", "TPO", "TLT", "THS",
+        "CAL", "RET", "ARG",
+        "JMP", "JT", "JF",
+        "AND", "OR", "XOR", "SHL", "SHR",
+        "ADD", "SUB", "MUL", "DIV", "MOD",
+        "NOT", "EQ", "NE", "GT", "GE", "LT", "LE",
+        "REM"
+    };
+
+    mpdm_ref(prg);
+
+    for (n = 0; n < mpdm_size(prg); n++) {
+        mpsl_op_t i = mpdm_ival(mpdm_aget(prg, n));
+
+        printf("%4d: ", n);
+        printf("%s", ops[i]);
+
+        if (i == OP_LIT || i == OP_REM)
+            printf(" \"%ls\"", mpdm_string(mpdm_aget(prg, ++n)));
+        if (i == OP_JMP || i == OP_JT || i == OP_JF)
+            printf(" %d", mpdm_ival(mpdm_aget(prg, ++n)));
+
+        printf("\n");
+    }
+
+    mpdm_unref(prg);
+}
+
+
+/** start / stop **/
+
+void mpsl_library_init(mpdm_t r, int argc, char *argv[]);
+
+void mpsl_startup(int argc, char *argv[])
+{
+    mpdm_startup();
+    mpsl_library_init(mpdm_root(), argc, argv);
+}
+
+
 void mpsl_shutdown(void)
 {
-    mpdm_shutdown();
 }

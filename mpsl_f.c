@@ -1,6 +1,6 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language
+    MPSL - Minimum Profit Scripting Language 3.x
     Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
 
     mpsl_f.c - Minimum Profit Scripting Language Function Library
@@ -28,10 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <wchar.h>
-
 #include <time.h>
 
-#include "mpdm.h"
 #include "mpsl.h"
 
 /** code **/
@@ -52,6 +50,11 @@
 #define RA1 RA(1)
 #define RA2 RA(2)
 #define RA3 RA(3)
+
+#define mpsl_boolean(b) MPDM_I(b)
+
+
+/** library **/
 
 /**
  * size - Returns the size of a value.
@@ -476,20 +479,6 @@ static mpdm_t F_hdel(F_ARGS)
 }
 
 /**
- * keys - Returns the keys of a hash.
- * @h: the hash
- *
- * Returns an array containing all the keys of the @h hash.
- * [Hashes]
- * [Arrays]
- */
-/** array = keys(h); */
-static mpdm_t F_keys(F_ARGS)
-{
-    return mpdm_keys(A0);
-}
-
-/**
  * open - Opens a file.
  * @filename: the file name
  * @mode: an fopen-like mode string
@@ -541,6 +530,32 @@ static mpdm_t F_read(F_ARGS)
 {
     return mpdm_read(A0);
 }
+
+/**
+ * write - Writes values to a file descriptor.
+ * @fd: the file descriptor
+ * @arg1: first argument
+ * @arg2: second argument
+ * @argn: nth argument
+ *
+ * Writes the variable arguments to the file descriptor, doing
+ * charset conversion in the process.
+ *
+ * Returns the total size written to @fd.
+ * [Input-Output]
+ * [Character Set Conversion]
+ */
+/** integer = write(fd, arg1 [,arg2 ... argn]); */
+static mpdm_t F_write(F_ARGS)
+{
+    int n, r = 0;
+
+    for (n = 1; n < mpdm_size(a); n++)
+        r += mpdm_write(A0, A(n));
+
+    return MPDM_I(r);
+}
+
 
 /**
  * getchar - Reads a character from a file descriptor.
@@ -880,51 +895,6 @@ static mpdm_t F_gettext_domain(F_ARGS)
 }
 
 /**
- * load - Loads an MPSL source code file.
- * @source_file: the source code file
- *
- * Loads and executes an MPSL source code file and returns
- * its value.
- * [Code Control]
- */
-/** load(source_file); */
-static mpdm_t F_load(F_ARGS)
-{
-    return mpdm_exec(mpsl_compile_file(A0,
-                                       mpsl_get_symbol(MPDM_LS(L"INC"),
-                                                       l)), NULL, l);
-}
-
-/**
- * compile - Compiles a string of MSPL source code file.
- * @source: the source code string
- *
- * Compiles a string of MPSL source code and returns an
- * executable value.
- * [Code Control]
- */
-/** func = compile(source); */
-static mpdm_t F_compile(F_ARGS)
-{
-    return mpsl_compile(A0);
-}
-
-/**
- * error - Simulates an error.
- * @err: the error message
- *
- * Simulates an error. The @err error message is stored in the `ERROR'
- * global variable and an internal abort global flag is set, so no further
- * MPSL code can be executed until reset.
- * [Code Control]
- */
-/** error(err); */
-static mpdm_t F_error(F_ARGS)
-{
-    return mpsl_error(A0);
-}
-
-/**
  * uc - Converts a string to uppercase.
  * @str: the string to be converted
  *
@@ -1000,36 +970,6 @@ static mpdm_t F_sscanf(F_ARGS)
 }
 
 /**
- * eval - Evaluates MSPL code.
- * @code: A value containing a string of MPSL code, or executable code
- * @args: optional arguments for @code
- *
- * Evaluates a piece of code. The @code can be a string containing MPSL
- * source code (that will be compiled) or a direct executable value. If
- * the compilation or the execution gives an error, the `ERROR' variable
- * will be set to a printable value and NULL returned. Otherwise, the
- * exit value from the code is returned and `ERROR' set to NULL. The 
- * internal abort flag is reset on exit.
- *
- * [Code Control]
- */
-/** v = eval(code, args); */
-static mpdm_t F_eval(F_ARGS)
-{
-    mpdm_t r, c;
-
-    a = mpdm_ref(mpdm_clone(a));
-    c = mpdm_shift(a);
-
-    r = mpsl_eval(c, a, l);
-
-    mpdm_unref(a);
-
-    return r;
-}
-
-
-/**
  * sprintf - Formats a sprintf()-like string.
  * @fmt: the string format
  * @arg1: first argument
@@ -1081,32 +1021,6 @@ static mpdm_t F_print(F_ARGS)
 
 
 /**
- * write - Writes values to a file descriptor.
- * @fd: the file descriptor
- * @arg1: first argument
- * @arg2: second argument
- * @argn: nth argument
- *
- * Writes the variable arguments to the file descriptor, doing
- * charset conversion in the process.
- *
- * Returns the total size written to @fd.
- * [Input-Output]
- * [Character Set Conversion]
- */
-/** integer = write(fd, arg1 [,arg2 ... argn]); */
-static mpdm_t F_write(F_ARGS)
-{
-    int n, r = 0;
-
-    for (n = 1; n < mpdm_size(a); n++)
-        r += mpdm_write(A0, A(n));
-
-    return MPDM_I(r);
-}
-
-
-/**
  * chr - Returns the Unicode character represented by the codepoint.
  * @c: the codepoint as an integer value
  *
@@ -1148,167 +1062,6 @@ static mpdm_t F_ord(F_ARGS)
     return MPDM_I(ret);
 }
 
-
-/**
- * map - Maps a multiple value to an array.
- * @a: the value (array or hash)
- * @filter: the filter
- *
- * Returns a new array built by applying the @filter to all the
- * elements of the @a multiple value. The filter can be an executable
- * function accepting one argument if @a is an array and two if @a is
- * a hash, in which case the return value of the function will be used
- * as the output element; @filter can also be a hash, in which
- * case each array element or hash key will be used as a key to the
- * hash and the associated value used as the output element.
- *
- * [Arrays]
- * [Hashes]
- */
-/** array = map(a, filter); */
-static mpdm_t F_map(F_ARGS)
-{
-    mpdm_t set = mpdm_aget(a, 0);
-    mpdm_t fil = mpdm_aget(a, 1);
-    mpdm_t out = NULL;
-    int n = 0, i = 0;
-    mpdm_t k, v;
-
-    if (set != NULL) {
-        out = mpdm_ref(
-            MPDM_A(MPDM_IS_HASH(set) ? mpdm_hsize(set) : mpdm_size(set))
-        );
-
-        if (MPDM_IS_EXEC(fil)) {
-            while (mpdm_iterator(set, &n, &k, &v)) {
-                mpdm_aset(out, mpdm_exec_2(fil, k, v, l), i++);
-            }
-        }
-        else
-        if (MPDM_IS_HASH(fil)) {
-            while (mpdm_iterator(set, &n, &k, &v)) {
-                mpdm_aset(out, mpdm_hget(fil, k), i++);
-            }
-        }
-    }
-
-    return mpdm_unrefnd(out);
-}
-
-
-/**
- * hmap - Maps a multiple value to a hash.
- * @a: the value (array or hash)
- * @filter: the filter
- *
- * Returns a new hash built by applying the @filter to all the elements
- * of the @a multiple value. The filter can be an executable function
- * accepting one argument if @a is an array and two if @a is a hash,
- * in which case the return value of the function is expected to be a
- * two element array, with the 0th element to be the key and the 1st
- * element the value for the new pair in the output hash.
- *
- * [Arrays]
- * [Hashes]
- */
-/** hash = hmap(a, filter); */
-static mpdm_t F_hmap(F_ARGS)
-{
-    mpdm_t set = mpdm_aget(a, 0);
-    mpdm_t fil = mpdm_aget(a, 1);
-    mpdm_t out = NULL;
-    int n = 0;
-    mpdm_t k, v;
-
-    if (set != NULL) {
-        out = mpdm_ref(MPDM_H(0));
-
-        if (MPDM_IS_EXEC(fil)) {
-            while (mpdm_iterator(set, &n, &k, &v)) {
-                mpdm_t w = mpdm_ref(mpdm_exec_2(fil, k, v, l));
-
-                if (MPDM_IS_ARRAY(w))
-                    mpdm_hset(out, mpdm_aget(w, 0), mpdm_aget(w, 1));
-
-                mpdm_unref(w);
-            }
-        }
-    }
-
-    return mpdm_unrefnd(out);
-}
-
-
-/**
- * grep - Greps inside a multiple value.
- * @a: the array or hash
- * @filter: the filter
- *
- * Greps inside a multiple value and returns another one containing only the
- * elements that passed the filter. If @filter is a string, it's accepted
- * as a regular expression, which will be applied to each element or hash
- * key. If @filter is executable, it will be called with the element as
- * its only argument if @a is an array or with two if @a is a hash,
- * and its return value used as validation.
- *
- * The new value will have the same type as @a and will contain all
- * elements that passed the filter.
- * [Arrays]
- * [Regular Expressions]
- */
-/** array = grep(filter, a); */
-static mpdm_t F_grep(F_ARGS)
-{
-    mpdm_t set = mpdm_aget(a, 0);
-    mpdm_t fil = mpdm_aget(a, 1);
-    mpdm_t out = NULL;
-    int n = 0;
-    mpdm_t k, v;
-
-    if (set != NULL) {
-
-        out = mpdm_ref(MPDM_IS_HASH(set) ? MPDM_H(0) : MPDM_A(0));
-
-        if (MPDM_IS_EXEC(fil)) {
-            while (mpdm_iterator(set, &n, &k, &v)) {
-                mpdm_t w = mpdm_ref(mpdm_exec_2(fil, k, v, l));
-
-                if (mpsl_is_true(w)) {
-                    if (MPDM_IS_HASH(out))
-                        mpdm_hset(out, k, v);
-                    else
-                        mpdm_push(out, k);
-                }
-
-                mpdm_unref(w);
-            }
-        }
-        else
-        if (MPDM_IS_STRING(fil)) {
-            while (mpdm_iterator(set, &n, &k, &v)) {
-                mpdm_t w = mpdm_ref(mpdm_regex(v, fil, 0));
-
-                if (w) {
-                    if (MPDM_IS_HASH(out))
-                        mpdm_hset(out, k, v);
-                    else
-                        mpdm_push(out, k);
-                }
-
-                mpdm_unref(w);
-            }
-        }
-    }
-
-    return mpdm_unrefnd(out);
-}
-
-static mpdm_t F_getenv(F_ARGS)
-{
-    mpdm_t e = mpdm_hget_s(mpdm_root(), L"ENV");
-
-    return mpdm_hget(e, mpdm_aget(a, 0));
-}
 
 static mpdm_t F_bincall(F_ARGS)
 {
@@ -1369,45 +1122,78 @@ static mpdm_t F_sleep(F_ARGS)
 
 
 /**
- * mutex - Returns a new mutex.
- *
- * Returns a new mutex.
- * [Threading]
- */
-/** var = mutex(); */
-static mpdm_t F_mutex(F_ARGS)
-{
-    return mpdm_new_mutex();
-}
-
-
-/**
- * mutex_lock - Locks a mutex (possibly waiting).
- * @mtx: the mutex
+ * mutex.lock - Locks a mutex (possibly waiting).
  *
  * Locks a mutex. If the mutex is already locked by
  * another process, it waits until it's unlocked.
  * [Threading]
  */
-/** mutex_lock(mtx); */
+/** mutex.lock(); */
 static mpdm_t F_mutex_lock(F_ARGS)
 {
-    mpdm_mutex_lock(A0);
+    mpdm_mutex_lock(mpdm_hget_s(l, L"v"));
+    return l;
+}
+
+
+/**
+ * mutex.unlock - Unlocks a mutex.
+ *
+ * Unlocks a mutex.
+ * [Threading]
+ */
+/** mutex.unlock(); */
+static mpdm_t F_mutex_unlock(F_ARGS)
+{
+    mpdm_mutex_unlock(mpdm_hget_s(l, L"v"));
+    return l;
+}
+
+
+/**
+ * mutex - Returns a new mutex object.
+ *
+ * Returns a new mutex object.
+ * [Threading]
+ */
+/** local m = mutex(); */
+static mpdm_t F_mutex(F_ARGS)
+{
+    mpdm_t o = mpdm_ref(MPDM_H(0));
+
+    mpdm_hset_s(o, L"v",        mpdm_new_mutex());
+    mpdm_hset_s(o, L"lock",     MPDM_X(F_mutex_lock));
+    mpdm_hset_s(o, L"unlock",   MPDM_X(F_mutex_unlock));
+
+    return mpdm_unrefnd(o);
+}
+
+
+/**
+ * semaphore.wait - Waits for a semaphore to be ready.
+ *
+ * Waits for the value of a semaphore to be > 0. If it's
+ * not, the thread waits until it is.
+ * [Threading]
+ */
+/** semaphore.wait(); */
+static mpdm_t F_semaphore_wait(F_ARGS)
+{
+    mpdm_semaphore_wait(mpdm_hget_s(l, L"v"));
     return NULL;
 }
 
 
 /**
- * mutex_unlock - Unlocks a mutex.
- * @mtx: the mutex
+ * semaphore.post - Increments the value of a semaphore.
  *
- * Unlocks a mutex.
+ * Increments by 1 the value of a semaphore.
  * [Threading]
  */
-/** mutex_unlock(mtx); */
-static mpdm_t F_mutex_unlock(F_ARGS)
+/** semaphore.post(); */
+static mpdm_t F_semaphore_post(F_ARGS)
 {
-    mpdm_mutex_unlock(A0);
+    mpdm_semaphore_post(mpdm_hget_s(l, L"v"));
     return NULL;
 }
 
@@ -1419,41 +1205,17 @@ static mpdm_t F_mutex_unlock(F_ARGS)
  * Returns a new semaphore.
  * [Threading]
  */
-/** var = semaphore(cnt); */
+/** local s = semaphore(); */
+/** local s = semaphore(cnt); */
 static mpdm_t F_semaphore(F_ARGS)
 {
-    return mpdm_new_semaphore(IA0);
-}
+    mpdm_t o = mpdm_ref(MPDM_H(0));
 
+    mpdm_hset_s(o, L"v",    mpdm_new_semaphore(IA0));
+    mpdm_hset_s(o, L"post", MPDM_X(F_semaphore_post));
+    mpdm_hset_s(o, L"wait", MPDM_X(F_semaphore_wait));
 
-/**
- * semaphore_wait - Waits for a semaphore to be ready.
- * @sem: the semaphore to wait onto
- *
- * Waits for the value of a semaphore to be > 0. If it's
- * not, the thread waits until it is.
- * [Threading]
- */
-/** semaphore_wait(sem); */
-static mpdm_t F_semaphore_wait(F_ARGS)
-{
-    mpdm_semaphore_wait(A0);
-    return NULL;
-}
-
-
-/**
- * semaphore_post - Increments the value of a semaphore.
- * @sem: the semaphore to increment
- *
- * Increments by 1 the value of a semaphore.
- * [Threading]
- */
-/** semaphore_post(mtx); */
-static mpdm_t F_semaphore_post(F_ARGS)
-{
-    mpdm_semaphore_post(A0);
-    return NULL;
+    return mpdm_unrefnd(o);
 }
 
 
@@ -1551,6 +1313,9 @@ static mpdm_t F_new(F_ARGS)
 
         w = mpdm_ref(A(n));
 
+        if (MPDM_IS_EXEC(w))
+            w = mpdm_ref(mpdm_exec(mpdm_unrefnd(w), NULL, NULL));
+
         if (MPDM_IS_HASH(w)) {
             while (mpdm_iterator(w, &m, &k, &v))
                 mpdm_hset(r, k, mpdm_clone(v));
@@ -1562,110 +1327,112 @@ static mpdm_t F_new(F_ARGS)
     return mpdm_unrefnd(r);
 }
 
-static struct {
-    wchar_t *name;
-     mpdm_t(*func) (mpdm_t, mpdm_t);
-} mpsl_funcs[] = {
-    { L"size",           F_size },
-    { L"clone",          F_clone },
-    { L"dump",           F_dump },
-    { L"dumper",         F_dumper },
-    { L"cmp",            F_cmp },
-    { L"is_array",       F_is_array },
-    { L"is_hash",        F_is_hash },
-    { L"is_exec",        F_is_exec },
-    { L"splice",         F_splice },
-    { L"expand",         F_expand },
-    { L"collapse",       F_collapse },
-    { L"ins",            F_ins },
-    { L"adel",           F_adel },
-    { L"shift",          F_shift },
-    { L"push",           F_push },
-    { L"pop",            F_pop },
-    { L"queue",          F_queue },
-    { L"seek",           F_seek },
-    { L"sort",           F_sort },
-    { L"split",          F_split },
-    { L"join",           F_join },
-    { L"hsize",          F_hsize },
-    { L"exists",         F_exists },
-    { L"hdel",           F_hdel },
-    { L"keys",           F_keys },
-    { L"open",           F_open },
-    { L"close",          F_close },
-    { L"read",           F_read },
-    { L"write",          F_write },
-    { L"getchar",        F_getchar },
-    { L"putchar",        F_putchar },
-    { L"fseek",          F_fseek },
-    { L"ftell",          F_ftell },
-    { L"unlink",         F_unlink },
-    { L"stat",           F_stat },
-    { L"chmod",          F_chmod },
-    { L"chown",          F_chown },
-    { L"glob",           F_glob },
-    { L"encoding",       F_encoding },
-    { L"popen",          F_popen },
-    { L"popen2",         F_popen2 },
-    { L"pclose",         F_pclose },
-    { L"regex",          F_regex },
-    { L"sregex",         F_sregex },
-    { L"load",           F_load },
-    { L"compile",        F_compile },
-    { L"error",          F_error },
-    { L"eval",           F_eval },
-    { L"print",          F_print },
-    { L"gettext",        F_gettext },
-    { L"gettext_domain", F_gettext_domain },
-    { L"sprintf",        F_sprintf },
-    { L"chr",            F_chr },
-    { L"ord",            F_ord },
-    { L"map",            F_map },
-    { L"hmap",           F_hmap },
-    { L"grep",           F_grep },
-    { L"getenv",         F_getenv },
-    { L"uc",             F_uc },
-    { L"lc",             F_lc },
-    { L"time",           F_time },
-    { L"chdir",          F_chdir },
-    { L"sscanf",         F_sscanf },
-    { L"bincall",        F_bincall },
-    { L"random",         F_random },
-    { L"sleep",          F_sleep },
-    { L"mutex",          F_mutex },
-    { L"mutex_lock",     F_mutex_lock },
-    { L"mutex_unlock",   F_mutex_unlock },
-    { L"semaphore",      F_semaphore },
-    { L"semaphore_wait", F_semaphore_wait },
-    { L"semaphore_post", F_semaphore_post },
-    { L"tr",             F_tr },
-    { L"strftime",       F_strftime },
-    { L"connect",        F_connect },
-    { L"new",            F_new },
-    { NULL,              NULL }
-};
+/** init **/
 
-
-mpdm_t mpsl_build_funcs(void)
-/* build all functions */
+void mpsl_library_init(mpdm_t r, int argc, char *argv[])
+/* inits the library */
 {
-    mpdm_t c;
     int n;
+    mpdm_t v;
 
-    /* creates all the symbols in the CORE library */
-    c = MPDM_H(0);
+    mpdm_ref(r);
 
-    mpdm_ref(c);
+    /* standard file descriptors */
+    mpdm_hset_s(r, L"STDIN",    MPDM_F(stdin));
+    mpdm_hset_s(r, L"STDOUT",   MPDM_F(stdout));
+    mpdm_hset_s(r, L"STDERR",   MPDM_F(stderr));
 
-    for (n = 0; mpsl_funcs[n].name != NULL; n++) {
-        mpdm_t f = MPDM_S(mpsl_funcs[n].name);
-        mpdm_t x = MPDM_X(mpsl_funcs[n].func);
+    /* home and application directories */
+    mpdm_hset_s(r, L"HOMEDIR",  mpdm_home_dir());
+    mpdm_hset_s(r, L"APPDIR",   mpdm_app_dir());
 
-        mpdm_hset(mpdm_root(), f, x);
-        mpdm_hset(c, f, x);
-    }
+    /* library functions */
+    mpdm_hset_s(r, L"size",     MPDM_X(F_size));
+    mpdm_hset_s(r, L"clone",    MPDM_X(F_clone));
+    mpdm_hset_s(r, L"dump",     MPDM_X(F_dump));
+    mpdm_hset_s(r, L"dumper",   MPDM_X(F_dumper));
+    mpdm_hset_s(r, L"cmp",      MPDM_X(F_cmp));
+    mpdm_hset_s(r, L"is_array", MPDM_X(F_is_array));
+    mpdm_hset_s(r, L"is_hash",  MPDM_X(F_is_hash));
+    mpdm_hset_s(r, L"is_exec",  MPDM_X(F_is_exec));
+    mpdm_hset_s(r, L"splice",   MPDM_X(F_splice));
+    mpdm_hset_s(r, L"expand",   MPDM_X(F_expand));
+    mpdm_hset_s(r, L"collapse", MPDM_X(F_collapse));
+    mpdm_hset_s(r, L"ins",      MPDM_X(F_ins));
+    mpdm_hset_s(r, L"adel",     MPDM_X(F_adel));
+    mpdm_hset_s(r, L"shift",    MPDM_X(F_shift));
+    mpdm_hset_s(r, L"push",     MPDM_X(F_push));
+    mpdm_hset_s(r, L"pop",      MPDM_X(F_pop));
+    mpdm_hset_s(r, L"queue",    MPDM_X(F_queue));
+    mpdm_hset_s(r, L"hsize",    MPDM_X(F_hsize));
+    mpdm_hset_s(r, L"exists",   MPDM_X(F_exists));
+    mpdm_hset_s(r, L"hdel",     MPDM_X(F_hdel));
 
-    mpdm_unrefnd(c);
+    mpdm_hset_s(r, L"open",     MPDM_X(F_open));
+    mpdm_hset_s(r, L"close",    MPDM_X(F_close));
+    mpdm_hset_s(r, L"read",     MPDM_X(F_read));
+    mpdm_hset_s(r, L"write",    MPDM_X(F_write));
+    mpdm_hset_s(r, L"getchar",  MPDM_X(F_getchar));
+    mpdm_hset_s(r, L"putchar",  MPDM_X(F_putchar));
+    mpdm_hset_s(r, L"fseek",    MPDM_X(F_fseek));
+    mpdm_hset_s(r, L"ftell",    MPDM_X(F_ftell));
 
-    return c;
+    mpdm_hset_s(r, L"unlink",   MPDM_X(F_unlink));
+    mpdm_hset_s(r, L"stat",     MPDM_X(F_stat));
+    mpdm_hset_s(r, L"chmod",    MPDM_X(F_chmod));
+    mpdm_hset_s(r, L"chown",    MPDM_X(F_chown));
+    mpdm_hset_s(r, L"glob",     MPDM_X(F_glob));
+    mpdm_hset_s(r, L"chdir",    MPDM_X(F_chdir));
+
+    mpdm_hset_s(r, L"seek",     MPDM_X(F_seek));
+    mpdm_hset_s(r, L"sort",     MPDM_X(F_sort));
+    mpdm_hset_s(r, L"split",    MPDM_X(F_split));
+    mpdm_hset_s(r, L"join",     MPDM_X(F_join));
+
+    mpdm_hset_s(r, L"encoding", MPDM_X(F_encoding));
+    mpdm_hset_s(r, L"popen",    MPDM_X(F_popen));
+    mpdm_hset_s(r, L"popen2",   MPDM_X(F_popen2));
+    mpdm_hset_s(r, L"pclose",   MPDM_X(F_pclose));
+
+    mpdm_hset_s(r, L"regex",    MPDM_X(F_regex));
+    mpdm_hset_s(r, L"sregex",   MPDM_X(F_sregex));
+    mpdm_hset_s(r, L"sscanf",   MPDM_X(F_sscanf));
+    mpdm_hset_s(r, L"sprintf",  MPDM_X(F_sprintf));
+    mpdm_hset_s(r, L"strftime", MPDM_X(F_strftime));
+
+    mpdm_hset_s(r, L"gettext",  MPDM_X(F_gettext));
+    mpdm_hset_s(r, L"gettext_domain",  MPDM_X(F_gettext_domain));
+
+    mpdm_hset_s(r, L"print",    MPDM_X(F_print));
+
+    mpdm_hset_s(r, L"chr",      MPDM_X(F_chr));
+    mpdm_hset_s(r, L"ord",      MPDM_X(F_ord));
+    mpdm_hset_s(r, L"uc",       MPDM_X(F_uc));
+    mpdm_hset_s(r, L"lc",       MPDM_X(F_lc));
+    mpdm_hset_s(r, L"tr",       MPDM_X(F_tr));
+
+    mpdm_hset_s(r, L"time",     MPDM_X(F_time));
+    mpdm_hset_s(r, L"random",   MPDM_X(F_random));
+    mpdm_hset_s(r, L"sleep",    MPDM_X(F_sleep));
+
+    mpdm_hset_s(r, L"mutex",     MPDM_X(F_mutex));
+    mpdm_hset_s(r, L"semaphore", MPDM_X(F_semaphore));
+
+    mpdm_hset_s(r, L"connect",     MPDM_X(F_connect));
+
+    mpdm_hset_s(r, L"bincall",  MPDM_X(F_bincall));
+
+    mpdm_hset_s(r, L"new",      MPDM_X(F_new));
+
+    /* version */
+    v = mpdm_hset_s(r, L"MPSL", MPDM_H(0));
+    mpdm_hset_s(v, L"VERSION",  MPDM_MBS(VERSION));
+
+    /* command line arguments */
+    v = mpdm_hset_s(r, L"ARGV", MPDM_A(0));
+
+    for (n = 0; n < argc; n++)
+        mpdm_push(v, MPDM_MBS(argv[n]));
+
+    mpdm_unref(r);
 }

@@ -2,16 +2,16 @@
 
 LIB=libmpsl.a
 
-all: $(TARGET) docs
+all: $(TARGET)
 
 PROJ=mpsl
 
-ADD_DOCS=doc/mpsl_quickref.ps
+#ADD_DOCS=doc/mpsl_quickref.ps
 GRUTATXT_DOCS=doc/mpsl_index.html doc/mpsl_overview.html doc/mpsl_internals.html
 MP_DOCCER_DOCS=doc/mpsl_api.txt doc/mpsl_reference.txt
 G_AND_MP_DOCS=doc/mpsl_api.html doc/mpsl_reference.html
 
-OBJS=mpsl_c.o mpsl_l.o mpsl_m.o mpsl_y.o mpsl_f.o mpsl_d.o
+OBJS=mpsl_c.o mpsl_f.o mpsl_m.o
 
 DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
 
@@ -22,21 +22,6 @@ version:
 
 .c.o:
 	$(CC) $(CFLAGS) `cat config.cflags` -c $<
-
-y.tab.h: $(MPDM)/mpdm.h mpsl.y
-	$(YACC) -d mpsl.y
-
-y.tab.c: $(MPDM)/mpdm.h mpsl.y
-	$(YACC) -d mpsl.y
-
-lex.yy.c: $(MPDM)/mpdm.h mpsl.l
-	flex mpsl.l
-
-mpsl_l.o: lex.yy.c y.tab.h
-	$(CC) $(CFLAGS) `cat config.cflags` -c lex.yy.c -o mpsl_l.o
-
-mpsl_y.o: y.tab.c
-	$(CC) $(CFLAGS) `cat config.cflags` -c y.tab.c -o mpsl_y.o
 
 $(MPDM)/libmpdm.a:
 	( cd $(MPDM); $(MAKE) )
@@ -59,9 +44,8 @@ clean:
 	rm -f $(TARGET) $(LIB) $(OBJS) *.o tags *.tar.gz stress
 
 realclean: clean
-	rm -f y.tab.c y.tab.h lex.yy.c
 
-distclean: clean y.tab.c y.tab.h lex.yy.c
+distclean: clean
 	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile
 
 realclean: distclean docsclean
@@ -76,8 +60,8 @@ realdistclean: realclean
 doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
 	-./mpsl scripts/mkquickref.mpsl < $< > $@
 
-doc/mpsl_api.txt: mpsl_c.c mpsl.y
-	mp_doccer mpsl_c.c mpsl.y -o doc/mpsl_api -f grutatxt \
+doc/mpsl_api.txt: mpsl_c.c
+	mp_doccer mpsl_c.c -o doc/mpsl_api -f grutatxt \
 	-t "MPSL C API" \
 	-b "This reference documents version $(VERSION) of the C API." \
 	-a 'Angel Ortega - angel@triptico.com'

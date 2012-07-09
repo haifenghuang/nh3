@@ -1,7 +1,7 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2010 Angel Ortega <angel@triptico.com>
+    MPSL - Minimum Profit Scripting Language 3.x
+    Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
 
     mpsl_m.c - Minimum Profit Scripting Language main()
 
@@ -28,28 +28,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <wchar.h>
-#include "mpdm.h"
+
 #include "mpsl.h"
 
 
+void mpsl_disasm(mpdm_t);
+
 /** code **/
-
-mpdm_t trap_func(mpdm_t args, mpdm_t ctxt)
-{
-    mpdm_t c = mpdm_aget(args, 0);
-    mpdm_t r = mpdm_aget(args, 2);
-
-    printf("-- Code ---------------\n");
-    mpdm_dump(c);
-    printf("-- Ret  ---------------\n");
-    mpdm_dump(r);
-
-    printf("Press ENTER\n");
-    getchar();
-
-    return NULL;
-}
-
 
 int mpsl_main(int argc, char *argv[])
 {
@@ -58,9 +43,8 @@ int mpsl_main(int argc, char *argv[])
     char *immscript = NULL;
     FILE *script = stdin;
     int ret = 0;
-    int dump_only = 0;
-    int install_trap = 0;
     int ok = 0;
+    int disasm = 0;
 
     /* skip the executable */
     argv++;
@@ -73,16 +57,13 @@ int mpsl_main(int argc, char *argv[])
             printf("Copyright (C) 2003-2012 Angel Ortega <angel@triptico.com>\n");
             printf("This software is covered by the GPL license. NO WARRANTY.\n\n");
 
-            printf("Usage: mpsl [-d | -s] [-e 'script' | script.mpsl ]\n\n");
+            printf("Usage: mpsl [-d] [-e 'script' | script.mpsl ]\n\n");
 
             return 0;
         }
         else
         if (strcmp(argv[0], "-d") == 0)
-            dump_only = 1;
-        else
-        if (strcmp(argv[0], "-s") == 0)
-            install_trap = 1;
+            disasm = 1;
         else
         if (strcmp(argv[0], "-e") == 0) {
             argv++;
@@ -103,13 +84,7 @@ int mpsl_main(int argc, char *argv[])
         argc--;
     }
 
-    mpsl_startup();
-
-    /* set arguments */
-    mpsl_argv(argc, argv);
-
-    if (install_trap)
-        mpsl_trap(MPDM_X(trap_func));
+    mpsl_startup(argc, argv);
 
     /* compile */
     if (immscript != NULL) {
@@ -118,17 +93,17 @@ int mpsl_main(int argc, char *argv[])
         mpdm_unref(w);
     }
     else {
-        int c;
+        int c = 0;
 
         /* if line starts with #!, discard it */
-        if ((c = getc(script)) == '#' && (c = getc(script)) == '!')
+/*        if ((c = getc(script)) == '#' && (c = getc(script)) == '!')
             while ((c = getc(script)) != EOF && c != '\n');
         else
             ungetc(c, script);
-
+*/
         if (c != EOF) {
             w = mpdm_ref(MPDM_F(script));
-            v = mpsl_compile_file(w, NULL);
+            v = mpsl_compile(w);
             mpdm_close(w);
             mpdm_unref(w);
         }
@@ -137,10 +112,14 @@ int mpsl_main(int argc, char *argv[])
     if (v != NULL) {
         mpdm_ref(v);
 
-        if (dump_only)
-            mpdm_dump(v);
-        else
-            mpdm_void(mpdm_exec(v, NULL, NULL));
+        if (disasm)
+            mpsl_disasm(mpdm_aget(v, 1));
+        else {
+            int r = mpdm_ival(mpdm_exec(v, NULL, NULL));
+
+            if (r == VM_ERROR)
+                printf("ERROR:\n");
+        }
 
         mpdm_unref(v);
     }

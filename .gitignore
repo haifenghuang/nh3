@@ -5,10 +5,7 @@ config.h
 config.ldflags
 doc/*.html
 doc/*.ps
-lex.yy.c
 makefile.opts
-mpsl2
+mpsl3
 *.[oa]
-y.tab.c
-y.tab.h
 stress
