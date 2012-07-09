@@ -1339,7 +1339,9 @@ static mpdm_t F_new(F_ARGS)
     return mpdm_unrefnd(r);
 }
 
+
 /** init **/
+wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t * ptr, int *size);
 
 void mpsl_library_init(mpdm_t r, int argc, char *argv[])
 /* inits the library */
@@ -1435,6 +1437,8 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
 
     for (n = 0; n < argc; n++)
         mpdm_push(v, MPDM_MBS(argv[n]));
+
+    mpdm_dump_1 = mpsl_dump_1;
 
     mpdm_unref(r);
 }
