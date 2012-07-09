@@ -1352,9 +1352,9 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_ref(r);
 
     /* standard file descriptors */
-    mpdm_hset_s(r, L"STDIN",    MPDM_F(stdin));
-    mpdm_hset_s(r, L"STDOUT",   MPDM_F(stdout));
-    mpdm_hset_s(r, L"STDERR",   MPDM_F(stderr));
+    mpdm_hset_s(r, L"STDIN",    io_obj(MPDM_F(stdin)));
+    mpdm_hset_s(r, L"STDOUT",   io_obj(MPDM_F(stdout)));
+    mpdm_hset_s(r, L"STDERR",   io_obj(MPDM_F(stderr)));
 
     /* home and application directories */
     mpdm_hset_s(r, L"HOMEDIR",  mpdm_home_dir());
