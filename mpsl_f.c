@@ -478,13 +478,147 @@ static mpdm_t F_hdel(F_ARGS)
     return mpdm_hdel(A0, A1);
 }
 
+/** I/O **/
+
+/**
+ * io.close - Closes an I/O stream.
+ *
+ * Closes the file, pipe or socket.
+ * [Input-Output]
+ */
+/** io.close(); */
+static mpdm_t F_close(F_ARGS)
+{
+    return mpdm_close(mpdm_hget_s(l, L"f"));
+}
+
+/**
+ * io.read - Reads a line from an I/O stream.
+ *
+ * Reads a line from and I/O stream, doing character conversion.
+ * Returns the line, or NULL on EOF.
+ * [Input-Output]
+ * [Character Set Conversion]
+ */
+/** string = io.read(); */
+static mpdm_t F_read(F_ARGS)
+{
+    return mpdm_read(mpdm_hget_s(l, L"f"));
+}
+
+/**
+ * io.write - Writes to an I/O stream.
+ * @arg1: first argument
+ * @arg2: second argument
+ * @argn: nth argument
+ *
+ * Writes the variable list of arguments to the I/O stream, doing
+ * charset conversion in the process.
+ *
+ * Returns the total size written to @fd.
+ * [Input-Output]
+ * [Character Set Conversion]
+ */
+/** integer = io.write(arg1 [,arg2 ... argn]); */
+static mpdm_t F_write(F_ARGS)
+{
+    int n, r = 0;
+    mpdm_t f = mpdm_hget_s(l, L"f");
+
+    for (n = 0; n < mpdm_size(a); n++)
+        r += mpdm_write(f, A(n));
+
+    return MPDM_I(r);
+}
+
+
+/**
+ * io.getchar - Reads a character from an I/O stream.
+ *
+ * Returns a character read, or NULL on EOF. No
+ * charset conversion is done.
+ * [Input-Output]
+ */
+/** string = io.getchar(); */
+static mpdm_t F_getchar(F_ARGS)
+{
+    return mpdm_getchar(mpdm_hget_s(l, L"f"));
+}
+
+/**
+ * io.putchar - Writes a character to an I/O stream.
+ * @s: the string
+ *
+ * Writes the first character in @s to the I/O stram. No charset
+ * conversion is done.
+ *
+ * Returns the number of chars written (0 or 1).
+ * [Input-Output]
+ */
+/** integer = io.putchar(s); */
+static mpdm_t F_putchar(F_ARGS)
+{
+    return MPDM_I(mpdm_putchar(mpdm_hget_s(l, L"f"), A0));
+}
+
+/**
+ * io.seek - Sets the position of an I/O stream.
+ * @offset: the offset
+ * @whence: the position
+ *
+ * Sets the file pointer position to @offset. @whence can
+ * be: 0 for SEEK_SET, 1 for SEEK_CUR and 2 for SEEK_END.
+ *
+ * Returns the value from the fseek() C function call.
+ * [Input-Output]
+ */
+/** integer = io.seek(offset, whence); */
+static mpdm_t F_fseek(F_ARGS)
+{
+    return MPDM_I(mpdm_fseek(mpdm_hget_s(l, L"f"), IA0, IA1));
+}
+
+/**
+ * io.tell - Returns the current file pointer.
+ *
+ * Returns the position of the file pointer.
+ * [Input-Output]
+ */
+/** integer = io.tell(); */
+static mpdm_t F_ftell(F_ARGS)
+{
+    return MPDM_I(mpdm_ftell(mpdm_hget_s(l, L"f")));
+}
+
+
+static mpdm_t io_obj(mpdm_t fd)
+/* returns a file / pipe / socket object */ 
+{
+    mpdm_t o = mpdm_ref(MPDM_H(0));
+
+    mpdm_hset_s(o, L"f",        fd);
+    mpdm_hset_s(o, L"close",    MPDM_X(F_close));
+
+    mpdm_hset_s(o, L"read",     MPDM_X(F_read));
+    mpdm_hset_s(o, L"getchar",  MPDM_X(F_getchar));
+
+    mpdm_hset_s(o, L"write",    MPDM_X(F_write));
+    mpdm_hset_s(o, L"putchar",  MPDM_X(F_putchar));
+
+    mpdm_hset_s(o, L"seek",     MPDM_X(F_fseek));
+    mpdm_hset_s(o, L"tell",     MPDM_X(F_ftell));
+
+    return mpdm_unrefnd(o);
+}
+
+
 /**
  * open - Opens a file.
  * @filename: the file name
  * @mode: an fopen-like mode string
  *
  * Opens a file. If @filename can be open in the specified @mode, a
- * value will be returned containing the file descriptor, or NULL
+ * value will be returned containing an I/O stream object, or NULL
  * otherwise.
  *
  * If the file is open for reading, some charset detection methods are
@@ -498,126 +632,68 @@ static mpdm_t F_hdel(F_ARGS)
  * [Input-Output]
  * [Character Set Conversion]
  */
-/** fd = open(filename, mode); */
+/** io = open(filename, mode); */
 static mpdm_t F_open(F_ARGS)
 {
-    return mpdm_open(A0, A1);
+    mpdm_t f = mpdm_open(A0, A1);
+
+    if (f != NULL)
+        f = io_obj(f);
+
+    return f;
 }
 
-/**
- * close - Closes a file descriptor.
- * @fd: the file descriptor
- *
- * Closes the file descriptor.
- * [Input-Output]
- */
-/** close(fd); */
-static mpdm_t F_close(F_ARGS)
-{
-    return mpdm_close(A0);
-}
+static mpdm_t F_pclose(F_ARGS) { return mpdm_pclose(mpdm_hget_s(l, L"f")); }
 
 /**
- * read - Reads a line from a file descriptor.
- * @fd: the file descriptor
+ * popen - Opens a pipe.
+ * @prg: the program to pipe
+ * @mode: an fopen-like mode string
  *
- * Reads a line from @fd. Returns the line, or NULL on EOF.
+ * Opens a pipe to a program. If @prg can be open in the specified @mode,
+ * returns an I/O stream, or NULL otherwise.
+ *
+ * The @mode can be `r' (for reading), `w' (for writing), or `r+' or `w+'
+ * for a special double pipe reading-writing mode.
  * [Input-Output]
- * [Character Set Conversion]
  */
-/** string = read(fd); */
-static mpdm_t F_read(F_ARGS)
+/** io = popen(prg, mode); */
+static mpdm_t F_popen(F_ARGS)
 {
-    return mpdm_read(A0);
-}
+    mpdm_t f = mpdm_popen(A0, A1);
 
-/**
- * write - Writes values to a file descriptor.
- * @fd: the file descriptor
- * @arg1: first argument
- * @arg2: second argument
- * @argn: nth argument
- *
- * Writes the variable arguments to the file descriptor, doing
- * charset conversion in the process.
- *
- * Returns the total size written to @fd.
- * [Input-Output]
- * [Character Set Conversion]
- */
-/** integer = write(fd, arg1 [,arg2 ... argn]); */
-static mpdm_t F_write(F_ARGS)
-{
-    int n, r = 0;
+    if (f != NULL) {
+        f = mpdm_ref(io_obj(f));
+        mpdm_hset_s(f, L"close", MPDM_X(F_pclose));
+        mpdm_unrefnd(f);
+    }
 
-    for (n = 1; n < mpdm_size(a); n++)
-        r += mpdm_write(A0, A(n));
-
-    return MPDM_I(r);
+    return f;
 }
 
 
 /**
- * getchar - Reads a character from a file descriptor.
- * @fd: the file descriptor
+ * connect - Opens a client TCP/IP socket.
+ * @h: host name or ip
+ * @s: service or port number
  *
- * Returns a character read from @fd, or NULL on EOF. No
- * charset conversion is done.
+ * Opens a client TCP/IP socket to the @h host at @s service (or port).
+ * Returns NULL if the connection cannot be done or an I/O stream,
+ * that can be used with all file operation functions, including close().
+ * [Sockets]
  * [Input-Output]
  */
-/** string = getchar(fd); */
-static mpdm_t F_getchar(F_ARGS)
+/** io = connect(h, s); */
+static mpdm_t F_connect(F_ARGS)
 {
-    return mpdm_getchar(A0);
+    mpdm_t f = mpdm_connect(A0, A1);
+
+    if (f != NULL)
+        f = io_obj(f);
+
+    return f;
 }
 
-/**
- * putchar - Writes a character to a file descriptor.
- * @fd: the file descriptor
- * @s: the string
- *
- * Writes the first character in @s into @fd. No charset
- * conversion is done.
- *
- * Returns the number of chars written (0 or 1).
- * [Input-Output]
- */
-/** s = putchar(fd, s); */
-static mpdm_t F_putchar(F_ARGS)
-{
-    return MPDM_I(mpdm_putchar(A0, A1));
-}
-
-/**
- * fseek - Sets a file pointer.
- * @fd: the file descriptor
- * @offset: the offset
- * @whence: the position
- *
- * Sets the file pointer position of @fd to @offset. @whence can
- * be: 0 for SEEK_SET, 1 for SEEK_CUR and 2 for SEEK_END.
- *
- * Returns the value from the fseek() C function call.
- * [Input-Output]
- */
-/** integer = fseek(fd, offset, whence); */
-static mpdm_t F_fseek(F_ARGS)
-{
-    return MPDM_I(mpdm_fseek(A0, IA1, IA2));
-}
-
-/**
- * ftell - Returns the current file pointer.
- * @fd: the file descriptor
- *
- * Returns the position of the file pointer in @fd.
- * [Input-Output]
- */
-/** integer = ftell(fd); */
-static mpdm_t F_ftell(F_ARGS)
-{
-    return MPDM_I(mpdm_ftell(A0));
-}
 
 /**
  * unlink - Deletes a file.
@@ -729,52 +805,6 @@ static mpdm_t F_glob(F_ARGS)
 static mpdm_t F_encoding(F_ARGS)
 {
     return MPDM_I(mpdm_encoding(A0));
-}
-
-/**
- * popen - Opens a pipe.
- * @prg: the program to pipe
- * @mode: an fopen-like mode string
- *
- * Opens a pipe to a program. If @prg can be open in the specified @mode,
- * return file descriptor, or NULL otherwise.
- *
- * The @mode can be `r' (for reading), `w' (for writing), or `r+' or `w+'
- * for a special double pipe reading-writing mode.
- * [Input-Output]
- */
-/** fd = popen(prg, mode); */
-static mpdm_t F_popen(F_ARGS)
-{
-    return mpdm_popen(A0, A1);
-}
-
-/**
- * popen2 - Opens a pipe and returns an array of two pipes.
- * @prg: the program to pipe
- *
- * Opens a read-write pipe and returns an array of two descriptors,
- * one for reading and one for writing. If @prg could not be piped to,
- * returns NULL.
- * [Input-Output]
- */
-/** array = popen2(prg); */
-static mpdm_t F_popen2(F_ARGS)
-{
-    return mpdm_popen2(A0);
-}
-
-/**
- * pclose - Closes a pipe.
- * @fd: the value containing the file descriptor
- *
- * Closes a pipe.
- * [Input-Output]
- */
-/** pclose(fd); */
-static mpdm_t F_pclose(F_ARGS)
-{
-    return mpdm_pclose(A0);
 }
 
 /**
@@ -1273,24 +1303,6 @@ static mpdm_t F_strftime(F_ARGS)
 
 
 /**
- * connect - Opens a client TCP/IP socket.
- * @h: host name or ip
- * @s: service or port number
- *
- * Opens a client TCP/IP socket to the @h host at @s service (or port).
- * Returns NULL if the connection cannot be done or a file type value,
- * that can be used with all file operation functions, including close().
- * [Sockets]
- * [Input-Output]
- */
-/** f = connect(@h, @s); */
-static mpdm_t F_connect(F_ARGS)
-{
-    return mpdm_connect(A0, A1);
-}
-
-
-/**
  * new - Creates a new object using another as its base.
  * @c1: class / base object
  * @c2: class / base object
@@ -1369,13 +1381,8 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(r, L"hdel",     MPDM_X(F_hdel));
 
     mpdm_hset_s(r, L"open",     MPDM_X(F_open));
-    mpdm_hset_s(r, L"close",    MPDM_X(F_close));
-    mpdm_hset_s(r, L"read",     MPDM_X(F_read));
-    mpdm_hset_s(r, L"write",    MPDM_X(F_write));
-    mpdm_hset_s(r, L"getchar",  MPDM_X(F_getchar));
-    mpdm_hset_s(r, L"putchar",  MPDM_X(F_putchar));
-    mpdm_hset_s(r, L"fseek",    MPDM_X(F_fseek));
-    mpdm_hset_s(r, L"ftell",    MPDM_X(F_ftell));
+    mpdm_hset_s(r, L"popen",    MPDM_X(F_popen));
+    mpdm_hset_s(r, L"connect",  MPDM_X(F_connect));
 
     mpdm_hset_s(r, L"unlink",   MPDM_X(F_unlink));
     mpdm_hset_s(r, L"stat",     MPDM_X(F_stat));
@@ -1390,9 +1397,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(r, L"join",     MPDM_X(F_join));
 
     mpdm_hset_s(r, L"encoding", MPDM_X(F_encoding));
-    mpdm_hset_s(r, L"popen",    MPDM_X(F_popen));
-    mpdm_hset_s(r, L"popen2",   MPDM_X(F_popen2));
-    mpdm_hset_s(r, L"pclose",   MPDM_X(F_pclose));
 
     mpdm_hset_s(r, L"regex",    MPDM_X(F_regex));
     mpdm_hset_s(r, L"sregex",   MPDM_X(F_sregex));
@@ -1417,8 +1421,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
 
     mpdm_hset_s(r, L"mutex",     MPDM_X(F_mutex));
     mpdm_hset_s(r, L"semaphore", MPDM_X(F_semaphore));
-
-    mpdm_hset_s(r, L"connect",     MPDM_X(F_connect));
 
     mpdm_hset_s(r, L"bincall",  MPDM_X(F_bincall));
 
