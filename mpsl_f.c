@@ -487,7 +487,7 @@ static mpdm_t F_hdel(F_ARGS)
  * [Input-Output]
  */
 /** io.close(); */
-static mpdm_t F_close(F_ARGS)
+static mpdm_t M_close(F_ARGS)
 {
     return mpdm_close(mpdm_hget_s(l, L"f"));
 }
@@ -501,7 +501,7 @@ static mpdm_t F_close(F_ARGS)
  * [Character Set Conversion]
  */
 /** string = io.read(); */
-static mpdm_t F_read(F_ARGS)
+static mpdm_t M_read(F_ARGS)
 {
     return mpdm_read(mpdm_hget_s(l, L"f"));
 }
@@ -520,7 +520,7 @@ static mpdm_t F_read(F_ARGS)
  * [Character Set Conversion]
  */
 /** integer = io.write(arg1 [,arg2 ... argn]); */
-static mpdm_t F_write(F_ARGS)
+static mpdm_t M_write(F_ARGS)
 {
     int n, r = 0;
     mpdm_t f = mpdm_hget_s(l, L"f");
@@ -540,7 +540,7 @@ static mpdm_t F_write(F_ARGS)
  * [Input-Output]
  */
 /** string = io.getchar(); */
-static mpdm_t F_getchar(F_ARGS)
+static mpdm_t M_getchar(F_ARGS)
 {
     return mpdm_getchar(mpdm_hget_s(l, L"f"));
 }
@@ -556,7 +556,7 @@ static mpdm_t F_getchar(F_ARGS)
  * [Input-Output]
  */
 /** integer = io.putchar(s); */
-static mpdm_t F_putchar(F_ARGS)
+static mpdm_t M_putchar(F_ARGS)
 {
     return MPDM_I(mpdm_putchar(mpdm_hget_s(l, L"f"), A0));
 }
@@ -573,7 +573,7 @@ static mpdm_t F_putchar(F_ARGS)
  * [Input-Output]
  */
 /** integer = io.seek(offset, whence); */
-static mpdm_t F_fseek(F_ARGS)
+static mpdm_t M_fseek(F_ARGS)
 {
     return MPDM_I(mpdm_fseek(mpdm_hget_s(l, L"f"), IA0, IA1));
 }
@@ -585,7 +585,7 @@ static mpdm_t F_fseek(F_ARGS)
  * [Input-Output]
  */
 /** integer = io.tell(); */
-static mpdm_t F_ftell(F_ARGS)
+static mpdm_t M_ftell(F_ARGS)
 {
     return MPDM_I(mpdm_ftell(mpdm_hget_s(l, L"f")));
 }
@@ -597,16 +597,16 @@ static mpdm_t io_obj(mpdm_t fd)
     mpdm_t o = mpdm_ref(MPDM_H(0));
 
     mpdm_hset_s(o, L"f",        fd);
-    mpdm_hset_s(o, L"close",    MPDM_X(F_close));
+    mpdm_hset_s(o, L"close",    MPDM_X(M_close));
 
-    mpdm_hset_s(o, L"read",     MPDM_X(F_read));
-    mpdm_hset_s(o, L"getchar",  MPDM_X(F_getchar));
+    mpdm_hset_s(o, L"read",     MPDM_X(M_read));
+    mpdm_hset_s(o, L"getchar",  MPDM_X(M_getchar));
 
-    mpdm_hset_s(o, L"write",    MPDM_X(F_write));
-    mpdm_hset_s(o, L"putchar",  MPDM_X(F_putchar));
+    mpdm_hset_s(o, L"write",    MPDM_X(M_write));
+    mpdm_hset_s(o, L"putchar",  MPDM_X(M_putchar));
 
-    mpdm_hset_s(o, L"seek",     MPDM_X(F_fseek));
-    mpdm_hset_s(o, L"tell",     MPDM_X(F_ftell));
+    mpdm_hset_s(o, L"seek",     MPDM_X(M_fseek));
+    mpdm_hset_s(o, L"tell",     MPDM_X(M_ftell));
 
     return mpdm_unrefnd(o);
 }
@@ -643,7 +643,7 @@ static mpdm_t F_open(F_ARGS)
     return f;
 }
 
-static mpdm_t F_pclose(F_ARGS) { return mpdm_pclose(mpdm_hget_s(l, L"f")); }
+static mpdm_t M_pclose(F_ARGS) { return mpdm_pclose(mpdm_hget_s(l, L"f")); }
 
 /**
  * popen - Opens a pipe.
@@ -664,7 +664,7 @@ static mpdm_t F_popen(F_ARGS)
 
     if (f != NULL) {
         f = mpdm_ref(io_obj(f));
-        mpdm_hset_s(f, L"close", MPDM_X(F_pclose));
+        mpdm_hset_s(f, L"close", MPDM_X(M_pclose));
         mpdm_unrefnd(f);
     }
 
@@ -1159,7 +1159,7 @@ static mpdm_t F_sleep(F_ARGS)
  * [Threading]
  */
 /** mutex.lock(); */
-static mpdm_t F_mutex_lock(F_ARGS)
+static mpdm_t M_mutex_lock(F_ARGS)
 {
     mpdm_mutex_lock(mpdm_hget_s(l, L"v"));
     return l;
@@ -1173,7 +1173,7 @@ static mpdm_t F_mutex_lock(F_ARGS)
  * [Threading]
  */
 /** mutex.unlock(); */
-static mpdm_t F_mutex_unlock(F_ARGS)
+static mpdm_t M_mutex_unlock(F_ARGS)
 {
     mpdm_mutex_unlock(mpdm_hget_s(l, L"v"));
     return l;
@@ -1192,8 +1192,8 @@ static mpdm_t F_mutex(F_ARGS)
     mpdm_t o = mpdm_ref(MPDM_H(0));
 
     mpdm_hset_s(o, L"v",        mpdm_new_mutex());
-    mpdm_hset_s(o, L"lock",     MPDM_X(F_mutex_lock));
-    mpdm_hset_s(o, L"unlock",   MPDM_X(F_mutex_unlock));
+    mpdm_hset_s(o, L"lock",     MPDM_X(M_mutex_lock));
+    mpdm_hset_s(o, L"unlock",   MPDM_X(M_mutex_unlock));
 
     return mpdm_unrefnd(o);
 }
@@ -1207,7 +1207,7 @@ static mpdm_t F_mutex(F_ARGS)
  * [Threading]
  */
 /** semaphore.wait(); */
-static mpdm_t F_semaphore_wait(F_ARGS)
+static mpdm_t M_semaphore_wait(F_ARGS)
 {
     mpdm_semaphore_wait(mpdm_hget_s(l, L"v"));
     return NULL;
@@ -1221,7 +1221,7 @@ static mpdm_t F_semaphore_wait(F_ARGS)
  * [Threading]
  */
 /** semaphore.post(); */
-static mpdm_t F_semaphore_post(F_ARGS)
+static mpdm_t M_semaphore_post(F_ARGS)
 {
     mpdm_semaphore_post(mpdm_hget_s(l, L"v"));
     return NULL;
@@ -1242,8 +1242,8 @@ static mpdm_t F_semaphore(F_ARGS)
     mpdm_t o = mpdm_ref(MPDM_H(0));
 
     mpdm_hset_s(o, L"v",    mpdm_new_semaphore(IA0));
-    mpdm_hset_s(o, L"post", MPDM_X(F_semaphore_post));
-    mpdm_hset_s(o, L"wait", MPDM_X(F_semaphore_wait));
+    mpdm_hset_s(o, L"post", MPDM_X(M_semaphore_post));
+    mpdm_hset_s(o, L"wait", MPDM_X(M_semaphore_wait));
 
     return mpdm_unrefnd(o);
 }
