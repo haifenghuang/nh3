@@ -1,7 +1,7 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language
-    Copyright (C) 2003/2009 Angel Ortega <angel@triptico.com>
+    MPSL - Minimum Profit Scripting Language 3.x
+    Copyright (C) 2003/2011 Angel Ortega <angel@triptico.com>
 
     mpsl_d.c - Minimum Profit Scripting Language debugging functions
 
@@ -19,7 +19,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-    http://www.triptico.com
+    http://triptico.com
 
 */
 
@@ -30,7 +30,6 @@
 #include <wchar.h>
 #include <malloc.h>
 
-#include "mpdm.h"
 #include "mpsl.h"
 
 /** code **/
@@ -124,7 +123,7 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t * ptr, int *size)
                 ptr = mpdm_pokews(ptr, size, L",\n");
 
             ptr = mpsl_dump_1(k, l + 1, ptr, size);
-            ptr = mpdm_pokews(ptr, size, L" => ");
+            ptr = mpdm_pokews(ptr, size, L": ");
             ptr = mpsl_dump_1(w, -(l + 1), ptr, size);
         }
 

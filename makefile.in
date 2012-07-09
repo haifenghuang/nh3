@@ -11,7 +11,7 @@ GRUTATXT_DOCS=doc/mpsl_index.html doc/mpsl_overview.html doc/mpsl_internals.html
 MP_DOCCER_DOCS=doc/mpsl_api.txt doc/mpsl_reference.txt
 G_AND_MP_DOCS=doc/mpsl_api.html doc/mpsl_reference.html
 
-OBJS=mpsl_c.o mpsl_f.o mpsl_m.o
+OBJS=mpsl_c.o mpsl_f.o mpsl_m.o mpsl_d.o
 
 DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
 
