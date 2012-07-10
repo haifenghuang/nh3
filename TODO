@@ -4,31 +4,17 @@ Minimum Profit Scripting Language (mpsl) TODO / Bug List
 Release Critical Bugs
 ---------------------
 
- * 1136: Document the `METHOD' opcode.
- * 1137: Document the `GLOBAL' opcode.
  * 1138: Add a clean solution that getpid() for randomizing.
 
 Open Bugs
 ---------
-
- * 1108: Document the 'executable component in compact symbols'
-   feature.
- * 1112: Document the difference regarding local variable access in
-   named and anonymous subroutines.
- * 1132: Fix for() to allow an instruction (and not just an expression)
-   in the 'init' part.
 
 Pending Enhancements
 --------------------
 
  * 1024: Implement the `continue' directive.
  * 1083: Implement a split() that uses regular expressions.
- * 1095: Accept "local var" everywhere a symbol name is accepted.
- * 1109: There must be possible to have executable components with
-   arguments in compact symbols (as in 'h.code(a1,a2).other').
  * 1115: Add C++ style comments.
- * 1135: Rewrite hashes as an in-memory version of the Borodin Indexes
-   (randomly balanced binary trees).
 
 Closed
 ------
@@ -220,5 +206,20 @@ Closed
  * 1134: Document the JavaScript style of defining hashes
    (Mon, 17 Oct 2011 20:13:21 +0200).
  * 1119: Fix bincall() in 64 bit systems (Fri, 25 May 2012 12:10:57 +0200).
+ * 1136: Document the `METHOD' opcode (Tue, 10 Jul 2012 12:15:06 +0200).
+ * 1137: Document the `GLOBAL' opcode (Tue, 10 Jul 2012 12:15:06 +0200).
+ * 1108: Document the 'executable component in compact symbols'
+   feature (Tue, 10 Jul 2012 12:15:06 +0200).
+ * 1112: Document the difference regarding local variable access in
+   named and anonymous subroutines (Tue, 10 Jul 2012 12:15:06 +0200).
+ * 1132: Fix for() to allow an instruction (and not just an expression)
+   in the 'init' part (Tue, 10 Jul 2012 12:15:06 +0200).
+ * 1095: Accept "local var" everywhere a symbol name is accepted
+    (Tue, 10 Jul 2012 12:15:06 +0200).
+ * 1109: There must be possible to have executable components with
+   arguments in compact symbols (as in 'h.code(a1,a2).other')
+   (Tue, 10 Jul 2012 12:15:06 +0200).
+ * 1135: Rewrite hashes as an in-memory version of the Borodin Indexes
+   (randomly balanced binary trees) (Tue, 10 Jul 2012 12:15:06 +0200).
 
 Email bugs to angel@triptico.com
