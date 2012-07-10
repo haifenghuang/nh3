@@ -1,13 +1,23 @@
-Minimum Profit Scripting Language (mpsl) TODO / Bug List
+Minimum Profit Scripting Language (MPSL) TODO / Bug List
 ========================================================
 
 Release Critical Bugs
 ---------------------
 
- * 1138: Add a clean solution that getpid() for randomizing.
+ * 3000: Add \x{hhhh} to strings.
+ * 3001: Design iterators.
+ * 3002: Decide what to do about the local/global issue
+   of subroutine definitions.
+ * 3003: Implement string concat (~).
+ * 3004: Implement `eq'.
+ * 3005: Implement `ne'.
+ * 3006: Implement N_SINC.
+ * 3007: Implement N_SDEC.
 
 Open Bugs
 ---------
+
+ * 1138: Add a clean solution that getpid() for randomizing.
 
 Pending Enhancements
 --------------------
