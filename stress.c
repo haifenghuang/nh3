@@ -236,7 +236,9 @@ int main(int argc, char *argv[])
     do_test("T = 'a' ~ 'b';", MPDM_LS(L"ab"));
     do_test("T = [1, 2, 3] ~ ':';", MPDM_LS(L"1:2:3"));
     do_test("T = ([1, 2, 3] ~ [4, 5, 6]) ~ ':';", MPDM_LS(L"1:2:3:4:5:6"));
+    do_test("T = [1, 2, 3] ~ [4, 5, 6] ~ ':';", MPDM_LS(L"1:2:3:4:5:6"));
     do_test("T = ({a: 1, b: 2} ~ '=') ~ ',';", MPDM_LS(L"a=1,b=2"));
+    do_test("T = {a: 1, b: 2} ~ '=' ~ ',';", MPDM_LS(L"a=1,b=2"));
 
     test_summary();
 

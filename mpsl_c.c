@@ -528,7 +528,7 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
         if (t == T_SYMBOL && !is_assign(c))
             v = node1(N_SYMVAL, v);
 
-        while (!c->error && (op = node_by_token(c)) > 0 && op <= p_op) {
+        while (!c->error && (op = node_by_token(c)) > 0 && op < p_op) {
             if (c->token == T_LBRACK) {
                 /* subindexes */
                 token(c);
