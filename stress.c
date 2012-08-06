@@ -240,6 +240,8 @@ int main(int argc, char *argv[])
     do_test("T = ({a: 1, b: 2} ~ '=') ~ ',';", MPDM_LS(L"a=1,b=2"));
     do_test("T = {a: 1, b: 2} ~ '=' ~ ',';", MPDM_LS(L"a=1,b=2"));
 
+    do_test("T = 0; foreach 10 ++T;", MPDM_I(10));
+
     test_summary();
 
     return 0;
