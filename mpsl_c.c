@@ -863,9 +863,6 @@ static int gen(struct mpsl_c *c, mpdm_t node)
 
     case N_FOREACH:
         O(1); o(c, OP_NUL); n = here(c); i = o2(c, OP_ITE, NULL);
-        o(c, OP_HSH);
-        o(c, OP_SWP); o2(c, OP_LIT, MPDM_LS(L"value")); o(c, OP_SWP); o(c, OP_STI);
-        o(c, OP_SWP); o2(c, OP_LIT, MPDM_LS(L"key")); o(c, OP_SWP); o(c, OP_STI);
         o(c, OP_TPU); O(2); o(c, OP_TPO);
         o2(c, OP_JMP, MPDM_I(n)); fix(c, i); break;
 
@@ -1027,7 +1024,7 @@ static void ARG(struct mpsl_vm *m)
 static int exec_vm(struct mpsl_vm *m, int msecs)
 {
     clock_t max;
-    mpdm_t v, w;
+    mpdm_t v, w, h;
     double r1, r2;
     int i1, i2;
 
@@ -1102,8 +1099,9 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
             if (mpdm_iterator(TOS(m), &i2, &v, &w)) {
                 m->pc++;
                 PUSH(m, MPDM_I(i2));
-                PUSH(m, v);
-                PUSH(m, w);
+                h = PUSH(m, MPDM_H(0));
+                mpdm_hset_s(h, L"key", v);
+                mpdm_hset_s(h, L"value", w);
             }
             else {
                 POP(m);
