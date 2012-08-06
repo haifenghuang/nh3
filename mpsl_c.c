@@ -766,7 +766,7 @@ typedef enum {
     OP_AND, OP_OR,  OP_XOR, OP_SHL, OP_SHR,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_NOT, OP_EQ,  OP_NE,  OP_GT,  OP_GE,  OP_LT, OP_LE,
-    OP_REM, OP_JIN
+    OP_REM, OP_JIN, OP_ITE
 } mpsl_op_t;
 
 
@@ -1081,6 +1081,18 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
                 m->pc = mpdm_ival(v);
             }
             break;
+        case OP_ITE:
+            i2 = IPOP(m);
+            if (mpdm_iterator(TOS(m), &i2, &v, &w)) {
+                m->pc++;
+                PUSH(m, MPDM_I(i2));
+                PUSH(m, v);
+                PUSH(m, w);
+            }
+            else {
+                POP(m);
+                m->pc = mpdm_ival(PC(m));
+            }
         }
 
         m->ins++;
@@ -1152,7 +1164,7 @@ void mpsl_disasm(mpdm_t prg)
         "AND", "OR", "XOR", "SHL", "SHR",
         "ADD", "SUB", "MUL", "DIV", "MOD",
         "NOT", "EQ", "NE", "GT", "GE", "LT", "LE",
-        "REM", "JIN"
+        "REM", "JIN", "ITE"
     };
 
     mpdm_ref(prg);
@@ -1165,7 +1177,7 @@ void mpsl_disasm(mpdm_t prg)
 
         if (i == OP_LIT || i == OP_REM)
             printf(" \"%ls\"", mpdm_string(mpdm_aget(prg, ++n)));
-        if (i == OP_JMP || i == OP_JT || i == OP_JF)
+        if (i == OP_JMP || i == OP_JT || i == OP_JF || i == OP_ITE)
             printf(" %d", mpdm_ival(mpdm_aget(prg, ++n)));
 
         printf("\n");
