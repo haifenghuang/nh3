@@ -37,7 +37,7 @@
 
 typedef enum {
     T_EOP,    T_ERROR,
-    T_IF,     T_ELSE,    T_WHILE,   T_BREAK,
+    T_IF,     T_ELSE,    T_WHILE,   T_BREAK,   T_FOREACH,
     T_LOCAL,  T_GLOBAL,  T_SUB,     T_RETURN,  T_NULL,    T_THIS,
     T_LBRACE, T_RBRACE,  T_LPAREN,  T_RPAREN,  T_LBRACK,  T_RBRACK,
     T_COLON,  T_SEMI,    T_DOT,     T_COMMA,
@@ -245,6 +245,7 @@ again:
             STOKEN(L"return",   T_RETURN);
             STOKEN(L"NULL",     T_NULL);
             STOKEN(L"this",     T_THIS);
+            STOKEN(L"foreach",  T_FOREACH);
 
             if (t == T_ERROR) t = T_SYMBOL;
         }
@@ -272,7 +273,7 @@ typedef enum {
     N_AND,    N_OR,
     N_BINAND, N_BINOR,  N_XOR,  N_SHL,  N_SHR,
     N_JOIN,
-    N_IF,     N_WHILE,
+    N_IF,     N_WHILE,  N_FOREACH,
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
     N_IADD,   N_ISUB,   N_IMUL, N_IDIV, N_IMOD,
@@ -615,6 +616,12 @@ static mpdm_t statement(struct mpsl_c *c)
             v = node2(N_WHILE, w, statement(c));
     }
     else
+    if (c->token == T_FOREACH) {
+        token(c);
+        if ((w = expr(c)) != NULL)
+            v = node2(N_FOREACH, w, statement(c));
+    }
+    else
     if (c->token == T_LOCAL || c->token == T_GLOBAL) {
         mpdm_t w1, w2;
         mpsl_node_t op = node_by_token(c);
@@ -851,7 +858,16 @@ static int gen(struct mpsl_c *c, mpdm_t node)
         break;
 
     case N_WHILE:
-        n = here(c); O(1); i = o2(c, OP_JF, NULL); O(2); o2(c, OP_JMP, MPDM_I(n)); fix(c, i); break;
+        n = here(c); O(1); i = o2(c, OP_JF, NULL);
+        O(2); o2(c, OP_JMP, MPDM_I(n)); fix(c, i); break;
+
+    case N_FOREACH:
+        O(1); o(c, OP_NUL); n = here(c); i = o2(c, OP_ITE, NULL);
+        o(c, OP_HSH);
+        o(c, OP_SWP); o2(c, OP_LIT, MPDM_LS(L"value")); o(c, OP_SWP); o(c, OP_STI);
+        o(c, OP_SWP); o2(c, OP_LIT, MPDM_LS(L"key")); o(c, OP_SWP); o(c, OP_STI);
+        o(c, OP_TPU); O(2); o(c, OP_TPO);
+        o2(c, OP_JMP, MPDM_I(n)); fix(c, i); break;
 
     case N_OR:
         O(1); o(c, OP_DUP); n = o2(c, OP_JT, NULL);
