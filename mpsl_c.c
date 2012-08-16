@@ -773,7 +773,7 @@ typedef enum {
     OP_AND, OP_OR,  OP_XOR, OP_SHL, OP_SHR,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_NOT, OP_EQ,  OP_NE,  OP_GT,  OP_GE,  OP_LT, OP_LE,
-    OP_REM, OP_JIN, OP_ITE
+    OP_REM, OP_CAT, OP_ITE
 } mpsl_op_t;
 
 
@@ -826,7 +826,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_XOR:     O(1); O(2); o(c, OP_XOR); break;
     case N_SHL:     O(1); O(2); o(c, OP_SHL); break;
     case N_SHR:     O(1); O(2); o(c, OP_SHR); break;
-    case N_JOIN:    O(1); O(2); o(c, OP_JIN); break;
+    case N_JOIN:    O(1); O(2); o(c, OP_CAT); break;
 
     case N_ARRAY:
         o(c, OP_ARR);
@@ -1083,7 +1083,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_XOR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 ^  i2)); break;
         case OP_SHL: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 << i2)); break;
         case OP_SHR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 >> i2)); break;
-        case OP_JIN: w = POP(m); v = POP(m); PUSH(m, mpdm_join(v, w)); break;
+        case OP_CAT: w = POP(m); v = POP(m); PUSH(m, mpdm_join(v, w)); break;
         case OP_REM: m->pc++; break;
         case OP_CAL:
             v = POP(m);
@@ -1178,7 +1178,7 @@ void mpsl_disasm(mpdm_t prg)
         "AND", "OR", "XOR", "SHL", "SHR",
         "ADD", "SUB", "MUL", "DIV", "MOD",
         "NOT", "EQ", "NE", "GT", "GE", "LT", "LE",
-        "REM", "JIN", "ITE"
+        "REM", "CAT", "ITE"
     };
 
     mpdm_ref(prg);
