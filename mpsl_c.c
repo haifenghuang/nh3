@@ -984,12 +984,38 @@ static mpdm_t TBL(struct mpsl_vm *m)
 
     /* local symtable */
     for (n = m->tt - 1; n >= 0; n--) {
-        if ((l = mpdm_aget(m->symtbl, n)) || (l = mpdm_aget(m->symtbl, (n = 0))))
+        /* try down the list and short-circuit on NULL values,
+           jumping down to 0 (global symtable) */
+        if (
+                (l = mpdm_aget(m->symtbl, n)) ||
+                (l = mpdm_aget(m->symtbl, (n = 0)))
+            ) {
             if (mpdm_exists(l, s))
                 break;
+        }
     }
 
-    if (n < 0)
+    if (n < 0) {
+        mpdm_t v;
+        l = NULL;
+
+        /* still not found? try on the type-specific tables */
+        if (MPDM_IS_HASH(l))
+            v = mpdm_hget_s(mpdm_root(), L"HASH");
+        else
+        if (MPDM_IS_ARRAY(l))
+            v = mpdm_hget_s(mpdm_root(), L"ARRAY");
+        else
+            v = mpdm_hget_s(mpdm_root(), L"SCALAR");
+
+        if (v == NULL)
+            v = mpdm_hget_s(mpdm_root(), L"ALL");
+
+        if (mpdm_exists(v, s))
+            l = v;
+    }
+
+    if (l == NULL)
         vm_error(m, MPDM_LS(L"undefined symbol "), s);
     else {
         PUSH(m, l);

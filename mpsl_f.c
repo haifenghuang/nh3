@@ -1360,6 +1360,18 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(r, L"HOMEDIR",  mpdm_home_dir());
     mpdm_hset_s(r, L"APPDIR",   mpdm_app_dir());
 
+    /* hash methods */
+    mpdm_hset_s(r, L"HASH",     MPDM_H(0));
+
+    /* array methods */
+    mpdm_hset_s(r, L"ARRAY",    MPDM_H(0));
+
+    /* scalar methods */
+    mpdm_hset_s(r, L"SCALAR",   MPDM_H(0));
+
+    /* "any type" methods */
+    mpdm_hset_s(r, L"ANY",      MPDM_H(0));
+
     /* library functions */
     mpdm_hset_s(r, L"size",     MPDM_X(F_size));
     mpdm_hset_s(r, L"clone",    MPDM_X(F_clone));
@@ -1438,6 +1450,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     for (n = 0; n < argc; n++)
         mpdm_push(v, MPDM_MBS(argv[n]));
 
+    /* special dump plugin */
     mpdm_dump_1 = mpsl_dump_1;
 
     mpdm_unref(r);
