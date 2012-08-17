@@ -56,6 +56,8 @@
 
 /** library **/
 
+/** ANY type **/
+
 /**
  * v.size - Returns the size of a value.
  * @v: the value
@@ -74,7 +76,7 @@ static mpdm_t F_size(F_ARGS)
 }
 
 /**
- * clone - Creates a clone of a value.
+ * v.clone - Creates a clone of a value.
  * @v: the value
  *
  * Creates a clone of a value. If the value is multiple, a new value will
@@ -142,58 +144,61 @@ static mpdm_t F_cmp(F_ARGS)
 }
 
 /**
- * is_array - Tests if a value is an array.
+ * v.is_array - Tests if a value is an array.
  * @v: the value
  *
  * Returns non-zero if @v is an array.
  * [Value Management]
  * [Arrays]
  */
-/** bool = is_array(v); */
+/** bool = v.is_array(); */
 static mpdm_t F_is_array(F_ARGS)
 {
-    return mpsl_boolean(MPDM_IS_ARRAY(A0));
+    return mpsl_boolean(MPDM_IS_ARRAY(l));
 }
 
 /**
- * is_hash - Tests if a value is a hash.
+ * v.is_hash - Tests if a value is a hash.
  * @v: the value
  *
  * Returns non-zero if @v is a hash.
  * [Value Management]
  * [Hashes]
  */
-/** bool = is_hash(v); */
+/** bool = v.is_hash(); */
 static mpdm_t F_is_hash(F_ARGS)
 {
-    return mpsl_boolean(MPDM_IS_HASH(A0));
+    return mpsl_boolean(MPDM_IS_HASH(l));
 }
 
 /**
- * is_exec - Tests if a value is executable.
+ * v.is_exec - Tests if a value is executable.
  * @v: the value
  *
  * Returns non-zero if @v is a executable.
  * [Value Management]
  */
-/** bool = is_exec(v); */
+/** bool = v.is_exec(); */
 static mpdm_t F_is_exec(F_ARGS)
 {
-    return mpsl_boolean(MPDM_IS_EXEC(A0));
+    return mpsl_boolean(MPDM_IS_EXEC(l));
 }
 
+
+/** SCALAR type **/
+
 /**
- * splice - Creates a new string value from another.
- * @v: the original value
+ * str.splice - Creates a new string value from another.
+ * @str: the original value
  * @i: the value to be inserted
  * @offset: offset where the substring is to be inserted
  * @del: number of characters to delete
  *
- * Creates a new string value from @v, deleting @del chars at @offset
+ * Creates a new string value from @str, deleting @del chars at @offset
  * and substituting them by @i. If @del is 0, no deletion is done.
  * both @offset and @del can be negative; if this is the case, it's
- * assumed as counting from the end of @v. If @v is NULL, @i will become
- * the new string, and both @offset and @del will be ignored. If @v is
+ * assumed as counting from the end of @str. If @str is NULL, @i will become
+ * the new string, and both @offset and @del will be ignored. If @str is
  * not NULL and @i is, no insertion process is done (only deletion, if
  * applicable).
  *
@@ -202,15 +207,230 @@ static mpdm_t F_is_exec(F_ARGS)
  * if @del is 0).
  * [Strings]
  */
-/** array = splice(v, i, offset, del); */
+/** array = str.splice(i, offset, del); */
 static mpdm_t F_splice(F_ARGS)
 {
-    return mpdm_splice(A0, A1, IA2, IA3);
+    return mpdm_splice(l, A0, IA1, IA2);
+}
+
+
+/**
+ * str.split - Separates a string into an array of pieces.
+ * @str: the value to be separated
+ * @s: the separator
+ *
+ * Separates the @str string value into an array of pieces, using @s
+ * as a separator.
+ *
+ * If the separator is NULL, the string is splitted by characters.
+ *
+ * If the string does not contain the separator, an array holding 
+ * the complete string as its unique argument is returned.
+ * [Arrays]
+ * [Strings]
+ */
+/** array = str.split(s); */
+static mpdm_t F_split(F_ARGS)
+{
+    return mpdm_split(l, A0);
+}
+
+
+/**
+ * str.regex - Matches a regular expression.
+ * @str: the value to be matched
+ * @r: the regular expression
+ * @ra: an array of regular expressions
+ * @offset: offset from the start of the value
+ *
+ * Matches a regular expression against a value. Valid flags are `i',
+ * for case-insensitive matching, `m', to treat the string as a
+ * multiline string (i.e., one containing newline characters), so
+ * that ^ and $ match the boundaries of each line instead of the
+ * whole string, `l', to return the last matching instead of the
+ * first one, or `g', to match globally; in that last case, an array
+ * containing all matches is returned instead of a string scalar.
+ *
+ * If @r is a string, an ordinary regular expression matching is tried
+ * over the @v string. If the matching is possible, the match result
+ * is returned, or NULL otherwise.
+ *
+ * If @r is an array (of strings), each element is tried sequentially
+ * as an individual regular expression over the @v string, each one using
+ * the offset returned by the previous match. All regular expressions
+ * must match to be successful. If this is the case, an array (with
+ * the same number of arguments) is returned containing the matched
+ * strings, or NULL otherwise.
+ *
+ * If @r is NULL, the result of the previous regex matching
+ * is returned as a two element array. The first element will contain
+ * the character offset of the matching and the second the number of
+ * characters matched. If the previous regex was unsuccessful, NULL
+ * is returned.
+ * [Regular Expressions]
+ */
+/** string = str.regex(r); */
+/** string = str.regex(r, offset); */
+/** array = str.regex(ra); */
+/** array = str.regex(); */
+static mpdm_t F_regex(F_ARGS)
+{
+    return mpdm_regex(l, A0, IA1);
 }
 
 /**
- * expand - Expands an array.
- * @a: the array
+ * str.sregex - Matches and substitutes a regular expression.
+ * @str: the value to be matched
+ * @r: the regular expression
+ * @s: the substitution string, hash or code
+ * @offset: offset from the start of v
+ *
+ * Matches a regular expression against a value, and substitutes the
+ * found substring with @s. Valid flags are `i', for case-insensitive
+ * matching, and `g', for global replacements (all ocurrences in @v
+ * will be replaced, instead of just the first found one).
+ *
+ * If @s is executable, it's executed with the matched part as
+ * the only argument and its return value is used as the
+ * substitution string.
+ *
+ * If @s is a hash, the matched string is used as a key to it and
+ * its value used as the substitution. If this value itself is
+ * executable, it's executed with the matched string as its only
+ * argument and its return value used as the substitution.
+ *
+ * If @r is NULL, returns the number of substitutions made in the
+ * previous call to sregex() (can be zero if none was done).
+ *
+ * Returns the modified string, or the original one if no substitutions
+ * were done.
+ * [Regular Expressions]
+ */
+/** string = str.sregex(r, s); */
+/** string = str.sregex(r, s, offset); */
+/** integer = str.sregex(); */
+static mpdm_t F_sregex(F_ARGS)
+{
+    return mpdm_sregex(l, A0, A1, IA2);
+}
+
+
+/**
+ * str.uc - Converts a string to uppercase.
+ * @str: the string to be converted
+ *
+ * Returns @str converted to uppercase.
+ * [Strings]
+ */
+/** string = str.uc(); */
+static mpdm_t F_uc(F_ARGS)
+{
+    return mpdm_ulc(l, 1);
+}
+
+/**
+ * str.lc - Converts a string to lowercase.
+ * @str: the string to be converted
+ *
+ * Returns @str converted to lowercase.
+ * [Strings]
+ */
+/** string = str.uc(); */
+static mpdm_t F_lc(F_ARGS)
+{
+    return mpdm_ulc(l, 0);
+}
+
+
+/**
+ * str.sscanf - Extracts data like sscanf().
+ * @str: the string to be parsed
+ * @fmt: the string format
+ * @offset: the character offset to start scanning
+ *
+ * Extracts data from a string using a special format pattern, very
+ * much like the scanf() series of functions in the C library. Apart
+ * from the standard percent-sign-commands (s, u, d, i, f, x,
+ * n, [, with optional size and * to ignore), it implements S,
+ * to match a string of characters upto what follows in the format
+ * string. Also, the [ set of characters can include other % formats.
+ *
+ * Returns an array with the extracted values. If %n is used, the
+ * position in the scanned string is returned as the value.
+ * [Strings]
+ */
+/** array = str.sscanf(fmt); */
+/** array = str.sscanf(fmt, offset); */
+static mpdm_t F_sscanf(F_ARGS)
+{
+    return mpdm_sscanf(l, A0, IA1);
+}
+
+/**
+ * int.chr - Returns the Unicode character represented by the codepoint.
+ * @int: the codepoint as an integer value
+ *
+ * Returns a 1 character string containing the character which
+ * Unicode codepoint is @int.
+ * [Strings]
+ */
+/** string = int.chr(); */
+static mpdm_t F_chr(F_ARGS)
+{
+    wchar_t tmp[2];
+
+    tmp[0] = (wchar_t) mpdm_ival(l);
+    tmp[1] = L'\0';
+
+    return MPDM_S(tmp);
+}
+
+
+/**
+ * str.ord - Returns the Unicode codepoint of a character.
+ * @str: the string
+ *
+ * Returns the Unicode codepoint for the first character in
+ * the string.
+ * [Strings]
+ */
+/** integer = str.ord(); */
+static mpdm_t F_ord(F_ARGS)
+{
+    int ret = 0;
+    mpdm_t v = l;
+
+    if (v != NULL) {
+        wchar_t *ptr = mpdm_string(v);
+        ret = (int) *ptr;
+    }
+
+    return MPDM_I(ret);
+}
+
+
+/**
+ * str.tr - Transliterates a string.
+ * @str: the string
+ * @from: set of characters to be replaced
+ * @to: set of characters to replace
+ *
+ * Transliterates @str to a new string with all characters from @from
+ * replaced by those in @to.
+ * [Threading]
+ */
+/** string = str.tr(from, to); */
+static mpdm_t F_tr(F_ARGS)
+{
+    return mpdm_tr(l, A0, A1);
+}
+
+
+/** ARRAY type **/
+
+/**
+ * array.expand - Expands an array.
+ * @array: the array
  * @offset: insertion offset
  * @num: number of elements to insert
  *
@@ -218,15 +438,15 @@ static mpdm_t F_splice(F_ARGS)
  * to NULL) at the specified @offset.
  * [Arrays]
  */
-/** expand(a, offset, num); */
+/** array.expand(offset, num); */
 static mpdm_t F_expand(F_ARGS)
 {
-    return mpdm_expand(A0, IA1, IA2);
+    return mpdm_expand(l, IA0, IA1);
 }
 
 /**
- * collapse - Collapses an array.
- * @a: the array
+ * array.collapse - Collapses an array.
+ * @array: the array
  * @offset: deletion offset
  * @num: number of elements to collapse
  *
@@ -234,35 +454,35 @@ static mpdm_t F_expand(F_ARGS)
  * the specified @offset.
  * [Arrays]
  */
-/** collapse(a, offset, num); */
+/** array.collapse(offset, num); */
 static mpdm_t F_collapse(F_ARGS)
 {
-    return mpdm_collapse(A0, IA1, IA2);
+    return mpdm_collapse(l, IA0, IA1);
 }
 
 /**
- * ins - Insert an element in an array.
- * @a: the array
+ * array.ins - Insert an element in an array.
+ * @array: the array
  * @e: the element to be inserted
  * @offset: subscript where the element is going to be inserted
  *
- * Inserts the @e value in the @a array at @offset.
+ * Inserts the @e value in the array at @offset.
  * Further elements are pushed up, so the array increases its size
  * by one. Returns the inserted element.
  * [Arrays]
  */
-/** e = ins(a, e, offset); */
+/** e = array.ins(e, offset); */
 static mpdm_t F_ins(F_ARGS)
 {
-    return mpdm_ins(A0, A1, IA2);
+    return mpdm_ins(l, A0, IA1);
 }
 
 /**
- * adel - Deletes an element of an array.
- * @a: the array
+ * array.delete - Deletes an element of an array.
+ * @array: the array
  * @offset: subscript of the element to be deleted
  *
- * Deletes the element at @offset of the @a array. The array
+ * Deletes the element at @offset of the array. The array
  * is shrinked by one. If @offset is negative, is counted from
  * the end of the array (so a value of -1 means delete the
  * last element of the array).
@@ -270,15 +490,15 @@ static mpdm_t F_ins(F_ARGS)
  * Returns NULL (previous versions returned the deleted element).
  * [Arrays]
  */
-/** v = adel(a, offset); */
+/** array.delete(offset); */
 static mpdm_t F_adel(F_ARGS)
 {
-    return mpdm_adel(A0, IA1);
+    return mpdm_adel(l, IA0);
 }
 
 /**
- * shift - Extracts the first element of an array.
- * @a: the array
+ * array.shift - Extracts the first element of an array.
+ * @array: the array
  *
  * Extracts the first element of the array. The array
  * is shrinked by one.
@@ -286,15 +506,15 @@ static mpdm_t F_adel(F_ARGS)
  * Returns the deleted element.
  * [Arrays]
  */
-/** v = shift(a); */
+/** v = array.shift(); */
 static mpdm_t F_shift(F_ARGS)
 {
-    return mpdm_shift(A0);
+    return mpdm_shift(l);
 }
 
 /**
- * push - Pushes a value into an array.
- * @a: the array
+ * array.push - Pushes a value into an array.
+ * @array: the array
  * @arg1: first value
  * @arg2: second value
  * @argn: nth value
@@ -303,15 +523,15 @@ static mpdm_t F_shift(F_ARGS)
  * Returns the last element pushed.
  * [Arrays]
  */
-/** argn = push(a, arg1 [, arg2, ... argn]); */
+/** argn = array.push(arg1 [, arg2, ... argn]); */
 static mpdm_t F_push(F_ARGS)
 {
     int n;
     mpdm_t r = NULL;
 
-    for (n = 1; n < mpdm_size(a); n++) {
+    for (n = 0; n < mpdm_size(a); n++) {
         mpdm_unref(r);
-        r = mpdm_push(A0, A(n));
+        r = mpdm_push(l, A(n));
         mpdm_ref(r);
     }
 
@@ -319,26 +539,26 @@ static mpdm_t F_push(F_ARGS)
 }
 
 /**
- * pop - Pops a value from an array.
- * @a: the array
+ * array.pop - Pops a value from an array.
+ * @array: the array
  *
  * Pops a value from the array (i.e. deletes from the end
  * and returns it).
  * [Arrays]
  */
-/** v = pop(a); */
+/** v = array.pop(); */
 static mpdm_t F_pop(F_ARGS)
 {
-    return mpdm_pop(A0);
+    return mpdm_pop(l);
 }
 
 /**
- * queue - Implements a queue in an array.
- * @a: the array
+ * array.queue - Implements a queue in an array.
+ * @array: the array
  * @e: the element to be pushed
  * @size: maximum size of array
  *
- * Pushes the @e element into the @a array. If the array already has
+ * Pushes the @e element into the array. If the array already has
  * @size elements, the first (oldest) element is deleted from the
  * queue and returned.
  *
@@ -346,32 +566,33 @@ static mpdm_t F_pop(F_ARGS)
  * @size elements yet.
  * [Arrays]
  */
-/** v = queue(a, e, size); */
+/** v = array.queue(e, size); */
 static mpdm_t F_queue(F_ARGS)
 {
-    return mpdm_queue(A0, A1, IA2);
+    return mpdm_queue(l, A0, IA1);
 }
 
+
 /**
- * seek - Seeks a value in an array (sequential).
- * @a: the array
+ * array.seek - Seeks a value in an array (sequential).
+ * @array: the array
  * @k: the key
  * @step: number of elements to step
  *
- * Seeks sequentially the value @k in the @a array in
+ * Seeks sequentially the value @k in the array in
  * increments of @step. A complete search should use a step of 1.
  * Returns the offset of the element if found, or -1 otherwise.
  * [Arrays]
  */
-/** integer = seek(a, k, step); */
+/** integer = array.seek(k, step); */
 static mpdm_t F_seek(F_ARGS)
 {
-    return MPDM_I(mpdm_seek(A0, A1, IA2));
+    return MPDM_I(mpdm_seek(l, A0, IA1));
 }
 
 /**
- * sort - Sorts an array.
- * @a: the array
+ * array.sort - Sorts an array.
+ * @array: the array
  * @sorting_func: sorting function
  *
  * Sorts the array. For each pair of elements being sorted, the
@@ -384,98 +605,54 @@ static mpdm_t F_seek(F_ARGS)
  * Returns the sorted array (the original one is left untouched).
  * [Arrays]
  */
-/** array = sort(a); */
-/** array = sort(a, sorting_func); */
+/** array = array.sort(); */
+/** array = array.sort(sorting_func); */
 static mpdm_t F_sort(F_ARGS)
 {
     mpdm_t r, v;
 
-    v = mpdm_ref(A0);
-    r = mpdm_sort_cb(mpdm_clone(v), 1, A1);
+    v = mpdm_ref(l);
+    r = mpdm_sort_cb(mpdm_clone(v), 1, A0);
     mpdm_unref(v);
 
     return r;
 }
 
-/**
- * split - Separates a string into an array of pieces.
- * @v: the value to be separated
- * @s: the separator
- *
- * Separates the @v string value into an array of pieces, using @s
- * as a separator.
- *
- * If the separator is NULL, the string is splitted by characters.
- *
- * If the string does not contain the separator, an array holding 
- * the complete string as its unique argument is returned.
- * [Arrays]
- * [Strings]
- */
-/** array = split(v, s); */
-static mpdm_t F_split(F_ARGS)
-{
-    return mpdm_split(A0, A1);
-}
 
-/**
- * join - Joins an array.
- * @a: array to be joined
- * @s: joiner string or second array
- *
- * If @s is a string or NULL, returns a new string with all elements
- * in @a joined using @s. If @s is an array, it returns a new one
- * containing all elements of @a followed by all elements of @s.
- * [Arrays]
- * [Strings]
- */
-/** string = join(a, joiner_str); */
-/** array = join(a1, a2); */
-static mpdm_t F_join(F_ARGS)
-{
-    return mpdm_join(A0, A1);
-}
+/** HASH type **/
 
-/**
- * hsize - Returns the number of pairs of a hash.
- * @h: the hash
- *
- * Returns the number of key-value pairs of a hash.
- * [Hashes]
- */
-/** integer = hsize(h); */
 static mpdm_t F_hsize(F_ARGS)
 {
-    return MPDM_I(mpdm_hsize(A0));
+    return MPDM_I(mpdm_hsize(l));
 }
 
 /**
- * exists - Tests if a key exists.
- * @h: the hash
+ * hash.exists - Tests if a key exists.
+ * @hash: the hash
  * @k: the key
  *
- * Returns 1 if @k is defined in @h, or 0 othersize.
+ * Returns 1 if @k is defined in the hash, or 0 othersize.
  * [Hashes]
  */
-/** bool = exists(h, k); */
+/** bool = hash.exists(k); */
 static mpdm_t F_exists(F_ARGS)
 {
-    return mpsl_boolean(mpdm_exists(A0, A1));
+    return mpsl_boolean(mpdm_exists(l, A0));
 }
 
 /**
- * hdel - Deletes a key from a hash.
- * @h: the hash
+ * hash.delete - Deletes a key from a hash.
+ * @hash: the hash
  * @k: the key
  *
- * Deletes the key @k from the hash @h. Returns the previous
+ * Deletes the key @k from the hash. Returns the previous
  * value, or NULL if the key was not defined.
  * [Hashes]
  */
-/** v = hdel(h, k); */
+/** v = array.delete(k); */
 static mpdm_t F_hdel(F_ARGS)
 {
-    return mpdm_hdel(A0, A1);
+    return mpdm_hdel(l, A0);
 }
 
 /** I/O **/
@@ -808,84 +985,6 @@ static mpdm_t F_encoding(F_ARGS)
 }
 
 /**
- * regex - Matches a regular expression.
- * @v: the value to be matched
- * @r: the regular expression
- * @ra: an array of regular expressions
- * @offset: offset from the start of the value
- *
- * Matches a regular expression against a value. Valid flags are `i',
- * for case-insensitive matching, `m', to treat the string as a
- * multiline string (i.e., one containing newline characters), so
- * that ^ and $ match the boundaries of each line instead of the
- * whole string, `l', to return the last matching instead of the
- * first one, or `g', to match globally; in that last case, an array
- * containing all matches is returned instead of a string scalar.
- *
- * If @r is a string, an ordinary regular expression matching is tried
- * over the @v string. If the matching is possible, the match result
- * is returned, or NULL otherwise.
- *
- * If @r is an array (of strings), each element is tried sequentially
- * as an individual regular expression over the @v string, each one using
- * the offset returned by the previous match. All regular expressions
- * must match to be successful. If this is the case, an array (with
- * the same number of arguments) is returned containing the matched
- * strings, or NULL otherwise.
- *
- * If @r is NULL, the result of the previous regex matching
- * is returned as a two element array. The first element will contain
- * the character offset of the matching and the second the number of
- * characters matched. If the previous regex was unsuccessful, NULL
- * is returned.
- * [Regular Expressions]
- */
-/** string = regex(v, r); */
-/** string = regex(v, r, offset); */
-/** array = regex(v, ra); */
-/** array = regex(); */
-static mpdm_t F_regex(F_ARGS)
-{
-    return mpdm_regex(A0, A1, IA2);
-}
-
-/**
- * sregex - Matches and substitutes a regular expression.
- * @v: the value to be matched
- * @r: the regular expression
- * @s: the substitution string, hash or code
- * @offset: offset from the start of v
- *
- * Matches a regular expression against a value, and substitutes the
- * found substring with @s. Valid flags are `i', for case-insensitive
- * matching, and `g', for global replacements (all ocurrences in @v
- * will be replaced, instead of just the first found one).
- *
- * If @s is executable, it's executed with the matched part as
- * the only argument and its return value is used as the
- * substitution string.
- *
- * If @s is a hash, the matched string is used as a key to it and
- * its value used as the substitution. If this value itself is
- * executable, it's executed with the matched string as its only
- * argument and its return value used as the substitution.
- *
- * If @r is NULL, returns the number of substitutions made in the
- * previous call to sregex() (can be zero if none was done).
- *
- * Returns the modified string, or the original one if no substitutions
- * were done.
- * [Regular Expressions]
- */
-/** string = sregex(v, r, s); */
-/** string = sregex(v, r, s, offset); */
-/** integer = sregex(); */
-static mpdm_t F_sregex(F_ARGS)
-{
-    return mpdm_sregex(A0, A1, A2, IA3);
-}
-
-/**
  * gettext - Translates a string to the current language.
  * @str: the string
  *
@@ -924,31 +1023,6 @@ static mpdm_t F_gettext_domain(F_ARGS)
     return MPDM_I(mpdm_gettext_domain(A0, A1));
 }
 
-/**
- * uc - Converts a string to uppercase.
- * @str: the string to be converted
- *
- * Returns @str converted to uppercase.
- * [Strings]
- */
-/** string = uc(str); */
-static mpdm_t F_uc(F_ARGS)
-{
-    return mpdm_ulc(A0, 1);
-}
-
-/**
- * lc - Converts a string to lowercase.
- * @str: the string to be converted
- *
- * Returns @str converted to lowercase.
- * [Strings]
- */
-/** string = uc(str); */
-static mpdm_t F_lc(F_ARGS)
-{
-    return mpdm_ulc(A0, 0);
-}
 
 /**
  * time - Returns the current time.
@@ -973,30 +1047,6 @@ static mpdm_t F_time(F_ARGS)
 static mpdm_t F_chdir(F_ARGS)
 {
     return MPDM_I(mpdm_chdir(A0));
-}
-
-/**
- * sscanf - Extracts data like sscanf().
- * @str: the string to be parsed
- * @fmt: the string format
- * @offset: the character offset to start scanning
- *
- * Extracts data from a string using a special format pattern, very
- * much like the scanf() series of functions in the C library. Apart
- * from the standard percent-sign-commands (s, u, d, i, f, x,
- * n, [, with optional size and * to ignore), it implements S,
- * to match a string of characters upto what follows in the format
- * string. Also, the [ set of characters can include other % formats.
- *
- * Returns an array with the extracted values. If %n is used, the
- * position in the scanned string is returned as the value.
- * [Strings]
- */
-/** array = sscanf(str, fmt); */
-/** array = sscanf(str, fmt, offset); */
-static mpdm_t F_sscanf(F_ARGS)
-{
-    return mpdm_sscanf(A0, A1, IA2);
 }
 
 /**
@@ -1047,49 +1097,6 @@ static mpdm_t F_print(F_ARGS)
     for (n = 0; n < mpdm_size(a); n++)
         mpdm_write_wcs(stdout, mpdm_string(A(n)));
     return NULL;
-}
-
-
-/**
- * chr - Returns the Unicode character represented by the codepoint.
- * @c: the codepoint as an integer value
- *
- * Returns a 1 character string containing the character which
- * Unicode codepoint is @c.
- * [Strings]
- */
-/** string = chr(c); */
-static mpdm_t F_chr(F_ARGS)
-{
-    wchar_t tmp[2];
-
-    tmp[0] = (wchar_t) mpdm_ival(mpdm_aget(a, 0));
-    tmp[1] = L'\0';
-
-    return MPDM_S(tmp);
-}
-
-
-/**
- * ord - Returns the Unicode codepoint of a character.
- * @str: the string
- *
- * Returns the Unicode codepoint for the first character in
- * the string.
- * [Strings]
- */
-/** integer = ord(str); */
-static mpdm_t F_ord(F_ARGS)
-{
-    int ret = 0;
-    mpdm_t v = mpdm_aget(a, 0);
-
-    if (v != NULL) {
-        wchar_t *ptr = mpdm_string(v);
-        ret = (int) *ptr;
-    }
-
-    return MPDM_I(ret);
 }
 
 
@@ -1250,23 +1257,6 @@ static mpdm_t F_semaphore(F_ARGS)
 
 
 /**
- * tr - Transliterates a string.
- * @str: the string
- * @from: set of characters to be replaced
- * @to: set of characters to replace
- *
- * Transliterates @str to a new string with all characters from @from
- * replaced by those in @to.
- * [Threading]
- */
-/** tr(str, from, to); */
-static mpdm_t F_tr(F_ARGS)
-{
-    return mpdm_tr(A0, A1, A2);
-}
-
-
-/**
  * strftime - Formats the time as a string.
  * @f: format string
  * @t: seconds (from the Unix epoch)
@@ -1361,79 +1351,66 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(r, L"APPDIR",   mpdm_app_dir());
 
     /* hash methods */
-    mpdm_hset_s(r, L"HASH",     MPDM_H(0));
+    v = mpdm_hset_s(r, L"HASH", MPDM_H(0));
+    mpdm_hset_s(v, L"size",     MPDM_X(F_hsize));
+    mpdm_hset_s(v, L"exists",   MPDM_X(F_exists));
+    mpdm_hset_s(v, L"delete",   MPDM_X(F_hdel));
 
     /* array methods */
-    mpdm_hset_s(r, L"ARRAY",    MPDM_H(0));
+    v = mpdm_hset_s(r, L"ARRAY",    MPDM_H(0));
+    mpdm_hset_s(v, L"expand",       MPDM_X(F_expand));
+    mpdm_hset_s(v, L"collapse",     MPDM_X(F_collapse));
+    mpdm_hset_s(v, L"ins",          MPDM_X(F_ins));
+    mpdm_hset_s(v, L"delete",       MPDM_X(F_adel));
+    mpdm_hset_s(v, L"shift",        MPDM_X(F_shift));
+    mpdm_hset_s(v, L"push",         MPDM_X(F_push));
+    mpdm_hset_s(v, L"pop",          MPDM_X(F_pop));
+    mpdm_hset_s(v, L"queue",        MPDM_X(F_queue));
+    mpdm_hset_s(v, L"seek",         MPDM_X(F_seek));
+    mpdm_hset_s(v, L"sort",         MPDM_X(F_sort));
 
     /* scalar methods */
-    mpdm_hset_s(r, L"SCALAR",   MPDM_H(0));
+    v = mpdm_hset_s(r, L"SCALAR",   MPDM_H(0));
+    mpdm_hset_s(v, L"splice",       MPDM_X(F_splice));
+    mpdm_hset_s(v, L"split",        MPDM_X(F_split));
+    mpdm_hset_s(v, L"regex",        MPDM_X(F_regex));
+    mpdm_hset_s(v, L"sregex",       MPDM_X(F_sregex));
+    mpdm_hset_s(v, L"sscanf",       MPDM_X(F_sscanf));
+    mpdm_hset_s(v, L"chr",          MPDM_X(F_chr));
+    mpdm_hset_s(v, L"ord",          MPDM_X(F_ord));
+    mpdm_hset_s(v, L"uc",           MPDM_X(F_uc));
+    mpdm_hset_s(v, L"lc",           MPDM_X(F_lc));
+    mpdm_hset_s(v, L"tr",           MPDM_X(F_tr));
 
     /* "any type" methods */
     v = mpdm_hset_s(r, L"ANY",  MPDM_H(0));
-    mpdm_hset_s(v, L"size",    MPDM_X(F_size));
-    mpdm_hset_s(v, L"dump",    MPDM_X(F_dump));
+    mpdm_hset_s(v, L"size",     MPDM_X(F_size));
+    mpdm_hset_s(v, L"dump",     MPDM_X(F_dump));
     mpdm_hset_s(v, L"clone",    MPDM_X(F_clone));
     mpdm_hset_s(v, L"dumper",   MPDM_X(F_dumper));
     mpdm_hset_s(v, L"cmp",      MPDM_X(F_cmp));
+    mpdm_hset_s(v, L"is_array", MPDM_X(F_is_array));
+    mpdm_hset_s(v, L"is_hash",  MPDM_X(F_is_hash));
+    mpdm_hset_s(v, L"is_exec",  MPDM_X(F_is_exec));
 
-    /* library functions */
-//    mpdm_hset_s(r, L"size",     MPDM_X(F_size));
-//    mpdm_hset_s(r, L"clone",    MPDM_X(F_clone));
-//    mpdm_hset_s(r, L"dump",     MPDM_X(F_dump));
-//    mpdm_hset_s(r, L"dumper",   MPDM_X(F_dumper));
-//    mpdm_hset_s(r, L"cmp",      MPDM_X(F_cmp));
-    mpdm_hset_s(r, L"is_array", MPDM_X(F_is_array));
-    mpdm_hset_s(r, L"is_hash",  MPDM_X(F_is_hash));
-    mpdm_hset_s(r, L"is_exec",  MPDM_X(F_is_exec));
-    mpdm_hset_s(r, L"splice",   MPDM_X(F_splice));
-    mpdm_hset_s(r, L"expand",   MPDM_X(F_expand));
-    mpdm_hset_s(r, L"collapse", MPDM_X(F_collapse));
-    mpdm_hset_s(r, L"ins",      MPDM_X(F_ins));
-    mpdm_hset_s(r, L"adel",     MPDM_X(F_adel));
-    mpdm_hset_s(r, L"shift",    MPDM_X(F_shift));
-    mpdm_hset_s(r, L"push",     MPDM_X(F_push));
-    mpdm_hset_s(r, L"pop",      MPDM_X(F_pop));
-    mpdm_hset_s(r, L"queue",    MPDM_X(F_queue));
-    mpdm_hset_s(r, L"hsize",    MPDM_X(F_hsize));
-    mpdm_hset_s(r, L"exists",   MPDM_X(F_exists));
-    mpdm_hset_s(r, L"hdel",     MPDM_X(F_hdel));
-
+    /* I/O */
     mpdm_hset_s(r, L"open",     MPDM_X(F_open));
     mpdm_hset_s(r, L"popen",    MPDM_X(F_popen));
     mpdm_hset_s(r, L"connect",  MPDM_X(F_connect));
 
+    /* library functions */
     mpdm_hset_s(r, L"unlink",   MPDM_X(F_unlink));
     mpdm_hset_s(r, L"stat",     MPDM_X(F_stat));
     mpdm_hset_s(r, L"chmod",    MPDM_X(F_chmod));
     mpdm_hset_s(r, L"chown",    MPDM_X(F_chown));
     mpdm_hset_s(r, L"glob",     MPDM_X(F_glob));
     mpdm_hset_s(r, L"chdir",    MPDM_X(F_chdir));
-
-    mpdm_hset_s(r, L"seek",     MPDM_X(F_seek));
-    mpdm_hset_s(r, L"sort",     MPDM_X(F_sort));
-    mpdm_hset_s(r, L"split",    MPDM_X(F_split));
-    mpdm_hset_s(r, L"join",     MPDM_X(F_join));
-
     mpdm_hset_s(r, L"encoding", MPDM_X(F_encoding));
-
-    mpdm_hset_s(r, L"regex",    MPDM_X(F_regex));
-    mpdm_hset_s(r, L"sregex",   MPDM_X(F_sregex));
-    mpdm_hset_s(r, L"sscanf",   MPDM_X(F_sscanf));
     mpdm_hset_s(r, L"sprintf",  MPDM_X(F_sprintf));
     mpdm_hset_s(r, L"strftime", MPDM_X(F_strftime));
-
     mpdm_hset_s(r, L"gettext",  MPDM_X(F_gettext));
     mpdm_hset_s(r, L"gettext_domain",  MPDM_X(F_gettext_domain));
-
     mpdm_hset_s(r, L"print",    MPDM_X(F_print));
-
-    mpdm_hset_s(r, L"chr",      MPDM_X(F_chr));
-    mpdm_hset_s(r, L"ord",      MPDM_X(F_ord));
-    mpdm_hset_s(r, L"uc",       MPDM_X(F_uc));
-    mpdm_hset_s(r, L"lc",       MPDM_X(F_lc));
-    mpdm_hset_s(r, L"tr",       MPDM_X(F_tr));
-
     mpdm_hset_s(r, L"time",     MPDM_X(F_time));
     mpdm_hset_s(r, L"random",   MPDM_X(F_random));
     mpdm_hset_s(r, L"sleep",    MPDM_X(F_sleep));
