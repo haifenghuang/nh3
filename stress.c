@@ -34,6 +34,9 @@ void mpsl_disasm(mpdm_t prg);
 int tests = 0;
 int oks = 0;
 
+/* also print good tests */
+int verbose = 0;
+
 
 /* failed tests messages */
 char *failed_msgs[5000];
@@ -73,8 +76,10 @@ void _do_test(char *prg, mpdm_t t_value, int line)
         }
     }
 
-	sprintf(tmp, "Test %d: \"%s\" (line %d): %s\n", tests + 1, prg, line, ok ? "OK!" : "*** Failed ***");
-	printf("%s", tmp);
+	sprintf(tmp, "stress.c:%d: (test %d): \"%s\" (line %d): %s\n", line, tests + 1, prg, line, ok ? "OK!" : "*** Failed ***");
+
+    if (verbose)
+	   printf("%s", tmp);
 
     if (!ok) {
         printf("ERROR:\n");
