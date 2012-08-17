@@ -57,7 +57,7 @@
 /** library **/
 
 /**
- * size - Returns the size of a value.
+ * v.size - Returns the size of a value.
  * @v: the value
  *
  * Returns the size of a value. For scalars, the size is the
@@ -66,11 +66,11 @@
  * probably not useful, see hsize() instead).
  * [Value Management]
  */
-/** integer = size(v); */
+/** integer = v.size(); */
 /* ; */
 static mpdm_t F_size(F_ARGS)
 {
-    return MPDM_I(mpdm_size(A0));
+    return MPDM_I(mpdm_size(l));
 }
 
 /**
@@ -82,14 +82,14 @@ static mpdm_t F_size(F_ARGS)
  * the same unchanged value is returned.
  * [Value Management]
  */
-/** v2 = clone(v); */
+/** v2 = v.clone(); */
 static mpdm_t F_clone(F_ARGS)
 {
-    return mpdm_clone(A0);
+    return mpdm_clone(l);
 }
 
 /**
- * dump - Dumps a value to stdin.
+ * v.dump - Dumps a value to stdin.
  * @v: The value
  *
  * Dumps a value to stdin. The value can be complex. This function
@@ -97,30 +97,30 @@ static mpdm_t F_clone(F_ARGS)
  * [Debugging]
  * [Input-Output]
  */
-/** dump(v); */
+/** v.dump(); */
 static mpdm_t F_dump(F_ARGS)
 {
-    mpdm_dump(A0);
+    mpdm_dump(l);
     return NULL;
 }
 
 /**
- * dumper - Returns a visual representation of a complex value.
+ * v.dumper - Returns a visual representation of a complex value.
  * @v: The value
  *
  * Returns a visual representation of a complex value.
  * [Debugging]
  * [Strings]
  */
-/** string = dumper(v); */
+/** string = v.dumper(); */
 static mpdm_t F_dumper(F_ARGS)
 {
-    return mpdm_dumper(A0);
+    return mpdm_dumper(l);
 }
 
 /**
- * cmp - Compares two values.
- * @v1: the first value
+ * v.cmp - Compares two values.
+ * @v: the first value
  * @v2: the second value
  *
  * Compares two values. If both are strings, a standard string
@@ -129,16 +129,16 @@ static mpdm_t F_dumper(F_ARGS)
  * elements, each one is compared; otherwise, a simple pointer
  * comparison is done.
  *
- * In either case, an integer is returned, which is < 0 if @v1
+ * In either case, an integer is returned, which is < 0 if @v
  * is lesser than @v2, > 0 on the contrary or 0 if both are
  * equal.
  * [Strings]
  * [Arrays]
  */
-/** integer = cmp(v); */
+/** integer = v.cmp(v2); */
 static mpdm_t F_cmp(F_ARGS)
 {
-    return MPDM_I(mpdm_cmp(A0, A1));
+    return MPDM_I(mpdm_cmp(l, A0));
 }
 
 /**
@@ -1370,14 +1370,19 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(r, L"SCALAR",   MPDM_H(0));
 
     /* "any type" methods */
-    mpdm_hset_s(r, L"ANY",      MPDM_H(0));
+    v = mpdm_hset_s(r, L"ANY",  MPDM_H(0));
+    mpdm_hset_s(v, L"size",    MPDM_X(F_size));
+    mpdm_hset_s(v, L"dump",    MPDM_X(F_dump));
+    mpdm_hset_s(v, L"clone",    MPDM_X(F_clone));
+    mpdm_hset_s(v, L"dumper",   MPDM_X(F_dumper));
+    mpdm_hset_s(v, L"cmp",      MPDM_X(F_cmp));
 
     /* library functions */
-    mpdm_hset_s(r, L"size",     MPDM_X(F_size));
-    mpdm_hset_s(r, L"clone",    MPDM_X(F_clone));
-    mpdm_hset_s(r, L"dump",     MPDM_X(F_dump));
-    mpdm_hset_s(r, L"dumper",   MPDM_X(F_dumper));
-    mpdm_hset_s(r, L"cmp",      MPDM_X(F_cmp));
+//    mpdm_hset_s(r, L"size",     MPDM_X(F_size));
+//    mpdm_hset_s(r, L"clone",    MPDM_X(F_clone));
+//    mpdm_hset_s(r, L"dump",     MPDM_X(F_dump));
+//    mpdm_hset_s(r, L"dumper",   MPDM_X(F_dumper));
+//    mpdm_hset_s(r, L"cmp",      MPDM_X(F_cmp));
     mpdm_hset_s(r, L"is_array", MPDM_X(F_is_array));
     mpdm_hset_s(r, L"is_hash",  MPDM_X(F_is_hash));
     mpdm_hset_s(r, L"is_exec",  MPDM_X(F_is_exec));
