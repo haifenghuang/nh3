@@ -996,23 +996,26 @@ static mpdm_t TBL(struct mpsl_vm *m)
     }
 
     if (n < 0) {
-        mpdm_t v;
+        mpdm_t v = mpdm_aget(m->symtbl, m->tt - 1);
         l = NULL;
 
         /* still not found? try on the type-specific tables */
-        if (MPDM_IS_HASH(l))
+        if (MPDM_IS_HASH(v))
             v = mpdm_hget_s(mpdm_root(), L"HASH");
         else
-        if (MPDM_IS_ARRAY(l))
+        if (MPDM_IS_ARRAY(v))
             v = mpdm_hget_s(mpdm_root(), L"ARRAY");
         else
             v = mpdm_hget_s(mpdm_root(), L"SCALAR");
 
-        if (v == NULL)
-            v = mpdm_hget_s(mpdm_root(), L"ALL");
-
         if (mpdm_exists(v, s))
             l = v;
+        else {
+            v = mpdm_hget_s(mpdm_root(), L"ANY");
+
+            if (mpdm_exists(v, s))
+                l = v;
+        }
     }
 
     if (l == NULL)
