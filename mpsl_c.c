@@ -299,7 +299,7 @@ static mpdm_t node3(mpsl_node_t t, mpdm_t n1, mpdm_t n2, mpdm_t n3) { mpdm_t r =
 static mpdm_t tstr(struct mpsl_c *c)
 /* returns the current token as a string */
 {
-    mpdm_t r = MPDM_ENS(c->token_s, c->token_o);
+    mpdm_t r = MPDM_ENS(c->token_s, (c->token_o / sizeof(wchar_t)) - 1);
 
     c->token_s = NULL;
     c->token_i = c->token_o = 0;
