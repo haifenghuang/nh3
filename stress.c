@@ -126,6 +126,9 @@ int main(int argc, char *argv[])
 
     mpsl_startup(argc, argv);
 
+    if (argc > 1 && strcmp(argv[1], "-v") == 0)
+        verbose = 1;
+
     /* create the T global variable */
     mpdm_hset_s(mpdm_root(), L"T", NULL);
 
