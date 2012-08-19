@@ -8,7 +8,7 @@ though it can also be used as a general-purpose programming tool.
 This is the 3.x source code branch. It's a development, unstable
 version where everything is subject to change or break. If you
 need to build the Minimum Profit Text Editor (upto versions 5.2.x),
-you need the 2.x branch.
+you need the 2.x branch (which is master as of 2012-08-19).
 
 ---
 Angel Ortega <angel@triptico.com>
