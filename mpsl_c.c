@@ -279,7 +279,7 @@ typedef enum {
     N_EQ,     N_NE,     N_GT,   N_GE,   N_LT,  N_LE,
     N_AND,    N_OR,
     N_BINAND, N_BINOR,  N_XOR,  N_SHL,  N_SHR,
-    N_JOIN,
+    N_JOIN,   N_MAP,
     N_IF,     N_WHILE,  N_FOREACH,
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
@@ -494,7 +494,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTER, T_SLASH, T_PERCENT, 
         T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
         T_DAMP, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL,
-        T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, T_VIRGULE, -1
+        T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, T_VIRGULE, T_THARRW, -1
     };
     static mpsl_node_t binop[] = {
         N_IADD, N_ISUB, N_IMUL, N_IDIV, N_IMOD,
@@ -502,7 +502,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
         N_FUNCAL, N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
         N_AND, N_OR, N_LOCAL, N_GLOBAL, N_ASSIGN,
-        N_BINAND, N_BINOR, N_XOR, N_SHL, N_SHR, N_JOIN, -1
+        N_BINAND, N_BINOR, N_XOR, N_SHL, N_SHR, N_JOIN, N_MAP, -1
     };
 
     for (n = 0; tokens[n] != -1; n++)
@@ -772,7 +772,7 @@ static int parse(struct mpsl_c *c)
 typedef enum {
     OP_EOP,
     OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROO,
-    OP_POP, OP_SWP, OP_DUP, OP_DP2, OP_DP3,
+    OP_POP, OP_SWP, OP_DUP, OP_DP2, OP_DPN,
     OP_GET, OP_SET, OP_STI, OP_APU, OP_TBL,
     OP_TPU, OP_TPO, OP_TLT, OP_THS,
     OP_CAL, OP_RET, OP_ARG,
@@ -899,6 +899,14 @@ static int gen(struct mpsl_c *c, mpdm_t node)
 
     case N_PINC: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); o2(c, OP_LIT, MPDM_I(1)); o(c, OP_ADD); o(c, OP_SET); break;
     case N_PDEC: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); o2(c, OP_LIT, MPDM_I(1)); o(c, OP_SUB); o(c, OP_SET); break;
+
+    case N_MAP:
+        o(c, OP_ARR);
+        O(1); o(c, OP_NUL); n = here(c); i = o2(c, OP_ITE, NULL);
+        o(c, OP_TPU);
+        O(2); o2(c, OP_DPN, MPDM_I(4)); o(c, OP_SWP); o(c, OP_APU); o(c, OP_POP);
+        o(c, OP_TPO);
+        o2(c, OP_JMP, MPDM_I(n)); fix(c, i); break;
     }
 
     return c->error;
@@ -1088,7 +1096,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
         case OP_DUP: PUSH(m, TOS(m)); break;
         case OP_DP2: PUSH(m, mpdm_aget(m->stack, m->sp - 2)); break;
-        case OP_DP3: PUSH(m, mpdm_aget(m->stack, m->sp - 3)); break;
+        case OP_DPN: m->pc++; PUSH(m, mpdm_aget(m->stack, m->sp - mpdm_ival(PC(m)))); break;
         case OP_TBL: TBL(m); break;
         case OP_GET: w = POP(m); v = POP(m); PUSH(m, GET(m, v, w)); break;
         case OP_SET: w = POP(m); v = POP(m); PUSH(m, SET(m, POP(m), v, w)); break;
@@ -1122,8 +1130,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SHR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 >> i2)); break;
         case OP_CAT: w = POP(m); v = POP(m); PUSH(m, mpdm_join(v, w)); break;
         case OP_REM: m->pc++; break;
-        case OP_CAL:
-            v = POP(m);
+        case OP_CAL: v = POP(m);
             if (MPDM_IS_EXEC(v))
                 PUSH(m, mpdm_exec(v, POP(m), mpdm_aget(m->symtbl, m->tt - 1)));
             else {
@@ -1131,8 +1138,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
                 m->pc = mpdm_ival(v);
             }
             break;
-        case OP_ITE:
-            i2 = IPOP(m);
+        case OP_ITE: i2 = IPOP(m);
             if (mpdm_iterator(TOS(m), &i2, &v, &w)) {
                 m->pc++;
                 PUSH(m, MPDM_I(i2));
@@ -1207,7 +1213,7 @@ void mpsl_disasm(mpdm_t prg)
     static char *ops[] = {
         "EOP",
         "LIT", "NUL", "ARR", "HSH", "ROO",
-        "POP", "SWP", "DUP", "DP2", "DP3",
+        "POP", "SWP", "DUP", "DP2", "DPN",
         "GET", "SET", "STI", "APU", "TBL",
         "TPU", "TPO", "TLT", "THS",
         "CAL", "RET", "ARG",
@@ -1228,7 +1234,7 @@ void mpsl_disasm(mpdm_t prg)
 
         if (i == OP_LIT || i == OP_REM)
             printf(" \"%ls\"", mpdm_string(mpdm_aget(prg, ++n)));
-        if (i == OP_JMP || i == OP_JT || i == OP_JF || i == OP_ITE)
+        if (i == OP_JMP || i == OP_JT || i == OP_JF || i == OP_ITE || i == OP_DPN)
             printf(" %d", mpdm_ival(mpdm_aget(prg, ++n)));
 
         printf("\n");
