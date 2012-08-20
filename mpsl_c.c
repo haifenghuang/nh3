@@ -771,7 +771,7 @@ typedef enum {
     OP_EOP,
     OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROO,
     OP_POP, OP_SWP, OP_DUP, OP_DP2,
-    OP_GET, OP_SET, OP_STI, OP_TBL,
+    OP_GET, OP_SET, OP_STI, OP_APU, OP_TBL,
     OP_TPU, OP_TPO, OP_TLT, OP_THS,
     OP_CAL, OP_RET, OP_ARG,
     OP_JMP, OP_JT,  OP_JF,
@@ -836,9 +836,8 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_ARRAY:
         o(c, OP_ARR);
         for (n = 1; n < mpdm_size(node); n++) {
-            o2(c, OP_LIT, MPDM_I(n - 1));
             O(n);
-            o(c, OP_STI);
+            o(c, OP_APU);
         }
         break;
 
@@ -1091,6 +1090,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_GET: w = POP(m); v = POP(m); PUSH(m, GET(m, v, w)); break;
         case OP_SET: w = POP(m); v = POP(m); PUSH(m, SET(m, POP(m), v, w)); break;
         case OP_STI: w = POP(m); v = POP(m); SET(m, TOS(m), v, w); break;
+        case OP_APU: v = POP(m); mpdm_push(TOS(m), v); break;
         case OP_TPU: mpdm_aset(m->symtbl, POP(m), m->tt++); break;
         case OP_TPO: --m->tt; break;
         case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
@@ -1205,7 +1205,7 @@ void mpsl_disasm(mpdm_t prg)
         "EOP",
         "LIT", "NUL", "ARR", "HSH", "ROO",
         "POP", "SWP", "DUP", "DP2",
-        "GET", "SET", "STI", "TBL",
+        "GET", "SET", "STI", "APU", "TBL",
         "TPU", "TPO", "TLT", "THS",
         "CAL", "RET", "ARG",
         "JMP", "JT", "JF",
