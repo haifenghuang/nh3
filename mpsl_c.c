@@ -288,7 +288,7 @@ typedef enum {
     N_PINC,   N_PDEC,   N_SINC, N_SDEC,
     N_THIS,
     N_LOCAL,  N_GLOBAL,
-    N_SUBDEF, N_ANONSB, N_RETURN,
+    N_SUBDEF,   N_RETURN,
     N_VOID,
     N_EOP
 } mpsl_node_t;
@@ -466,7 +466,7 @@ static mpdm_t term(struct mpsl_c *c)
                 c_error(c);
         }
 
-        v = node2(N_ANONSB, node1(N_LITERAL, a), statement(c));
+        v = node2(N_SUBDEF, node1(N_LITERAL, a), statement(c));
         mpdm_unref(a);
     }
     else
@@ -668,7 +668,8 @@ static mpdm_t statement(struct mpsl_c *c)
         token(c);
 
         if (c->token == T_SYMBOL) {
-            w = term(c);
+            w = node1(N_LITERAL, tstr(c));
+            token(c);
 
             /* new symbol name must have only symbols and dots */
             while (!c->error && c->token == T_DOT) {
@@ -701,7 +702,8 @@ static mpdm_t statement(struct mpsl_c *c)
                     c_error(c);
             }
 
-            v = node3(N_SUBDEF, w, node1(N_LITERAL, a), statement(c));
+            v = node2(N_SUBDEF, node1(N_LITERAL, a), statement(c));
+            v = node2(N_LOCAL, w, v);
             mpdm_unref(a);
         }
         else
@@ -883,12 +885,10 @@ static int gen(struct mpsl_c *c, mpdm_t node)
         o(c, OP_POP); O(2); fix(c, n); break;
 
     case N_SUBDEF:
-        O(1); n = o2(c, OP_LIT, NULL); o(c, OP_SET); i = o2(c, OP_JMP, NULL);
-        fix(c, n); O(2); o(c, OP_ARG); O(3); o(c, OP_RET); fix(c, i); break;
-
-    case N_ANONSB:
-        n = o2(c, OP_LIT, NULL); i = o2(c, OP_JMP, NULL);
-        fix(c, n); O(1); o(c, OP_ARG); O(2); o(c, OP_RET); fix(c, i); break;
+        n = o2(c, OP_LIT, NULL);
+        i = o2(c, OP_JMP, NULL); fix(c, n);
+        O(1); o(c, OP_ARG); O(2); o(c, OP_RET); fix(c, i);
+        break;
 
     case N_IADD: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_ADD); o(c, OP_SET); break;
     case N_ISUB: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_SUB); o(c, OP_SET); break;
