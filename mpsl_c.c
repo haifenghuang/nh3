@@ -161,8 +161,12 @@ again:
             /* C-style comments */
             nc(c);
             while (c->c != L'\0' && c->c != WEOF) {
-                if (c->c == L'*' && nc(c) == L'/') break;
-                nc(c);
+                if (c->c == L'*') {
+                    if (nc(c) == L'/')
+                        break;
+                }
+                else
+                    nc(c);
             }
             nc(c);
             goto again;
@@ -183,6 +187,7 @@ again:
                 case L'\\': m = L'\\';  break;
                 case L'"': m = L'"';    break;
                 case L'x':
+                    /* FIXME */
                     break;
                 }
             }
