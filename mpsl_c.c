@@ -1096,7 +1096,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
         case OP_DUP: PUSH(m, TOS(m)); break;
         case OP_DP2: PUSH(m, mpdm_aget(m->stack, m->sp - 2)); break;
-        case OP_DPN: m->pc++; PUSH(m, mpdm_aget(m->stack, m->sp - mpdm_ival(PC(m)))); break;
+        case OP_DPN: PUSH(m, mpdm_aget(m->stack, m->sp - mpdm_ival(PC(m)))); break;
         case OP_TBL: TBL(m); break;
         case OP_GET: w = POP(m); v = POP(m); PUSH(m, GET(m, v, w)); break;
         case OP_SET: w = POP(m); v = POP(m); PUSH(m, SET(m, POP(m), v, w)); break;
