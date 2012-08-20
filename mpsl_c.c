@@ -157,7 +157,7 @@ again:
     case L'*':  t = T_ASTER;   nc(c); COMP(-1, T_ASTEREQ, -1); break;
     case L'%':  t = T_PERCENT; nc(c); COMP(-1, T_PERCEQ, -1); break;
     case L'^':  t = T_CARET;   nc(c); COMP(-1, T_CARETEQ, -1); break;
-    case L'@':  /* FIXME */ t = T_THARRW;  nc(c); break;
+    case L'@':  /* FIXME */ t = T_FATARRW;  nc(c); break;
     case L'/':  t = T_SLASH;   nc(c);
         if (c->c == L'*') {
             /* C-style comments */
@@ -279,7 +279,7 @@ typedef enum {
     N_EQ,     N_NE,     N_GT,   N_GE,   N_LT,  N_LE,
     N_AND,    N_OR,
     N_BINAND, N_BINOR,  N_XOR,  N_SHL,  N_SHR,
-    N_JOIN,   N_MAP,
+    N_JOIN,   N_MAP,    N_HMAP,
     N_IF,     N_WHILE,  N_FOREACH,
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
@@ -494,7 +494,8 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTER, T_SLASH, T_PERCENT, 
         T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
         T_DAMP, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL,
-        T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, T_VIRGULE, T_THARRW, -1
+        T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, T_VIRGULE,
+        T_THARRW, T_FATARRW, -1
     };
     static mpsl_node_t binop[] = {
         N_IADD, N_ISUB, N_IMUL, N_IDIV, N_IMOD,
@@ -502,7 +503,8 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
         N_FUNCAL, N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
         N_AND, N_OR, N_LOCAL, N_GLOBAL, N_ASSIGN,
-        N_BINAND, N_BINOR, N_XOR, N_SHL, N_SHR, N_JOIN, N_MAP, -1
+        N_BINAND, N_BINOR, N_XOR, N_SHL, N_SHR, N_JOIN,
+        N_MAP, N_HMAP, -1
     };
 
     for (n = 0; tokens[n] != -1; n++)
@@ -905,6 +907,17 @@ static int gen(struct mpsl_c *c, mpdm_t node)
         O(1); o(c, OP_NUL); n = here(c); i = o2(c, OP_ITE, NULL);
         o(c, OP_TPU);
         O(2); o2(c, OP_DPN, MPDM_I(4)); o(c, OP_SWP); o(c, OP_APU); o(c, OP_POP);
+        o(c, OP_TPO);
+        o2(c, OP_JMP, MPDM_I(n)); fix(c, i); break;
+
+    case N_HMAP:
+        o(c, OP_HSH);
+        O(1); o(c, OP_NUL); n = here(c); i = o2(c, OP_ITE, NULL);
+        o(c, OP_TPU);
+        O(2); o2(c, OP_DPN, MPDM_I(4)); o(c, OP_SWP); o(c, OP_DUP);
+        o(c, OP_NUL); o(c, OP_GET); o(c, OP_SWP);
+        o2(c, OP_LIT, MPDM_I(1)); o(c, OP_GET); o(c, OP_SET);
+        o(c, OP_POP);
         o(c, OP_TPO);
         o2(c, OP_JMP, MPDM_I(n)); fix(c, i); break;
     }
