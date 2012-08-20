@@ -49,6 +49,7 @@ typedef enum {
     T_PLUSEQ, T_MINUSEQ, T_ASTEREQ, T_SLASHEQ, T_PERCEQ,
     T_EQEQ,   T_BANGEQ,  T_CARETEQ,
     T_DGTEQ,  T_DLTEQ,   T_DPIPEEQ, T_DAMPEQ,
+    T_THARRW, T_FATARRW, T_VIRARRW, T_COLARRW,
     T_SYMBOL, T_LITERAL
 } mpsl_token_t;
 
@@ -156,6 +157,7 @@ again:
     case L'*':  t = T_ASTER;   nc(c); COMP(-1, T_ASTEREQ, -1); break;
     case L'%':  t = T_PERCENT; nc(c); COMP(-1, T_PERCEQ, -1); break;
     case L'^':  t = T_CARET;   nc(c); COMP(-1, T_CARETEQ, -1); break;
+    case L'@':  /* FIXME */ t = T_THARRW;  nc(c); break;
     case L'/':  t = T_SLASH;   nc(c);
         if (c->c == L'*') {
             /* C-style comments */
@@ -770,7 +772,7 @@ static int parse(struct mpsl_c *c)
 typedef enum {
     OP_EOP,
     OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROO,
-    OP_POP, OP_SWP, OP_DUP, OP_DP2,
+    OP_POP, OP_SWP, OP_DUP, OP_DP2, OP_DP3,
     OP_GET, OP_SET, OP_STI, OP_APU, OP_TBL,
     OP_TPU, OP_TPO, OP_TLT, OP_THS,
     OP_CAL, OP_RET, OP_ARG,
@@ -1086,6 +1088,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
         case OP_DUP: PUSH(m, TOS(m)); break;
         case OP_DP2: PUSH(m, mpdm_aget(m->stack, m->sp - 2)); break;
+        case OP_DP3: PUSH(m, mpdm_aget(m->stack, m->sp - 3)); break;
         case OP_TBL: TBL(m); break;
         case OP_GET: w = POP(m); v = POP(m); PUSH(m, GET(m, v, w)); break;
         case OP_SET: w = POP(m); v = POP(m); PUSH(m, SET(m, POP(m), v, w)); break;
@@ -1204,7 +1207,7 @@ void mpsl_disasm(mpdm_t prg)
     static char *ops[] = {
         "EOP",
         "LIT", "NUL", "ARR", "HSH", "ROO",
-        "POP", "SWP", "DUP", "DP2",
+        "POP", "SWP", "DUP", "DP2", "DP3",
         "GET", "SET", "STI", "APU", "TBL",
         "TPU", "TPO", "TLT", "THS",
         "CAL", "RET", "ARG",
