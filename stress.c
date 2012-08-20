@@ -201,6 +201,10 @@ int main(int argc, char *argv[])
     do_test("local pi; sub pi() { return 3.14; } T = pi();", MPDM_R(3.14));
     do_test("local sum; sub sum(a, b) { return a + b; } T = sum(5, 6);", MPDM_I(11));
 
+    do_test("sub pi { return 3.14; } T = pi();", MPDM_R(3.14));
+    do_test("sub pi() { return 3.14; } T = pi();", MPDM_R(3.14));
+    do_test("sub sum(a, b) { return a + b; } T = sum(5, 6);", MPDM_I(11));
+
     do_test("T = (1 == 1);", MPDM_I(1));
     do_test("T = (1 == 2);", MPDM_I(0));
     do_test("T = (1 == 1.0);", MPDM_I(1));
@@ -225,7 +229,7 @@ int main(int argc, char *argv[])
     do_test("local obj = { x: 1234, get_x: sub () { return this.x; }}; T = obj.get_x();", MPDM_I(1234));
     do_test("local obj = { x: 1234, get_fx: sub (f) { return f * this.x; }}; T = obj.get_fx(10);", MPDM_I(12340));
 
-    do_test("print(1234, 5678, \"--hello\\n\");", NULL);
+//    do_test("print(1234, 5678, \"--hello\\n\");", NULL);
 
     do_test("local n = 0; while (n < 10) n += 1; T = n;", MPDM_I(10));
     do_test("local n = 3; n *= 7; T = n;", MPDM_I(3 * 7));
@@ -255,6 +259,9 @@ int main(int argc, char *argv[])
     do_test("T = 0; foreach 10 ++T;", MPDM_I(10));
     do_test("T = 0; foreach [1, 3, 7, 'a', 9] { ++T; }", MPDM_I(5));
     do_test("T = 0; foreach { 'a': 1, 'b': 2 } ++T;", MPDM_I(2));
+
+    /* nested subroutines */
+    do_test("sub circlen(r) { sub pi() { return 3.14; } return 2 * pi() * r; } T = circlen(2);", MPDM_R(6.28 * 2));
 
     test_summary();
 
