@@ -36,9 +36,12 @@ $(LIB): $(OBJS)
 $(TARGET): $(LIB) $(MPDM)/libmpdm.a
 	$(CC) $(CFLAGS) -L. -lmpsl `cat config.ldflags` -o $@
 
+stress-test: stress
+	./stress
+
 stress: stress.c $(LIB) $(MPDM)/libmpdm.a
 	$(CC) $(CFLAGS) `cat config.cflags` stress.c \
-		-L. -lmpsl `cat config.ldflags` -o $@ && ./stress
+		-L. -lmpsl `cat config.ldflags` -o $@
 
 clean:
 	rm -f $(TARGET) $(LIB) $(OBJS) *.o tags *.tar.gz stress
