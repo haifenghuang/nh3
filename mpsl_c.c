@@ -599,27 +599,33 @@ static mpdm_t expr(struct mpsl_c *c)
 static mpdm_t var(struct mpsl_c *c)
 /* returns a symbol to be created */
 {
-    mpdm_t v, w;
+    mpdm_t v = NULL;
 
-    v = tstr(c);
-    token(c);
+    if (c->token == T_SYMBOL) {
+        v = tstr(c);
+        token(c);
 
-    if (c->token == T_DOT) {
-        v = node1(N_SYMID, v);
+        if (c->token == T_DOT) {
+            v = node1(N_SYMID, v);
 
-        do {
-            token(c);
+            do {
+                mpdm_t w;
 
-            w = node1(N_LITERAL, tstr(c));
-            token(c);
+                token(c);
 
-            v = node2(N_PARTOF, node1(N_SYMVAL, v), w);
+                w = node1(N_LITERAL, tstr(c));
+                token(c);
+
+                v = node2(N_PARTOF, node1(N_SYMVAL, v), w);
+            }
+            while (c->token == T_DOT);
         }
-        while (c->token == T_DOT);
+        else {
+            v = node1(N_LOCAL, node1(N_LITERAL, v));
+        }
     }
-    else {
-        v = node1(N_LOCAL, node1(N_LITERAL, v));
-    }
+    else
+        c_error(c);
 
     return v;
 }
@@ -666,10 +672,8 @@ static mpdm_t statement(struct mpsl_c *c)
         v = node0(N_NOP);
 
         do {
-            if (c->token == T_SYMBOL) {
-                w1 = var(c);
-
-                /* has initialization value? */
+            if ((w1 = var(c)) != NULL) {
+                /* does it have an initialization value? */
                 if (c->token == T_EQUAL) {
                     token(c);
                     w2 = expr(c);
@@ -682,9 +686,6 @@ static mpdm_t statement(struct mpsl_c *c)
                 if (c->token == T_COMMA)
                     token(c);
             }
-            else
-                c_error(c);
-
         } while (!c->error && c->token != T_SEMI);
 
         token(c);
@@ -693,9 +694,7 @@ static mpdm_t statement(struct mpsl_c *c)
     if (c->token == T_SUB) {
         token(c);
 
-        if (c->token == T_SYMBOL) {
-            w = var(c);
-
+        if ((w = var(c)) != NULL) {
             /* argument name array */
             mpdm_t a = mpdm_ref(MPDM_A(0));
 
@@ -722,8 +721,6 @@ static mpdm_t statement(struct mpsl_c *c)
             v = node1(N_VOID, v);
             mpdm_unref(a);
         }
-        else
-            c_error(c);
     }
     else
     if (c->token == T_RETURN) {
