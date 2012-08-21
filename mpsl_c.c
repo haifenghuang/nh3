@@ -38,7 +38,7 @@
 typedef enum {
     T_EOP,    T_ERROR,
     T_IF,     T_ELSE,    T_WHILE,   T_BREAK,   T_FOREACH,
-    T_LOCAL,  T_GLOBAL,  T_SUB,     T_RETURN,  T_NULL,    T_THIS,
+    T_VAR,    T_SUB,     T_RETURN,  T_NULL,    T_THIS,
     T_LBRACE, T_RBRACE,  T_LPAREN,  T_RPAREN,  T_LBRACK,  T_RBRACK,
     T_COLON,  T_SEMI,    T_DOT,     T_COMMA,
     T_GT,     T_LT,      T_PIPE,    T_AMP,
@@ -246,8 +246,7 @@ again:
             STOKEN(L"else",     T_ELSE);
             STOKEN(L"while",    T_WHILE);
             STOKEN(L"break",    T_BREAK);
-            STOKEN(L"local",    T_LOCAL);
-            STOKEN(L"global",   T_GLOBAL);
+            STOKEN(L"var",      T_VAR);
             STOKEN(L"sub",      T_SUB);
             STOKEN(L"return",   T_RETURN);
             STOKEN(L"NULL",     T_NULL);
@@ -493,7 +492,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         T_AMPEQ, T_PIPEEQ, T_CARETEQ,
         T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTER, T_SLASH, T_PERCENT, 
         T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
-        T_DAMP, T_DPIPE, T_LOCAL, T_GLOBAL, T_EQUAL,
+        T_DAMP, T_DPIPE, T_EQUAL,
         T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, T_VIRGULE,
         T_THARRW, T_FATARRW, -1
     };
@@ -502,7 +501,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         N_IBAND, N_IBOR, N_IXOR,
         N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
         N_FUNCAL, N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
-        N_AND, N_OR, N_LOCAL, N_GLOBAL, N_ASSIGN,
+        N_AND, N_OR, N_ASSIGN,
         N_BINAND, N_BINOR, N_XOR, N_SHL, N_SHR, N_JOIN,
         N_MAP, N_HMAP, -1
     };
@@ -660,9 +659,8 @@ static mpdm_t statement(struct mpsl_c *c)
             v = node2(N_FOREACH, w, statement(c));
     }
     else
-    if (c->token == T_LOCAL || c->token == T_GLOBAL) {
+    if (c->token == T_VAR) {
         mpdm_t w1, w2;
-        mpsl_node_t op = node_by_token(c);
 
         token(c);
         v = node0(N_NOP);
@@ -679,7 +677,7 @@ static mpdm_t statement(struct mpsl_c *c)
                 else
                     w2 = node0(N_NULL);
 
-                v = node2(N_SEQ, v, node2(N_ASSIGN, w1, w2));
+                v = node2(N_SEQ, v, node1(N_VOID, node2(N_ASSIGN, w1, w2)));
 
                 if (c->token == T_COMMA)
                     token(c);
