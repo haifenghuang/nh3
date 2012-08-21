@@ -719,6 +719,7 @@ static mpdm_t statement(struct mpsl_c *c)
 
             v = node2(N_SUBDEF, node1(N_LITERAL, a), statement(c));
             v = node2(N_ASSIGN, w, v);
+            v = node1(N_VOID, v);
             mpdm_unref(a);
         }
         else
