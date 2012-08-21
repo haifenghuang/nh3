@@ -597,6 +597,35 @@ static mpdm_t expr(struct mpsl_c *c)
 }
 
 
+static mpdm_t var(struct mpsl_c *c)
+/* returns a symbol to be created */
+{
+    mpdm_t v, w;
+
+    v = tstr(c);
+    token(c);
+
+    if (c->token == T_DOT) {
+        v = node1(N_SYMID, v);
+
+        do {
+            token(c);
+
+            w = node1(N_LITERAL, tstr(c));
+            token(c);
+
+            v = node2(N_PARTOF, node1(N_SYMVAL, v), w);
+        }
+        while (c->token == T_DOT);
+    }
+    else {
+        v = node1(N_LOCAL, node1(N_LITERAL, v));
+    }
+
+    return v;
+}
+
+
 static mpdm_t statement(struct mpsl_c *c)
 /* returns a statement */
 {
@@ -640,8 +669,7 @@ static mpdm_t statement(struct mpsl_c *c)
 
         do {
             if (c->token == T_SYMBOL) {
-                w1 = node1(N_LITERAL, tstr(c));
-                token(c);
+                w1 = var(c);
 
                 /* has initialization value? */
                 if (c->token == T_EQUAL) {
@@ -651,7 +679,7 @@ static mpdm_t statement(struct mpsl_c *c)
                 else
                     w2 = node0(N_NULL);
 
-                v = node2(N_SEQ, v, node2(op, w1, w2));
+                v = node2(N_SEQ, v, node2(N_ASSIGN, w1, w2));
 
                 if (c->token == T_COMMA)
                     token(c);
@@ -668,18 +696,7 @@ static mpdm_t statement(struct mpsl_c *c)
         token(c);
 
         if (c->token == T_SYMBOL) {
-            w = node1(N_LITERAL, tstr(c));
-            token(c);
-
-            /* new symbol name must have only symbols and dots */
-            while (!c->error && c->token == T_DOT) {
-                token(c);
-
-                if (c->token == T_SYMBOL)
-                    w = node2(N_PARTOF, node1(N_SYMVAL, w), term(c));
-                else
-                    c_error(c);
-            }
+            w = var(c);
 
             /* argument name array */
             mpdm_t a = mpdm_ref(MPDM_A(0));
@@ -703,7 +720,7 @@ static mpdm_t statement(struct mpsl_c *c)
             }
 
             v = node2(N_SUBDEF, node1(N_LITERAL, a), statement(c));
-            v = node2(N_LOCAL, w, v);
+            v = node2(N_ASSIGN, w, v);
             mpdm_unref(a);
         }
         else
@@ -829,7 +846,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_SUBSCR:  O(1); O(2); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
     case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_STI); o(c, OP_POP); break;
-    case N_LOCAL:   o(c, OP_TLT); O(1); O(2); o(c, OP_STI); o(c, OP_POP); break;
+    case N_LOCAL:   o(c, OP_TLT); O(1); break;
     case N_RETURN:  O(1); o(c, OP_TPO); o(c, OP_RET); break;
     case N_FUNCAL:  O(1); O(2); o(c, OP_CAL); break;
     case N_BINAND:  O(1); O(2); o(c, OP_AND); break;
