@@ -265,6 +265,10 @@ int main(int argc, char *argv[])
     /* nested subroutines */
     do_test("sub circlen(r) { sub pi() { return 3.14; } return 2 * pi() * r; } T = circlen(2);", MPDM_R(6.28 * 2));
 
+    do_test("T = 0; sub six { return 6; } T = six();", MPDM_I(6));
+    do_test("T = 0; var a = {six: sub { return 6; }}; T = a.six();", MPDM_I(6));
+    do_test("T = 0; var a = {}; sub a.six { return 6; } T = a.six();", MPDM_I(6));
+
     test_summary();
 
     return 0;
