@@ -606,19 +606,8 @@ static mpdm_t var(struct mpsl_c *c)
         token(c);
 
         if (c->token == T_DOT) {
-            v = node1(N_SYMID, v);
-
-            do {
-                mpdm_t w;
-
-                token(c);
-
-                w = node1(N_LITERAL, tstr(c));
-                token(c);
-
-                v = node2(N_PARTOF, node1(N_SYMVAL, v), w);
-            }
-            while (c->token == T_DOT);
+            token(c);
+            v = node2(N_PARTOF, node1(N_SYMVAL, node1(N_SYMID, v)), var(c));
         }
         else {
             v = node1(N_LOCAL, node1(N_LITERAL, v));
