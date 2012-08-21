@@ -131,6 +131,8 @@ int main(int argc, char *argv[])
 
     /* create the T global variable */
     mpdm_hset_s(mpdm_root(), L"T", NULL);
+    mpdm_hset_s(mpdm_root(), L"TT", NULL);
+    mpdm_hset_s(mpdm_root(), L"L", NULL);
 
     do_test("1;", NULL);
     do_test("1 + 2;", NULL);
@@ -174,32 +176,32 @@ int main(int argc, char *argv[])
 
     mpdm_unref(v);
 
-    do_test("local addr = { name: 'angel', email: 'angel@triptico.com' };", NULL);
+    do_test("var addr = { name: 'angel', email: 'angel@triptico.com' };", NULL);
 
-    do_test("local tt = 1234; T = tt;", MPDM_I(1234));
-    do_test("global TT = { 'name': 'me', 'host': 'localhost', 'one': 1, 'two': 2, 'german': { 'ein': 1, 'zwei': 2 } }; T = 1;", MPDM_I(1));
+    do_test("var tt = 1234; T = tt;", MPDM_I(1234));
+    do_test("TT = { 'name': 'me', 'host': 'varhost', 'one': 1, 'two': 2, 'german': { 'ein': 1, 'zwei': 2 } }; T = 1;", MPDM_I(1));
     do_test("T = TT.name;", MPDM_LS(L"me"));
     do_test("T = TT.one + TT.two;", MPDM_I(3));
     do_test("T = 1 + TT.two;", MPDM_I(3));
     do_test("T = TT.one + 2;", MPDM_I(3));
     do_test("TT.one = 111; T = TT.one;", MPDM_I(111));
     do_test("TT.german.ein = 222; T = TT.german.ein;", MPDM_I(222));
-    do_test("global L = [10, 20, 30];", NULL);
+    do_test("L = [10, 20, 30];", NULL);
     do_test("T = L[1];", MPDM_I(20));
     do_test("L[2] = 1000; T = L[2];", MPDM_I(1000));
     do_test("L = [10, 20, 30, [1, 2, 3]];", NULL);
     do_test("L[3][0] = 123; T = L[3][0];", MPDM_I(123));
-    do_test("T = TT['host'];", MPDM_LS(L"localhost"));
+    do_test("T = TT['host'];", MPDM_LS(L"varhost"));
     do_test("T = L[1 + 1];", MPDM_I(30));
     do_test("TT['three'] = 3; T = TT.three;", MPDM_I(3));
 
-    do_test("local n = 0; while (n < 10) n = n + 1; T = n;", MPDM_I(10));
-    do_test("local n = 123; if (n < 200) { T = 1; } else T = 2;", MPDM_I(1));
-    do_test("local n = 123; if (n > 200) { T = 1; } else T = 2;", MPDM_I(2));
+    do_test("var n = 0; while (n < 10) n = n + 1; T = n;", MPDM_I(10));
+    do_test("var n = 123; if (n < 200) { T = 1; } else T = 2;", MPDM_I(1));
+    do_test("var n = 123; if (n > 200) { T = 1; } else T = 2;", MPDM_I(2));
 
-    do_test("local pi; sub pi { return 3.14; } T = pi();", MPDM_R(3.14));
-    do_test("local pi; sub pi() { return 3.14; } T = pi();", MPDM_R(3.14));
-    do_test("local sum; sub sum(a, b) { return a + b; } T = sum(5, 6);", MPDM_I(11));
+    do_test("var pi; sub pi { return 3.14; } T = pi();", MPDM_R(3.14));
+    do_test("var pi; sub pi() { return 3.14; } T = pi();", MPDM_R(3.14));
+    do_test("var sum; sub sum(a, b) { return a + b; } T = sum(5, 6);", MPDM_I(11));
 
     do_test("sub pi { return 3.14; } T = pi();", MPDM_R(3.14));
     do_test("sub pi() { return 3.14; } T = pi();", MPDM_R(3.14));
@@ -212,8 +214,8 @@ int main(int argc, char *argv[])
     do_test("T = (1 < 2);", MPDM_I(1));
     do_test("T = (1 == 1.0 && 2 == 2.000);", MPDM_I(1));
     do_test("T = (1 == 2 || 2 == 2.000);", MPDM_I(1));
-    do_test("local t = NULL; T = (t == NULL);", MPDM_I(1));
-    do_test("local t = NULL; T = (t != NULL);", MPDM_I(0));
+    do_test("var t = NULL; T = (t == NULL);", MPDM_I(1));
+    do_test("var t = NULL; T = (t != NULL);", MPDM_I(0));
     do_test("T = 0; T = T == 0 && 1 || 2;", MPDM_I(1));
     do_test("T = 1; T = T == 0 && 1 || 2;", MPDM_I(2));
     do_test("T = 0; T = T < time() && 1 || 2;", MPDM_I(1));
@@ -224,16 +226,16 @@ int main(int argc, char *argv[])
     do_test("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return this.x; } T = obj.get_x();", MPDM_I(1234));
     do_test("global obj = { x: 2, y: 3, size: NULL }; sub obj.size { return this.x * this.y; } T = obj.size();", MPDM_I(6));
 */
-    do_test("local pi = sub () { return 3.14; }; T = pi();", MPDM_R(3.14));
-    do_test("local obj = { x: 1234, get_x: sub { return this.x; }}; T = obj.get_x();", MPDM_I(1234));
-    do_test("local obj = { x: 1234, get_x: sub () { return this.x; }}; T = obj.get_x();", MPDM_I(1234));
-    do_test("local obj = { x: 1234, get_fx: sub (f) { return f * this.x; }}; T = obj.get_fx(10);", MPDM_I(12340));
+    do_test("var pi = sub () { return 3.14; }; T = pi();", MPDM_R(3.14));
+    do_test("var obj = { x: 1234, get_x: sub { return this.x; }}; T = obj.get_x();", MPDM_I(1234));
+    do_test("var obj = { x: 1234, get_x: sub () { return this.x; }}; T = obj.get_x();", MPDM_I(1234));
+    do_test("var obj = { x: 1234, get_fx: sub (f) { return f * this.x; }}; T = obj.get_fx(10);", MPDM_I(12340));
 
 //    do_test("print(1234, 5678, \"--hello\\n\");", NULL);
 
-    do_test("local n = 0; while (n < 10) n += 1; T = n;", MPDM_I(10));
-    do_test("local n = 3; n *= 7; T = n;", MPDM_I(3 * 7));
-    do_test("local n = 12345678; n &= 0xff; T = n;", MPDM_I(12345678 & 0xff));
+    do_test("var n = 0; while (n < 10) n += 1; T = n;", MPDM_I(10));
+    do_test("var n = 3; n *= 7; T = n;", MPDM_I(3 * 7));
+    do_test("var n = 12345678; n &= 0xff; T = n;", MPDM_I(12345678 & 0xff));
 
     do_test("/* comment */ T = 1;", MPDM_I(1));
     do_test("T /* comment */ = 1;", MPDM_I(1));
@@ -244,10 +246,10 @@ int main(int argc, char *argv[])
     do_test("T = 1; /* comment */", MPDM_I(1));
     do_test("T /** comment **/ = 1;", MPDM_I(1));
 
-    do_test("local n = 1; ++n; T = n;", MPDM_I(2));
-    do_test("local n = 10; T = ++n;", MPDM_I(11));
-    do_test("local n = 1; --n; T = n;", MPDM_I(0));
-    do_test("local n = 10; T = --n;", MPDM_I(9));
+    do_test("var n = 1; ++n; T = n;", MPDM_I(2));
+    do_test("var n = 10; T = ++n;", MPDM_I(11));
+    do_test("var n = 1; --n; T = n;", MPDM_I(0));
+    do_test("var n = 10; T = --n;", MPDM_I(9));
 
     do_test("T = 'a' ~ 'b';", MPDM_LS(L"ab"));
     do_test("T = [1, 2, 3] ~ ':';", MPDM_LS(L"1:2:3"));
