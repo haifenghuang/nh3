@@ -270,6 +270,10 @@ int main(int argc, char *argv[])
     do_test("T = 0; var a = {}; sub a.six { return 6; } T = a.six();", MPDM_I(6));
     do_test("T = 0; var a = {b: {}}; sub a.b.six { return 6; } T = a.b.six();", MPDM_I(6));
 
+    do_test("T = '123'.size();", MPDM_I(3));
+    do_test("T = [1, 2, 3, 4].size();", MPDM_I(4));
+    do_test("T = {a: 1, b: 2, c: 3}.size();", MPDM_I(3));
+
     test_summary();
 
     return 0;
