@@ -5,8 +5,6 @@ Release Critical Bugs
 ---------------------
 
  * 3000: Add \x{hhhh} to strings.
- * 3002: Decide what to do about the local/global issue
-   of subroutine definitions.
  * 3004: Implement `eq'.
  * 3005: Implement `ne'.
  * 3006: Implement N_SINC.
@@ -231,5 +229,7 @@ Closed
    (randomly balanced binary trees) (Tue, 10 Jul 2012 12:15:06 +0200).
  * 3001: Design iterators (Sun, 19 Aug 2012 12:50:51 +0200).
  * 3003: Implement string concat (~) (Sun, 19 Aug 2012 12:50:51 +0200).
+ * 3002: Decide what to do about the local/global issue
+   of subroutine definitions (Wed, 22 Aug 2012 14:03:39 +0200).
 
 Email bugs to angel@triptico.com
