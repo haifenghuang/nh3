@@ -50,7 +50,8 @@ typedef enum {
     T_EQEQ,   T_BANGEQ,  T_CARETEQ,
     T_DGTEQ,  T_DLTEQ,   T_DPIPEEQ, T_DAMPEQ,
     T_THARRW, T_FATARRW, T_VIRARRW, T_COLARRW,
-    T_SYMBOL, T_LITERAL
+    T_SYMBOL, T_LITERAL, T_BLANK,   T_BCOMMNT,
+    T_SQUOTE, T_DQUOTE
 } mpsl_token_t;
 
 
@@ -106,11 +107,6 @@ void POKE(struct mpsl_c *c, wchar_t k) { c->token_s = mpdm_poke_o(c->token_s, &c
 
 #define STORE(COND) while (COND) { POKE(c, c->c); nc(c); } POKE(c, L'\0')
 
-#define COMP(d,e,de) if (c->c == i) { \
-        if (d != -1) { nc(c); t = d; } \
-        if (c->c == L'=' && de != -1) { nc(c); t = de; } \
-    } else if (c->c == L'=' && e != -1) { nc(c); t = e; }
-
 #define STOKEN(s,v) if (t == T_ERROR && wcscmp(c->token_s, s) == 0) t = v
 
 #define DIGIT(d) ((d) >= L'0' && (d) <= L'9')
@@ -119,64 +115,101 @@ void POKE(struct mpsl_c *c, wchar_t k) { c->token_s = mpdm_poke_o(c->token_s, &c
 #define HEXDG(h) (DIGIT(h) || ((h) >= L'a' && (h) <= L'f') || ((h) >= L'A' && (h) <= L'F'))
 #define OCTDG(h) ((h) >= L'0' && (h) <= L'7')
 
+static struct {
+    wchar_t         c;
+    mpsl_token_t    t;
+    mpsl_token_t    p;
+} martians[] = {
+    { L' ', T_BLANK,    T_ERROR }, { L'\t', T_BLANK,    T_ERROR },
+    { L'\r', T_BLANK,   T_ERROR }, { L'\n', T_BLANK,    T_ERROR },
+    { L'{', T_LBRACE,   T_ERROR }, { L'}', T_RBRACE,    T_ERROR },
+    { L'(', T_LPAREN,   T_ERROR }, { L')', T_RPAREN,    T_ERROR },
+    { L'[', T_LBRACK,   T_ERROR }, { L']', T_RBRACK,    T_ERROR },
+    { L':', T_COLON,    T_ERROR }, { L';', T_SEMI,      T_ERROR },
+    { L'.', T_DOT,      T_ERROR }, { L',', T_COMMA,     T_ERROR },
+    { L'>', T_GT,       T_ERROR }, { L'<', T_LT,        T_ERROR },
+    { L'|', T_PIPE,     T_ERROR }, { L'&', T_AMP,       T_ERROR },
+    { L'+', T_PLUS,     T_ERROR }, { L'-', T_MINUS,     T_ERROR },
+    { L'=', T_EQUAL,    T_ERROR }, { L'!', T_BANG,      T_ERROR },
+    { L'*', T_ASTER,    T_ERROR }, { L'/', T_SLASH,     T_ERROR },
+    { L'%', T_PERCENT,  T_ERROR }, { L'^', T_CARET,     T_ERROR },
+    { L'\'', T_SQUOTE,  T_ERROR }, { L'"', T_DQUOTE,    T_ERROR },
+    { L'~', T_VIRGULE,  T_ERROR },
+
+    { L'>', T_COLARRW,  T_COLON },
+    { L'>', T_DGT,      T_GT    }, { L'=', T_GTEQ,      T_GT    },
+    { L'=', T_DGTEQ,    T_DGT   },
+    { L'<', T_DLT,      T_LT    }, { L'=', T_GTEQ,      T_LT    },
+    { L'=', T_DLTEQ,    T_DLT   },
+    { L'|', T_DPIPE,    T_PIPE  }, { L'=', T_PIPEEQ,    T_PIPE  },
+    { L'=', T_DPIPEEQ,  T_DPIPE },
+    { L'&', T_DAMP,     T_AMP   }, { L'=', T_AMPEQ,     T_AMP   },
+    { L'=', T_DAMPEQ,   T_DAMP  },
+    { L'+', T_DPLUS,    T_PLUS  }, { L'=', T_PLUSEQ,    T_PLUS  },
+    { L'-', T_DMINUS,   T_MINUS }, { L'=', T_MINUSEQ,   T_MINUS },
+    { L'>', T_THARRW,   T_MINUS },
+    { L'=', T_EQEQ,     T_EQUAL }, { L'>', T_FATARRW,   T_EQUAL },
+    { L'=', T_BANGEQ,   T_BANG  },
+    { L'=', T_ASTEREQ,  T_ASTER },
+    { L'=', T_SLASHEQ,  T_SLASH }, { L'*', T_BCOMMNT,   T_SLASH },
+    { L'=', T_PERCEQ,   T_PERCENT },
+    { L'=', T_CARETEQ,  T_CARET },
+    { L'>', T_VIRARRW,  T_VIRGULE },
+    { 0,    0,          0 }
+};
+
+
+static mpsl_token_t martian(struct mpsl_c *c) {
+    int n;
+    mpsl_token_t t = T_ERROR;
+
+    if (c->c == '\0' || c->c == WEOF)
+        t = T_EOP;
+    else
+    for (n = 0; martians[n].c; n++) {
+        if (martians[n].p == t && martians[n].c == c->c) {
+            t = martians[n].t;
+            nc(c);
+        }
+    }
+
+    return t;
+}
+
 
 static mpsl_token_t token(struct mpsl_c *c)
 {
     mpsl_token_t t;
-    wchar_t i;
 
     c->token_o = 0;
 
 again:
-    t = T_ERROR;
-    i = c->c;
+    t = martian(c);
 
-    switch (i) {
-    case L' ': case L'\t': case L'\r': case L'\n': nc(c); goto again;
-    case L'\0': case WEOF: t = T_EOP; break;
-    case L'\'': nc(c); STORE(c->c != L'\''); nc(c); t = T_LITERAL; break;
-    case L'{':  t = T_LBRACE;  nc(c); break;
-    case L'}':  t = T_RBRACE;  nc(c); break;
-    case L'(':  t = T_LPAREN;  nc(c); break;
-    case L')':  t = T_RPAREN;  nc(c); break;
-    case L'[':  t = T_LBRACK;  nc(c); break;
-    case L']':  t = T_RBRACK;  nc(c); break;
-    case L':':  t = T_COLON;   nc(c); break;
-    case L';':  t = T_SEMI;    nc(c); break;
-    case L'.':  t = T_DOT;     nc(c); break;
-    case L',':  t = T_COMMA;   nc(c); break;
-    case L'~':  t = T_VIRGULE; nc(c); break;
-    case L'>':  t = T_GT;      nc(c); COMP(T_DGT, T_GTEQ, T_DGTEQ); break;
-    case L'<':  t = T_LT;      nc(c); COMP(T_DLT, T_LTEQ, T_DLTEQ); break;
-    case L'|':  t = T_PIPE;    nc(c); COMP(T_DPIPE, T_PIPEEQ, T_DPIPEEQ); break;
-    case L'&':  t = T_AMP;     nc(c); COMP(T_DAMP, T_AMPEQ, T_DAMPEQ); break;
-    case L'+':  t = T_PLUS;    nc(c); COMP(T_DPLUS, T_PLUSEQ, -1); break;
-    case L'-':  t = T_MINUS;   nc(c); COMP(T_DMINUS, T_MINUSEQ, -1); break;
-    case L'=':  t = T_EQUAL;   nc(c); COMP(T_EQEQ, T_EQEQ, -1); break;
-    case L'!':  t = T_BANG;    nc(c); COMP(-1, T_BANGEQ, -1); break;
-    case L'*':  t = T_ASTER;   nc(c); COMP(-1, T_ASTEREQ, -1); break;
-    case L'%':  t = T_PERCENT; nc(c); COMP(-1, T_PERCEQ, -1); break;
-    case L'^':  t = T_CARET;   nc(c); COMP(-1, T_CARETEQ, -1); break;
-    case L'@':  /* FIXME */ t = T_FATARRW;  nc(c); break;
-    case L'/':  t = T_SLASH;   nc(c);
-        if (c->c == L'*') {
-            /* C-style comments */
-            nc(c);
-            while (c->c != L'\0' && c->c != WEOF) {
-                if (c->c == L'*') {
-                    if (nc(c) == L'/')
-                        break;
-                }
-                else
-                    nc(c);
+    switch (t) {
+    case T_BLANK:
+        goto again;
+
+    case T_BCOMMNT:
+        while (c->c != L'\0' && c->c != WEOF) {
+            if (c->c == L'*') {
+                if (nc(c) == L'/')
+                    break;
             }
-            nc(c);
-            goto again;
+            else
+                nc(c);
         }
-        COMP(-1, T_SLASHEQ, -1);
+        nc(c);
+        goto again;
+
+    case T_SQUOTE:
+        STORE(c->c != L'\'');
+        nc(c);
+        t = T_LITERAL;
         break;
-    case L'"':
-        while (nc(c) != L'"') {
+
+    case T_DQUOTE:
+            while (nc(c) != L'"') {
             wchar_t m = c->c;
 
             if (m == L'\\') {
@@ -201,59 +234,61 @@ again:
         break;
 
     default:
-        if (DIGIT(i)) {
-            t = T_LITERAL;
+        if (t == T_ERROR) {
+            if (DIGIT(c->c)) {
+                t = T_LITERAL;
 
-            if (i == L'0') {
-                POKE(c, c->c); nc(c);
-
-                if (c->c == L'b' || c->c == L'B') {
+                if (c->c == L'0') {
                     POKE(c, c->c); nc(c);
-                    STORE(c->c == L'0' || c->c == L'1');
-                    break;
-                }
-                else
-                if (c->c == L'x' || c->c == L'X') {
-                    POKE(c, c->c); nc(c);
-                    STORE(HEXDG(c->c));
-                    break;
-                }
-                else
-                if (OCTDG(c->c)) {
-                    STORE(OCTDG(c->c));
-                    break;
-                }
-                else
-                if (c->c != L'.') {
-                    POKE(c, L'\0');
-                    break;
-                }
-            }
 
-            while (DIGIT(c->c)) { POKE(c, c->c); nc(c); };
+                    if (c->c == L'b' || c->c == L'B') {
+                        POKE(c, c->c); nc(c);
+                        STORE(c->c == L'0' || c->c == L'1');
+                        break;
+                    }
+                    else
+                    if (c->c == L'x' || c->c == L'X') {
+                        POKE(c, c->c); nc(c);
+                        STORE(HEXDG(c->c));
+                        break;
+                    }
+                    else
+                    if (OCTDG(c->c)) {
+                        STORE(OCTDG(c->c));
+                        break;
+                    }
+                    else
+                    if (c->c != L'.') {
+                        POKE(c, L'\0');
+                        break;
+                    }
+                }
 
-            if (c->c == L'.' || c->c == L'e' || c->c == L'E') {
-                POKE(c, c->c); nc(c);
                 while (DIGIT(c->c)) { POKE(c, c->c); nc(c); };
+
+                if (c->c == L'.' || c->c == L'e' || c->c == L'E') {
+                    POKE(c, c->c); nc(c);
+                    while (DIGIT(c->c)) { POKE(c, c->c); nc(c); };
+                }
+
+                POKE(c, '\0');
             }
+            else
+            if (ALPHA(c->c)) {
+                STORE(ALNUM(c->c));
+                STOKEN(L"if",       T_IF);
+                STOKEN(L"else",     T_ELSE);
+                STOKEN(L"while",    T_WHILE);
+                STOKEN(L"break",    T_BREAK);
+                STOKEN(L"var",      T_VAR);
+                STOKEN(L"sub",      T_SUB);
+                STOKEN(L"return",   T_RETURN);
+                STOKEN(L"NULL",     T_NULL);
+                STOKEN(L"this",     T_THIS);
+                STOKEN(L"foreach",  T_FOREACH);
 
-            POKE(c, '\0');
-        }
-        else
-        if (ALPHA(i)) {
-            STORE(ALNUM(c->c));
-            STOKEN(L"if",       T_IF);
-            STOKEN(L"else",     T_ELSE);
-            STOKEN(L"while",    T_WHILE);
-            STOKEN(L"break",    T_BREAK);
-            STOKEN(L"var",      T_VAR);
-            STOKEN(L"sub",      T_SUB);
-            STOKEN(L"return",   T_RETURN);
-            STOKEN(L"NULL",     T_NULL);
-            STOKEN(L"this",     T_THIS);
-            STOKEN(L"foreach",  T_FOREACH);
-
-            if (t == T_ERROR) t = T_SYMBOL;
+                if (t == T_ERROR) t = T_SYMBOL;
+            }
         }
 
         break;
@@ -287,7 +322,7 @@ typedef enum {
     N_PINC,   N_PDEC,   N_SINC, N_SDEC,
     N_THIS,
     N_LOCAL,  N_GLOBAL,
-    N_SUBDEF,   N_RETURN,
+    N_SUBDEF, N_RETURN,
     N_VOID,
     N_EOP
 } mpsl_node_t;
