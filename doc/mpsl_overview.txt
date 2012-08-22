@@ -16,6 +16,42 @@ tokens. MPSL borrows syntax and concepts from many languages: C, Perl, Java
 or JavaScript. Statements end in a semi-colon, blocks are enclosed between {
 and } (curly brackets).
 
+Grammar
+~~~~~~~
+
+The grammar of MPSL 3.x in EBNF is as follows:
+
+ <program>      ::= <statement> ;
+ <statement>    ::= "if" <paren_expr> <statement> |
+                    "if" <paren_expr> <statement> "else" <statement> |
+                    "while" <paren_expr> <statement> |
+                    "foreach" <expr> <statement> |
+                    "sub" <id> <arglist> <statement> |
+                    "{" { <statement> } "}" |
+                    <expr> ";" |
+                    ";" ;
+ <arglist>      ::= "(" <symbol> , { "," <symbol> } ")" ;
+ <symbol>       ::= <alpha> , { <alnum> } ;
+ <id>           ::= <symbol> , { "." <symbol> } ;
+ <paren_expr>   ::= "(" <expr> ")" ;
+ <expr>         ::= <term> |
+                    <term> "[" <expr> "]" |
+                    <term> "(" <exprlist> ")" |
+                    <term> <op> <expr>
+ <term>         ::= "!" <expr> |
+                    "-" <expr> |
+                    "++" <id> |
+                    "--" <id> |
+                    "this" |
+                    "NULL" |
+                    <paren_expr> |
+                    <inline_hash> |
+                    <inline_array> |
+                    "sub" <arglist> <statement> |
+                    <literal> |
+                    <id>
+
+
 Comments
 ~~~~~~~~
 
