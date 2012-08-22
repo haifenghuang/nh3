@@ -163,9 +163,6 @@ static mpsl_token_t martian(struct mpsl_c *c) {
     int n;
     mpsl_token_t t = T_ERROR;
 
-    if (c->c == '\0' || c->c == WEOF)
-        t = T_EOP;
-    else
     for (n = 0; martians[n].c; n++) {
         if (martians[n].p == t && martians[n].c == c->c) {
             t = martians[n].t;
@@ -184,7 +181,10 @@ static mpsl_token_t token(struct mpsl_c *c)
     c->token_o = 0;
 
 again:
-    t = martian(c);
+    if (c->c == '\0' || c->c == WEOF)
+        t = T_EOP;
+    else
+        t = martian(c);
 
     switch (t) {
     case T_BLANK:
@@ -209,7 +209,7 @@ again:
         break;
 
     case T_DQUOTE:
-            while (nc(c) != L'"') {
+            while (c->c != L'"') {
             wchar_t m = c->c;
 
             if (m == L'\\') {
@@ -227,6 +227,7 @@ again:
                 }
             }
             POKE(c, m);
+            nc(c);
         }
         POKE(c, L'\0');
         nc(c);
