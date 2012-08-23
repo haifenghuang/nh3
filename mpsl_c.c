@@ -1110,9 +1110,29 @@ static void ARG(struct mpsl_vm *m)
 }
 
 
+int mpsl_is_true(mpdm_t v)
+{
+    /* if value is NULL, it's false */
+    if (v == NULL)
+        return 0;
+
+    /* if it's a printable string... */
+    if (v->flags & MPDM_STRING) {
+        wchar_t *ptr = mpdm_string(v);
+
+        /* ... and it's "" or the "0" string, it's false */
+        if (*ptr == L'\0' || (*ptr == L'0' && *(ptr + 1) == L'\0'))
+            return 0;
+    }
+
+    /* any other case is true */
+    return 1;
+}
+
+
 #define IPOP(m) mpdm_ival(POP(m))
 #define RPOP(m) mpdm_rval(POP(m))
-#define ISTRU(v) mpdm_ival(v)
+#define ISTRU(v) mpsl_is_true(v)
 #define BOOL(i) MPDM_I(i)
 
 static int exec_vm(struct mpsl_vm *m, int msecs)
