@@ -925,7 +925,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_SUBDEF:
         n = o2(c, OP_LIT, NULL);
         i = o2(c, OP_JMP, NULL); fix(c, n);
-        O(1); o(c, OP_ARG); O(2); o(c, OP_RET); fix(c, i);
+        O(1); o(c, OP_ARG); O(2); o(c, OP_TPO); o(c, OP_NUL); o(c, OP_RET); fix(c, i);
         break;
 
     case N_IADD: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_ADD); o(c, OP_SET); break;

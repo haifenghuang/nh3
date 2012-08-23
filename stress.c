@@ -274,6 +274,11 @@ int main(int argc, char *argv[])
     do_test("T = [1, 2, 3, 4].size();", MPDM_I(4));
     do_test("T = {a: 1, b: 2, c: 3}.size();", MPDM_I(3));
 
+    do_test("var class = { key: 0, init: sub (key) { this.key = key; }}; var key = 10; class.init(key); T = class.key;", MPDM_I(10));
+
+    /* this test should fail with "undefined symbol try" */
+//    do_test("var class = { key: 0, init: sub (key) { this.key = key; }, try: sub { return 0; }}; class.init(123); try(); T = 10;", MPDM_I(10));
+
     test_summary();
 
     return 0;
