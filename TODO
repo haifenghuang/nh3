@@ -5,10 +5,12 @@ Release Critical Bugs
 ---------------------
 
  * 3000: Add \x{hhhh} to strings.
- * 3004: Implement `eq'.
- * 3005: Implement `ne'.
  * 3006: Implement N_SINC.
  * 3007: Implement N_SDEC.
+ * 3008: When calling a method, arguments are erroneously found
+   inside the method symbol table. N_PARTOF and related code
+   should be rewritten and OP_TPU and OP_TPO generated only
+   for function calls *and* after arguments are resolved.
 
 Open Bugs
 ---------
@@ -231,5 +233,7 @@ Closed
  * 3003: Implement string concat (~) (Sun, 19 Aug 2012 12:50:51 +0200).
  * 3002: Decide what to do about the local/global issue
    of subroutine definitions (Wed, 22 Aug 2012 14:03:39 +0200).
+ * 3004: Implement `eq' (Use cmp(); Thu, 23 Aug 2012 12:11:08 +0200).
+ * 3005: Implement `ne' (Use cmp(); Thu, 23 Aug 2012 12:11:08 +0200).
 
 Email bugs to angel@triptico.com
