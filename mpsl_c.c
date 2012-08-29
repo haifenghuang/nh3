@@ -343,7 +343,6 @@ typedef enum {
 static mpdm_t node0(mpsl_node_t t) { mpdm_t r = RF(MPDM_A(1)); mpdm_aset(r, MPDM_I(t), 0); return UFND(r); }
 static mpdm_t node1(mpsl_node_t t, mpdm_t n1) { mpdm_t r = RF(node0(t)); mpdm_push(r, n1); return UFND(r); }
 static mpdm_t node2(mpsl_node_t t, mpdm_t n1, mpdm_t n2) { mpdm_t r = RF(node1(t, n1)); mpdm_push(r, n2); return UFND(r); }
-static mpdm_t node3(mpsl_node_t t, mpdm_t n1, mpdm_t n2, mpdm_t n3) { mpdm_t r = RF(node2(t, n1, n2)); mpdm_push(r, n3); return UFND(r); }
 
 static mpdm_t tstr(struct mpsl_c *c)
 /* returns the current token as a string */
