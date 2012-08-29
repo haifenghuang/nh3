@@ -182,20 +182,6 @@ static mpsl_token_t token(struct mpsl_c *c)
     c->token_o = 0;
 
 again:
-    /* special case: #!...\n at the start of the stream */
-    if (c->x == 2 && c->y == 1) {
-        if (c->c == L'#') {
-            nc(c);
-            if (c->c == L'!') {
-                /* read up to a new line */
-                nc(c);
-
-                while (c->c != L'\0' && c->c != WEOF && c->c != L'\n')
-                    nc(c);
-            }
-        }
-    }
-
     if (c->c == L'\0' || c->c == WEOF)
         t = T_EOP;
     else
@@ -809,6 +795,21 @@ static int parse(struct mpsl_c *c)
     mpdm_t v;
 
     nc(c);
+
+    /* special case: #!(.*)\n at the start of the stream */
+    if (c->c == L'#') {
+        nc(c);
+        if (c->c == L'!') {
+            /* read up to a new line */
+            nc(c);
+
+            while (c->c != L'\0' && c->c != WEOF && c->c != L'\n')
+                nc(c);
+        }
+        else
+            c_error(c);
+    }
+
     token(c);
 
     v = node0(N_NOP);
