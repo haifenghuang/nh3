@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
     do_test("T = 1 /* comment */;", MPDM_I(1));
     do_test("T = 1; /* comment */", MPDM_I(1));
     do_test("T /** comment **/ = 1;", MPDM_I(1));
-    do_test("T = 1; // C++ style comment", MPDM_I(1));
+    do_test("T = 2; // C++ style comment\nT = 1;", MPDM_I(1));
 
     do_test("var n = 1; ++n; T = n;", MPDM_I(2));
     do_test("var n = 10; T = ++n;", MPDM_I(11));
