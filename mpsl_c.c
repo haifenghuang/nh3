@@ -83,7 +83,7 @@ static wchar_t nc(struct mpsl_c *c)
     /* update position in source */
     if (c->c == L'\n') {
         c->y++;
-        c->x = -1;
+        c->x = 0;
     }
     else
         c->x++;
@@ -97,7 +97,7 @@ static void c_error(struct mpsl_c *c)
 {
     char tmp[64];
 
-    sprintf(tmp, "%d:%d: ", c->y, c->x);
+    sprintf(tmp, "%d:%d: ", c->y, c->x - 1);
     s_error(MPDM_MBS(tmp), MPDM_LS(L"syntax error"));
 
     c->error = 1;
