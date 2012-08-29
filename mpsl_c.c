@@ -50,7 +50,7 @@ typedef enum {
     T_EQEQ,   T_BANGEQ,  T_CARETEQ,
     T_DGTEQ,  T_DLTEQ,   T_DPIPEEQ, T_DAMPEQ,
     T_THARRW, T_FATARRW, T_VIRARRW, T_COLARRW,
-    T_SYMBOL, T_LITERAL, T_BLANK,   T_BCOMMNT,
+    T_SYMBOL, T_LITERAL, T_BLANK,   T_SLASHAST,
     T_SQUOTE, T_DQUOTE
 } mpsl_token_t;
 
@@ -151,7 +151,7 @@ static struct {
     { L'=', T_EQEQ,     T_EQUAL }, { L'>', T_FATARRW,   T_EQUAL },
     { L'=', T_BANGEQ,   T_BANG  },
     { L'=', T_ASTEREQ,  T_ASTER },
-    { L'=', T_SLASHEQ,  T_SLASH }, { L'*', T_BCOMMNT,   T_SLASH },
+    { L'=', T_SLASHEQ,  T_SLASH }, { L'*', T_SLASHAST,  T_SLASH },
     { L'=', T_PERCEQ,   T_PERCENT },
     { L'=', T_CARETEQ,  T_CARET },
     { L'>', T_VIRARRW,  T_VIRGULE },
@@ -191,7 +191,7 @@ again:
     case T_BLANK:
         goto again;
 
-    case T_BCOMMNT:
+    case T_SLASHAST:
         while (c->c != L'\0' && c->c != WEOF) {
             if (c->c == L'*') {
                 if (nc(c) == L'/')
