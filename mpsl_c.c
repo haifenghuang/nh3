@@ -97,7 +97,7 @@ static void c_error(struct mpsl_c *c)
 {
     char tmp[64];
 
-    sprintf(tmp, "%d:%d: ", c->y, c->x - 1);
+    sprintf(tmp, "%d:%d: ", c->y + 1, c->x);
     s_error(MPDM_MBS(tmp), MPDM_LS(L"syntax error"));
 
     c->error = 1;
