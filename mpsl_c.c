@@ -83,7 +83,7 @@ static wchar_t nc(struct mpsl_c *c)
     /* update position in source */
     if (c->c == L'\n') {
         c->y++;
-        c->x = 0;
+        c->x = 1;
     }
     else
         c->x++;
@@ -97,7 +97,7 @@ static void c_error(struct mpsl_c *c)
 {
     char tmp[64];
 
-    sprintf(tmp, "%d:%d: ", c->y + 1, c->x);
+    sprintf(tmp, "%d:%d: ", c->y, c->x);
     s_error(MPDM_MBS(tmp), MPDM_LS(L"syntax error"));
 
     c->error = 1;
@@ -159,7 +159,8 @@ static struct {
 };
 
 
-static mpsl_token_t martian(struct mpsl_c *c) {
+static mpsl_token_t martian(struct mpsl_c *c)
+{
     int n;
     mpsl_token_t t = T_ERROR;
 
@@ -181,7 +182,21 @@ static mpsl_token_t token(struct mpsl_c *c)
     c->token_o = 0;
 
 again:
-    if (c->c == '\0' || c->c == WEOF)
+    /* special case: #!...\n at the start of the stream */
+    if (c->x == 2 && c->y == 1) {
+        if (c->c == L'#') {
+            nc(c);
+            if (c->c == L'!') {
+                /* read up to a new line */
+                nc(c);
+
+                while (c->c != L'\0' && c->c != WEOF && c->c != L'\n')
+                    nc(c);
+            }
+        }
+    }
+
+    if (c->c == L'\0' || c->c == WEOF)
         t = T_EOP;
     else
         t = martian(c);
@@ -1260,6 +1275,8 @@ mpdm_t mpsl_compile(mpdm_t src)
 
     memset(&c, '\0', sizeof(c));
     mpdm_set(&c.prg, MPDM_A(0));
+
+    c.x = c.y = 1;
 
     /* src can be a file or a string */
     if ((c.f = mpdm_get_filehandle(src)) == NULL)

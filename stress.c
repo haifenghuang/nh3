@@ -279,6 +279,8 @@ int main(int argc, char *argv[])
     /* this test should fail with "undefined symbol try" */
 //    do_test("var class = { key: 0, init: sub (key) { this.key = key; }, try: sub { return 0; }}; class.init(123); try(); T = 10;", MPDM_I(10));
 
+    do_test("#!/usr/bin/env mpsl3\nT = 10;", MPDM_I(10));
+
     test_summary();
 
     return 0;
