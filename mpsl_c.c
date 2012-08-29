@@ -50,7 +50,7 @@ typedef enum {
     T_EQEQ,   T_BANGEQ,  T_CARETEQ,
     T_DGTEQ,  T_DLTEQ,   T_DPIPEEQ, T_DAMPEQ,
     T_THARRW, T_FATARRW, T_VIRARRW, T_COLARRW,
-    T_SYMBOL, T_LITERAL, T_BLANK,   T_SLASHAST,
+    T_SYMBOL, T_LITERAL, T_BLANK,   T_SLASHAST, T_DSLASH,
     T_SQUOTE, T_DQUOTE
 } mpsl_token_t;
 
@@ -120,38 +120,39 @@ static struct {
     mpsl_token_t    t;
     mpsl_token_t    p;
 } martians[] = {
-    { L' ', T_BLANK,    T_ERROR }, { L'\t', T_BLANK,    T_ERROR },
-    { L'\r', T_BLANK,   T_ERROR }, { L'\n', T_BLANK,    T_ERROR },
-    { L'{', T_LBRACE,   T_ERROR }, { L'}', T_RBRACE,    T_ERROR },
-    { L'(', T_LPAREN,   T_ERROR }, { L')', T_RPAREN,    T_ERROR },
-    { L'[', T_LBRACK,   T_ERROR }, { L']', T_RBRACK,    T_ERROR },
-    { L':', T_COLON,    T_ERROR }, { L';', T_SEMI,      T_ERROR },
-    { L'.', T_DOT,      T_ERROR }, { L',', T_COMMA,     T_ERROR },
-    { L'>', T_GT,       T_ERROR }, { L'<', T_LT,        T_ERROR },
-    { L'|', T_PIPE,     T_ERROR }, { L'&', T_AMP,       T_ERROR },
-    { L'+', T_PLUS,     T_ERROR }, { L'-', T_MINUS,     T_ERROR },
-    { L'=', T_EQUAL,    T_ERROR }, { L'!', T_BANG,      T_ERROR },
-    { L'*', T_ASTER,    T_ERROR }, { L'/', T_SLASH,     T_ERROR },
-    { L'%', T_PERCENT,  T_ERROR }, { L'^', T_CARET,     T_ERROR },
-    { L'\'', T_SQUOTE,  T_ERROR }, { L'"', T_DQUOTE,    T_ERROR },
+    { L' ', T_BLANK,    T_ERROR },  { L'\t', T_BLANK,    T_ERROR },
+    { L'\r', T_BLANK,   T_ERROR },  { L'\n', T_BLANK,    T_ERROR },
+    { L'{', T_LBRACE,   T_ERROR },  { L'}', T_RBRACE,    T_ERROR },
+    { L'(', T_LPAREN,   T_ERROR },  { L')', T_RPAREN,    T_ERROR },
+    { L'[', T_LBRACK,   T_ERROR },  { L']', T_RBRACK,    T_ERROR },
+    { L':', T_COLON,    T_ERROR },  { L';', T_SEMI,      T_ERROR },
+    { L'.', T_DOT,      T_ERROR },  { L',', T_COMMA,     T_ERROR },
+    { L'>', T_GT,       T_ERROR },  { L'<', T_LT,        T_ERROR },
+    { L'|', T_PIPE,     T_ERROR },  { L'&', T_AMP,       T_ERROR },
+    { L'+', T_PLUS,     T_ERROR },  { L'-', T_MINUS,     T_ERROR },
+    { L'=', T_EQUAL,    T_ERROR },  { L'!', T_BANG,      T_ERROR },
+    { L'*', T_ASTER,    T_ERROR },  { L'/', T_SLASH,     T_ERROR },
+    { L'%', T_PERCENT,  T_ERROR },  { L'^', T_CARET,     T_ERROR },
+    { L'\'', T_SQUOTE,  T_ERROR },  { L'"', T_DQUOTE,    T_ERROR },
     { L'~', T_VIRGULE,  T_ERROR },
 
     { L'>', T_COLARRW,  T_COLON },
-    { L'>', T_DGT,      T_GT    }, { L'=', T_GTEQ,      T_GT    },
+    { L'>', T_DGT,      T_GT    },  { L'=', T_GTEQ,      T_GT    },
     { L'=', T_DGTEQ,    T_DGT   },
-    { L'<', T_DLT,      T_LT    }, { L'=', T_GTEQ,      T_LT    },
+    { L'<', T_DLT,      T_LT    },  { L'=', T_GTEQ,      T_LT    },
     { L'=', T_DLTEQ,    T_DLT   },
-    { L'|', T_DPIPE,    T_PIPE  }, { L'=', T_PIPEEQ,    T_PIPE  },
+    { L'|', T_DPIPE,    T_PIPE  },  { L'=', T_PIPEEQ,    T_PIPE  },
     { L'=', T_DPIPEEQ,  T_DPIPE },
-    { L'&', T_DAMP,     T_AMP   }, { L'=', T_AMPEQ,     T_AMP   },
+    { L'&', T_DAMP,     T_AMP   },  { L'=', T_AMPEQ,     T_AMP   },
     { L'=', T_DAMPEQ,   T_DAMP  },
-    { L'+', T_DPLUS,    T_PLUS  }, { L'=', T_PLUSEQ,    T_PLUS  },
-    { L'-', T_DMINUS,   T_MINUS }, { L'=', T_MINUSEQ,   T_MINUS },
+    { L'+', T_DPLUS,    T_PLUS  },  { L'=', T_PLUSEQ,    T_PLUS  },
+    { L'-', T_DMINUS,   T_MINUS },  { L'=', T_MINUSEQ,   T_MINUS },
     { L'>', T_THARRW,   T_MINUS },
-    { L'=', T_EQEQ,     T_EQUAL }, { L'>', T_FATARRW,   T_EQUAL },
+    { L'=', T_EQEQ,     T_EQUAL },  { L'>', T_FATARRW,   T_EQUAL },
     { L'=', T_BANGEQ,   T_BANG  },
     { L'=', T_ASTEREQ,  T_ASTER },
     { L'=', T_SLASHEQ,  T_SLASH }, { L'*', T_SLASHAST,  T_SLASH },
+    { L'/', T_DSLASH,   T_SLASH },
     { L'=', T_PERCEQ,   T_PERCENT },
     { L'=', T_CARETEQ,  T_CARET },
     { L'>', T_VIRARRW,  T_VIRGULE },
@@ -201,6 +202,11 @@ again:
                 nc(c);
         }
         nc(c);
+        goto again;
+
+    case T_DSLASH:
+        while (c->c != L'\n' && c->c != L'\0' && c->c != WEOF)
+            nc(c);
         goto again;
 
     case T_SQUOTE:
