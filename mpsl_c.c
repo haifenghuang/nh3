@@ -863,7 +863,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
 
     switch (nt) {
     case N_NOP:     break;
-    case N_EOP:     o(c, OP_EOP); break;
+    case N_EOP:     o(c, OP_RET); break;
     case N_NULL:    o(c, OP_NUL); break;
     case N_SYMID:   o2(c, OP_LIT, mpdm_aget(node, 1)); o(c, OP_TBL); break;
     case N_LITERAL: o2(c, OP_LIT, mpdm_aget(node, 1)); break;
@@ -1198,7 +1198,6 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_TPO: --m->tt; break;
         case OP_TLT: PUSH(m, mpdm_aget(m->symtbl, m->tt - 1)); break;
         case OP_THS: PUSH(m, mpdm_aget(m->symtbl, m->tt - 2)); break;
-        case OP_RET: m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs)); break;
         case OP_ARG: ARG(m); break;
         case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
         case OP_JT:  if (ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
@@ -1229,6 +1228,12 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
                 mpdm_aset(m->c_stack, MPDM_I(m->pc), m->cs++);
                 m->pc = mpdm_ival(v);
             }
+            break;
+        case OP_RET:
+            if (m->cs)
+                m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs));
+            else
+                m->mode = VM_IDLE;
             break;
         case OP_ITE: i2 = IPOP(m);
             if (mpdm_iterator(TOS(m), &i2, &v, &w)) {
