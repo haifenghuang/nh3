@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
     do_test("var t = NULL; T = (t != NULL);", MPDM_I(0));
     do_test("T = 0; T = T == 0 && 1 || 2;", MPDM_I(1));
     do_test("T = 1; T = T == 0 && 1 || 2;", MPDM_I(2));
-    do_test("T = 0; T = T < time() && 1 || 2;", MPDM_I(1));
+    do_test("T = 0; T = T < sys.time() && 1 || 2;", MPDM_I(1));
 
 //    do_disasm("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return x; } T = obj.get_x();");
 /*    do_test("global obj = { x: 1234, get_x: NULL }; sub obj.get_x { return x; } T = obj.get_x();", MPDM_I(1234));

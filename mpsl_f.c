@@ -1381,6 +1381,8 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"uc",           MPDM_X(F_uc));
     mpdm_hset_s(v, L"lc",           MPDM_X(F_lc));
     mpdm_hset_s(v, L"tr",           MPDM_X(F_tr));
+    mpdm_hset_s(v, L"sprintf",      MPDM_X(F_sprintf));
+    mpdm_hset_s(v, L"strftime",     MPDM_X(F_strftime));
 
     /* "any type" methods */
     v = mpdm_hset_s(r, L"ANY",  MPDM_H(0));
@@ -1393,32 +1395,27 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"is_hash",  MPDM_X(F_is_hash));
     mpdm_hset_s(v, L"is_exec",  MPDM_X(F_is_exec));
 
-    /* I/O */
-    mpdm_hset_s(r, L"open",     MPDM_X(F_open));
-    mpdm_hset_s(r, L"popen",    MPDM_X(F_popen));
-    mpdm_hset_s(r, L"connect",  MPDM_X(F_connect));
-
-    /* library functions */
-    mpdm_hset_s(r, L"unlink",   MPDM_X(F_unlink));
-    mpdm_hset_s(r, L"stat",     MPDM_X(F_stat));
-    mpdm_hset_s(r, L"chmod",    MPDM_X(F_chmod));
-    mpdm_hset_s(r, L"chown",    MPDM_X(F_chown));
-    mpdm_hset_s(r, L"glob",     MPDM_X(F_glob));
-    mpdm_hset_s(r, L"chdir",    MPDM_X(F_chdir));
-    mpdm_hset_s(r, L"encoding", MPDM_X(F_encoding));
-    mpdm_hset_s(r, L"sprintf",  MPDM_X(F_sprintf));
-    mpdm_hset_s(r, L"strftime", MPDM_X(F_strftime));
-    mpdm_hset_s(r, L"gettext",  MPDM_X(F_gettext));
-    mpdm_hset_s(r, L"gettext_domain",  MPDM_X(F_gettext_domain));
-    mpdm_hset_s(r, L"print",    MPDM_X(F_print));
-    mpdm_hset_s(r, L"time",     MPDM_X(F_time));
-    mpdm_hset_s(r, L"random",   MPDM_X(F_random));
-    mpdm_hset_s(r, L"sleep",    MPDM_X(F_sleep));
-
-    mpdm_hset_s(r, L"mutex",     MPDM_X(F_mutex));
-    mpdm_hset_s(r, L"semaphore", MPDM_X(F_semaphore));
-
-    mpdm_hset_s(r, L"bincall",  MPDM_X(F_bincall));
+    /* "sys" namespace */
+    v = mpdm_hset_s(r, L"sys",          MPDM_H(0));
+    mpdm_hset_s(v, L"open",             MPDM_X(F_open));
+    mpdm_hset_s(v, L"popen",            MPDM_X(F_popen));
+    mpdm_hset_s(v, L"connect",          MPDM_X(F_connect));
+    mpdm_hset_s(v, L"unlink",           MPDM_X(F_unlink));
+    mpdm_hset_s(v, L"stat",             MPDM_X(F_stat));
+    mpdm_hset_s(v, L"chmod",            MPDM_X(F_chmod));
+    mpdm_hset_s(v, L"chown",            MPDM_X(F_chown));
+    mpdm_hset_s(v, L"glob",             MPDM_X(F_glob));
+    mpdm_hset_s(v, L"chdir",            MPDM_X(F_chdir));
+    mpdm_hset_s(v, L"encoding",         MPDM_X(F_encoding));
+    mpdm_hset_s(v, L"gettext",          MPDM_X(F_gettext));
+    mpdm_hset_s(v, L"gettext_domain",   MPDM_X(F_gettext_domain));
+    mpdm_hset_s(v, L"print",            MPDM_X(F_print));
+    mpdm_hset_s(v, L"time",             MPDM_X(F_time));
+    mpdm_hset_s(v, L"random",           MPDM_X(F_random));
+    mpdm_hset_s(v, L"sleep",            MPDM_X(F_sleep));
+    mpdm_hset_s(v, L"mutex",            MPDM_X(F_mutex));
+    mpdm_hset_s(v, L"semaphore",        MPDM_X(F_semaphore));
+    mpdm_hset_s(v, L"bincall",          MPDM_X(F_bincall));
 
     mpdm_hset_s(r, L"new",      MPDM_X(F_new));
 
