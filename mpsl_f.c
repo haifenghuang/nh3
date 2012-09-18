@@ -790,7 +790,7 @@ static mpdm_t io_obj(mpdm_t fd)
 
 
 /**
- * open - Opens a file.
+ * sys.open - Opens a file.
  * @filename: the file name
  * @mode: an fopen-like mode string
  *
@@ -809,7 +809,7 @@ static mpdm_t io_obj(mpdm_t fd)
  * [Input-Output]
  * [Character Set Conversion]
  */
-/** io = open(filename, mode); */
+/** io = sys.open(filename, mode); */
 static mpdm_t F_open(F_ARGS)
 {
     mpdm_t f = mpdm_open(A0, A1);
@@ -823,7 +823,7 @@ static mpdm_t F_open(F_ARGS)
 static mpdm_t M_pclose(F_ARGS) { return mpdm_pclose(mpdm_hget_s(l, L"f")); }
 
 /**
- * popen - Opens a pipe.
+ * sys.popen - Opens a pipe.
  * @prg: the program to pipe
  * @mode: an fopen-like mode string
  *
@@ -834,7 +834,7 @@ static mpdm_t M_pclose(F_ARGS) { return mpdm_pclose(mpdm_hget_s(l, L"f")); }
  * for a special double pipe reading-writing mode.
  * [Input-Output]
  */
-/** io = popen(prg, mode); */
+/** io = sys.popen(prg, mode); */
 static mpdm_t F_popen(F_ARGS)
 {
     mpdm_t f = mpdm_popen(A0, A1);
@@ -850,7 +850,7 @@ static mpdm_t F_popen(F_ARGS)
 
 
 /**
- * connect - Opens a client TCP/IP socket.
+ * sys.connect - Opens a client TCP/IP socket.
  * @h: host name or ip
  * @s: service or port number
  *
@@ -860,7 +860,7 @@ static mpdm_t F_popen(F_ARGS)
  * [Sockets]
  * [Input-Output]
  */
-/** io = connect(h, s); */
+/** io = sys.connect(h, s); */
 static mpdm_t F_connect(F_ARGS)
 {
     mpdm_t f = mpdm_connect(A0, A1);
@@ -873,20 +873,20 @@ static mpdm_t F_connect(F_ARGS)
 
 
 /**
- * unlink - Deletes a file.
+ * sys.unlink - Deletes a file.
  * @filename: file name to be deleted
  *
  * Deletes a file.
  * [Input-Output]
  */
-/** bool = unlink(filename); */
+/** bool = sys.unlink(filename); */
 static mpdm_t F_unlink(F_ARGS)
 {
     return mpsl_boolean(mpdm_unlink(A0));
 }
 
 /**
- * stat - Gives status from a file.
+ * sys.stat - Gives status from a file.
  * @filename: file name to get the status from
  *
  * Returns a 14 element array of the status (permissions, onwer, etc.)
@@ -902,28 +902,28 @@ static mpdm_t F_unlink(F_ARGS)
  * system-dependent.
  * [Input-Output]
  */
-/** array = stat(filename); */
+/** array = sys.stat(filename); */
 static mpdm_t F_stat(F_ARGS)
 {
     return mpdm_stat(A0);
 }
 
 /**
- * chmod - Changes a file's permissions.
+ * sys.chmod - Changes a file's permissions.
  * @filename: the file name
  * @perms: permissions (element 2 from stat())
  *
  * Changes the permissions for a file.
  * [Input-Output]
  */
-/** integer = chmod(filename, perms); */
+/** integer = sys.chmod(filename, perms); */
 static mpdm_t F_chmod(F_ARGS)
 {
     return MPDM_I(mpdm_chmod(A0, A1));
 }
 
 /**
- * chown - Changes a file's owner.
+ * sys.chown - Changes a file's owner.
  * @filename: the file name
  * @uid: user id (element 4 from stat())
  * @gid: group id (element 5 from stat())
@@ -931,14 +931,14 @@ static mpdm_t F_chmod(F_ARGS)
  * Changes the owner and group id's for a file.
  * [Input-Output]
  */
-/** integer = chown(filename, uid, gid); */
+/** integer = sys.chown(filename, uid, gid); */
 static mpdm_t F_chown(F_ARGS)
 {
     return MPDM_I(mpdm_chown(A0, A1, A2));
 }
 
 /**
- * glob - Executes a file globbing.
+ * sys.glob - Executes a file globbing.
  * @spec: Globbing spec
  * @base: Optional base directory
  *
@@ -953,14 +953,14 @@ static mpdm_t F_chown(F_ARGS)
  * Directories are returned first and their names end with a slash.
  * [Input-Output]
  */
-/** array = glob(spec, base); */
+/** array = sys.glob(spec, base); */
 static mpdm_t F_glob(F_ARGS)
 {
     return mpdm_glob(A0, A1);
 }
 
 /**
- * encoding - Sets the current charset encoding for files.
+ * sys.encoding - Sets the current charset encoding for files.
  * @charset: the charset name.
  *
  * Sets the current charset encoding for files. Future opened
@@ -978,14 +978,14 @@ static mpdm_t F_glob(F_ARGS)
  * [Input-Output]
  * [Character Set Conversion]
  */
-/** integer = encoding(charset); */
+/** integer = sys.encoding(charset); */
 static mpdm_t F_encoding(F_ARGS)
 {
     return MPDM_I(mpdm_encoding(A0));
 }
 
 /**
- * gettext - Translates a string to the current language.
+ * sys.gettext - Translates a string to the current language.
  * @str: the string
  *
  * Translates the @str string to the current language.
@@ -998,14 +998,14 @@ static mpdm_t F_encoding(F_ARGS)
  * [Strings]
  * [Localization]
  */
-/** string = gettext(str); */
+/** string = sys.gettext(str); */
 static mpdm_t F_gettext(F_ARGS)
 {
     return mpdm_gettext(A0);
 }
 
 /**
- * gettext_domain - Sets domain and data directory for translations.
+ * sys.gettext_domain - Sets domain and data directory for translations.
  * @dom: the domain (application name)
  * @data: directory contaning the .mo files
  *
@@ -1017,7 +1017,7 @@ static mpdm_t F_gettext(F_ARGS)
  * [Strings]
  * [Localization]
  */
-/** bool = gettext_domain(dom, data); */
+/** bool = sys.gettext_domain(dom, data); */
 static mpdm_t F_gettext_domain(F_ARGS)
 {
     return MPDM_I(mpdm_gettext_domain(A0, A1));
@@ -1025,33 +1025,33 @@ static mpdm_t F_gettext_domain(F_ARGS)
 
 
 /**
- * time - Returns the current time.
+ * sys.time - Returns the current time.
  *
  * Returns the current time from the epoch (C library time()).
  * [Time]
  */
-/** integer = time(); */
+/** integer = sys.time(); */
 static mpdm_t F_time(F_ARGS)
 {
     return MPDM_I(time(NULL));
 }
 
 /**
- * chdir - Changes the working directory
+ * sys.chdir - Changes the working directory
  * @dir: the new path
  *
  * Changes the working directory
  * [Input-Output]
  */
-/** integer = chdir(dir); */
+/** integer = sys.chdir(dir); */
 static mpdm_t F_chdir(F_ARGS)
 {
     return MPDM_I(mpdm_chdir(A0));
 }
 
 /**
- * sprintf - Formats a sprintf()-like string.
- * @fmt: the string format
+ * str.sprintf - Formats a sprintf()-like string.
+ * @str: the format string
  * @arg1: first argument
  * @arg2: second argument
  * @argn: nth argument
@@ -1060,7 +1060,7 @@ static mpdm_t F_chdir(F_ARGS)
  * the variable arguments.
  * [Strings]
  */
-/** string = sprintf(fmt, arg1 [,arg2 ... argn]); */
+/** string = str.sprintf(arg1 [,arg2 ... argn]); */
 static mpdm_t F_sprintf(F_ARGS)
 {
     return mpdm_sprintf(l, a);
@@ -1068,7 +1068,7 @@ static mpdm_t F_sprintf(F_ARGS)
 
 
 /**
- * print - Writes values to stdout.
+ * sys.print - Writes values to stdout.
  * @arg1: first argument
  * @arg2: second argument
  * @argn: nth argument
@@ -1076,7 +1076,7 @@ static mpdm_t F_sprintf(F_ARGS)
  * Writes the variable arguments to stdout.
  * [Input-Output]
  */
-/** print(arg1 [,arg2 ... argn]); */
+/** sys.print(arg1 [,arg2 ... argn]); */
 static mpdm_t F_print(F_ARGS)
 {
     int n;
@@ -1102,12 +1102,12 @@ static mpdm_t F_bincall(F_ARGS)
 int getpid(void);
 
 /**
- * random - Returns a random value.
+ * sys.random - Returns a random value.
  *
  * Returns a random number from 0 to value - 1.
  * [Miscellaneous]
  */
-/** integer = random(value); */
+/** integer = sys.random(value); */
 static mpdm_t F_random(F_ARGS)
 {
     static unsigned int seed = 0;
@@ -1130,13 +1130,13 @@ static mpdm_t F_random(F_ARGS)
 
 
 /**
- * sleep - Sleeps a number of milliseconds.
+ * sys.sleep - Sleeps a number of milliseconds.
  *
  * Sleeps a number of milliseconds.
  * [Threading]
  * [Time]
  */
-/** sleep(msecs); */
+/** sys.sleep(msecs); */
 static mpdm_t F_sleep(F_ARGS)
 {
     mpdm_sleep(mpdm_ival(mpdm_aget(a, 0)));
@@ -1175,12 +1175,12 @@ static mpdm_t M_mutex_unlock(F_ARGS)
 
 
 /**
- * mutex - Returns a new mutex object.
+ * sys.mutex - Returns a new mutex object.
  *
  * Returns a new mutex object.
  * [Threading]
  */
-/** local m = mutex(); */
+/** local m = sys.mutex(); */
 static mpdm_t F_mutex(F_ARGS)
 {
     mpdm_t o = mpdm_ref(MPDM_H(0));
@@ -1223,14 +1223,14 @@ static mpdm_t M_semaphore_post(F_ARGS)
 
 
 /**
- * semaphore - Returns a new semaphore.
+ * sys.semaphore - Returns a new semaphore.
  * cnt: the initial count of the semaphore.
  *
  * Returns a new semaphore.
  * [Threading]
  */
-/** local s = semaphore(); */
-/** local s = semaphore(cnt); */
+/** local s = sys.semaphore(); */
+/** local s = sys.semaphore(cnt); */
 static mpdm_t F_semaphore(F_ARGS)
 {
     mpdm_t o = mpdm_ref(MPDM_H(0));
@@ -1244,19 +1244,19 @@ static mpdm_t F_semaphore(F_ARGS)
 
 
 /**
- * strftime - Formats the time as a string.
- * @f: format string
+ * sys.strftime - Formats the time as a string.
+ * @fmt: format string
  * @t: seconds (from the Unix epoch)
  *
- * Returns as a string, formatted using the @f format string,
+ * Returns as a string, formatted using the @fmt format string,
  * the time @t given as argument (or now if @t is not given).
  * See the local clib strftime() implementation for details
  * on the format string.
  * [Strings]
  * [Time]
  */
-/** string = strftime(@f); */
-/** string = strftime(@f, @t); */
+/** string = sys.strftime(@fmt); */
+/** string = sys.strftime(@fmt, @t); */
 static mpdm_t F_strftime(F_ARGS)
 {
     char *ptr;
@@ -1369,7 +1369,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"lc",           MPDM_X(F_lc));
     mpdm_hset_s(v, L"tr",           MPDM_X(F_tr));
     mpdm_hset_s(v, L"sprintf",      MPDM_X(F_sprintf));
-    mpdm_hset_s(v, L"strftime",     MPDM_X(F_strftime));
 
     /* "any type" methods */
     v = mpdm_hset_s(r, L"ANY",  MPDM_H(0));
@@ -1384,6 +1383,8 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
 
     /* "sys" namespace */
     v = mpdm_hset_s(r, L"sys",          MPDM_H(0));
+    mpdm_hset_s(v, L"p",                MPDM_X(F_print));
+    mpdm_hset_s(v, L"print",            MPDM_X(F_print));
     mpdm_hset_s(v, L"open",             MPDM_X(F_open));
     mpdm_hset_s(v, L"popen",            MPDM_X(F_popen));
     mpdm_hset_s(v, L"connect",          MPDM_X(F_connect));
@@ -1396,8 +1397,8 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"encoding",         MPDM_X(F_encoding));
     mpdm_hset_s(v, L"gettext",          MPDM_X(F_gettext));
     mpdm_hset_s(v, L"gettext_domain",   MPDM_X(F_gettext_domain));
-    mpdm_hset_s(v, L"print",            MPDM_X(F_print));
     mpdm_hset_s(v, L"time",             MPDM_X(F_time));
+    mpdm_hset_s(v, L"strftime",         MPDM_X(F_strftime));
     mpdm_hset_s(v, L"random",           MPDM_X(F_random));
     mpdm_hset_s(v, L"sleep",            MPDM_X(F_sleep));
     mpdm_hset_s(v, L"mutex",            MPDM_X(F_mutex));
