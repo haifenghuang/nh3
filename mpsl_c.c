@@ -1042,7 +1042,7 @@ static mpdm_t GET(struct mpsl_vm *m, mpdm_t h, mpdm_t k)
     if (MPDM_IS_ARRAY(h))
         r = mpdm_aget(h, mpdm_ival(k)); 
     else
-        vm_error(m, MPDM_LS(L"bad holder in get for key "), k);
+        vm_error(m, MPDM_LS(L"bad holder in GET for key "), k);
 
     return r;
 }
@@ -1057,7 +1057,7 @@ static mpdm_t SET(struct mpsl_vm *m, mpdm_t h, mpdm_t k, mpdm_t v)
     if (MPDM_IS_ARRAY(h))
         r = mpdm_aset(h, v, mpdm_ival(k)); 
     else
-        vm_error(m, MPDM_LS(L"bad holder in set for key "), k);
+        vm_error(m, MPDM_LS(L"bad holder in SET for key "), k);
 
     return r;
 }
