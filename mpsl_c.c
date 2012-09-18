@@ -842,7 +842,7 @@ typedef enum {
     OP_JMP, OP_JT,  OP_JF,
     OP_AND, OP_OR,  OP_XOR, OP_SHL, OP_SHR,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
-    OP_NOT, OP_EQ,  OP_NE,  OP_GT,  OP_GE,  OP_LT, OP_LE,
+    OP_NOT, OP_EQ,  OP_GT,  OP_GE,  OP_LT, OP_LE,
     OP_REM, OP_CAT, OP_ITE
 } mpsl_op_t;
 
@@ -876,7 +876,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_UMINUS:  o2(c, OP_LIT, MPDM_I(-1)); O(1); o(c, OP_MUL); break;
     case N_NOT:     O(1); o(c, OP_NOT); break;
     case N_EQ:      O(1); O(2); o(c, OP_EQ); break;
-    case N_NE:      O(1); O(2); o(c, OP_NE); break;
+    case N_NE:      O(1); O(2); o(c, OP_EQ); o(c, OP_NOT); break;
     case N_GT:      O(1); O(2); o(c, OP_GT); break;
     case N_GE:      O(1); O(2); o(c, OP_GE); break;
     case N_LT:      O(1); O(2); o(c, OP_LT); break;
@@ -1209,7 +1209,6 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_MOD: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 % i2)); break;
         case OP_NOT: PUSH(m, MPDM_I(!ISTRU(POP(m)))); break;
         case OP_EQ:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 == r2)); break;
-        case OP_NE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 != r2)); break;
         case OP_GT:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 >  r2)); break;
         case OP_GE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 >= r2)); break;
         case OP_LT:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 <  r2)); break;
@@ -1319,7 +1318,7 @@ void mpsl_disasm(mpdm_t prg)
         "JMP", "JT", "JF",
         "AND", "OR", "XOR", "SHL", "SHR",
         "ADD", "SUB", "MUL", "DIV", "MOD",
-        "NOT", "EQ", "NE", "GT", "GE", "LT", "LE",
+        "NOT", "EQ", "GT", "GE", "LT", "LE",
         "REM", "CAT", "ITE"
     };
 
