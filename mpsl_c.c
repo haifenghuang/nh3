@@ -1155,6 +1155,7 @@ int mpsl_is_true(mpdm_t v)
 #define RPOP(m) mpdm_rval(POP(m))
 #define ISTRU(v) mpsl_is_true(v)
 #define BOOL(i) MPDM_I(i)
+#define R(v) mpdm_rval(v)
 
 static int exec_vm(struct mpsl_vm *m, int msecs)
 {
@@ -1208,7 +1209,8 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_DIV: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 / r2)); break;
         case OP_MOD: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 % i2)); break;
         case OP_NOT: PUSH(m, MPDM_I(!ISTRU(POP(m)))); break;
-        case OP_EQ:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 == r2)); break;
+        case OP_EQ:  v = POP(m); w = POP(m);
+             PUSH(m, BOOL((v == NULL || w == NULL) ? (v == w) : (R(v) == R(w)))); break;
         case OP_GT:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 >  r2)); break;
         case OP_GE:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 >= r2)); break;
         case OP_LT:  r2 = RPOP(m); r1 = RPOP(m); PUSH(m, BOOL(r1 <  r2)); break;
