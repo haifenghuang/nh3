@@ -672,7 +672,7 @@ static mpdm_t statement(struct mpsl_c *c)
     else
     if (c->token == T_IF) {
         token(c);
-        if ((w = paren_expr(c)) != NULL) {
+        if ((w = expr(c)) != NULL) {
             v = node2(N_IF, w, statement(c));
 
             if (c->token == T_ELSE) {
@@ -686,7 +686,7 @@ static mpdm_t statement(struct mpsl_c *c)
     else
     if (c->token == T_WHILE) {
         token(c);
-        if ((w = paren_expr(c)) != NULL)
+        if ((w = expr(c)) != NULL)
             v = node2(N_WHILE, w, statement(c));
     }
     else
