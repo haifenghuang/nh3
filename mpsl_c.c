@@ -1222,8 +1222,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SHL: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 << i2)); break;
         case OP_SHR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 >> i2)); break;
         case OP_CAT: w = POP(m); v = POP(m); PUSH(m, mpdm_join(v, w)); break;
-        case OP_FMT: w = RF(MPDM_A(1)); mpdm_aset(w, POP(m), 0); UFND(w);
-            v = POP(m); PUSH(m, mpdm_sprintf(v, w)); break;
+        case OP_FMT: w = POP(m); v = POP(m); PUSH(m, mpdm_sprintf1(v, w)); break;
         case OP_REM: m->pc++; break;
         case OP_CAL: v = POP(m);
             if (MPDM_IS_EXEC(v))
