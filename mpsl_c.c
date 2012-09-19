@@ -51,7 +51,7 @@ typedef enum {
     T_DGTEQ,  T_DLTEQ,   T_DPIPEEQ, T_DAMPEQ,
     T_THARRW, T_FATARRW, T_VIRARRW, T_COLARRW,
     T_SYMBOL, T_LITERAL, T_BLANK,   T_SLASHAST, T_DSLASH,
-    T_SQUOTE, T_DQUOTE
+    T_SQUOTE, T_DQUOTE,  T_DOLLAR
 } mpsl_token_t;
 
 
@@ -134,7 +134,7 @@ static struct {
     { L'*', T_ASTER,    T_ERROR },  { L'/', T_SLASH,     T_ERROR },
     { L'%', T_PERCENT,  T_ERROR },  { L'^', T_CARET,     T_ERROR },
     { L'\'', T_SQUOTE,  T_ERROR },  { L'"', T_DQUOTE,    T_ERROR },
-    { L'~', T_VIRGULE,  T_ERROR },
+    { L'~', T_VIRGULE,  T_ERROR },  { L'$', T_DOLLAR,    T_ERROR },
 
     { L'>', T_COLARRW,  T_COLON },
     { L'>', T_DGT,      T_GT    },  { L'=', T_GTEQ,      T_GT    },
@@ -321,7 +321,7 @@ typedef enum {
     N_EQ,     N_NE,     N_GT,   N_GE,   N_LT,  N_LE,
     N_AND,    N_OR,
     N_BINAND, N_BINOR,  N_XOR,  N_SHL,  N_SHR,
-    N_JOIN,   N_MAP,    N_HMAP,
+    N_JOIN,   N_MAP,    N_HMAP, N_FMT,
     N_IF,     N_WHILE,  N_FOREACH,
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
@@ -536,7 +536,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
         T_DAMP, T_DPIPE, T_EQUAL,
         T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, T_VIRGULE,
-        T_THARRW, T_FATARRW, -1
+        T_THARRW, T_FATARRW, T_DOLLAR, -1
     };
     static mpsl_node_t binop[] = {
         N_IADD, N_ISUB, N_IMUL, N_IDIV, N_IMOD,
@@ -545,7 +545,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         N_FUNCAL, N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
         N_AND, N_OR, N_ASSIGN,
         N_BINAND, N_BINOR, N_XOR, N_SHL, N_SHR, N_JOIN,
-        N_MAP, N_HMAP, -1
+        N_MAP, N_HMAP, N_FMT, -1
     };
 
     for (n = 0; tokens[n] != -1; n++)
@@ -843,7 +843,7 @@ typedef enum {
     OP_AND, OP_OR,  OP_XOR, OP_SHL, OP_SHR,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_NOT, OP_EQ,  OP_GT,  OP_GE,  OP_LT, OP_LE,
-    OP_REM, OP_CAT, OP_ITE
+    OP_REM, OP_CAT, OP_ITE, OP_FMT
 } mpsl_op_t;
 
 
@@ -897,6 +897,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_SHL:     O(1); O(2); o(c, OP_SHL); break;
     case N_SHR:     O(1); O(2); o(c, OP_SHR); break;
     case N_JOIN:    O(1); O(2); o(c, OP_CAT); break;
+    case N_FMT:     O(1); O(2); o(c, OP_FMT); break;
 
     case N_ARRAY:
         o(c, OP_ARR);
@@ -1221,6 +1222,8 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_SHL: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 << i2)); break;
         case OP_SHR: i2 = IPOP(m); i1 = IPOP(m); PUSH(m, MPDM_I(i1 >> i2)); break;
         case OP_CAT: w = POP(m); v = POP(m); PUSH(m, mpdm_join(v, w)); break;
+        case OP_FMT: w = RF(MPDM_A(1)); mpdm_aset(w, POP(m), 0); UFND(w);
+            v = POP(m); PUSH(m, mpdm_sprintf(v, w)); break;
         case OP_REM: m->pc++; break;
         case OP_CAL: v = POP(m);
             if (MPDM_IS_EXEC(v))
@@ -1321,7 +1324,7 @@ void mpsl_disasm(mpdm_t prg)
         "AND", "OR", "XOR", "SHL", "SHR",
         "ADD", "SUB", "MUL", "DIV", "MOD",
         "NOT", "EQ", "GT", "GE", "LT", "LE",
-        "REM", "CAT", "ITE"
+        "REM", "CAT", "ITE", "FMT"
     };
 
     mpdm_ref(prg);
