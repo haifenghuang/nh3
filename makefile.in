@@ -89,9 +89,9 @@ dist: distcopy
 	rm -rf $(DIST_TARGET)
 
 install: installdoc
-	rm -f $(PREFIX)/bin/mpsl
+#	rm -f $(PREFIX)/bin/mpsl
 	install $(TARGET) $(PREFIX)/bin
-	ln -s $(PREFIX)/bin/$(TARGET) $(PREFIX)/bin/mpsl
+#	ln -s $(PREFIX)/bin/$(TARGET) $(PREFIX)/bin/mpsl
 
 installdoc:
 	install -d $(DOCDIR)
