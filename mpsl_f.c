@@ -1049,23 +1049,6 @@ static mpdm_t F_chdir(F_ARGS)
     return MPDM_I(mpdm_chdir(A0));
 }
 
-/**
- * str.sprintf - Formats a sprintf()-like string.
- * @str: the format string
- * @arg1: first argument
- * @arg2: second argument
- * @argn: nth argument
- *
- * Formats a string using the sprintf() format taking the values from
- * the variable arguments.
- * [Strings]
- */
-/** string = str.sprintf(arg1 [,arg2 ... argn]); */
-static mpdm_t F_sprintf(F_ARGS)
-{
-    return mpdm_sprintf(l, a);
-}
-
 
 /**
  * sys.print - Writes values to stdout.
@@ -1368,7 +1351,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"uc",           MPDM_X(F_uc));
     mpdm_hset_s(v, L"lc",           MPDM_X(F_lc));
     mpdm_hset_s(v, L"tr",           MPDM_X(F_tr));
-    mpdm_hset_s(v, L"sprintf",      MPDM_X(F_sprintf));
 
     /* "any type" methods */
     v = mpdm_hset_s(r, L"ANY",  MPDM_H(0));
