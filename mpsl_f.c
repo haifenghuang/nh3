@@ -1384,7 +1384,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     /* "sys" namespace */
     v = mpdm_hset_s(r, L"sys",          MPDM_H(0));
     mpdm_hset_s(v, L"p",                MPDM_X(F_print));
-    mpdm_hset_s(v, L"print",            MPDM_X(F_print));
     mpdm_hset_s(v, L"open",             MPDM_X(F_open));
     mpdm_hset_s(v, L"popen",            MPDM_X(F_popen));
     mpdm_hset_s(v, L"connect",          MPDM_X(F_connect));
