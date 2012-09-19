@@ -574,7 +574,10 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
         mpsl_token_t t = c->token;
         mpsl_node_t op;
 
-        v = term(c);
+        if ((v = term(c)) == NULL) {
+            c_error(c);
+            return NULL;
+        }
 
         if (t == T_SYMBOL && !is_assign(c))
             v = node1(N_SYMVAL, v);
