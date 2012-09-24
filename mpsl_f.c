@@ -1227,42 +1227,6 @@ static mpdm_t F_semaphore(F_ARGS)
 
 
 /**
- * sys.strftime - Formats the time as a string.
- * @fmt: format string
- * @t: seconds (from the Unix epoch)
- *
- * Returns as a string, formatted using the @fmt format string,
- * the time @t given as argument (or now if @t is not given).
- * See the local clib strftime() implementation for details
- * on the format string.
- * [Strings]
- * [Time]
- */
-/** string = sys.strftime(@fmt); */
-/** string = sys.strftime(@fmt, @t); */
-static mpdm_t F_strftime(F_ARGS)
-{
-    char *ptr;
-    time_t t;
-    char tmp[2048];
-    struct tm *tm;
-
-    ptr = mpdm_wcstombs(mpdm_string(A0), NULL);
-
-    if ((t = IA1) == 0)
-        t = time(NULL);
-
-    tm = localtime(&t);
-
-    strftime(tmp, sizeof(tmp) - 1, ptr, tm);
-
-    free(ptr);
-
-    return MPDM_MBS(tmp);
-}
-
-
-/**
  * new - Creates a new object using another as its base.
  * @c1: class / base object
  * @c2: class / base object
@@ -1379,7 +1343,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"gettext",          MPDM_X(F_gettext));
     mpdm_hset_s(v, L"gettext_domain",   MPDM_X(F_gettext_domain));
     mpdm_hset_s(v, L"time",             MPDM_X(F_time));
-    mpdm_hset_s(v, L"strftime",         MPDM_X(F_strftime));
     mpdm_hset_s(v, L"random",           MPDM_X(F_random));
     mpdm_hset_s(v, L"sleep",            MPDM_X(F_sleep));
     mpdm_hset_s(v, L"mutex",            MPDM_X(F_mutex));
