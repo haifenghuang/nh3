@@ -1,0 +1,28 @@
+#!mpsl3
+
+/** stock processor **/
+
+/* symbols */
+var symbols = [ "REP.MC" "POP.MC" "MCD"];
+
+/* query for Yahoo Finance */
+var yf_host     = "download.finance.yahoo.com";
+//var yf_query    = "/d/quotes.csv?s=" ~  (symbols ~ ',') ~ "&f=sl1d1t1c1ohgv&e=.csv";
+var yf_query    = "/d/quotes.csv?s=" ~  (symbols ~ ',') ~ "&f=sl1d1t1b2&e=.csv";
+
+var s = sys.connect(yf_host, 'www');
+
+s.write(
+    'GET ',     yf_query,   " HTTP/1.0\r\n",
+    'Host: ',   yf_host,    "\r\n",
+    'Connection: close',    "\r\n",
+    "\r\n"
+);
+
+var r = [];
+
+while (r.push(s.read()));
+
+s.close();
+
+r.dump();
