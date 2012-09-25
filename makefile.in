@@ -2,7 +2,7 @@
 
 LIB=libmpsl.a
 
-all: $(TARGET)
+all: $(TARGET) stress
 
 PROJ=mpsl
 
