@@ -229,7 +229,19 @@ again:
                 case L'\\': m = L'\\';  break;
                 case L'"': m = L'"';    break;
                 case L'x':
-                    /* FIXME */
+                    if (nc(c) == L'{') {
+                        char tmp[16];
+                        int i = 0;
+
+                        while ((m = nc(c)) != L'}' && m)
+                            tmp[i++] = (char) (m & 0xff);
+                        tmp[i] = '\0';
+
+                        sscanf(tmp, "%x", &m);
+                    }
+                    else
+                        c_error(c);
+
                     break;
                 }
             }
