@@ -5,24 +5,64 @@
 /* symbols */
 var symbols = [ "REP.MC" "POP.MC" "MCD"];
 
-/* query for Yahoo Finance */
-var yf_host     = "download.finance.yahoo.com";
+/* query arguments for Yahoo Finance */
+var yf = {
+    host:   "download.finance.yahoo.com"
+    query:  "/d/quotes.csv?s=" ~  (symbols ~ ',') ~ "&f=sl1d1t1&e=.csv"
+    proto:  'HTTP/1.0'
+};
+
 //var yf_query    = "/d/quotes.csv?s=" ~  (symbols ~ ',') ~ "&f=sl1d1t1c1ohgv&e=.csv";
-var yf_query    = "/d/quotes.csv?s=" ~  (symbols ~ ',') ~ "&f=sl1d1t1b2&e=.csv";
 
-var s = sys.connect(yf_host, 'www');
 
-s.write(
-    'GET ',     yf_query,   " HTTP/1.0\r\n",
-    'Host: ',   yf_host,    "\r\n",
-    'Connection: close',    "\r\n",
-    "\r\n"
-);
+/* http query and response */
+sub http(args) {
+    var s = NULL;
 
-var r = [];
+    if (s = sys.connect(args.host, 'www')) != NULL {
+        /* query */
+        s.write('GET ', args.query, ' ', (args.proto || 'HTTP/1.1'), "\r\n");
 
-while (r.push(s.read()));
+        /* headers */
+        foreach args s.write(key, ': ', value, "\r\n");
+        s.write("\r\n");
 
-s.close();
+        /* response */
+        var r = {}, l = s.read().sregex("/\r?\n$").split(' ');
 
-r.dump();
+        /* split first line */
+        r['proto']  = l[0];
+        r['status'] = l[1];
+        r['stmsg']  = l[2];
+
+        /* split rest of response header */
+        while (l = s.read()) != NULL && !l.regex("/^\r?\n$/") {
+            l = l.sregex("/\r?\n$/").split(': ');
+            r[l[0]] = l[1];
+        }
+
+        s['resp'] = r;
+    }
+
+    return s;
+}
+
+var www = http(yf);
+
+if www != NULL {
+    var o = [], l;
+
+    while l = www.read() {
+        l = l.sregex("/\r?\n$/").sregex("/\"/g").split(',');
+
+        o.push(
+            {
+                symbol:     l[0]
+                value:      l[1] + 0
+                time:       (l[2] ~ ' ' ~ l[3]).sscanf("%t{%m/%d/%Y %I:%M%p}")[0]
+            }
+        );
+    }
+
+    sys.p("%j" $ o, "\n");
+}
