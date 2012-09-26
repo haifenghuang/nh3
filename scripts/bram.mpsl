@@ -3,7 +3,7 @@
 /** stock processor **/
 
 /* symbols */
-var symbols = [ "REP.MC" "POP.MC" "MCD"];
+var symbols = ["REP.MC" "POP.MC" "MCD" "EURUSD=X"];
 
 /* query arguments for Yahoo Finance */
 var yf = {
