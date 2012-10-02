@@ -343,7 +343,7 @@ typedef enum {
     N_THIS,
     N_LOCAL,  N_GLOBAL,
     N_SUBDEF, N_RETURN,
-    N_VOID,
+    N_VOID,   N_LINEINFO,
     N_EOP
 } mpsl_node_t;
 
@@ -355,6 +355,7 @@ typedef enum {
 static mpdm_t node0(mpsl_node_t t) { mpdm_t r = RF(MPDM_A(1)); mpdm_aset(r, MPDM_I(t), 0); return UFND(r); }
 static mpdm_t node1(mpsl_node_t t, mpdm_t n1) { mpdm_t r = RF(node0(t)); mpdm_push(r, n1); return UFND(r); }
 static mpdm_t node2(mpsl_node_t t, mpdm_t n1, mpdm_t n2) { mpdm_t r = RF(node1(t, n1)); mpdm_push(r, n2); return UFND(r); }
+static mpdm_t node3(mpsl_node_t t, mpdm_t n1, mpdm_t n2, mpdm_t n3) { mpdm_t r = RF(node2(t, n1, n2)); mpdm_push(r, n3); return UFND(r); }
 
 static mpdm_t tstr(struct mpsl_c *c)
 /* returns the current token as a string */
@@ -682,6 +683,10 @@ static mpdm_t statement(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
     mpdm_t w;
+    int x, y;
+
+    x = c->x;
+    y = c->y;
 
     if (c->error) {}
     else
@@ -804,6 +809,9 @@ static mpdm_t statement(struct mpsl_c *c)
         else
             c_error(c);
     }
+
+    /* add line info */
+    v = node3(N_LINEINFO, v, MPDM_I(y), MPDM_I(x));
 
     return v;
 }
