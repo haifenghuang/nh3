@@ -76,7 +76,7 @@ void _do_test(char *prg, mpdm_t t_value, int line)
         }
     }
 
-	sprintf(tmp, "stress.c:%d: (test %d): \"%s\" (line %d): %s\n", line, tests + 1, prg, line, ok ? "OK!" : "*** Failed ***");
+	sprintf(tmp, "stress.c:%d: error: test #%d \"%s\" (line %d): %s\n", line, tests + 1, prg, line, ok ? "OK!" : "*** Failed ***");
 
     if (verbose)
 	   printf("%s", tmp);
