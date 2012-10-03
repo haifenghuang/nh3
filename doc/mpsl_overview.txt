@@ -334,6 +334,8 @@ rules:
  * If the value is a scalar, it's assumed to be a numeral and both key and value
    variables are set with integers from 0 to the scalar - 1. This is specially
    useful for counted loops.
+ * If the value is a file, a read() will be done on each iteration and stored
+   as the value and the line number (starting from 0) as the key.
 
 Builtin operators
 -----------------
