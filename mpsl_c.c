@@ -859,7 +859,7 @@ typedef enum {
     OP_GET, OP_SET, OP_STI, OP_APU, OP_TBL,
     OP_TPU, OP_TPO, OP_TLT, OP_THS,
     OP_CAL, OP_RET, OP_ARG,
-    OP_JMP, OP_JT,  OP_JF,
+    OP_JMP, OP_JF,
     OP_AND, OP_OR,  OP_XOR, OP_SHL, OP_SHR,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_NOT, OP_EQ,  OP_GT,  OP_GE,  OP_LT, OP_LE,
@@ -958,7 +958,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
         o2(c, OP_JMP, MPDM_I(n)); fix(c, i); break;
 
     case N_OR:
-        O(1); o(c, OP_DUP); n = o2(c, OP_JT, NULL);
+        O(1); o(c, OP_DUP); o(c, OP_NOT); n = o2(c, OP_JF, NULL);
         o(c, OP_POP); O(2); fix(c, n); break;
 
     case N_AND:
@@ -1241,7 +1241,6 @@ static int exec_vm(struct mpsl_vm *m)
         case OP_THS: PUSH(m, mpdm_aget(m->symtbl, m->tt - 2)); break;
         case OP_ARG: ARG(m); break;
         case OP_JMP: m->pc = mpdm_ival(PC(m)); break;
-        case OP_JT:  if (ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
         case OP_JF:  if (!ISTRU(POP(m))) m->pc = mpdm_ival(PC(m)); else m->pc++; break;
         case OP_ADD: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 + r2)); break;
         case OP_SUB: r2 = RPOP(m); r1 = RPOP(m); PUSH(m, MPDM_R(r1 - r2)); break;
@@ -1361,7 +1360,7 @@ void mpsl_disasm(mpdm_t prg)
         "GET", "SET", "STI", "APU", "TBL",
         "TPU", "TPO", "TLT", "THS",
         "CAL", "RET", "ARG",
-        "JMP", "JT", "JF",
+        "JMP", "JF",
         "AND", "OR", "XOR", "SHL", "SHR",
         "ADD", "SUB", "MUL", "DIV", "MOD",
         "NOT", "EQ", "GT", "GE", "LT", "LE",
@@ -1378,7 +1377,7 @@ void mpsl_disasm(mpdm_t prg)
 
         if (i == OP_LIT || i == OP_REM)
             printf(" \"%ls\"", mpdm_string(mpdm_aget(prg, ++n)));
-        if (i == OP_JMP || i == OP_JT || i == OP_JF ||
+        if (i == OP_JMP || i == OP_JF ||
             i == OP_ITE || i == OP_DPN || i == OP_LNI)
             printf(" %d", mpdm_ival(mpdm_aget(prg, ++n)));
 
