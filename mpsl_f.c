@@ -666,7 +666,7 @@ static mpdm_t F_hdel(F_ARGS)
 /** io.close(); */
 static mpdm_t M_close(F_ARGS)
 {
-    return mpdm_close(mpdm_hget_s(l, L"f"));
+    return mpdm_close(l);
 }
 
 /**
@@ -680,7 +680,7 @@ static mpdm_t M_close(F_ARGS)
 /** string = io.read(); */
 static mpdm_t M_read(F_ARGS)
 {
-    return mpdm_read(mpdm_hget_s(l, L"f"));
+    return mpdm_read(l);
 }
 
 /**
@@ -700,10 +700,9 @@ static mpdm_t M_read(F_ARGS)
 static mpdm_t M_write(F_ARGS)
 {
     int n, r = 0;
-    mpdm_t f = mpdm_hget_s(l, L"f");
 
     for (n = 0; n < mpdm_size(a); n++)
-        r += mpdm_write(f, A(n));
+        r += mpdm_write(l, A(n));
 
     return MPDM_I(r);
 }
@@ -719,7 +718,7 @@ static mpdm_t M_write(F_ARGS)
 /** string = io.getchar(); */
 static mpdm_t M_getchar(F_ARGS)
 {
-    return mpdm_getchar(mpdm_hget_s(l, L"f"));
+    return mpdm_getchar(l);
 }
 
 /**
@@ -735,7 +734,7 @@ static mpdm_t M_getchar(F_ARGS)
 /** integer = io.putchar(s); */
 static mpdm_t M_putchar(F_ARGS)
 {
-    return MPDM_I(mpdm_putchar(mpdm_hget_s(l, L"f"), A0));
+    return MPDM_I(mpdm_putchar(l, A0));
 }
 
 /**
@@ -752,7 +751,7 @@ static mpdm_t M_putchar(F_ARGS)
 /** integer = io.seek(offset, whence); */
 static mpdm_t M_fseek(F_ARGS)
 {
-    return MPDM_I(mpdm_fseek(mpdm_hget_s(l, L"f"), IA0, IA1));
+    return MPDM_I(mpdm_fseek(l, IA0, IA1));
 }
 
 /**
@@ -764,28 +763,7 @@ static mpdm_t M_fseek(F_ARGS)
 /** integer = io.tell(); */
 static mpdm_t M_ftell(F_ARGS)
 {
-    return MPDM_I(mpdm_ftell(mpdm_hget_s(l, L"f")));
-}
-
-
-static mpdm_t io_obj(mpdm_t fd)
-/* returns a file / pipe / socket object */ 
-{
-    mpdm_t o = mpdm_ref(MPDM_H(0));
-
-    mpdm_hset_s(o, L"f",        fd);
-    mpdm_hset_s(o, L"close",    MPDM_X(M_close));
-
-    mpdm_hset_s(o, L"read",     MPDM_X(M_read));
-    mpdm_hset_s(o, L"getchar",  MPDM_X(M_getchar));
-
-    mpdm_hset_s(o, L"write",    MPDM_X(M_write));
-    mpdm_hset_s(o, L"putchar",  MPDM_X(M_putchar));
-
-    mpdm_hset_s(o, L"seek",     MPDM_X(M_fseek));
-    mpdm_hset_s(o, L"tell",     MPDM_X(M_ftell));
-
-    return mpdm_unrefnd(o);
+    return MPDM_I(mpdm_ftell(l));
 }
 
 
@@ -814,13 +792,10 @@ static mpdm_t F_open(F_ARGS)
 {
     mpdm_t f = mpdm_open(A0, A1);
 
-    if (f != NULL)
-        f = io_obj(f);
-
     return f;
 }
 
-static mpdm_t M_pclose(F_ARGS) { return mpdm_pclose(mpdm_hget_s(l, L"f")); }
+static mpdm_t M_pclose(F_ARGS) { return mpdm_pclose(l); }
 
 /**
  * sys.popen - Opens a pipe.
@@ -837,15 +812,7 @@ static mpdm_t M_pclose(F_ARGS) { return mpdm_pclose(mpdm_hget_s(l, L"f")); }
 /** io = sys.popen(prg, mode); */
 static mpdm_t F_popen(F_ARGS)
 {
-    mpdm_t f = mpdm_popen(A0, A1);
-
-    if (f != NULL) {
-        f = mpdm_ref(io_obj(f));
-        mpdm_hset_s(f, L"close", MPDM_X(M_pclose));
-        mpdm_unrefnd(f);
-    }
-
-    return f;
+    return mpdm_popen(A0, A1);
 }
 
 
@@ -863,12 +830,7 @@ static mpdm_t F_popen(F_ARGS)
 /** io = sys.connect(h, s); */
 static mpdm_t F_connect(F_ARGS)
 {
-    mpdm_t f = mpdm_connect(A0, A1);
-
-    if (f != NULL)
-        f = io_obj(f);
-
-    return f;
+    return mpdm_connect(A0, A1);
 }
 
 
@@ -1276,9 +1238,9 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_ref(r);
 
     /* standard file descriptors */
-    mpdm_hset_s(r, L"STDIN",    io_obj(MPDM_F(stdin)));
-    mpdm_hset_s(r, L"STDOUT",   io_obj(MPDM_F(stdout)));
-    mpdm_hset_s(r, L"STDERR",   io_obj(MPDM_F(stderr)));
+    mpdm_hset_s(r, L"STDIN",    MPDM_F(stdin));
+    mpdm_hset_s(r, L"STDOUT",   MPDM_F(stdout));
+    mpdm_hset_s(r, L"STDERR",   MPDM_F(stderr));
 
     /* home and application directories */
     mpdm_hset_s(r, L"HOMEDIR",  mpdm_home_dir());
@@ -1338,6 +1300,16 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"is_array",     MPDM_X(F_is_array));
     mpdm_hset_s(v, L"is_hash",      MPDM_X(F_is_hash));
     mpdm_hset_s(v, L"is_exec",      MPDM_X(F_is_exec));
+
+    /* I/O methods */
+    v = mpdm_hset_s(r, L"IO",           MPDM_H(0));
+    mpdm_hset_s(v, L"read",             MPDM_X(M_read));
+    mpdm_hset_s(v, L"write",            MPDM_X(M_write));
+    mpdm_hset_s(v, L"getchar",          MPDM_X(M_getchar));
+    mpdm_hset_s(v, L"putchar",          MPDM_X(M_putchar));
+    mpdm_hset_s(v, L"fseek",            MPDM_X(M_fseek));
+    mpdm_hset_s(v, L"ftell",            MPDM_X(M_ftell));
+    mpdm_hset_s(v, L"close",            MPDM_X(M_close));
 
     /* "sys" namespace */
     v = mpdm_hset_s(r, L"sys",          MPDM_H(0));

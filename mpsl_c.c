@@ -1127,6 +1127,9 @@ static mpdm_t TBL(struct mpsl_vm *m)
         l = NULL;
 
         /* still not found? try on the type-specific tables */
+        if (MPDM_IS_FILE(v))
+            v = mpdm_hget_s(mpdm_root(), L"IO");
+        else
         if (MPDM_IS_HASH(v))
             v = mpdm_hget_s(mpdm_root(), L"HASH");
         else
