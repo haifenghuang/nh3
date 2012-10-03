@@ -854,7 +854,7 @@ static int parse(struct mpsl_c *c)
 
 typedef enum {
     OP_EOP,
-    OP_LIT, OP_NUL, OP_ARR, OP_HSH, OP_ROO,
+    OP_LIT, OP_NUL, OP_ARR, OP_HSH,
     OP_POP, OP_SWP, OP_DUP, OP_DP2, OP_DPN,
     OP_GET, OP_SET, OP_STI, OP_APU, OP_TBL,
     OP_TPU, OP_TPO, OP_TLT, OP_THS,
@@ -1225,7 +1225,6 @@ static int exec_vm(struct mpsl_vm *m)
         case OP_NUL: PUSH(m, NULL); break;
         case OP_ARR: PUSH(m, MPDM_A(0)); break;
         case OP_HSH: PUSH(m, MPDM_H(0)); break;
-        case OP_ROO: PUSH(m, mpdm_root()); break;
         case OP_POP: --m->sp; break;
         case OP_SWP: v = POP(m); w = RF(POP(m)); PUSH(m, v); UF(PUSH(m, w)); break;
         case OP_DUP: PUSH(m, TOS(m)); break;
@@ -1357,7 +1356,7 @@ void mpsl_disasm(mpdm_t prg)
     int n;
     static char *ops[] = {
         "EOP",
-        "LIT", "NUL", "ARR", "HSH", "ROO",
+        "LIT", "NUL", "ARR", "HSH",
         "POP", "SWP", "DUP", "DP2", "DPN",
         "GET", "SET", "STI", "APU", "TBL",
         "TPU", "TPO", "TLT", "THS",
