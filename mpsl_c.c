@@ -1137,12 +1137,6 @@ static mpdm_t TBL(struct mpsl_vm *m)
 
         if (mpdm_exists(v, s))
             l = v;
-        else {
-            v = mpdm_hget_s(mpdm_root(), L"ANY");
-
-            if (mpdm_exists(v, s))
-                l = v;
-        }
     }
 
     if (l == NULL)

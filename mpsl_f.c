@@ -56,7 +56,7 @@
 
 /** library **/
 
-/** ANY type **/
+/** any type **/
 
 /**
  * v.size - Returns the size of a value.
@@ -1289,9 +1289,17 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"size",     MPDM_X(F_hsize));
     mpdm_hset_s(v, L"exists",   MPDM_X(F_exists));
     mpdm_hset_s(v, L"delete",   MPDM_X(F_hdel));
+    mpdm_hset_s(v, L"dump",     MPDM_X(F_dump));
+    mpdm_hset_s(v, L"clone",    MPDM_X(F_clone));
+    mpdm_hset_s(v, L"dumper",   MPDM_X(F_dumper));
+    mpdm_hset_s(v, L"cmp",      MPDM_X(F_cmp));
+    mpdm_hset_s(v, L"is_array", MPDM_X(F_is_array));
+    mpdm_hset_s(v, L"is_hash",  MPDM_X(F_is_hash));
+    mpdm_hset_s(v, L"is_exec",  MPDM_X(F_is_exec));
 
     /* array methods */
     v = mpdm_hset_s(r, L"ARRAY",    MPDM_H(0));
+    mpdm_hset_s(v, L"size",         MPDM_X(F_size));
     mpdm_hset_s(v, L"expand",       MPDM_X(F_expand));
     mpdm_hset_s(v, L"collapse",     MPDM_X(F_collapse));
     mpdm_hset_s(v, L"ins",          MPDM_X(F_ins));
@@ -1302,9 +1310,17 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"queue",        MPDM_X(F_queue));
     mpdm_hset_s(v, L"seek",         MPDM_X(F_seek));
     mpdm_hset_s(v, L"sort",         MPDM_X(F_sort));
+    mpdm_hset_s(v, L"dump",         MPDM_X(F_dump));
+    mpdm_hset_s(v, L"clone",        MPDM_X(F_clone));
+    mpdm_hset_s(v, L"dumper",       MPDM_X(F_dumper));
+    mpdm_hset_s(v, L"cmp",          MPDM_X(F_cmp));
+    mpdm_hset_s(v, L"is_array",     MPDM_X(F_is_array));
+    mpdm_hset_s(v, L"is_hash",      MPDM_X(F_is_hash));
+    mpdm_hset_s(v, L"is_exec",      MPDM_X(F_is_exec));
 
     /* scalar methods */
     v = mpdm_hset_s(r, L"SCALAR",   MPDM_H(0));
+    mpdm_hset_s(v, L"size",         MPDM_X(F_size));
     mpdm_hset_s(v, L"splice",       MPDM_X(F_splice));
     mpdm_hset_s(v, L"split",        MPDM_X(F_split));
     mpdm_hset_s(v, L"regex",        MPDM_X(F_regex));
@@ -1315,17 +1331,13 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"uc",           MPDM_X(F_uc));
     mpdm_hset_s(v, L"lc",           MPDM_X(F_lc));
     mpdm_hset_s(v, L"tr",           MPDM_X(F_tr));
-
-    /* "any type" methods */
-    v = mpdm_hset_s(r, L"ANY",  MPDM_H(0));
-    mpdm_hset_s(v, L"size",     MPDM_X(F_size));
-    mpdm_hset_s(v, L"dump",     MPDM_X(F_dump));
-    mpdm_hset_s(v, L"clone",    MPDM_X(F_clone));
-    mpdm_hset_s(v, L"dumper",   MPDM_X(F_dumper));
-    mpdm_hset_s(v, L"cmp",      MPDM_X(F_cmp));
-    mpdm_hset_s(v, L"is_array", MPDM_X(F_is_array));
-    mpdm_hset_s(v, L"is_hash",  MPDM_X(F_is_hash));
-    mpdm_hset_s(v, L"is_exec",  MPDM_X(F_is_exec));
+    mpdm_hset_s(v, L"dump",         MPDM_X(F_dump));
+    mpdm_hset_s(v, L"clone",        MPDM_X(F_clone));
+    mpdm_hset_s(v, L"dumper",       MPDM_X(F_dumper));
+    mpdm_hset_s(v, L"cmp",          MPDM_X(F_cmp));
+    mpdm_hset_s(v, L"is_array",     MPDM_X(F_is_array));
+    mpdm_hset_s(v, L"is_hash",      MPDM_X(F_is_hash));
+    mpdm_hset_s(v, L"is_exec",      MPDM_X(F_is_exec));
 
     /* "sys" namespace */
     v = mpdm_hset_s(r, L"sys",          MPDM_H(0));
