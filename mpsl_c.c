@@ -1024,6 +1024,7 @@ struct mpsl_vm {
     int mode;               /* running mode */
     int ins;                /* # of executed instructions */
     int line;               /* line of source code (debug) */
+    int msecs;              /* max running milliseconds (0, no max) */
 };
 
 
@@ -1043,6 +1044,7 @@ static void reset_vm(struct mpsl_vm *m, mpdm_t prg)
 
         m->pc = m->sp = m->cs = 0;
         m->tt = mpdm_size(m->symtbl);
+        m->line = m->msecs = 0;
         m->mode = VM_IDLE;
     }
     else
@@ -1198,7 +1200,7 @@ int mpsl_is_true(mpdm_t v)
 #define BOOL(i) MPDM_I(i)
 #define R(v) mpdm_rval(v)
 
-static int exec_vm(struct mpsl_vm *m, int msecs)
+static int exec_vm(struct mpsl_vm *m)
 {
     clock_t max;
     mpdm_t v, w, h;
@@ -1206,7 +1208,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
     int i1, i2;
 
     /* maximum running time */
-    max = msecs ? (clock() + (msecs * CLOCKS_PER_SEC) / 1000) : 0;
+    max = m->msecs ? (clock() + (m->msecs * CLOCKS_PER_SEC) / 1000) : 0;
 
     /* start running if there is no error */
     if (m->mode != VM_ERROR)
@@ -1264,7 +1266,9 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_CAT: w = POP(m); v = POP(m); PUSH(m, mpdm_join(v, w)); break;
         case OP_FMT: w = POP(m); v = POP(m); PUSH(m, mpdm_fmt(v, w)); break;
         case OP_REM: m->pc++; break;
-        case OP_LNI: m->line = mpdm_ival(PC(m)); break;
+        case OP_LNI: m->line = mpdm_ival(PC(m));
+            /* TBD: step-by-step hook */
+            break;
         case OP_CAL: v = POP(m);
             if (MPDM_IS_EXEC(v))
                 PUSH(m, mpdm_exec(v, POP(m), mpdm_aget(m->symtbl, m->tt - 1)));
@@ -1312,7 +1316,7 @@ static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
     memset(&m, '\0', sizeof(m));
     reset_vm(&m, c);
 
-    r = MPDM_I(exec_vm(&m, 0));
+    r = MPDM_I(exec_vm(&m));
 
     reset_vm(&m, NULL);
 
