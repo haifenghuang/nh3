@@ -659,6 +659,7 @@ static mpdm_t F_hdel(F_ARGS)
 
 /**
  * io.close - Closes an I/O stream.
+ * @io: the I/O stream
  *
  * Closes the file, pipe or socket.
  * [Input-Output]
@@ -671,6 +672,7 @@ static mpdm_t M_close(F_ARGS)
 
 /**
  * io.read - Reads a line from an I/O stream.
+ * @io: the I/O stream
  *
  * Reads a line from and I/O stream, doing character conversion.
  * Returns the line, or NULL on EOF.
@@ -685,6 +687,7 @@ static mpdm_t M_read(F_ARGS)
 
 /**
  * io.write - Writes to an I/O stream.
+ * @io: the I/O stream
  * @arg1: first argument
  * @arg2: second argument
  * @argn: nth argument
@@ -710,6 +713,7 @@ static mpdm_t M_write(F_ARGS)
 
 /**
  * io.getchar - Reads a character from an I/O stream.
+ * @io: the I/O stream
  *
  * Returns a character read, or NULL on EOF. No
  * charset conversion is done.
@@ -723,6 +727,7 @@ static mpdm_t M_getchar(F_ARGS)
 
 /**
  * io.putchar - Writes a character to an I/O stream.
+ * @io: the I/O stream
  * @s: the string
  *
  * Writes the first character in @s to the I/O stram. No charset
@@ -739,6 +744,7 @@ static mpdm_t M_putchar(F_ARGS)
 
 /**
  * io.seek - Sets the position of an I/O stream.
+ * @io: the I/O stream
  * @offset: the offset
  * @whence: the position
  *
@@ -756,6 +762,7 @@ static mpdm_t M_fseek(F_ARGS)
 
 /**
  * io.tell - Returns the current file pointer.
+ * @io: the I/O stream
  *
  * Returns the position of the file pointer.
  * [Input-Output]
