@@ -14,7 +14,8 @@ around within the code. It is a free-form language, meaning that you can
 format and indent it however you like, as whitespace serves to separate
 tokens. MPSL borrows syntax and concepts from many languages: C, Perl, Java
 or JavaScript. Statements end in a semi-colon, blocks are enclosed between {
-and } (curly brackets). It also allows a rudimentary object-oriented interface.
+and } (curly brackets). It also allows a rudimentary object-oriented
+interface.
 
 Grammar
 ~~~~~~~
@@ -110,7 +111,8 @@ for example:
 returns 14 (the size of the string).
 
 Objects are also used as namespaces, so the `sys.p()' call shown before
-is just the `p()' method of the object `sys'.
+is just the `p()' method of the object `sys' (where all system library
+functions are implemented).
 
 True and false
 ~~~~~~~~~~~~~~
@@ -368,7 +370,7 @@ used on a value using another as argument. This method returns 0 if both
 values are the same, or a negative or positive value describing the
 relative position.
 
- if arg.cmp("-v") verbose = 1;      /* true if arg is "-v" */
+ if arg.cmp("-v") == 0 verbose = 1;      /* true if arg is "-v" */
 
 The `cmp()' method can also be used on arrays and hashes, and return 0
 for identical values.
