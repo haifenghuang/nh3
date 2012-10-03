@@ -1439,8 +1439,6 @@ mpdm_t mpsl_asm(mpdm_t src)
     mpdm_t l = mpdm_ref(mpdm_split(src, MPDM_LS(L"\n")));
     int n;
 
-    mpdm_ref(src);
-
     for (n = 0; n < mpdm_size(l); n++) {
         wchar_t *ptr;
         mpdm_t s = mpdm_aget(l, n);
@@ -1449,6 +1447,8 @@ mpdm_t mpsl_asm(mpdm_t src)
         struct _mpsl_assembler *a;
 
         ptr = mpdm_string(s);
+        if (*ptr == L'\0')
+            continue;
 
         /* skip possible spaces and line numbers */
         while (*ptr == L' ') ptr++;
@@ -1457,8 +1457,8 @@ mpdm_t mpsl_asm(mpdm_t src)
         while (*ptr == L' ') ptr++;
 
         /* pick and find mnemonic */
-        for (m = 0; (ptr[m] >= L'A' && ptr[m] <= L'Z') || ptr[m] == L'2'; m++)
-            mnem[m] = ptr[m];
+        for (m = 0; (*ptr >= L'A' && *ptr <= L'Z') || *ptr == L'2'; m++, ptr++)
+            mnem[m] = *ptr;
         mnem[m] = L'\0';
 
         for (m = 0; (a = &mpsl_assembler[m]) && a->op != -1; m++) {
@@ -1488,9 +1488,10 @@ mpdm_t mpsl_asm(mpdm_t src)
         }
     }
 
-    mpdm_unref(src);
+    if (r != NULL)
+        r = MPDM_X2(exec_vm_a0, mpdm_unrefnd(r));
 
-    return mpdm_unrefnd(r);
+    return r;
 }
 
 

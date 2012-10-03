@@ -29,6 +29,7 @@
 #include "mpsl.h"
 
 void mpsl_disasm(mpdm_t prg);
+mpdm_t mpsl_asm(mpdm_t code);
 
 /* total number of tests and oks */
 int tests = 0;
@@ -283,6 +284,8 @@ int main(int argc, char *argv[])
     do_test("#!/usr/bin/env mpsl3\nT = 10;", MPDM_I(10));
 
     test_summary();
+
+    mpsl_disasm(mpdm_aget(mpsl_asm(MPDM_LS(L"LIT 2\nLIT 3\nADD\nRET\n")), 1));
 
     return 0;
 }
