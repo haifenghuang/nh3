@@ -1273,8 +1273,7 @@ static int exec_vm(struct mpsl_vm *m)
                 m->pc = mpdm_ival(v);
             }
             break;
-        case OP_RET:
-            if (m->cs)
+        case OP_RET: if (m->cs)
                 m->pc = mpdm_ival(mpdm_aget(m->c_stack, --m->cs));
             else
                 m->mode = VM_IDLE;
@@ -1350,56 +1349,28 @@ mpdm_t mpsl_compile(mpdm_t src)
 }
 
 
+/** assembler **/
+
 static struct _mpsl_assembler {
     mpsl_op_t   op;
     wchar_t     *str;
     int         argc;
 } mpsl_assembler[] = {
-    { OP_EOP,   L"EOP", 0 },
-    { OP_LIT,   L"LIT", 1 },
-    { OP_NUL,   L"NUL", 0 },
-    { OP_ARR,   L"ARR", 0 },
-    { OP_HSH,   L"HSH", 0 },
-    { OP_POP,   L"POP", 0 },
-    { OP_SWP,   L"SWP", 0 },
-    { OP_DUP,   L"DUP", 0 },
-    { OP_DP2,   L"DP2", 0 },
-    { OP_DPN,   L"DPN", 1 },
-    { OP_GET,   L"GET", 0 },
-    { OP_SET,   L"SET", 0 },
-    { OP_STI,   L"STI", 0 },
-    { OP_APU,   L"APU", 0 },
-    { OP_TBL,   L"TBL", 0 },
-    { OP_TPU,   L"TPU", 0 },
-    { OP_TPO,   L"TPO", 0 },
-    { OP_TLT,   L"TLT", 0 },
-    { OP_THS,   L"THS", 0 },
-    { OP_CAL,   L"CAL", 0 },
-    { OP_RET,   L"RET", 0 },
-    { OP_ARG,   L"ARG", 0 },
-    { OP_JMP,   L"JMP", 1 },
-    { OP_JF,    L"JF",  1 },
-    { OP_AND,   L"AND", 0 },
-    { OP_OR,    L"OR",  0 },
-    { OP_XOR,   L"XOR", 0 },
-    { OP_SHL,   L"SHL", 0 },
-    { OP_SHR,   L"SHR", 0 },
-    { OP_ADD,   L"ADD", 0 },
-    { OP_SUB,   L"SUB", 0 },
-    { OP_MUL,   L"MUL", 0 },
-    { OP_DIV,   L"DIV", 0 },
-    { OP_MOD,   L"MOD", 0 },
-    { OP_NOT,   L"NOT", 0 },
-    { OP_EQ,    L"EQ",  0 },
-    { OP_GT,    L"GT",  0 },
-    { OP_GE,    L"GE",  0 },
-    { OP_LT,    L"LT",  0 },
-    { OP_LE,    L"LE",  0 },
-    { OP_REM,   L"REM", 1 },
-    { OP_CAT,   L"CAT", 0 },
-    { OP_ITE,   L"ITE", 1 },
-    { OP_FMT,   L"FMT", 0 },
-    { OP_LNI,   L"LNI", 1 },
+    { OP_EOP,   L"EOP", 0 },    { OP_LIT,   L"LIT", 1 },    { OP_NUL,   L"NUL", 0 },
+    { OP_ARR,   L"ARR", 0 },    { OP_HSH,   L"HSH", 0 },    { OP_POP,   L"POP", 0 },
+    { OP_SWP,   L"SWP", 0 },    { OP_DUP,   L"DUP", 0 },    { OP_DP2,   L"DP2", 0 },
+    { OP_DPN,   L"DPN", 1 },    { OP_GET,   L"GET", 0 },    { OP_SET,   L"SET", 0 },
+    { OP_STI,   L"STI", 0 },    { OP_APU,   L"APU", 0 },    { OP_TBL,   L"TBL", 0 },
+    { OP_TPU,   L"TPU", 0 },    { OP_TPO,   L"TPO", 0 },    { OP_TLT,   L"TLT", 0 },
+    { OP_THS,   L"THS", 0 },    { OP_CAL,   L"CAL", 0 },    { OP_RET,   L"RET", 0 },
+    { OP_ARG,   L"ARG", 0 },    { OP_JMP,   L"JMP", 1 },    { OP_JF,    L"JF",  1 },
+    { OP_AND,   L"AND", 0 },    { OP_OR,    L"OR",  0 },    { OP_XOR,   L"XOR", 0 },
+    { OP_SHL,   L"SHL", 0 },    { OP_SHR,   L"SHR", 0 },    { OP_ADD,   L"ADD", 0 },
+    { OP_SUB,   L"SUB", 0 },    { OP_MUL,   L"MUL", 0 },    { OP_DIV,   L"DIV", 0 },
+    { OP_MOD,   L"MOD", 0 },    { OP_NOT,   L"NOT", 0 },    { OP_EQ,    L"EQ",  0 },
+    { OP_GT,    L"GT",  0 },    { OP_GE,    L"GE",  0 },    { OP_LT,    L"LT",  0 },
+    { OP_LE,    L"LE",  0 },    { OP_REM,   L"REM", 1 },    { OP_CAT,   L"CAT", 0 },
+    { OP_ITE,   L"ITE", 1 },    { OP_FMT,   L"FMT", 0 },    { OP_LNI,   L"LNI", 1 },
     { -1,       NULL,   0 }
 };
 
@@ -1414,7 +1385,7 @@ void mpsl_disasm(mpdm_t prg)
         struct _mpsl_assembler *a;
         int m = 0;
 
-        while ((a = &mpsl_assembler[m++]) && a->op != -1 && a->op != i);
+        while ((a = &mpsl_assembler[m++])->op != -1 && a->op != i);
 
         if (a->op == -1)
             printf("Error: opcode id #%d not found\n", i);
@@ -1461,7 +1432,7 @@ mpdm_t mpsl_asm(mpdm_t src)
             mnem[m] = *ptr;
         mnem[m] = L'\0';
 
-        for (m = 0; (a = &mpsl_assembler[m]) && a->op != -1; m++) {
+        for (m = 0; (a = &mpsl_assembler[m])->op != -1; m++) {
             if (wcscmp(mnem, a->str) == 0)
                 break;
         }
@@ -1479,12 +1450,7 @@ mpdm_t mpsl_asm(mpdm_t src)
         /* args? */
         if (a->argc) {
             while (*ptr == L' ') ptr++;
-
-            for (m = 0; ptr[m]; m++)
-                mnem[m] = ptr[m];
-            mnem[m] = L'\0';
-
-            mpdm_push(r, MPDM_S(mnem));
+            mpdm_push(r, MPDM_S(ptr));
         }
     }
 
