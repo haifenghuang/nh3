@@ -340,8 +340,7 @@ typedef enum {
     N_IADD,   N_ISUB,   N_IMUL, N_IDIV, N_IMOD,
     N_IBAND,  N_IBOR,   N_IXOR,
     N_PINC,   N_PDEC,   N_SINC, N_SDEC,
-    N_THIS,
-    N_LOCAL,  N_GLOBAL,
+    N_THIS,   N_VAR,
     N_SUBDEF, N_RETURN,
     N_VOID,   N_LINEINFO,
     N_EOP
@@ -667,7 +666,7 @@ static mpdm_t var(struct mpsl_c *c)
             v = node2(N_PARTOF, node1(N_SYMVAL, node1(N_SYMID, v)), var(c));
         }
         else {
-            v = node1(N_LOCAL, node1(N_LITERAL, v));
+            v = node1(N_VAR, node1(N_LITERAL, v));
         }
     }
     else
@@ -909,8 +908,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_THIS:    o(c, OP_THS); break;
     case N_SUBSCR:  O(1); O(2); break;
     case N_VOID:    O(1); o(c, OP_POP); break;
-    case N_GLOBAL:  o(c, OP_ROO); O(1); O(2); o(c, OP_STI); o(c, OP_POP); break;
-    case N_LOCAL:   o(c, OP_TLT); O(1); break;
+    case N_VAR:     o(c, OP_TLT); O(1); break;
     case N_RETURN:  O(1); o(c, OP_TPO); o(c, OP_RET); break;
     case N_FUNCAL:  O(1); O(2); o(c, OP_CAL); break;
     case N_BINAND:  O(1); O(2); o(c, OP_AND); break;
