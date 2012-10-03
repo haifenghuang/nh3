@@ -1350,11 +1350,11 @@ mpdm_t mpsl_compile(mpdm_t src)
 }
 
 
-static struct _mpsl_asm {
+static struct _mpsl_assembler {
     mpsl_op_t   op;
     wchar_t     *str;
     int         argc;
-} mpsl_asm[] = {
+} mpsl_assembler[] = {
     { OP_EOP,   L"EOP", 0 },
     { OP_LIT,   L"LIT", 1 },
     { OP_NUL,   L"NUL", 0 },
@@ -1411,10 +1411,10 @@ void mpsl_disasm(mpdm_t prg)
 
     for (n = 0; n < mpdm_size(prg); n++) {
         mpsl_op_t i = mpdm_ival(mpdm_aget(prg, n));
-        struct _mpsl_asm *a;
+        struct _mpsl_assembler *a;
         int m = 0;
 
-        while ((a = &mpsl_asm[m++]) && a->op != -1 && a->op != i);
+        while ((a = &mpsl_assembler[m++]) && a->op != -1 && a->op != i);
 
         if (a->op == -1)
             printf("Error: opcode id #%d not found\n", i);
@@ -1423,13 +1423,74 @@ void mpsl_disasm(mpdm_t prg)
             printf("%ls",   a->str);
 
             if (a->argc)
-                printf(" \"%ls\"", mpdm_string(mpdm_aget(prg, ++n)));
+                printf(" %ls", mpdm_string(mpdm_aget(prg, ++n)));
 
             printf("\n");
         }
     }
 
     mpdm_unref(prg);
+}
+
+
+mpdm_t mpsl_asm(mpdm_t src)
+{
+    mpdm_t r = mpdm_ref(MPDM_A(0));
+    mpdm_t l = mpdm_ref(mpdm_split(src, MPDM_LS(L"\n")));
+    int n;
+
+    mpdm_ref(src);
+
+    for (n = 0; n < mpdm_size(l); n++) {
+        wchar_t *ptr;
+        mpdm_t s = mpdm_aget(l, n);
+        int m;
+        wchar_t mnem[256];
+        struct _mpsl_assembler *a;
+
+        ptr = mpdm_string(s);
+
+        /* skip possible spaces and line numbers */
+        while (*ptr == L' ') ptr++;
+        while (*ptr >= L'0' && *ptr <= L'0') ptr++;
+        if (*ptr == L':') ptr++;
+        while (*ptr == L' ') ptr++;
+
+        /* pick and find mnemonic */
+        for (m = 0; (ptr[m] >= L'A' && ptr[m] <= L'Z') || ptr[m] == L'2'; m++)
+            mnem[m] = ptr[m];
+        mnem[m] = L'\0';
+
+        for (m = 0; (a = &mpsl_assembler[m]) && a->op != -1; m++) {
+            if (wcscmp(mnem, a->str) == 0)
+                break;
+        }
+
+        /* not found? error assembling */
+        if (a->op == -1) {
+            mpdm_unref(r);
+            r = NULL;
+            break;
+        }
+
+        /* push opcode */
+        mpdm_push(r, MPDM_I(a->op));
+
+        /* args? */
+        if (a->argc) {
+            while (*ptr == L' ') ptr++;
+
+            for (m = 0; ptr[m]; m++)
+                mnem[m] = ptr[m];
+            mnem[m] = L'\0';
+
+            mpdm_push(r, MPDM_S(mnem));
+        }
+    }
+
+    mpdm_unref(src);
+
+    return mpdm_unrefnd(r);
 }
 
 
