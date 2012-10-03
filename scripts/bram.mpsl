@@ -55,8 +55,8 @@ var www = http(yf);
 if www != NULL {
     var o = [], l;
 
-    while l = www.fd.read() {
-        l = l.sregex("/\r?\n$/").sregex("/\"/g").split(',');
+    foreach www.fd.read() {
+        l = value.sregex("/\r?\n$/").sregex("/\"/g").split(',');
 
         o.push(
             {
