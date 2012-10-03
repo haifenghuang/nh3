@@ -41,7 +41,10 @@ sub http(args) {
             r[l[0]] = l[1];
         }
 
-        s['resp'] = r;
+        s = {
+            fd:     s
+            resp:   r
+        };
     }
 
     return s;
@@ -52,7 +55,7 @@ var www = http(yf);
 if www != NULL {
     var o = [], l;
 
-    while l = www.read() {
+    while l = www.fd.read() {
         l = l.sregex("/\r?\n$/").sregex("/\"/g").split(',');
 
         o.push(
