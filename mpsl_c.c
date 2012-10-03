@@ -97,7 +97,7 @@ static void c_error(struct mpsl_c *c)
 {
     char tmp[64];
 
-    sprintf(tmp, "%d:%d: error: ", c->y, c->x);
+    sprintf(tmp, ":%d:%d: error: ", c->y, c->x);
     s_error(MPDM_MBS(tmp), MPDM_LS(L"syntax error"));
 
     c->error = 1;
@@ -355,7 +355,6 @@ typedef enum {
 static mpdm_t node0(mpsl_node_t t) { mpdm_t r = RF(MPDM_A(1)); mpdm_aset(r, MPDM_I(t), 0); return UFND(r); }
 static mpdm_t node1(mpsl_node_t t, mpdm_t n1) { mpdm_t r = RF(node0(t)); mpdm_push(r, n1); return UFND(r); }
 static mpdm_t node2(mpsl_node_t t, mpdm_t n1, mpdm_t n2) { mpdm_t r = RF(node1(t, n1)); mpdm_push(r, n2); return UFND(r); }
-static mpdm_t node3(mpsl_node_t t, mpdm_t n1, mpdm_t n2, mpdm_t n3) { mpdm_t r = RF(node2(t, n1, n2)); mpdm_push(r, n3); return UFND(r); }
 
 static mpdm_t tstr(struct mpsl_c *c)
 /* returns the current token as a string */
@@ -683,10 +682,9 @@ static mpdm_t statement(struct mpsl_c *c)
 {
     mpdm_t v = NULL;
     mpdm_t w;
-    int x, y;
+    int l;
 
-    x = c->x;
-    y = c->y;
+    l = c->y;
 
     if (c->error) {}
     else
@@ -811,7 +809,7 @@ static mpdm_t statement(struct mpsl_c *c)
     }
 
     /* add line info */
-    v = node3(N_LINEINFO, v, MPDM_I(y), MPDM_I(x));
+    v = node2(N_LINEINFO, v, MPDM_I(l));
 
     return v;
 }
@@ -866,7 +864,8 @@ typedef enum {
     OP_AND, OP_OR,  OP_XOR, OP_SHL, OP_SHR,
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_NOT, OP_EQ,  OP_GT,  OP_GE,  OP_LT, OP_LE,
-    OP_REM, OP_CAT, OP_ITE, OP_FMT
+    OP_REM, OP_CAT, OP_ITE, OP_FMT,
+    OP_LNI
 } mpsl_op_t;
 
 
@@ -921,6 +920,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_SHR:     O(1); O(2); o(c, OP_SHR); break;
     case N_JOIN:    O(1); O(2); o(c, OP_CAT); break;
     case N_FMT:     O(1); O(2); o(c, OP_FMT); break;
+    case N_LINEINFO: o2(c, OP_LNI, mpdm_aget(node, 2)); O(1); break;
 
     case N_ARRAY:
         o(c, OP_ARR);
@@ -1023,6 +1023,7 @@ struct mpsl_vm {
     int tt;                 /* symbol table top */
     int mode;               /* running mode */
     int ins;                /* # of executed instructions */
+    int line;               /* line of source code (debug) */
 };
 
 
@@ -1049,7 +1050,23 @@ static void reset_vm(struct mpsl_vm *m, mpdm_t prg)
 }
 
 
-static void vm_error(struct mpsl_vm *m, mpdm_t s1, mpdm_t s2) { m->mode = VM_ERROR; s_error(s1, s2); }
+static void vm_error(struct mpsl_vm *m, mpdm_t s1, mpdm_t s2) 
+{
+    mpdm_t t;
+
+    mpdm_ref(s1);
+    mpdm_ref(s2);
+
+    m->mode = VM_ERROR;
+
+    t = mpdm_fmt(MPDM_LS(L":%d: error: %s"), MPDM_I(m->line));
+    t = mpdm_fmt(t, s1);
+
+    s_error(t, s2); 
+
+    mpdm_unref(s2);
+    mpdm_unref(s1);
+}
 
 static mpdm_t PUSH(struct mpsl_vm *m, mpdm_t v) { return mpdm_aset(m->stack, v, m->sp++); }
 static mpdm_t POP(struct mpsl_vm *m) { return mpdm_aget(m->stack, --m->sp); }
@@ -1247,6 +1264,7 @@ static int exec_vm(struct mpsl_vm *m, int msecs)
         case OP_CAT: w = POP(m); v = POP(m); PUSH(m, mpdm_join(v, w)); break;
         case OP_FMT: w = POP(m); v = POP(m); PUSH(m, mpdm_fmt(v, w)); break;
         case OP_REM: m->pc++; break;
+        case OP_LNI: m->line = mpdm_ival(PC(m)); break;
         case OP_CAL: v = POP(m);
             if (MPDM_IS_EXEC(v))
                 PUSH(m, mpdm_exec(v, POP(m), mpdm_aget(m->symtbl, m->tt - 1)));
@@ -1346,7 +1364,7 @@ void mpsl_disasm(mpdm_t prg)
         "AND", "OR", "XOR", "SHL", "SHR",
         "ADD", "SUB", "MUL", "DIV", "MOD",
         "NOT", "EQ", "GT", "GE", "LT", "LE",
-        "REM", "CAT", "ITE", "FMT"
+        "REM", "CAT", "ITE", "FMT", "LNI"
     };
 
     mpdm_ref(prg);
@@ -1359,7 +1377,8 @@ void mpsl_disasm(mpdm_t prg)
 
         if (i == OP_LIT || i == OP_REM)
             printf(" \"%ls\"", mpdm_string(mpdm_aget(prg, ++n)));
-        if (i == OP_JMP || i == OP_JT || i == OP_JF || i == OP_ITE || i == OP_DPN)
+        if (i == OP_JMP || i == OP_JT || i == OP_JF ||
+            i == OP_ITE || i == OP_DPN || i == OP_LNI)
             printf(" %d", mpdm_ival(mpdm_aget(prg, ++n)));
 
         printf("\n");
