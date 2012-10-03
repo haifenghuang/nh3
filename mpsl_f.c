@@ -795,7 +795,6 @@ static mpdm_t F_open(F_ARGS)
     return f;
 }
 
-static mpdm_t M_pclose(F_ARGS) { return mpdm_pclose(l); }
 
 /**
  * sys.popen - Opens a pipe.
