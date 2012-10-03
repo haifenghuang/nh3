@@ -10,6 +10,8 @@ Release Critical Bugs
    inside the method symbol table. N_PARTOF and related code
    should be rewritten and OP_TPU and OP_TPO generated only
    for function calls *and* after arguments are resolved.
+ * 3009: Implement load() / import() / whatever.
+ * 3010: Think about channels and multitasking.
 
 Open Bugs
 ---------
