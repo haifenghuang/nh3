@@ -75,6 +75,15 @@ static mpdm_t F_size(F_ARGS)
     return MPDM_I(mpdm_size(l));
 }
 
+
+wchar_t *mpsl_type(mpdm_t);
+
+static mpdm_t F_type(F_ARGS)
+{
+    return MPDM_LS(mpsl_type(l));
+}
+
+
 /**
  * v.clone - Creates a clone of a value.
  * @v: the value
@@ -141,47 +150,6 @@ static mpdm_t F_dumper(F_ARGS)
 static mpdm_t F_cmp(F_ARGS)
 {
     return MPDM_I(mpdm_cmp(l, A0));
-}
-
-/**
- * v.is_array - Tests if a value is an array.
- * @v: the value
- *
- * Returns non-zero if @v is an array.
- * [Value Management]
- * [Arrays]
- */
-/** bool = v.is_array(); */
-static mpdm_t F_is_array(F_ARGS)
-{
-    return mpsl_boolean(MPDM_IS_ARRAY(l));
-}
-
-/**
- * v.is_hash - Tests if a value is a hash.
- * @v: the value
- *
- * Returns non-zero if @v is a hash.
- * [Value Management]
- * [Hashes]
- */
-/** bool = v.is_hash(); */
-static mpdm_t F_is_hash(F_ARGS)
-{
-    return mpsl_boolean(MPDM_IS_HASH(l));
-}
-
-/**
- * v.is_exec - Tests if a value is executable.
- * @v: the value
- *
- * Returns non-zero if @v is a executable.
- * [Value Management]
- */
-/** bool = v.is_exec(); */
-static mpdm_t F_is_exec(F_ARGS)
-{
-    return mpsl_boolean(MPDM_IS_EXEC(l));
 }
 
 
@@ -1261,9 +1229,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"clone",    MPDM_X(F_clone));
     mpdm_hset_s(v, L"dumper",   MPDM_X(F_dumper));
     mpdm_hset_s(v, L"cmp",      MPDM_X(F_cmp));
-    mpdm_hset_s(v, L"is_array", MPDM_X(F_is_array));
-    mpdm_hset_s(v, L"is_hash",  MPDM_X(F_is_hash));
-    mpdm_hset_s(v, L"is_exec",  MPDM_X(F_is_exec));
+    mpdm_hset_s(v, L"type",     MPDM_X(F_type));
 
     /* array methods */
     v = mpdm_hset_s(r, L"ARRAY",    MPDM_H(0));
@@ -1282,9 +1248,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"clone",        MPDM_X(F_clone));
     mpdm_hset_s(v, L"dumper",       MPDM_X(F_dumper));
     mpdm_hset_s(v, L"cmp",          MPDM_X(F_cmp));
-    mpdm_hset_s(v, L"is_array",     MPDM_X(F_is_array));
-    mpdm_hset_s(v, L"is_hash",      MPDM_X(F_is_hash));
-    mpdm_hset_s(v, L"is_exec",      MPDM_X(F_is_exec));
+    mpdm_hset_s(v, L"type",         MPDM_X(F_type));
 
     /* scalar methods */
     v = mpdm_hset_s(r, L"SCALAR",   MPDM_H(0));
@@ -1303,9 +1267,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"clone",        MPDM_X(F_clone));
     mpdm_hset_s(v, L"dumper",       MPDM_X(F_dumper));
     mpdm_hset_s(v, L"cmp",          MPDM_X(F_cmp));
-    mpdm_hset_s(v, L"is_array",     MPDM_X(F_is_array));
-    mpdm_hset_s(v, L"is_hash",      MPDM_X(F_is_hash));
-    mpdm_hset_s(v, L"is_exec",      MPDM_X(F_is_exec));
+    mpdm_hset_s(v, L"type",         MPDM_X(F_type));
 
     /* I/O methods */
     v = mpdm_hset_s(r, L"IO",           MPDM_H(0));
@@ -1316,6 +1278,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"fseek",            MPDM_X(M_fseek));
     mpdm_hset_s(v, L"ftell",            MPDM_X(M_ftell));
     mpdm_hset_s(v, L"close",            MPDM_X(M_close));
+    mpdm_hset_s(v, L"type",             MPDM_X(F_type));
 
     /* "sys" namespace */
     v = mpdm_hset_s(r, L"sys",          MPDM_H(0));

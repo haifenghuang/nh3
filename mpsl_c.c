@@ -1103,6 +1103,24 @@ static mpdm_t SET(struct mpsl_vm *m, mpdm_t h, mpdm_t k, mpdm_t v)
     return r;
 }
 
+
+wchar_t *mpsl_type(mpdm_t v)
+{
+    wchar_t *t = L"SCALAR";
+
+    if (MPDM_IS_FILE(v))
+        t = L"IO";
+    else
+    if (MPDM_IS_HASH(v))
+        t = L"HASH";
+    else
+    if (MPDM_IS_ARRAY(v))
+        t = L"ARRAY";
+
+    return t;
+}
+
+
 static mpdm_t TBL(struct mpsl_vm *m)
 {
     int n;
@@ -1127,16 +1145,7 @@ static mpdm_t TBL(struct mpsl_vm *m)
         l = NULL;
 
         /* still not found? try on the type-specific tables */
-        if (MPDM_IS_FILE(v))
-            v = mpdm_hget_s(mpdm_root(), L"IO");
-        else
-        if (MPDM_IS_HASH(v))
-            v = mpdm_hget_s(mpdm_root(), L"HASH");
-        else
-        if (MPDM_IS_ARRAY(v))
-            v = mpdm_hget_s(mpdm_root(), L"ARRAY");
-        else
-            v = mpdm_hget_s(mpdm_root(), L"SCALAR");
+        v = mpdm_hget_s(mpdm_root(), mpsl_type(v));
 
         if (mpdm_exists(v, s))
             l = v;
