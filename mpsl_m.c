@@ -33,6 +33,8 @@
 
 
 void mpsl_disasm(mpdm_t);
+mpdm_t mpsl_asm(mpdm_t);
+
 
 /** code **/
 
@@ -45,6 +47,7 @@ int mpsl_main(int argc, char *argv[])
     int ret = 0;
     int ok = 0;
     int disasm = 0;
+    int enasm = 0;
 
     /* skip the executable */
     argv++;
@@ -57,7 +60,7 @@ int mpsl_main(int argc, char *argv[])
             printf("Copyright (C) 2003-2012 Angel Ortega <angel@triptico.com>\n");
             printf("This software is covered by the GPL license. NO WARRANTY.\n\n");
 
-            printf("Usage: mpsl [-d] [-e 'script' | script.mpsl ]\n\n");
+            printf("Usage: mpsl [-d] [-a] [-e 'script' | script.mpsl ]\n\n");
 
             return 0;
         }
@@ -71,6 +74,9 @@ int mpsl_main(int argc, char *argv[])
             immscript = argv[0];
             ok = 1;
         }
+        else
+        if (strcmp(argv[0], "-a") == 0)
+            enasm = 1;
         else {
             /* next argument is a script name; open it */
             if ((script = fopen(argv[0], "r")) == NULL) {
@@ -93,15 +99,10 @@ int mpsl_main(int argc, char *argv[])
         mpdm_unref(w);
     }
     else {
-        int c = 0;
-
-        /* if line starts with #!, discard it */
-/*        if ((c = getc(script)) == '#' && (c = getc(script)) == '!')
-            while ((c = getc(script)) != EOF && c != '\n');
-        else
-            ungetc(c, script);
-*/
-        if (c != EOF) {
+        if (enasm) {
+            v = mpsl_asm(MPDM_F(script));
+        }
+        else {
             w = mpdm_ref(MPDM_F(script));
             v = mpsl_compile(w);
             mpdm_close(w);

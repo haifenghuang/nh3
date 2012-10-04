@@ -1413,12 +1413,20 @@ void mpsl_disasm(mpdm_t prg)
 mpdm_t mpsl_asm(mpdm_t src)
 {
     mpdm_t r = mpdm_ref(MPDM_A(0));
-    mpdm_t l = mpdm_ref(mpdm_split(src, MPDM_LS(L"\n")));
-    int n;
+    mpdm_t l, s;
+    int n = 0;
 
-    for (n = 0; n < mpdm_size(l); n++) {
+    mpdm_ref(src);
+
+    if (MPDM_IS_FILE(src))
+        l = src;
+    else
+        l = mpdm_split(src, MPDM_LS(L"\n"));
+
+    mpdm_ref(l);
+
+    while (mpdm_iterator(l, &n, NULL, &s)) {
         wchar_t *ptr;
-        mpdm_t s = mpdm_aget(l, n);
         int m;
         wchar_t mnem[256];
         struct _mpsl_assembler *a;
@@ -1456,9 +1464,16 @@ mpdm_t mpsl_asm(mpdm_t src)
         /* args? */
         if (a->argc) {
             while (*ptr == L' ') ptr++;
-            mpdm_push(r, MPDM_S(ptr));
+            for (m = 0; ptr[m] && ptr[m] != L'\n'; m++)
+                    mnem[m] = ptr[m];
+            mnem[m] = L'\0';
+
+            mpdm_push(r, MPDM_S(mnem));
         }
     }
+
+    mpdm_unref(l);
+    mpdm_unref(src);
 
     if (r != NULL)
         r = MPDM_X2(exec_vm_a0, mpdm_unrefnd(r));
