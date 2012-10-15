@@ -1232,6 +1232,21 @@ static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
 
 static void FRK(struct mpsl_vm *m)
 {
+    mpdm_t p, c, a, b, x;
+
+    mpdm_new_channel(&p, &c);
+
+    /* a = [ spawn_func_addr, [ child_channel ] ] ; */
+    a = mpdm_ref(MPDM_A(0));
+    mpdm_push(a, POP(m));
+    b = mpdm_push(a, MPDM_A(0));
+    mpdm_push(b, c);
+
+    PUSH(m, p);
+
+    x = MPDM_X2(exec_vm_a0, m->prg);
+
+    mpdm_void(mpdm_exec_thread(x, mpdm_unrefnd(a), NULL));
 }
 
 
