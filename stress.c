@@ -283,6 +283,8 @@ int main(int argc, char *argv[])
 
     do_test("#!/usr/bin/env mpsl3\nT = 10;", MPDM_I(10));
 
+    do_test("sub sqr(c) { var v = c.read(); c.write(v * v); } var c = &sqr; c.write(1234); T = c.read();", MPDM_I(1234 * 1234));
+
     test_summary();
 
     mpsl_disasm(mpdm_aget(mpsl_asm(MPDM_LS(L"LIT 2\nLIT 3\nADD\nRET\n")), 1));
