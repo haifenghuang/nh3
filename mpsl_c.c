@@ -1,3 +1,4 @@
+
 /*
 
     MPSL - Minimum Profit Scripting Language 3.x
@@ -1313,9 +1314,17 @@ static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
 {
     mpdm_t r = NULL;
     struct mpsl_vm m;
+    int n;
 
     memset(&m, '\0', sizeof(m));
     reset_vm(&m, c);
+
+    /* set program counter */
+    m.pc = mpdm_ival(mpdm_aget(a, 0));
+
+    /* push the rest of arguments to the stack */
+    for (n = 1; n < mpdm_size(a); n++)
+        PUSH(&m, mpdm_aget(a, n));
 
     r = MPDM_I(exec_vm(&m));
 
