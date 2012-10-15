@@ -1342,6 +1342,7 @@ static int exec_vm(struct mpsl_vm *m)
                 POP(m);
                 m->pc = mpdm_ival(PC(m));
             }
+            break;
         case OP_FRK: FRK(m); break;
         }
 
