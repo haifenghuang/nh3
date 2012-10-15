@@ -1,4 +1,3 @@
-
 /*
 
     MPSL - Minimum Profit Scripting Language 3.x
