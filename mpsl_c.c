@@ -864,7 +864,7 @@ typedef enum {
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_NOT, OP_EQ,  OP_GT,  OP_GE,  OP_LT, OP_LE,
     OP_REM, OP_CAT, OP_ITE, OP_FMT,
-    OP_LNI
+    OP_LNI, OP_FRK
 } mpsl_op_t;
 
 
@@ -1204,6 +1204,37 @@ int mpsl_is_true(mpdm_t v)
 #define BOOL(i) MPDM_I(i)
 #define R(v) mpdm_rval(v)
 
+static int exec_vm(struct mpsl_vm *m);
+
+static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
+{
+    mpdm_t r = NULL;
+    struct mpsl_vm m;
+    int n;
+
+    memset(&m, '\0', sizeof(m));
+    reset_vm(&m, c);
+
+    /* set program counter */
+    m.pc = mpdm_ival(mpdm_aget(a, 0));
+
+    /* push the rest of arguments to the stack */
+    for (n = 1; n < mpdm_size(a); n++)
+        PUSH(&m, mpdm_aget(a, n));
+
+    r = MPDM_I(exec_vm(&m));
+
+    reset_vm(&m, NULL);
+
+    return r;
+}
+
+
+static void FRK(struct mpsl_vm *m)
+{
+}
+
+
 static int exec_vm(struct mpsl_vm *m)
 {
     clock_t max;
@@ -1296,6 +1327,7 @@ static int exec_vm(struct mpsl_vm *m)
                 POP(m);
                 m->pc = mpdm_ival(PC(m));
             }
+        case OP_FRK: FRK(m); break;
         }
 
         m->ins++;
@@ -1306,30 +1338,6 @@ static int exec_vm(struct mpsl_vm *m)
     }
 
     return m->mode;
-}
-
-
-static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
-{
-    mpdm_t r = NULL;
-    struct mpsl_vm m;
-    int n;
-
-    memset(&m, '\0', sizeof(m));
-    reset_vm(&m, c);
-
-    /* set program counter */
-    m.pc = mpdm_ival(mpdm_aget(a, 0));
-
-    /* push the rest of arguments to the stack */
-    for (n = 1; n < mpdm_size(a); n++)
-        PUSH(&m, mpdm_aget(a, n));
-
-    r = MPDM_I(exec_vm(&m));
-
-    reset_vm(&m, NULL);
-
-    return r;
 }
 
 
@@ -1385,6 +1393,7 @@ static struct _mpsl_assembler {
     { OP_GT,    L"GT",  0 },    { OP_GE,    L"GE",  0 },    { OP_LT,    L"LT",  0 },
     { OP_LE,    L"LE",  0 },    { OP_REM,   L"REM", 1 },    { OP_CAT,   L"CAT", 0 },
     { OP_ITE,   L"ITE", 1 },    { OP_FMT,   L"FMT", 0 },    { OP_LNI,   L"LNI", 1 },
+    { OP_FRK,   L"FRK", 0 },
     { -1,       NULL,   0 }
 };
 
