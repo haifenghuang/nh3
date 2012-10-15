@@ -1,4 +1,4 @@
-#!mpsl3
+#!/usr/bin/env mpsl3
 
 /** stock processor **/
 
