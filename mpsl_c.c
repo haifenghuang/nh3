@@ -326,7 +326,7 @@ again:
 typedef enum {
     /* order matters (operator precedence) */
     N_NULL,   N_LITERAL,
-    N_ARRAY,  N_HASH,   N_FUNCAL,
+    N_ARRAY,  N_HASH,   N_FUNCAL, N_SPAWN,
     N_PARTOF, N_SUBSCR, 
     N_UMINUS, N_NOT,
     N_MOD,    N_DIV,    N_MUL,  N_SUB,  N_ADD,
@@ -400,6 +400,15 @@ static mpdm_t term(struct mpsl_c *c)
     mpdm_t v = NULL;
 
     if (c->error) {}
+    else
+    if (c->token == T_AMP) {
+        token(c);
+
+        if (c->token == T_SYMBOL)
+            v = node1(N_SPAWN, node1(N_SYMVAL, term(c)));
+        else
+            c_error(c);
+    }
     else
     if (c->token == T_BANG) {
         token(c);
@@ -919,6 +928,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_JOIN:    O(1); O(2); o(c, OP_CAT); break;
     case N_FMT:     O(1); O(2); o(c, OP_FMT); break;
     case N_LINEINFO: o2(c, OP_LNI, mpdm_aget(node, 2)); O(1); break;
+    case N_SPAWN:   O(1); o(c, OP_FRK); break;
 
     case N_ARRAY:
         o(c, OP_ARR);
