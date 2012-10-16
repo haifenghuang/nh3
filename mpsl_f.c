@@ -987,7 +987,7 @@ static mpdm_t F_chdir(F_ARGS)
 
 
 /**
- * sys.print - Writes values to stdout.
+ * sys.p - Writes values to stdout.
  * @arg1: first argument
  * @arg2: second argument
  * @argn: nth argument
@@ -995,7 +995,7 @@ static mpdm_t F_chdir(F_ARGS)
  * Writes the variable arguments to stdout.
  * [Input-Output]
  */
-/** sys.print(arg1 [,arg2 ... argn]); */
+/** sys.p(arg1 [,arg2 ... argn]); */
 static mpdm_t F_print(F_ARGS)
 {
     int n;
@@ -1052,7 +1052,6 @@ static mpdm_t F_random(F_ARGS)
  * sys.sleep - Sleeps a number of milliseconds.
  *
  * Sleeps a number of milliseconds.
- * [Threading]
  * [Time]
  */
 /** sys.sleep(msecs); */
@@ -1061,104 +1060,6 @@ static mpdm_t F_sleep(F_ARGS)
     mpdm_sleep(mpdm_ival(mpdm_aget(a, 0)));
 
     return NULL;
-}
-
-
-/**
- * mutex.lock - Locks a mutex (possibly waiting).
- *
- * Locks a mutex. If the mutex is already locked by
- * another process, it waits until it's unlocked.
- * [Threading]
- */
-/** mutex.lock(); */
-static mpdm_t M_mutex_lock(F_ARGS)
-{
-    mpdm_mutex_lock(mpdm_hget_s(l, L"v"));
-    return l;
-}
-
-
-/**
- * mutex.unlock - Unlocks a mutex.
- *
- * Unlocks a mutex.
- * [Threading]
- */
-/** mutex.unlock(); */
-static mpdm_t M_mutex_unlock(F_ARGS)
-{
-    mpdm_mutex_unlock(mpdm_hget_s(l, L"v"));
-    return l;
-}
-
-
-/**
- * sys.mutex - Returns a new mutex object.
- *
- * Returns a new mutex object.
- * [Threading]
- */
-/** local m = sys.mutex(); */
-static mpdm_t F_mutex(F_ARGS)
-{
-    mpdm_t o = mpdm_ref(MPDM_H(0));
-
-    mpdm_hset_s(o, L"v",        mpdm_new_mutex());
-    mpdm_hset_s(o, L"lock",     MPDM_X(M_mutex_lock));
-    mpdm_hset_s(o, L"unlock",   MPDM_X(M_mutex_unlock));
-
-    return mpdm_unrefnd(o);
-}
-
-
-/**
- * semaphore.wait - Waits for a semaphore to be ready.
- *
- * Waits for the value of a semaphore to be > 0. If it's
- * not, the thread waits until it is.
- * [Threading]
- */
-/** semaphore.wait(); */
-static mpdm_t M_semaphore_wait(F_ARGS)
-{
-    mpdm_semaphore_wait(mpdm_hget_s(l, L"v"));
-    return NULL;
-}
-
-
-/**
- * semaphore.post - Increments the value of a semaphore.
- *
- * Increments by 1 the value of a semaphore.
- * [Threading]
- */
-/** semaphore.post(); */
-static mpdm_t M_semaphore_post(F_ARGS)
-{
-    mpdm_semaphore_post(mpdm_hget_s(l, L"v"));
-    return NULL;
-}
-
-
-/**
- * sys.semaphore - Returns a new semaphore.
- * cnt: the initial count of the semaphore.
- *
- * Returns a new semaphore.
- * [Threading]
- */
-/** local s = sys.semaphore(); */
-/** local s = sys.semaphore(cnt); */
-static mpdm_t F_semaphore(F_ARGS)
-{
-    mpdm_t o = mpdm_ref(MPDM_H(0));
-
-    mpdm_hset_s(o, L"v",    mpdm_new_semaphore(IA0));
-    mpdm_hset_s(o, L"post", MPDM_X(M_semaphore_post));
-    mpdm_hset_s(o, L"wait", MPDM_X(M_semaphore_wait));
-
-    return mpdm_unrefnd(o);
 }
 
 
@@ -1298,9 +1199,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"time",             MPDM_X(F_time));
     mpdm_hset_s(v, L"random",           MPDM_X(F_random));
     mpdm_hset_s(v, L"sleep",            MPDM_X(F_sleep));
-    mpdm_hset_s(v, L"mutex",            MPDM_X(F_mutex));
-    mpdm_hset_s(v, L"semaphore",        MPDM_X(F_semaphore));
-    mpdm_hset_s(v, L"bincall",          MPDM_X(F_bincall));
 
     mpdm_hset_s(r, L"new",      MPDM_X(F_new));
 
