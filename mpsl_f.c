@@ -1117,10 +1117,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(r, L"STDOUT",   MPDM_F(stdout));
     mpdm_hset_s(r, L"STDERR",   MPDM_F(stderr));
 
-    /* home and application directories */
-    mpdm_hset_s(r, L"HOMEDIR",  mpdm_home_dir());
-    mpdm_hset_s(r, L"APPDIR",   mpdm_app_dir());
-
     /* hash methods */
     v = mpdm_hset_s(r, L"HASH", MPDM_H(0));
     mpdm_hset_s(v, L"size",     MPDM_X(F_hsize));
@@ -1205,6 +1201,9 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     /* version */
     v = mpdm_hset_s(r, L"MPSL", MPDM_H(0));
     mpdm_hset_s(v, L"VERSION",  MPDM_MBS(VERSION));
+    mpdm_hset_s(v, L"HOMEDIR",  mpdm_home_dir());
+    mpdm_hset_s(v, L"APPDIR",   mpdm_app_dir());
+
 
     /* command line arguments */
     v = mpdm_hset_s(r, L"ARGV", MPDM_A(0));
