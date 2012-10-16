@@ -1112,11 +1112,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
 
     mpdm_ref(r);
 
-    /* standard file descriptors */
-    mpdm_hset_s(r, L"STDIN",    MPDM_F(stdin));
-    mpdm_hset_s(r, L"STDOUT",   MPDM_F(stdout));
-    mpdm_hset_s(r, L"STDERR",   MPDM_F(stderr));
-
     /* hash methods */
     v = mpdm_hset_s(r, L"HASH", MPDM_H(0));
     mpdm_hset_s(v, L"size",     MPDM_X(F_hsize));
@@ -1195,6 +1190,9 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"time",             MPDM_X(F_time));
     mpdm_hset_s(v, L"random",           MPDM_X(F_random));
     mpdm_hset_s(v, L"sleep",            MPDM_X(F_sleep));
+    mpdm_hset_s(v, L"STDIN",            MPDM_F(stdin));
+    mpdm_hset_s(v, L"STDOUT",           MPDM_F(stdout));
+    mpdm_hset_s(v, L"STDERR",           MPDM_F(stderr));
 
     mpdm_hset_s(r, L"new",      MPDM_X(F_new));
 
