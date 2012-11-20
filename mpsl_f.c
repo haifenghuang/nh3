@@ -822,6 +822,20 @@ static mpdm_t F_unlink(F_ARGS)
 }
 
 /**
+ * sys.rename - Renames a file.
+ * @oldpath: old path
+ * @newpath: new path
+ *
+ * Renames a file.
+ * [Input-Output]
+ */
+/** bool = sys.rename(oldpath, newpath); */
+static mpdm_t F_rename(F_ARGS)
+{
+    return mpsl_boolean(mpdm_rename(A0, A1));
+}
+
+/**
  * sys.stat - Gives status from a file.
  * @filename: file name to get the status from
  *
@@ -1179,6 +1193,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"popen",            MPDM_X(F_popen));
     mpdm_hset_s(v, L"connect",          MPDM_X(F_connect));
     mpdm_hset_s(v, L"unlink",           MPDM_X(F_unlink));
+    mpdm_hset_s(v, L"rename",           MPDM_X(F_rename));
     mpdm_hset_s(v, L"stat",             MPDM_X(F_stat));
     mpdm_hset_s(v, L"chmod",            MPDM_X(F_chmod));
     mpdm_hset_s(v, L"chown",            MPDM_X(F_chown));
