@@ -143,8 +143,8 @@ fi
 cat $MPDM/config.ldflags >> config.ldflags
 echo "-lm" >> config.ldflags
 
-# if win32, the interpreter is called mpsl.exe
-grep CONFOPT_WIN32 ${MPDM}/config.h >/dev/null && TARGET=mpsl.exe
+# if win32, the interpreter is called mpsl3.exe
+grep CONFOPT_WIN32 ${MPDM}/config.h >/dev/null && TARGET=mpsl3.exe
 
 #########################################################
 
