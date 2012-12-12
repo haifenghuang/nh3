@@ -118,8 +118,8 @@ int mpsl_main(int argc, char *argv[])
         else {
             int r = mpdm_ival(mpdm_exec(v, NULL, NULL));
 
-            if (r == VM_ERROR)
-                printf("ERROR:\n");
+/*            if (r == VM_ERROR)
+                printf("ERROR:\n");*/
         }
 
         mpdm_unref(v);
@@ -127,8 +127,19 @@ int mpsl_main(int argc, char *argv[])
 
     /* prints the error, if any */
     if ((w = mpdm_hget_s(mpdm_root(), L"ERROR")) != NULL) {
-        mpdm_write_wcs(stderr, mpdm_string(w));
-        fprintf(stderr, "\n");
+        FILE *f = stderr;
+
+        /* if it's a CGI, dump error to stdout instead of stderr */
+        if (mpdm_hget_s(
+                mpdm_hget_s(mpdm_root(), L"ENV"),
+                L"GATEWAY_INTERFACE"
+            ) != NULL) {
+            printf("Content-type: text/plain\r\n\r\n");
+            f = stdout;
+        }
+
+        mpdm_write_wcs(f, mpdm_string(w));
+        fprintf(f, "\n");
 
         ret = 1;
     }
