@@ -11,6 +11,9 @@ Release Critical Bugs
    should be rewritten and OP_TPU and OP_TPO generated only
    for function calls *and* after arguments are resolved.
  * 3009: Implement load() / import() / whatever.
+ * 3011: Change the threading model to not using channels
+   by default; if a channel is needed in the thread, it should
+   be sent as argument.
 
 Open Bugs
 ---------
