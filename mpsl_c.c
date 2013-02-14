@@ -338,7 +338,7 @@ typedef enum {
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
     N_IADD,   N_ISUB,   N_IMUL, N_IDIV, N_IMOD,
-    N_IBAND,  N_IBOR,   N_IXOR,
+    N_IBAND,  N_IBOR,   N_IXOR, N_ORASSIGN,
     N_PINC,   N_PDEC,   N_SINC, N_SDEC,
     N_THIS,   N_VAR,
     N_SUBDEF, N_RETURN,
@@ -556,7 +556,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
         T_DAMP, T_DPIPE, T_EQUAL,
         T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, T_VIRGULE,
-        T_THARRW, T_FATARRW, T_DOLLAR, -1
+        T_THARRW, T_FATARRW, T_DOLLAR, T_DPIPEEQ, -1
     };
     static mpsl_node_t binop[] = {
         N_IADD, N_ISUB, N_IMUL, N_IDIV, N_IMOD,
@@ -565,7 +565,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         N_FUNCAL, N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
         N_AND, N_OR, N_ASSIGN,
         N_BINAND, N_BINOR, N_XOR, N_SHL, N_SHR, N_JOIN,
-        N_MAP, N_HMAP, N_FMT, -1
+        N_MAP, N_HMAP, N_FMT, N_ORASSIGN, -1
     };
 
     for (n = 0; tokens[n] != -1; n++)
@@ -970,6 +970,13 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_OR:
         O(1); o(c, OP_DUP); o(c, OP_NOT); n = o2(c, OP_JF, NULL);
         o(c, OP_POP); O(2); fix(c, n); break;
+
+    case N_ORASSIGN:
+        O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET);
+        n = o2(c, OP_JF, NULL);
+        o(c, OP_POP); i = o2(c, OP_JMP, NULL);
+        fix(c, n); O(2); o(c, OP_SET); fix(c, i);
+        break;
 
     case N_AND:
         O(1); o(c, OP_DUP); n = o2(c, OP_JF, NULL);
