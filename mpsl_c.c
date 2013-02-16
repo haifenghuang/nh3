@@ -51,7 +51,7 @@ typedef enum {
     T_DGTEQ,  T_DLTEQ,   T_DPIPEEQ, T_DAMPEQ,
     T_THARRW, T_FATARRW, T_VIRARRW, T_COLARRW,
     T_SYMBOL, T_LITERAL, T_BLANK,   T_SLASHAST, T_DSLASH,
-    T_SQUOTE, T_DQUOTE,  T_DOLLAR
+    T_SQUOTE, T_DQUOTE,  T_DOLLAR,  T_VIREQ
 } mpsl_token_t;
 
 
@@ -155,7 +155,7 @@ static struct {
     { L'/', T_DSLASH,   T_SLASH },
     { L'=', T_PERCEQ,   T_PERCENT },
     { L'=', T_CARETEQ,  T_CARET },
-    { L'>', T_VIRARRW,  T_VIRGULE },
+    { L'>', T_VIRARRW,  T_VIRGULE }, { L'=', T_VIREQ,   T_VIRGULE },
     { 0,    0,          0 }
 };
 
@@ -337,7 +337,7 @@ typedef enum {
     N_IF,     N_WHILE,  N_FOREACH,
     N_NOP,    N_SEQ,
     N_SYMID,  N_SYMVAL, N_ASSIGN,
-    N_IADD,   N_ISUB,   N_IMUL, N_IDIV, N_IMOD,
+    N_IADD,   N_ISUB,   N_IMUL, N_IDIV, N_IMOD, N_IJOIN,
     N_IBAND,  N_IBOR,   N_IXOR, N_ORASSIGN,
     N_PINC,   N_PDEC,   N_SINC, N_SDEC,
     N_THIS,   N_VAR,
@@ -555,7 +555,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         T_LBRACK, T_DOT, T_PLUS, T_MINUS, T_ASTER, T_SLASH, T_PERCENT, 
         T_LPAREN, T_EQEQ, T_BANGEQ, T_GT, T_GTEQ, T_LT, T_LTEQ, 
         T_DAMP, T_DPIPE, T_EQUAL,
-        T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, T_VIRGULE,
+        T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, T_VIRGULE, T_VIREQ,
         T_THARRW, T_FATARRW, T_DOLLAR, T_DPIPEEQ, -1
     };
     static mpsl_node_t binop[] = {
@@ -564,7 +564,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
         N_FUNCAL, N_EQ, N_NE, N_GT, N_GE, N_LT, N_LE,
         N_AND, N_OR, N_ASSIGN,
-        N_BINAND, N_BINOR, N_XOR, N_SHL, N_SHR, N_JOIN,
+        N_BINAND, N_BINOR, N_XOR, N_SHL, N_SHR, N_JOIN, N_IJOIN,
         N_MAP, N_HMAP, N_FMT, N_ORASSIGN, -1
     };
 
@@ -996,6 +996,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_IBAND: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_AND); o(c, OP_SET); break;
     case N_IBOR: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_OR); o(c, OP_SET); break;
     case N_IXOR: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_XOR); o(c, OP_SET); break;
+    case N_IJOIN: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); O(2); o(c, OP_CAT); o(c, OP_SET); break;
 
     case N_PINC: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); o2(c, OP_LIT, MPDM_I(1)); o(c, OP_ADD); o(c, OP_SET); break;
     case N_PDEC: O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET); o2(c, OP_LIT, MPDM_I(1)); o(c, OP_SUB); o(c, OP_SET); break;
