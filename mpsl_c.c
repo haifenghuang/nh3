@@ -974,7 +974,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     case N_ORASSIGN:
         O(1); o(c, OP_DP2); o(c, OP_DP2); o(c, OP_GET);
         n = o2(c, OP_JF, NULL);
-        o(c, OP_POP); i = o2(c, OP_JMP, NULL);
+        o(c, OP_GET); i = o2(c, OP_JMP, NULL);
         fix(c, n); O(2); o(c, OP_SET); fix(c, i);
         break;
 
