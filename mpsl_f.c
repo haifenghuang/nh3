@@ -1034,18 +1034,10 @@ static mpdm_t F_bincall(F_ARGS)
 /* FIXME: for randomizing */
 int getpid(void);
 
-/**
- * sys.random - Returns a random value.
- *
- * Returns a random number from 0 to value - 1.
- * [Miscellaneous]
- */
-/** integer = sys.random(value); */
-static mpdm_t F_random(F_ARGS)
+static int _rnd(int range)
 {
     static unsigned int seed = 0;
     int r = 0;
-    int range = mpdm_ival(mpdm_aget(a, 0));
 
     if (range == 0 || seed == 0) {
         seed = time(NULL) ^ getpid();
@@ -1058,7 +1050,20 @@ static mpdm_t F_random(F_ARGS)
         r = (seed >> 16) % range;
     }
 
-    return MPDM_I(r);
+    return r;
+}
+
+
+/**
+ * sys.random - Returns a random value.
+ *
+ * Returns a random number from 0 to value - 1.
+ * [Miscellaneous]
+ */
+/** integer = sys.random(value); */
+static mpdm_t F_random(F_ARGS)
+{
+    return MPDM_I(_rnd(mpdm_ival(mpdm_aget(a, 0))));
 };
 
 
