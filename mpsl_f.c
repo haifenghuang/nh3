@@ -1053,8 +1053,17 @@ static unsigned int _rnd(unsigned int range)
     unsigned int r = 0;
 
     if (_rnd_init == 0) {
-        _srand(time(NULL) ^ getpid());
-        _rnd_init = 1;
+        FILE *f;
+        unsigned int s;
+
+        if ((f = fopen("/dev/urandom", "rb")) != NULL) {
+            fread(&s, sizeof(s), 1, f);
+            fclose(f);
+        }
+        else
+            s = time(NULL) ^ getpid();
+
+        _srand(s);
     }
 
     _rnd_seed = (_rnd_seed * 58321) + 11113;
