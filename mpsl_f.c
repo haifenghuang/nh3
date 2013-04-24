@@ -1034,18 +1034,33 @@ static mpdm_t F_bincall(F_ARGS)
 /* FIXME: for randomizing */
 int getpid(void);
 
-static int _rnd(int range)
+static unsigned int _rnd_seed = 0;
+static unsigned int _rnd_init = 0;
+
+static unsigned int _srand(unsigned int seed)
 {
-    static unsigned int seed = 0;
-    int r = 0;
+    unsigned int p_seed = _rnd_seed;
 
-    if (range == 0 || seed == 0)
-        seed = time(NULL) ^ getpid();
+    _rnd_init = 1;
+    _rnd_seed = seed;
 
-    seed = (seed * 58321) + 11113;
+    return p_seed;
+}
+
+
+static unsigned int _rnd(unsigned int range)
+{
+    unsigned int r = 0;
+
+    if (_rnd_init == 0) {
+        _srand(time(NULL) ^ getpid());
+        _rnd_init = 1;
+    }
+
+    _rnd_seed = (_rnd_seed * 58321) + 11113;
 
     if (range)
-        r = (seed >> 16) % range;
+        r = (_rnd_seed >> 16) % range;
 
     return r;
 }
@@ -1061,6 +1076,19 @@ static int _rnd(int range)
 static mpdm_t F_random(F_ARGS)
 {
     return MPDM_I(_rnd(mpdm_ival(mpdm_aget(a, 0))));
+};
+
+
+/**
+ * sys.randomize - Sets the random seed.
+ *
+ * Sets the random seed.
+ * [Miscellaneous]
+ */
+/** previous_seed = sys.randomize(new_seed); */
+static mpdm_t F_randomize(F_ARGS)
+{
+    return MPDM_I(_srand(mpdm_ival(mpdm_aget(a, 0))));
 };
 
 
@@ -1228,6 +1256,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"gettext_domain",   MPDM_X(F_gettext_domain));
     mpdm_hset_s(v, L"time",             MPDM_X(F_time));
     mpdm_hset_s(v, L"random",           MPDM_X(F_random));
+    mpdm_hset_s(v, L"randomize",        MPDM_X(F_randomize));
     mpdm_hset_s(v, L"sleep",            MPDM_X(F_sleep));
     mpdm_hset_s(v, L"STDIN",            MPDM_F(stdin));
     mpdm_hset_s(v, L"STDOUT",           MPDM_F(stdout));
