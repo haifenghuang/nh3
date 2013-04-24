@@ -1039,16 +1039,13 @@ static int _rnd(int range)
     static unsigned int seed = 0;
     int r = 0;
 
-    if (range == 0 || seed == 0) {
+    if (range == 0 || seed == 0)
         seed = time(NULL) ^ getpid();
 
-        if (r)
-            r = seed % range;
-    }
-    else {
-        seed = (seed * 58321) + 11113;
+    seed = (seed * 58321) + 11113;
+
+    if (range)
         r = (seed >> 16) % range;
-    }
 
     return r;
 }
@@ -1065,6 +1062,26 @@ static mpdm_t F_random(F_ARGS)
 {
     return MPDM_I(_rnd(mpdm_ival(mpdm_aget(a, 0))));
 };
+
+
+/**
+ * array.rnd - Returns a random element from an array.
+ *
+ * Returns a random element from an array.
+ * [Arrays]
+ */
+/** elem = array.rnd(); */
+static mpdm_t F_rnd(F_ARGS)
+{
+    mpdm_t r;
+
+    if (MPDM_IS_ARRAY(l))
+        r = mpdm_aget(l, _rnd(mpdm_size(l)));
+    else
+        r = MPDM_I(_rnd(mpdm_ival(l)));
+
+    return r;
+}
 
 
 /**
@@ -1160,6 +1177,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"dumper",       MPDM_X(F_dumper));
     mpdm_hset_s(v, L"cmp",          MPDM_X(F_cmp));
     mpdm_hset_s(v, L"type",         MPDM_X(F_type));
+    mpdm_hset_s(v, L"rnd",          MPDM_X(F_rnd));
 
     /* scalar methods */
     v = mpdm_hset_s(r, L"SCALAR",   MPDM_H(0));
@@ -1179,6 +1197,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"dumper",       MPDM_X(F_dumper));
     mpdm_hset_s(v, L"cmp",          MPDM_X(F_cmp));
     mpdm_hset_s(v, L"type",         MPDM_X(F_type));
+    mpdm_hset_s(v, L"rnd",          MPDM_X(F_rnd));
 
     /* I/O methods */
     v = mpdm_hset_s(r, L"IO",           MPDM_H(0));
