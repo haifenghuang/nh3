@@ -1102,16 +1102,29 @@ static mpdm_t F_randomize(F_ARGS)
 
 
 /**
- * array.rnd - Returns a random element from an array.
+ * multiple.rnd - Returns a random element from an array or hash.
  *
- * Returns a random element from an array.
+ * Returns a random element from an array or a random key/value
+ * pair from a hash.
  * [Arrays]
+ * [Hashes]
  */
 /** elem = array.rnd(); */
+/** key_pair = hash.rnd(); */
 static mpdm_t F_rnd(F_ARGS)
 {
     mpdm_t r;
 
+    if (MPDM_IS_HASH(l)) {
+        mpdm_t t = mpdm_ref(mpdm_keys(l));
+        mpdm_t k = mpdm_aget(t, _rnd(mpdm_size(t)));
+        r = mpdm_ref(MPDM_A(2));
+        mpdm_aset(r, k, 0);
+        mpdm_aset(r, mpdm_hget(l, k), 1);
+        mpdm_unref(t);
+        mpdm_unrefnd(r);
+    }
+    else
     if (MPDM_IS_ARRAY(l))
         r = mpdm_aget(l, _rnd(mpdm_size(l)));
     else
@@ -1195,6 +1208,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"dumper",   MPDM_X(F_dumper));
     mpdm_hset_s(v, L"cmp",      MPDM_X(F_cmp));
     mpdm_hset_s(v, L"type",     MPDM_X(F_type));
+    mpdm_hset_s(v, L"rnd",      MPDM_X(F_rnd));
 
     /* array methods */
     v = mpdm_hset_s(r, L"ARRAY",    MPDM_H(0));
