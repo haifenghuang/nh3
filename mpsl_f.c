@@ -1066,10 +1066,11 @@ static unsigned int _rnd(unsigned int range)
         _srand(s);
     }
 
-    _rnd_seed = (_rnd_seed * 58321) + 11113;
+    /* Linear congruential generator by Numerical Recipes */
+    _rnd_seed = (_rnd_seed * 1664525) + 1013904223;
 
     if (range)
-        r = (_rnd_seed >> 16) % range;
+        r = (_rnd_seed & 0x7fffffff) % range;
 
     return r;
 }
