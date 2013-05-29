@@ -1077,19 +1077,6 @@ static unsigned int _rnd(unsigned int range)
 
 
 /**
- * sys.random - Returns a random value.
- *
- * Returns a random number from 0 to value - 1.
- * [Miscellaneous]
- */
-/** integer = sys.random(value); */
-static mpdm_t F_random(F_ARGS)
-{
-    return MPDM_I(_rnd(mpdm_ival(mpdm_aget(a, 0))));
-};
-
-
-/**
  * sys.randomize - Sets the random seed.
  *
  * Sets the random seed.
@@ -1282,7 +1269,6 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"gettext",          MPDM_X(F_gettext));
     mpdm_hset_s(v, L"gettext_domain",   MPDM_X(F_gettext_domain));
     mpdm_hset_s(v, L"time",             MPDM_X(F_time));
-    mpdm_hset_s(v, L"random",           MPDM_X(F_random));
     mpdm_hset_s(v, L"randomize",        MPDM_X(F_randomize));
     mpdm_hset_s(v, L"sleep",            MPDM_X(F_sleep));
     mpdm_hset_s(v, L"STDIN",            MPDM_F(stdin));
