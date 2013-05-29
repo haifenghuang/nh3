@@ -1103,13 +1103,16 @@ static mpdm_t F_randomize(F_ARGS)
 
 
 /**
- * multiple.rnd - Returns a random element from an array or hash.
+ * v.rnd - Returns a random value.
  *
- * Returns a random element from an array or a random key/value
- * pair from a hash.
+ * Returns a random number, array element or key/value pair
+ * from the value. For numbers, the result is in the 0 .. number - 1
+ * range (if the number is a numeral constant, remember to enclose it
+ * in parenthesis, like any other method applied to numerals).
  * [Arrays]
  * [Hashes]
  */
+/** number = number.rnd(); */
 /** elem = array.rnd(); */
 /** key_pair = hash.rnd(); */
 static mpdm_t F_rnd(F_ARGS)
