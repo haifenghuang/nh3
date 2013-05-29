@@ -1067,10 +1067,10 @@ static unsigned int _rnd(unsigned int range)
     }
 
     /* Linear congruential generator by Numerical Recipes */
-    _rnd_seed = (_rnd_seed * 1664525) + 1013904223;
+    r = _rnd_seed = (_rnd_seed * 1664525) + 1013904223;
 
     if (range)
-        r = (_rnd_seed & 0x7fffffff) % range;
+        r %= range;
 
     return r;
 }
@@ -1129,7 +1129,7 @@ static mpdm_t F_rnd(F_ARGS)
     if (MPDM_IS_ARRAY(l))
         r = mpdm_aget(l, _rnd(mpdm_size(l)));
     else
-        r = MPDM_I(_rnd(mpdm_ival(l)));
+        r = MPDM_R((double)_rnd(mpdm_ival(l)));
 
     return r;
 }
