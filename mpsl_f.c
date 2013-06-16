@@ -173,6 +173,26 @@ static mpdm_t M_fmt(F_ARGS)
 }
 
 
+/**
+ * v.join - Joins two values and returns a third one.
+ * @v: the first value
+ * @w: the second value
+ *
+ * Joins two values and returns a third one.
+ * [Strings]
+ * [Arrays]
+ * [Hashes]
+ */
+/** string = string.join(string); */
+/** string = array.join(string); */
+/** array = array.join(array); */
+/** hash = hash.join(hash); */
+static mpdm_t M_join(F_ARGS)
+{
+    return mpdm_join(l, A0);
+}
+
+
 /** SCALAR type **/
 
 /**
@@ -1225,17 +1245,18 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_ref(r);
 
     /* hash methods */
-    v = mpdm_hset_s(r, L"HASH", MPDM_H(0));
-    mpdm_hset_s(v, L"size",     MPDM_X(F_hsize));
-    mpdm_hset_s(v, L"exists",   MPDM_X(F_exists));
-    mpdm_hset_s(v, L"delete",   MPDM_X(F_hdel));
-    mpdm_hset_s(v, L"dump",     MPDM_X(F_dump));
-    mpdm_hset_s(v, L"clone",    MPDM_X(F_clone));
-    mpdm_hset_s(v, L"dumper",   MPDM_X(F_dumper));
-    mpdm_hset_s(v, L"cmp",      MPDM_X(F_cmp));
-    mpdm_hset_s(v, L"type",     MPDM_X(F_type));
-    mpdm_hset_s(v, L"rnd",      MPDM_X(F_rnd));
-    mpdm_hset_s(v, L"fmt",      MPDM_X(M_fmt));
+    v = mpdm_hset_s(r, L"HASH",     MPDM_H(0));
+    mpdm_hset_s(v, L"size",         MPDM_X(F_hsize));
+    mpdm_hset_s(v, L"exists",       MPDM_X(F_exists));
+    mpdm_hset_s(v, L"delete",       MPDM_X(F_hdel));
+    mpdm_hset_s(v, L"dump",         MPDM_X(F_dump));
+    mpdm_hset_s(v, L"clone",        MPDM_X(F_clone));
+    mpdm_hset_s(v, L"dumper",       MPDM_X(F_dumper));
+    mpdm_hset_s(v, L"cmp",          MPDM_X(F_cmp));
+    mpdm_hset_s(v, L"type",         MPDM_X(F_type));
+    mpdm_hset_s(v, L"rnd",          MPDM_X(F_rnd));
+    mpdm_hset_s(v, L"fmt",          MPDM_X(M_fmt));
+    mpdm_hset_s(v, L"join",         MPDM_X(M_join));
 
     /* array methods */
     v = mpdm_hset_s(r, L"ARRAY",    MPDM_H(0));
@@ -1257,6 +1278,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"type",         MPDM_X(F_type));
     mpdm_hset_s(v, L"rnd",          MPDM_X(F_rnd));
     mpdm_hset_s(v, L"fmt",          MPDM_X(M_fmt));
+    mpdm_hset_s(v, L"join",         MPDM_X(M_join));
 
     /* scalar methods */
     v = mpdm_hset_s(r, L"SCALAR",   MPDM_H(0));
@@ -1279,6 +1301,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"rnd",          MPDM_X(F_rnd));
     mpdm_hset_s(v, L"fmt",          MPDM_X(M_fmt));
     mpdm_hset_s(v, L"p",            MPDM_X(M_p));
+    mpdm_hset_s(v, L"join",         MPDM_X(M_join));
 
     /* I/O methods */
     v = mpdm_hset_s(r, L"IO",           MPDM_H(0));
