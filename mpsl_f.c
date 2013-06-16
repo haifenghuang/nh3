@@ -108,7 +108,7 @@ static mpdm_t F_clone(F_ARGS)
  * [Debugging]
  * [Input-Output]
  */
-/** v.dump(); */
+/** v = v.dump(); */
 static mpdm_t F_dump(F_ARGS)
 {
     mpdm_dump(l);
@@ -405,12 +405,27 @@ static mpdm_t F_ord(F_ARGS)
  *
  * Transliterates @str to a new string with all characters from @from
  * replaced by those in @to.
- * [Threading]
+ * [Strings]
  */
 /** string = str.tr(from, to); */
 static mpdm_t F_tr(F_ARGS)
 {
     return mpdm_tr(l, A0, A1);
+}
+
+
+/**
+ * str.p - Prints a string.
+ * @str: the string
+ *
+ * Prints a string to stdout.
+ * [Strings]
+ */
+/** str = str.p(); */
+static mpdm_t M_p(F_ARGS)
+{
+    mpdm_write_wcs(stdout, mpdm_string(l));
+    return l;
 }
 
 
@@ -1263,6 +1278,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"type",         MPDM_X(F_type));
     mpdm_hset_s(v, L"rnd",          MPDM_X(F_rnd));
     mpdm_hset_s(v, L"fmt",          MPDM_X(M_fmt));
+    mpdm_hset_s(v, L"p",            MPDM_X(M_p));
 
     /* I/O methods */
     v = mpdm_hset_s(r, L"IO",           MPDM_H(0));
