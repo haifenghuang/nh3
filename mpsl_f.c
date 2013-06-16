@@ -1,7 +1,7 @@
 /*
 
     MPSL - Minimum Profit Scripting Language 3.x
-    Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
+    Copyright (C) 2003/2013 Angel Ortega <angel@triptico.com>
 
     mpsl_f.c - Minimum Profit Scripting Language Function Library
 
@@ -150,6 +150,26 @@ static mpdm_t F_dumper(F_ARGS)
 static mpdm_t F_cmp(F_ARGS)
 {
     return MPDM_I(mpdm_cmp(l, A0));
+}
+
+
+/**
+ * v.fmt - Formats a value as a string.
+ * @v: the value
+ * @f: the format string
+ *
+ * Formats a value as a string, using an sprintf()-like format.
+ * Equivalent to @f $ @v.
+ * [Strings]
+ * [Arrays]
+ * [Hashes]
+ */
+/** string = scalar.fmt(format); */
+/** string = array.fmt(format); */
+/** string = hash.fmt(format); */
+static mpdm_t M_fmt(F_ARGS)
+{
+    return mpdm_fmt(A0, l);
 }
 
 
@@ -1200,6 +1220,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"cmp",      MPDM_X(F_cmp));
     mpdm_hset_s(v, L"type",     MPDM_X(F_type));
     mpdm_hset_s(v, L"rnd",      MPDM_X(F_rnd));
+    mpdm_hset_s(v, L"fmt",      MPDM_X(M_fmt));
 
     /* array methods */
     v = mpdm_hset_s(r, L"ARRAY",    MPDM_H(0));
@@ -1220,6 +1241,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"cmp",          MPDM_X(F_cmp));
     mpdm_hset_s(v, L"type",         MPDM_X(F_type));
     mpdm_hset_s(v, L"rnd",          MPDM_X(F_rnd));
+    mpdm_hset_s(v, L"fmt",          MPDM_X(M_fmt));
 
     /* scalar methods */
     v = mpdm_hset_s(r, L"SCALAR",   MPDM_H(0));
@@ -1240,6 +1262,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"cmp",          MPDM_X(F_cmp));
     mpdm_hset_s(v, L"type",         MPDM_X(F_type));
     mpdm_hset_s(v, L"rnd",          MPDM_X(F_rnd));
+    mpdm_hset_s(v, L"fmt",          MPDM_X(M_fmt));
 
     /* I/O methods */
     v = mpdm_hset_s(r, L"IO",           MPDM_H(0));
