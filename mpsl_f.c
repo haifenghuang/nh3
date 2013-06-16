@@ -112,7 +112,7 @@ static mpdm_t F_clone(F_ARGS)
 static mpdm_t F_dump(F_ARGS)
 {
     mpdm_dump(l);
-    return NULL;
+    return l;
 }
 
 /**
