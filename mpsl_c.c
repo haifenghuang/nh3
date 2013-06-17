@@ -1037,10 +1037,9 @@ static int gen(struct mpsl_c *c, mpdm_t node)
 
 static int opt(struct mpsl_c *c)
 {
-#if 0
     int n = 0;
 
-    for (n = 0; n < mpdm_size(c->prg); n++) {
+    while (n < mpdm_size(c->prg)) {
         /* array initialization */
         if (PO(n) == OP_ARR && PO(n + 1) == OP_LIT && PO(n + 3) == OP_APU) {
             mpdm_t v = mpdm_aset(c->prg, MPDM_A(1), n + 3);
@@ -1061,8 +1060,10 @@ static int opt(struct mpsl_c *c)
             mpdm_aset(c->prg, MPDM_I(OP_NOP),   n + 1);
             mpdm_aset(c->prg, MPDM_I(OP_NOP),   n + 0);
         }
+
+        n += opcode_argc[PO(n)] + 1;
     }
-#endif
+
     return 0;
 }
 
