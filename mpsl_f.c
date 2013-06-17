@@ -444,7 +444,12 @@ static mpdm_t F_tr(F_ARGS)
 /** str = str.p(); */
 static mpdm_t M_p(F_ARGS)
 {
-    mpdm_write_wcs(stdout, mpdm_string(l));
+    mpdm_t f;
+
+    f = MPDM_F(stdout);
+
+    mpdm_write(f, l);
+
     return l;
 }
 
