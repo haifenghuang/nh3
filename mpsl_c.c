@@ -873,7 +873,8 @@ typedef enum {
     OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
     OP_NOT, OP_EQ,  OP_GT,  OP_GE,  OP_LT, OP_LE,
     OP_REM, OP_CAT, OP_ITE, OP_FMT,
-    OP_LNI, OP_FRK
+    OP_LNI, OP_FRK,
+    OP_NOP
 } mpsl_op_t;
 
 
@@ -1024,6 +1025,40 @@ static int gen(struct mpsl_c *c, mpdm_t node)
     return c->error;
 }
 
+/** optimizer **/
+
+#define PO(n) mpdm_ival(mpdm_aget(c->prg, n))
+
+static int opt(struct mpsl_c *c)
+{
+#if 0
+    int n = 0;
+
+    for (n = 0; n < mpdm_size(c->prg); n++) {
+        /* array initialization */
+        if (PO(n) == OP_ARR && PO(n + 1) == OP_LIT && PO(n + 3) == OP_APU) {
+            mpdm_t v = mpdm_aset(c->prg, MPDM_A(1), n + 3);
+            mpdm_aset(v, mpdm_aget(c->prg, n + 2), 0);
+
+            mpdm_aset(c->prg, MPDM_I(OP_LIT), n + 2);
+            mpdm_aset(c->prg, MPDM_I(OP_NOP), n + 1);
+            mpdm_aset(c->prg, MPDM_I(OP_NOP), n);
+        }
+        /* add element to array literal */
+        if (PO(n) == OP_LIT && PO(n + 2) == OP_LIT && PO(n + 4) == OP_APU) {
+            mpdm_t v = mpdm_aget(c->prg, n + 1);
+            mpdm_push(v, mpdm_aget(c->prg, n + 3));
+
+            mpdm_aset(c->prg, v,                n + 4);
+            mpdm_aset(c->prg, MPDM_I(OP_LIT),   n + 3);
+            mpdm_aset(c->prg, MPDM_I(OP_NOP),   n + 2);
+            mpdm_aset(c->prg, MPDM_I(OP_NOP),   n + 1);
+            mpdm_aset(c->prg, MPDM_I(OP_NOP),   n + 0);
+        }
+    }
+#endif
+    return 0;
+}
 
 /** virtual machine **/
 
@@ -1290,6 +1325,7 @@ static int exec_vm(struct mpsl_vm *m)
         mpsl_op_t opcode = mpdm_ival(PC(m));
     
         switch (opcode) {
+        case OP_NOP: break;
         case OP_EOP: m->mode = VM_IDLE; break;
         case OP_LIT: PUSH(m, mpdm_clone(PC(m))); break;
         case OP_NUL: PUSH(m, NULL); break;
@@ -1392,7 +1428,7 @@ mpdm_t mpsl_compile(mpdm_t src)
     if ((c.f = mpdm_get_filehandle(src)) == NULL)
         c.ptr = mpdm_string(src);
 
-    if (parse(&c) == 0 && gen(&c, c.node) == 0)
+    if (parse(&c) == 0 && gen(&c, c.node) == 0 && opt(&c) == 0)
         r = MPDM_X2(exec_vm_a0, c.prg);
 
     mpdm_unref(src);
@@ -1427,7 +1463,7 @@ static struct _mpsl_assembler {
     { OP_GT,    L"GT",  0 },    { OP_GE,    L"GE",  0 },    { OP_LT,    L"LT",  0 },
     { OP_LE,    L"LE",  0 },    { OP_REM,   L"REM", 1 },    { OP_CAT,   L"CAT", 0 },
     { OP_ITE,   L"ITE", 1 },    { OP_FMT,   L"FMT", 0 },    { OP_LNI,   L"LNI", 1 },
-    { OP_FRK,   L"FRK", 0 },
+    { OP_FRK,   L"FRK", 0 },    { OP_NOP,   L"NOP", 0 },
     { -1,       NULL,   0 }
 };
 
