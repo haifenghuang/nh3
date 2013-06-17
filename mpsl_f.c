@@ -435,18 +435,24 @@ static mpdm_t F_tr(F_ARGS)
 
 
 /**
- * str.p - Prints a string.
+ * str.p - Prints a string to a file.
  * @str: the string
+ * @f: the file
  *
- * Prints a string to stdout.
+ * Prints a string to a file. If the file is not set, it prints
+ * to stdout.
  * [Strings]
  */
 /** str = str.p(); */
+/** str = str.p(f); */
 static mpdm_t M_p(F_ARGS)
 {
     mpdm_t f;
 
-    f = MPDM_F(stdout);
+    if (mpdm_size(a))
+        f = A0;
+    else
+        f = MPDM_F(stdout);
 
     mpdm_write(f, l);
 
