@@ -1143,11 +1143,8 @@ static mpdm_t GET(struct mpsl_vm *m, mpdm_t h, mpdm_t k)
     if (MPDM_IS_ARRAY(h))
         r = mpdm_aget(h, mpdm_ival(k)); 
     else
-    if (MPDM_IS_STRING(h)) {
-        /* FIXME: check boundaries */
-        wchar_t *ptr = mpdm_string(h);
-        r = MPDM_NS(&ptr[mpdm_ival(k)], 1);
-    }
+    if (MPDM_IS_STRING(h))
+        r = mpdm_slice(h, mpdm_ival(k), 1);
     else
         vm_error(m, MPDM_LS(L"bad holder in GET for key "), k);
 
