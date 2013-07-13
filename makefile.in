@@ -6,7 +6,7 @@ all: $(TARGET) stress
 
 PROJ=nh3
 
-GRUTATXT_DOCS=doc/nh3_index.html doc/nh3_overview.html doc/nh3_internals.html
+GRUTATXT_DOCS=
 MP_DOCCER_DOCS=doc/nh3_api.txt doc/nh3_reference.txt
 G_AND_MP_DOCS=doc/nh3_api.html doc/nh3_reference.html
 
