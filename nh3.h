@@ -1,7 +1,7 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language 3.x
-    Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
+    nh3 - A Programming Language
+    Copyright (C) 2003/2013 Angel Ortega <angel@triptico.com>
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -21,8 +21,8 @@
 
 */
 
-#ifndef MPSL_H_
-#define MPSL_H_
+#ifndef NH3_H_
+#define NH3_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,13 +35,13 @@ enum {
     VM_IDLE, VM_RUNNING, VM_TIMEOUT, VM_ERROR
 };
 
-mpdm_t mpsl_compile(mpdm_t src);
+mpdm_t nh3_compile(mpdm_t src);
 
-void mpsl_startup(int argc, char *argv[]);
-void mpsl_shutdown(void);
+void nh3_startup(int argc, char *argv[]);
+void nh3_shutdown(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* MPSL_H_ */
+#endif /* NH3_H_ */

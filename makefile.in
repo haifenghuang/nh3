@@ -1,17 +1,16 @@
 # -*- Mode: sh
 
-LIB=libmpsl.a
+LIB=libnh3.a
 
 all: $(TARGET) stress
 
-PROJ=mpsl
+PROJ=nh3
 
-#ADD_DOCS=doc/mpsl_quickref.ps
-GRUTATXT_DOCS=doc/mpsl_index.html doc/mpsl_overview.html doc/mpsl_internals.html
-MP_DOCCER_DOCS=doc/mpsl_api.txt doc/mpsl_reference.txt
-G_AND_MP_DOCS=doc/mpsl_api.html doc/mpsl_reference.html
+GRUTATXT_DOCS=doc/nh3_index.html doc/nh3_overview.html doc/nh3_internals.html
+MP_DOCCER_DOCS=doc/nh3_api.txt doc/nh3_reference.txt
+G_AND_MP_DOCS=doc/nh3_api.html doc/nh3_reference.html
 
-OBJS=mpsl_c.o mpsl_f.o mpsl_m.o mpsl_d.o
+OBJS=nh3_c.o nh3_f.o nh3_m.o nh3_d.o
 
 DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
 
@@ -34,14 +33,14 @@ $(LIB): $(OBJS)
 	$(AR) rv $(LIB) $(OBJS)
 
 $(TARGET): $(LIB) $(MPDM)/libmpdm.a
-	$(CC) $(CFLAGS) -L. -lmpsl `cat config.ldflags` -o $@
+	$(CC) $(CFLAGS) -L. $(LIB) `cat config.ldflags` -o $@
 
 stress-test: stress
 	./stress
 
 stress: stress.c $(LIB) $(MPDM)/libmpdm.a
 	$(CC) $(CFLAGS) `cat config.cflags` stress.c \
-		-L. -lmpsl `cat config.ldflags` -o $@
+		-L. $(LIB) `cat config.ldflags` -o $@
 
 clean:
 	rm -f $(TARGET) $(LIB) $(OBJS) *.o tags *.tar.gz stress
@@ -60,19 +59,16 @@ realdistclean: realclean
 .txt.html:
 	grutatxt < $< > $@
 
-doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
-	-./mpsl scripts/mkquickref.mpsl < $< > $@
-
-doc/mpsl_api.txt: mpsl_c.c
-	mp_doccer mpsl_c.c -o doc/mpsl_api -f grutatxt \
-	-t "MPSL C API" \
+doc/nh3_api.txt: nh3_c.c
+	mp_doccer nh3_c.c -o doc/nh3_api -f grutatxt \
+	-t "nh3 C API" \
 	-b "This reference documents version $(VERSION) of the C API." \
 	-a 'Angel Ortega - angel@triptico.com'
 
-doc/mpsl_reference.txt: mpsl_f.c
-	mp_doccer mpsl_f.c -o doc/mpsl_reference -f grutatxt \
-	-t "MPSL Function Library Reference" \
-	-b "This reference documents version $(VERSION) of the MPSL Function Library." \
+doc/nh3_reference.txt: nh3_f.c
+	mp_doccer nh3_f.c -o doc/nh3_reference -f grutatxt \
+	-t "nh3 Function Library Reference" \
+	-b "This reference documents version $(VERSION) of the nh3 Function Library." \
 	-a 'Angel Ortega - angel@triptico.com'
 
 docs: $(DOCS)

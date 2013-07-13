@@ -1,9 +1,9 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language 3.x
-    Copyright (C) 2003/2011 Angel Ortega <angel@triptico.com>
+    nh3 - A Programming Language
+    Copyright (C) 2003/2013 Angel Ortega <angel@triptico.com>
 
-    mpsl_d.c - Minimum Profit Scripting Language debugging functions
+    nh3_d.c - Debugging functions
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@
 #include <wchar.h>
 #include <malloc.h>
 
-#include "mpsl.h"
+#include "nh3.h"
 
 /** code **/
 
@@ -91,7 +91,7 @@ static wchar_t *dump_string(const mpdm_t v, wchar_t * ptr, int *size)
 }
 
 
-wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t * ptr, int *size)
+wchar_t *nh3_dump_1(const mpdm_t v, int l, wchar_t * ptr, int *size)
 /* dump plugin for mpdm_dump() */
 {
     int n;
@@ -122,9 +122,9 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t * ptr, int *size)
             if (n++)
                 ptr = mpdm_pokews(ptr, size, L",\n");
 
-            ptr = mpsl_dump_1(k, l + 1, ptr, size);
+            ptr = nh3_dump_1(k, l + 1, ptr, size);
             ptr = mpdm_pokews(ptr, size, L": ");
-            ptr = mpsl_dump_1(w, -(l + 1), ptr, size);
+            ptr = nh3_dump_1(w, -(l + 1), ptr, size);
         }
 
         ptr = mpdm_pokews(ptr, size, L"\n");
@@ -140,7 +140,7 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t * ptr, int *size)
         ptr = mpdm_pokews(ptr, size, L"[\n");
 
         for (n = 0; n < mpdm_size(v); n++) {
-            ptr = mpsl_dump_1(mpdm_aget(v, n), l + 1, ptr, size);
+            ptr = nh3_dump_1(mpdm_aget(v, n), l + 1, ptr, size);
 
             if (n < mpdm_size(v) - 1)
                 ptr = mpdm_pokews(ptr, size, L",");

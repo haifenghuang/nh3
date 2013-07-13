@@ -1,9 +1,9 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language 3.x
-    Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
+    nh3 - A Programming Language
+    Copyright (C) 2003/2013 Angel Ortega <angel@triptico.com>
 
-    mpsl_m.c - Minimum Profit Scripting Language main()
+    nh3_m.c - main()
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -29,16 +29,16 @@
 #include <string.h>
 #include <wchar.h>
 
-#include "mpsl.h"
+#include "nh3.h"
 
 
-void mpsl_disasm(mpdm_t);
-mpdm_t mpsl_asm(mpdm_t);
+void nh3_disasm(mpdm_t);
+mpdm_t nh3_asm(mpdm_t);
 
 
 /** code **/
 
-int mpsl_main(int argc, char *argv[])
+int nh3_main(int argc, char *argv[])
 {
     mpdm_t v = NULL;
     mpdm_t w = NULL;
@@ -55,12 +55,12 @@ int mpsl_main(int argc, char *argv[])
 
     while (!ok && argc > 0) {
         if (strcmp(argv[0], "-v") == 0 || strcmp(argv[0], "--help") == 0) {
-            printf("MPSL %s - Minimum Profit Scripting Language\n",
+            printf("nh3 %s - A Programming Language\n",
                    VERSION);
-            printf("Copyright (C) 2003-2012 Angel Ortega <angel@triptico.com>\n");
+            printf("Copyright (C) 2003-2013 Angel Ortega <angel@triptico.com>\n");
             printf("This software is covered by the GPL license. NO WARRANTY.\n\n");
 
-            printf("Usage: mpsl [-d] [-a] [-e 'script' | script.mpsl ]\n\n");
+            printf("Usage: nh3 [-d] [-a] [-e 'script' | script.nh3 ]\n\n");
 
             return 0;
         }
@@ -90,21 +90,21 @@ int mpsl_main(int argc, char *argv[])
         argc--;
     }
 
-    mpsl_startup(argc, argv);
+    nh3_startup(argc, argv);
 
     /* compile */
     if (immscript != NULL) {
         w = mpdm_ref(MPDM_MBS(immscript));
-        v = mpsl_compile(w);
+        v = nh3_compile(w);
         mpdm_unref(w);
     }
     else {
         if (enasm) {
-            v = mpsl_asm(MPDM_F(script));
+            v = nh3_asm(MPDM_F(script));
         }
         else {
             w = mpdm_ref(MPDM_F(script));
-            v = mpsl_compile(w);
+            v = nh3_compile(w);
             mpdm_close(w);
             mpdm_unref(w);
         }
@@ -114,7 +114,7 @@ int mpsl_main(int argc, char *argv[])
         mpdm_ref(v);
 
         if (disasm)
-            mpsl_disasm(mpdm_aget(v, 1));
+            nh3_disasm(mpdm_aget(v, 1));
         else {
             int r = mpdm_ival(mpdm_exec(v, NULL, NULL));
 
@@ -144,7 +144,7 @@ int mpsl_main(int argc, char *argv[])
         ret = 1;
     }
 
-    mpsl_shutdown();
+    nh3_shutdown();
 
     return ret;
 }
@@ -152,5 +152,5 @@ int mpsl_main(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-    return mpsl_main(argc, argv);
+    return nh3_main(argc, argv);
 }

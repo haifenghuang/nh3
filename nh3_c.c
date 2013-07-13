@@ -1,9 +1,9 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language 3.x
-    Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
+    nh3 - A Programming Language
+    Copyright (C) 2003/2013 Angel Ortega <angel@triptico.com>
 
-    mpsl_c.c - Lexer, Parser, Code Generator and Virtual Machine.
+    nh3_c.c - Lexer, Parser, Code Generator and Virtual Machine.
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@
 #include <string.h>
 #include <time.h> /* for clock() */
 
-#include "mpsl.h"
+#include "nh3.h"
 
 
 /** tokens **/
@@ -52,13 +52,13 @@ typedef enum {
     T_THARRW, T_FATARRW, T_VIRARRW, T_COLARRW,
     T_SYMBOL, T_LITERAL, T_BLANK,   T_SLASHAST, T_DSLASH,
     T_SQUOTE, T_DQUOTE,  T_DOLLAR,  T_VIREQ
-} mpsl_token_t;
+} nh3_token_t;
 
 
 /** compiler structure **/
 
-struct mpsl_c {
-    mpsl_token_t token; /* token found */
+struct nh3_c {
+    nh3_token_t token;  /* token found */
     wchar_t *token_s;   /* token as string */
     int token_i;        /* token size */
     int token_o;        /* offset to end of token */
@@ -75,7 +75,7 @@ struct mpsl_c {
 
 /** lexer **/
 
-static wchar_t nc(struct mpsl_c *c)
+static wchar_t nc(struct nh3_c *c)
 /* gets the next char */
 {
     c->c = c->f ? fgetwc(c->f) : *(c->ptr++);
@@ -93,7 +93,7 @@ static wchar_t nc(struct mpsl_c *c)
 
 static void s_error(mpdm_t s1, mpdm_t s2) { mpdm_hset_s(mpdm_root(), L"ERROR", mpdm_strcat(s1, s2)); }
 
-static void c_error(struct mpsl_c *c)
+static void c_error(struct nh3_c *c)
 {
     char tmp[64];
 
@@ -103,7 +103,7 @@ static void c_error(struct mpsl_c *c)
     c->error = 1;
 }
 
-void POKE(struct mpsl_c *c, wchar_t k) { c->token_s = mpdm_poke_o(c->token_s, &c->token_i, &c->token_o, &k, sizeof(wchar_t), 1); }
+void POKE(struct nh3_c *c, wchar_t k) { c->token_s = mpdm_poke_o(c->token_s, &c->token_i, &c->token_o, &k, sizeof(wchar_t), 1); }
 
 #define STORE(COND) while (COND) { POKE(c, c->c); nc(c); } POKE(c, L'\0')
 
@@ -117,8 +117,8 @@ void POKE(struct mpsl_c *c, wchar_t k) { c->token_s = mpdm_poke_o(c->token_s, &c
 
 static struct {
     wchar_t         c;
-    mpsl_token_t    t;
-    mpsl_token_t    p;
+    nh3_token_t     t;
+    nh3_token_t     p;
 } martians[] = {
     { L' ', T_BLANK,    T_ERROR },  { L'\t', T_BLANK,    T_ERROR },
     { L'\r', T_BLANK,   T_ERROR },  { L'\n', T_BLANK,    T_ERROR },
@@ -160,10 +160,10 @@ static struct {
 };
 
 
-static mpsl_token_t martian(struct mpsl_c *c)
+static nh3_token_t martian(struct nh3_c *c)
 {
     int n;
-    mpsl_token_t t = T_ERROR;
+    nh3_token_t t = T_ERROR;
 
     for (n = 0; martians[n].c; n++) {
         if (martians[n].p == t && martians[n].c == c->c) {
@@ -176,9 +176,9 @@ static mpsl_token_t martian(struct mpsl_c *c)
 }
 
 
-static mpsl_token_t token(struct mpsl_c *c)
+static nh3_token_t token(struct nh3_c *c)
 {
-    mpsl_token_t t;
+    nh3_token_t t;
 
     c->token_o = 0;
 
@@ -344,18 +344,18 @@ typedef enum {
     N_SUBDEF, N_RETURN,
     N_VOID,   N_LINEINFO,
     N_EOP
-} mpsl_node_t;
+} nh3_node_t;
 
 
 #define RF(v) mpdm_ref(v)
 #define UF(v) mpdm_unref(v)
 #define UFND(v) mpdm_unrefnd(v)
 
-static mpdm_t node0(mpsl_node_t t) { mpdm_t r = RF(MPDM_A(1)); mpdm_aset(r, MPDM_I(t), 0); return UFND(r); }
-static mpdm_t node1(mpsl_node_t t, mpdm_t n1) { mpdm_t r = RF(node0(t)); mpdm_push(r, n1); return UFND(r); }
-static mpdm_t node2(mpsl_node_t t, mpdm_t n1, mpdm_t n2) { mpdm_t r = RF(node1(t, n1)); mpdm_push(r, n2); return UFND(r); }
+static mpdm_t node0(nh3_node_t t) { mpdm_t r = RF(MPDM_A(1)); mpdm_aset(r, MPDM_I(t), 0); return UFND(r); }
+static mpdm_t node1(nh3_node_t t, mpdm_t n1) { mpdm_t r = RF(node0(t)); mpdm_push(r, n1); return UFND(r); }
+static mpdm_t node2(nh3_node_t t, mpdm_t n1, mpdm_t n2) { mpdm_t r = RF(node1(t, n1)); mpdm_push(r, n2); return UFND(r); }
 
-static mpdm_t tstr(struct mpsl_c *c)
+static mpdm_t tstr(struct nh3_c *c)
 /* returns the current token as a string */
 {
     mpdm_t r = MPDM_ENS(c->token_s, (c->token_o / sizeof(wchar_t)) - 1);
@@ -367,11 +367,11 @@ static mpdm_t tstr(struct mpsl_c *c)
 }
 
 
-static mpdm_t expr(struct mpsl_c *c);
-static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op);
-static mpdm_t statement(struct mpsl_c *c);
+static mpdm_t expr(struct nh3_c *c);
+static mpdm_t expr_p(struct nh3_c *c, nh3_node_t p_op);
+static mpdm_t statement(struct nh3_c *c);
 
-static mpdm_t paren_expr(struct mpsl_c *c)
+static mpdm_t paren_expr(struct nh3_c *c)
 /* parses a parenthesized expression */
 {
     mpdm_t v = NULL;
@@ -394,7 +394,7 @@ static mpdm_t paren_expr(struct mpsl_c *c)
 }
 
 
-static mpdm_t term(struct mpsl_c *c)
+static mpdm_t term(struct nh3_c *c)
 /* parses a term of an expression */
 {
     mpdm_t v = NULL;
@@ -545,7 +545,7 @@ static mpdm_t term(struct mpsl_c *c)
 }
 
 
-static mpsl_node_t node_by_token(struct mpsl_c *c)
+static nh3_node_t node_by_token(struct nh3_c *c)
 /* returns the operand associated by a token */
 {
     int n;
@@ -558,7 +558,7 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
         T_AMP, T_PIPE, T_CARET, T_DLT, T_DGT, T_VIRGULE, T_VIREQ,
         T_THARRW, T_FATARRW, T_DOLLAR, T_DPIPEEQ, -1
     };
-    static mpsl_node_t binop[] = {
+    static nh3_node_t binop[] = {
         N_IADD, N_ISUB, N_IMUL, N_IDIV, N_IMOD,
         N_IBAND, N_IBOR, N_IXOR,
         N_SUBSCR, N_PARTOF, N_ADD, N_SUB, N_MUL, N_DIV, N_MOD,
@@ -576,23 +576,23 @@ static mpsl_node_t node_by_token(struct mpsl_c *c)
 }
 
 
-static int is_assign(struct mpsl_c *c)
+static int is_assign(struct nh3_c *c)
 {
-    mpsl_node_t node = node_by_token(c);
+    nh3_node_t node = node_by_token(c);
 
     return node >= N_ASSIGN && node <= N_SDEC;
 }
 
 
-static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
+static mpdm_t expr_p(struct nh3_c *c, nh3_node_t p_op)
 /* returns an expression, with the previous operand for precedence */
 {
     mpdm_t v = NULL;
 
     if (c->error) {}
     else {
-        mpsl_token_t t = c->token;
-        mpsl_node_t op;
+        nh3_token_t t = c->token;
+        nh3_node_t op;
 
         if ((v = term(c)) == NULL) {
             c_error(c);
@@ -653,7 +653,7 @@ static mpdm_t expr_p(struct mpsl_c *c, mpsl_node_t p_op)
 }
 
 
-static mpdm_t expr(struct mpsl_c *c)
+static mpdm_t expr(struct nh3_c *c)
 /* returns a complete expression */
 {
     /* call expr_p with the lower precedence */
@@ -661,7 +661,7 @@ static mpdm_t expr(struct mpsl_c *c)
 }
 
 
-static mpdm_t var(struct mpsl_c *c)
+static mpdm_t var(struct nh3_c *c)
 /* returns a symbol to be created */
 {
     mpdm_t v = NULL;
@@ -685,7 +685,7 @@ static mpdm_t var(struct mpsl_c *c)
 }
 
 
-static mpdm_t statement(struct mpsl_c *c)
+static mpdm_t statement(struct nh3_c *c)
 /* returns a statement */
 {
     mpdm_t v = NULL;
@@ -823,8 +823,8 @@ static mpdm_t statement(struct mpsl_c *c)
 }
 
 
-static int parse(struct mpsl_c *c)
-/* parses an MPSL program and creates a tree of nodes */
+static int parse(struct nh3_c *c)
+/* parses an nh3 program and creates a tree of nodes */
 {
     mpdm_t v;
 
@@ -875,7 +875,7 @@ typedef enum {
     OP_REM, OP_CAT, OP_ITE, OP_FMT,
     OP_LNI, OP_FRK,
     OP_NOP
-} mpsl_op_t;
+} nh3_op_t;
 
 static int opcode_argc[] = {
     0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
@@ -884,19 +884,19 @@ static int opcode_argc[] = {
     0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0
 };
 
-static int o(struct mpsl_c *c, mpsl_op_t op) { mpdm_push(c->prg, MPDM_I(op)); return mpdm_size(c->prg); }
-static int o2(struct mpsl_c *c, mpsl_op_t op, mpdm_t v) { int r = o(c, op); mpdm_push(c->prg, v); return r; }
-static void fix(struct mpsl_c *c, int n) { mpdm_aset(c->prg, MPDM_I(mpdm_size(c->prg)), n); }
-static int here(struct mpsl_c *c) { return mpdm_size(c->prg); }
+static int o(struct nh3_c *c, nh3_op_t op) { mpdm_push(c->prg, MPDM_I(op)); return mpdm_size(c->prg); }
+static int o2(struct nh3_c *c, nh3_op_t op, mpdm_t v) { int r = o(c, op); mpdm_push(c->prg, v); return r; }
+static void fix(struct nh3_c *c, int n) { mpdm_aset(c->prg, MPDM_I(mpdm_size(c->prg)), n); }
+static int here(struct nh3_c *c) { return mpdm_size(c->prg); }
 #define O(n) gen(c, mpdm_aget(node, n))
 
 
-static int gen(struct mpsl_c *c, mpdm_t node)
-/* generates MPSL VM code from a tree of nodes */
+static int gen(struct nh3_c *c, mpdm_t node)
+/* generates nh3 VM code from a tree of nodes */
 {
     int n, i;
 
-    mpsl_node_t nt = mpdm_ival(mpdm_aget(node, 0));
+    nh3_node_t nt = mpdm_ival(mpdm_aget(node, 0));
 
     switch (nt) {
     case N_NOP:     break;
@@ -1035,7 +1035,7 @@ static int gen(struct mpsl_c *c, mpdm_t node)
 
 #define PO(n) mpdm_ival(mpdm_aget(c->prg, n))
 
-static int opt(struct mpsl_c *c)
+static int opt(struct nh3_c *c)
 {
     int n = 0;
 
@@ -1069,7 +1069,7 @@ static int opt(struct mpsl_c *c)
 
 /** virtual machine **/
 
-struct mpsl_vm {
+struct nh3_vm {
     mpdm_t prg;             /* program */
     mpdm_t ctxt;            /* context */
     mpdm_t stack;           /* stack */
@@ -1086,7 +1086,7 @@ struct mpsl_vm {
 };
 
 
-static void reset_vm(struct mpsl_vm *m, mpdm_t prg)
+static void reset_vm(struct nh3_vm *m, mpdm_t prg)
 {
     mpdm_set(&m->prg,   prg);
 
@@ -1110,7 +1110,7 @@ static void reset_vm(struct mpsl_vm *m, mpdm_t prg)
 }
 
 
-static void vm_error(struct mpsl_vm *m, mpdm_t s1, mpdm_t s2) 
+static void vm_error(struct nh3_vm *m, mpdm_t s1, mpdm_t s2) 
 {
     mpdm_t t;
 
@@ -1128,12 +1128,12 @@ static void vm_error(struct mpsl_vm *m, mpdm_t s1, mpdm_t s2)
     mpdm_unref(s1);
 }
 
-static mpdm_t PUSH(struct mpsl_vm *m, mpdm_t v) { return mpdm_aset(m->stack, v, m->sp++); }
-static mpdm_t POP(struct mpsl_vm *m) { return mpdm_aget(m->stack, --m->sp); }
-static mpdm_t TOS(struct mpsl_vm *m) { return mpdm_aget(m->stack, m->sp - 1); }
-static mpdm_t PC(struct mpsl_vm *m) { return mpdm_aget(m->prg, m->pc++); }
+static mpdm_t PUSH(struct nh3_vm *m, mpdm_t v) { return mpdm_aset(m->stack, v, m->sp++); }
+static mpdm_t POP(struct nh3_vm *m) { return mpdm_aget(m->stack, --m->sp); }
+static mpdm_t TOS(struct nh3_vm *m) { return mpdm_aget(m->stack, m->sp - 1); }
+static mpdm_t PC(struct nh3_vm *m) { return mpdm_aget(m->prg, m->pc++); }
 
-static mpdm_t GET(struct mpsl_vm *m, mpdm_t h, mpdm_t k)
+static mpdm_t GET(struct nh3_vm *m, mpdm_t h, mpdm_t k)
 {
     mpdm_t r = NULL;
 
@@ -1151,7 +1151,7 @@ static mpdm_t GET(struct mpsl_vm *m, mpdm_t h, mpdm_t k)
     return r;
 }
 
-static mpdm_t SET(struct mpsl_vm *m, mpdm_t h, mpdm_t k, mpdm_t v)
+static mpdm_t SET(struct nh3_vm *m, mpdm_t h, mpdm_t k, mpdm_t v)
 {
     mpdm_t r = NULL;
 
@@ -1167,7 +1167,7 @@ static mpdm_t SET(struct mpsl_vm *m, mpdm_t h, mpdm_t k, mpdm_t v)
 }
 
 
-wchar_t *mpsl_type(mpdm_t v)
+wchar_t *nh3_type(mpdm_t v)
 {
     wchar_t *t = L"SCALAR";
 
@@ -1184,7 +1184,7 @@ wchar_t *mpsl_type(mpdm_t v)
 }
 
 
-static mpdm_t TBL(struct mpsl_vm *m)
+static mpdm_t TBL(struct nh3_vm *m)
 {
     int n;
     mpdm_t s = mpdm_ref(POP(m));
@@ -1208,7 +1208,7 @@ static mpdm_t TBL(struct mpsl_vm *m)
         l = NULL;
 
         /* still not found? try on the type-specific tables */
-        v = mpdm_hget_s(mpdm_root(), mpsl_type(v));
+        v = mpdm_hget_s(mpdm_root(), nh3_type(v));
 
         if (mpdm_exists(v, s))
             l = v;
@@ -1227,7 +1227,7 @@ static mpdm_t TBL(struct mpsl_vm *m)
 }
 
 
-static void ARG(struct mpsl_vm *m)
+static void ARG(struct nh3_vm *m)
 {
     mpdm_t h, k, v;
     int n;
@@ -1241,7 +1241,7 @@ static void ARG(struct mpsl_vm *m)
 }
 
 
-int mpsl_is_true(mpdm_t v)
+int nh3_is_true(mpdm_t v)
 {
     /* if value is NULL, it's false */
     if (v == NULL)
@@ -1263,16 +1263,16 @@ int mpsl_is_true(mpdm_t v)
 
 #define IPOP(m) mpdm_ival(POP(m))
 #define RPOP(m) mpdm_rval(POP(m))
-#define ISTRU(v) mpsl_is_true(v)
+#define ISTRU(v) nh3_is_true(v)
 #define BOOL(i) MPDM_I(i)
 #define R(v) mpdm_rval(v)
 
-static int exec_vm(struct mpsl_vm *m);
+static int exec_vm(struct nh3_vm *m);
 
 static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
 {
     mpdm_t r = NULL;
-    struct mpsl_vm m;
+    struct nh3_vm m;
     int n;
 
     memset(&m, '\0', sizeof(m));
@@ -1293,7 +1293,7 @@ static mpdm_t exec_vm_a0(mpdm_t c, mpdm_t a, mpdm_t ctxt)
 }
 
 
-static void FRK(struct mpsl_vm *m)
+static void FRK(struct nh3_vm *m)
 {
     mpdm_t p, c, a, b, x;
 
@@ -1313,7 +1313,7 @@ static void FRK(struct mpsl_vm *m)
 }
 
 
-static int exec_vm(struct mpsl_vm *m)
+static int exec_vm(struct nh3_vm *m)
 {
     clock_t max;
     mpdm_t v, w, h;
@@ -1332,7 +1332,7 @@ static int exec_vm(struct mpsl_vm *m)
     while (m->mode == VM_RUNNING) {
 
         /* get the opcode */
-        mpsl_op_t opcode = mpdm_ival(PC(m));
+        nh3_op_t opcode = mpdm_ival(PC(m));
     
         switch (opcode) {
         case OP_NOP: break;
@@ -1421,11 +1421,11 @@ static int exec_vm(struct mpsl_vm *m)
 }
 
 
-mpdm_t mpsl_compile(mpdm_t src)
-/* compiles an MPSL source to MPSL VM code */
+mpdm_t nh3_compile(mpdm_t src)
+/* compiles an nh3 source to nh3 VM code */
 {
     mpdm_t r = NULL;
-    struct mpsl_c c;
+    struct nh3_c c;
 
     mpdm_ref(src);
 
@@ -1453,10 +1453,10 @@ mpdm_t mpsl_compile(mpdm_t src)
 
 /** assembler **/
 
-static struct _mpsl_assembler {
-    mpsl_op_t   op;
+static struct _nh3_assembler {
+    nh3_op_t   op;
     wchar_t     *str;
-} mpsl_assembler[] = {
+} nh3_assembler[] = {
     { OP_EOP,   L"EOP" },    { OP_LIT,   L"LIT" },    { OP_NUL,   L"NUL" },
     { OP_ARR,   L"ARR" },    { OP_HSH,   L"HSH" },    { OP_POP,   L"POP" },
     { OP_SWP,   L"SWP" },    { OP_DUP,   L"DUP" },    { OP_DP2,   L"DP2" },
@@ -1476,18 +1476,18 @@ static struct _mpsl_assembler {
     { -1,       NULL }
 };
 
-void mpsl_disasm(mpdm_t prg)
+void nh3_disasm(mpdm_t prg)
 {
     int n;
 
     mpdm_ref(prg);
 
     for (n = 0; n < mpdm_size(prg); n++) {
-        mpsl_op_t i = mpdm_ival(mpdm_aget(prg, n));
-        struct _mpsl_assembler *a;
+        nh3_op_t i = mpdm_ival(mpdm_aget(prg, n));
+        struct _nh3_assembler *a;
         int m = 0;
 
-        while ((a = &mpsl_assembler[m++])->op != -1 && a->op != i);
+        while ((a = &nh3_assembler[m++])->op != -1 && a->op != i);
 
         if (a->op == -1)
             printf("Error: opcode id #%d not found\n", i);
@@ -1506,7 +1506,7 @@ void mpsl_disasm(mpdm_t prg)
 }
 
 
-mpdm_t mpsl_asm(mpdm_t src)
+mpdm_t nh3_asm(mpdm_t src)
 {
     mpdm_t r = mpdm_ref(MPDM_A(0));
     mpdm_t l, s;
@@ -1525,7 +1525,7 @@ mpdm_t mpsl_asm(mpdm_t src)
         wchar_t *ptr;
         int m;
         wchar_t mnem[256];
-        struct _mpsl_assembler *a;
+        struct _nh3_assembler *a;
 
         ptr = mpdm_string(s);
         if (*ptr == L'\0')
@@ -1542,7 +1542,7 @@ mpdm_t mpsl_asm(mpdm_t src)
             mnem[m] = *ptr;
         mnem[m] = L'\0';
 
-        for (m = 0; (a = &mpsl_assembler[m])->op != -1; m++) {
+        for (m = 0; (a = &nh3_assembler[m])->op != -1; m++) {
             if (wcscmp(mnem, a->str) == 0)
                 break;
         }
@@ -1580,15 +1580,15 @@ mpdm_t mpsl_asm(mpdm_t src)
 
 /** start / stop **/
 
-void mpsl_library_init(mpdm_t r, int argc, char *argv[]);
+void nh3_library_init(mpdm_t r, int argc, char *argv[]);
 
-void mpsl_startup(int argc, char *argv[])
+void nh3_startup(int argc, char *argv[])
 {
     mpdm_startup();
-    mpsl_library_init(mpdm_root(), argc, argv);
+    nh3_library_init(mpdm_root(), argc, argv);
 }
 
 
-void mpsl_shutdown(void)
+void nh3_shutdown(void)
 {
 }

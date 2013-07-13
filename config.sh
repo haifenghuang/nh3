@@ -2,7 +2,7 @@
 
 # Configuration shell script
 
-TARGET=mpsl3
+TARGET=nh3
 
 # gets program version
 VERSION=`cut -f2 -d\" VERSION`
@@ -54,10 +54,10 @@ if [ "$CONFIG_HELP" = "1" ] ; then
 fi
 
 if [ "$DOCDIR" = "" ] ; then
-    DOCDIR=$PREFIX/share/doc/mpsl
+    DOCDIR=$PREFIX/share/doc/nh3
 fi
 
-echo "Configuring MPSL..."
+echo "Configuring nh3..."
 
 echo "/* automatically created by config.sh - do not modify */" > config.h
 echo "# automatically created by config.sh - do not modify" > makefile.opts
@@ -143,8 +143,8 @@ fi
 cat $MPDM/config.ldflags >> config.ldflags
 echo "-lm" >> config.ldflags
 
-# if win32, the interpreter is called mpsl3.exe
-grep CONFOPT_WIN32 ${MPDM}/config.h >/dev/null && TARGET=mpsl3.exe
+# if win32, the interpreter is called nh3.exe
+grep CONFOPT_WIN32 ${MPDM}/config.h >/dev/null && TARGET=nh3.exe
 
 #########################################################
 

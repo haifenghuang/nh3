@@ -1,7 +1,7 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language 3.x
-    Copyright (C) 2003/2012 Angel Ortega <angel@triptico.com>
+    nh3 - A Programming Language
+    Copyright (C) 2003/2013 Angel Ortega <angel@triptico.com>
 
     stress.c - Stress tests.
 
@@ -26,10 +26,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "mpsl.h"
+#include "nh3.h"
 
-void mpsl_disasm(mpdm_t prg);
-mpdm_t mpsl_asm(mpdm_t code);
+void nh3_disasm(mpdm_t prg);
+mpdm_t nh3_asm(mpdm_t code);
 
 /* total number of tests and oks */
 int tests = 0;
@@ -48,7 +48,7 @@ int i_failed_msgs = 0;
 
 void do_disasm(char *prg)
 {
-    mpsl_disasm(mpdm_aget(mpsl_compile(MPDM_MBS(prg)), 1));
+    nh3_disasm(mpdm_aget(nh3_compile(MPDM_MBS(prg)), 1));
 }
 
 
@@ -62,7 +62,7 @@ void _do_test(char *prg, mpdm_t t_value, int line)
 
     mpdm_hset_s(mpdm_root(), L"ERROR", NULL);
 
-    v = mpdm_ref(mpsl_compile(MPDM_MBS(prg)));
+    v = mpdm_ref(nh3_compile(MPDM_MBS(prg)));
 
     if (v != NULL) {
         int i = mpdm_ival(mpdm_exec(v, NULL, NULL));
@@ -88,7 +88,7 @@ void _do_test(char *prg, mpdm_t t_value, int line)
         printf("T:\n");
         mpdm_dump(mpdm_hget_s(mpdm_root(), L"T"));
         printf("Disasm:\n");
-        mpsl_disasm(mpdm_aget(v, 1));
+        nh3_disasm(mpdm_aget(v, 1));
     }
 
 	tests++;
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 {
     mpdm_t v, w;
 
-    mpsl_startup(argc, argv);
+    nh3_startup(argc, argv);
 
     if (argc > 1 && strcmp(argv[1], "-v") == 0)
         verbose = 1;
@@ -281,13 +281,13 @@ int main(int argc, char *argv[])
     /* this test should fail with "undefined symbol try" */
 //    do_test("var class = { key: 0, init: sub (key) { this.key = key; }, try: sub { return 0; }}; class.init(123); try(); T = 10;", MPDM_I(10));
 
-    do_test("#!/usr/bin/env mpsl3\nT = 10;", MPDM_I(10));
+    do_test("#!/usr/bin/env nh33\nT = 10;", MPDM_I(10));
 
     do_test("sub sqr(c) { var v = c.read(); c.write(v * v); } var c = &sqr; c.write(1234); T = c.read();", MPDM_I(1234 * 1234));
 
     test_summary();
 
-    mpsl_disasm(mpdm_aget(mpsl_asm(MPDM_LS(L"LIT 2\nLIT 3\nADD\nRET\n")), 1));
+    nh3_disasm(mpdm_aget(nh3_asm(MPDM_LS(L"LIT 2\nLIT 3\nADD\nRET\n")), 1));
 
     return 0;
 }

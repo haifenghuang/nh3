@@ -1,9 +1,9 @@
 /*
 
-    MPSL - Minimum Profit Scripting Language 3.x
+    nh3 - A Programming Language
     Copyright (C) 2003/2013 Angel Ortega <angel@triptico.com>
 
-    mpsl_f.c - Minimum Profit Scripting Language Function Library
+    nh3_f.c - Function Library
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@
 #include <wchar.h>
 #include <time.h>
 
-#include "mpsl.h"
+#include "nh3.h"
 
 /** code **/
 
@@ -51,7 +51,7 @@
 #define RA2 RA(2)
 #define RA3 RA(3)
 
-#define mpsl_boolean(b) MPDM_I(b)
+#define nh3_boolean(b) MPDM_I(b)
 
 
 /** library **/
@@ -76,11 +76,11 @@ static mpdm_t M_size(F_ARGS)
 }
 
 
-wchar_t *mpsl_type(mpdm_t);
+wchar_t *nh3_type(mpdm_t);
 
 static mpdm_t M_type(F_ARGS)
 {
-    return MPDM_LS(mpsl_type(l));
+    return MPDM_LS(nh3_type(l));
 }
 
 
@@ -671,7 +671,7 @@ static mpdm_t M_hsize(F_ARGS)
 /** bool = hash.exists(k); */
 static mpdm_t M_exists(F_ARGS)
 {
-    return mpsl_boolean(mpdm_exists(l, A0));
+    return nh3_boolean(mpdm_exists(l, A0));
 }
 
 /**
@@ -884,7 +884,7 @@ static mpdm_t F_connect(F_ARGS)
 /** bool = sys.unlink(filename); */
 static mpdm_t F_unlink(F_ARGS)
 {
-    return mpsl_boolean(mpdm_unlink(A0));
+    return nh3_boolean(mpdm_unlink(A0));
 }
 
 /**
@@ -898,7 +898,7 @@ static mpdm_t F_unlink(F_ARGS)
 /** bool = sys.rename(oldpath, newpath); */
 static mpdm_t F_rename(F_ARGS)
 {
-    return mpsl_boolean(mpdm_rename(A0, A1));
+    return nh3_boolean(mpdm_rename(A0, A1));
 }
 
 /**
@@ -1234,9 +1234,9 @@ static mpdm_t F_new(F_ARGS)
 
 
 /** init **/
-wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t * ptr, int *size);
+wchar_t *nh3_dump_1(const mpdm_t v, int l, wchar_t * ptr, int *size);
 
-void mpsl_library_init(mpdm_t r, int argc, char *argv[])
+void nh3_library_init(mpdm_t r, int argc, char *argv[])
 /* inits the library */
 {
     int n;
@@ -1353,7 +1353,7 @@ void mpsl_library_init(mpdm_t r, int argc, char *argv[])
         mpdm_push(v, MPDM_MBS(argv[n]));
 
     /* special dump plugin */
-    mpdm_dump_1 = mpsl_dump_1;
+    mpdm_dump_1 = nh3_dump_1;
 
     mpdm_unref(r);
 }
