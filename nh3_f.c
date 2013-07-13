@@ -1340,7 +1340,7 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(r, L"new",      MPDM_X(F_new));
 
     /* version */
-    v = mpdm_hset_s(r, L"MPSL", MPDM_H(0));
+    v = mpdm_hset_s(r, L"NH3", MPDM_H(0));
     mpdm_hset_s(v, L"VERSION",  MPDM_MBS(VERSION));
     mpdm_hset_s(v, L"HOMEDIR",  mpdm_home_dir());
     mpdm_hset_s(v, L"APPDIR",   mpdm_app_dir());
