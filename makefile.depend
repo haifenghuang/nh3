@@ -1,4 +1,5 @@
-mpsl_c.o: mpsl_c.c config.h mpsl.h $(MPDM)/mpdm.h
-mpsl_f.o: mpsl_f.c config.h mpsl.h $(MPDM)/mpdm.h
-mpsl_m.o: mpsl_m.c config.h mpsl.h $(MPDM)/mpdm.h
-stress.o: stress.c mpsl.h $(MPDM)/mpdm.h
+nh3_c.o: nh3_c.c config.h nh3.h $(MPDM)/mpdm.h
+nh3_d.o: nh3_d.c config.h nh3.h $(MPDM)/mpdm.h
+nh3_f.o: nh3_f.c config.h nh3.h $(MPDM)/mpdm.h
+nh3_m.o: nh3_m.c config.h nh3.h $(MPDM)/mpdm.h
+stress.o: stress.c nh3.h $(MPDM)/mpdm.h
