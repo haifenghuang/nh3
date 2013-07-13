@@ -1236,6 +1236,9 @@ static mpdm_t F_new(F_ARGS)
 /** init **/
 wchar_t *nh3_dump_1(const mpdm_t v, int l, wchar_t * ptr, int *size);
 
+extern char *git_rev_str;
+
+
 void nh3_library_init(mpdm_t r, int argc, char *argv[])
 /* inits the library */
 {
@@ -1341,10 +1344,10 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
 
     /* version */
     v = mpdm_hset_s(r, L"NH3", MPDM_H(0));
-    mpdm_hset_s(v, L"VERSION",  MPDM_MBS(VERSION));
-    mpdm_hset_s(v, L"HOMEDIR",  mpdm_home_dir());
-    mpdm_hset_s(v, L"APPDIR",   mpdm_app_dir());
-
+    mpdm_hset_s(v, L"VERSION",      MPDM_MBS(VERSION));
+    mpdm_hset_s(v, L"HOMEDIR",      mpdm_home_dir());
+    mpdm_hset_s(v, L"APPDIR",       mpdm_app_dir());
+    mpdm_hset_s(v, L"GIT_REV_STR",  MPDM_MBS(git_rev_str));
 
     /* command line arguments */
     v = mpdm_hset_s(r, L"ARGV", MPDM_A(0));

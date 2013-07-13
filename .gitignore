@@ -6,6 +6,7 @@ config.ldflags
 doc/*.html
 doc/*.ps
 makefile.opts
-mpsl3
+nh3
 *.[oa]
 stress
+git-rev-str.c

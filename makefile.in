@@ -30,7 +30,9 @@ dep:
 		sed -e 's;$(MPDM)/;$$(MPDM)/;g' > makefile.depend
 
 $(LIB): $(OBJS)
-	$(AR) rv $(LIB) $(OBJS)
+	./git-rev-str.sh
+	$(CC) -c git-rev-str.c
+	$(AR) rv $(LIB) $(OBJS) git-rev-str.o
 
 $(TARGET): $(LIB) $(MPDM)/libmpdm.a
 	$(CC) $(CFLAGS) -L. $(LIB) `cat config.ldflags` -o $@
