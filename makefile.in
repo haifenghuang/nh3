@@ -10,7 +10,7 @@ GRUTATXT_DOCS=
 MP_DOCCER_DOCS=doc/nh3_api.txt doc/nh3_reference.txt
 G_AND_MP_DOCS=doc/nh3_api.html doc/nh3_reference.html
 
-OBJS=nh3_c.o nh3_f.o nh3_m.o nh3_d.o
+OBJS=nh3_c.o nh3_f.o nh3_m.o
 
 DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
 

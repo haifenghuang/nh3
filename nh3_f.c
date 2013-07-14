@@ -1234,7 +1234,6 @@ static mpdm_t F_new(F_ARGS)
 
 
 /** init **/
-wchar_t *nh3_dump_1(const mpdm_t v, int l, wchar_t * ptr, int *size);
 
 extern char *__build_info_git_rev;
 extern char *__build_info_time;
@@ -1356,9 +1355,6 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
 
     for (n = 0; n < argc; n++)
         mpdm_push(v, MPDM_MBS(argv[n]));
-
-    /* special dump plugin */
-    mpdm_dump_1 = nh3_dump_1;
 
     mpdm_unref(r);
 }
