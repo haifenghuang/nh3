@@ -9,4 +9,4 @@ makefile.opts
 nh3
 *.[oa]
 stress
-git-rev-str.c
+.build-info.c
