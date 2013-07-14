@@ -100,36 +100,6 @@ static mpdm_t M_clone(F_ARGS)
 }
 
 /**
- * v.dump - Dumps a value to stdin.
- * @v: The value
- *
- * Dumps a value to stdin. The value can be complex. This function
- * is for debugging purposes only.
- * [Debugging]
- * [Input-Output]
- */
-/** v = v.dump(); */
-static mpdm_t M_dump(F_ARGS)
-{
-    mpdm_dump(l);
-    return l;
-}
-
-/**
- * v.dumper - Returns a visual representation of a complex value.
- * @v: The value
- *
- * Returns a visual representation of a complex value.
- * [Debugging]
- * [Strings]
- */
-/** string = v.dumper(); */
-static mpdm_t M_dumper(F_ARGS)
-{
-    return mpdm_dumper(l);
-}
-
-/**
  * v.cmp - Compares two values.
  * @v: the first value
  * @v2: the second value
@@ -1252,9 +1222,7 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"size",         MPDM_X(M_hsize));
     mpdm_hset_s(v, L"exists",       MPDM_X(M_exists));
     mpdm_hset_s(v, L"delete",       MPDM_X(M_hdel));
-    mpdm_hset_s(v, L"dump",         MPDM_X(M_dump));
     mpdm_hset_s(v, L"clone",        MPDM_X(M_clone));
-    mpdm_hset_s(v, L"dumper",       MPDM_X(M_dumper));
     mpdm_hset_s(v, L"cmp",          MPDM_X(M_cmp));
     mpdm_hset_s(v, L"type",         MPDM_X(M_type));
     mpdm_hset_s(v, L"rnd",          MPDM_X(M_rnd));
@@ -1274,9 +1242,7 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"queue",        MPDM_X(M_queue));
     mpdm_hset_s(v, L"seek",         MPDM_X(M_seek));
     mpdm_hset_s(v, L"sort",         MPDM_X(M_sort));
-    mpdm_hset_s(v, L"dump",         MPDM_X(M_dump));
     mpdm_hset_s(v, L"clone",        MPDM_X(M_clone));
-    mpdm_hset_s(v, L"dumper",       MPDM_X(M_dumper));
     mpdm_hset_s(v, L"cmp",          MPDM_X(M_cmp));
     mpdm_hset_s(v, L"type",         MPDM_X(M_type));
     mpdm_hset_s(v, L"rnd",          MPDM_X(M_rnd));
@@ -1296,9 +1262,7 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"uc",           MPDM_X(M_uc));
     mpdm_hset_s(v, L"lc",           MPDM_X(M_lc));
     mpdm_hset_s(v, L"tr",           MPDM_X(M_tr));
-    mpdm_hset_s(v, L"dump",         MPDM_X(M_dump));
     mpdm_hset_s(v, L"clone",        MPDM_X(M_clone));
-    mpdm_hset_s(v, L"dumper",       MPDM_X(M_dumper));
     mpdm_hset_s(v, L"cmp",          MPDM_X(M_cmp));
     mpdm_hset_s(v, L"type",         MPDM_X(M_type));
     mpdm_hset_s(v, L"rnd",          MPDM_X(M_rnd));
