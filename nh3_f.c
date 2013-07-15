@@ -644,6 +644,11 @@ static mpdm_t M_exists(F_ARGS)
     return nh3_boolean(mpdm_exists(l, A0));
 }
 
+static mpdm_t M_hcontains(F_ARGS)
+{
+    return MPDM_I(mpdm_exists(l, A0) ? 1 : -1);
+}
+
 /**
  * hash.delete - Deletes a key from a hash.
  * @hash: the hash
@@ -1220,7 +1225,7 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
     /* hash methods */
     v = mpdm_hset_s(r, L"HASH",     MPDM_H(0));
     mpdm_hset_s(v, L"size",         MPDM_X(M_hsize));
-    mpdm_hset_s(v, L"exists",       MPDM_X(M_exists));
+    mpdm_hset_s(v, L"contains",     MPDM_X(M_hcontains));
     mpdm_hset_s(v, L"delete",       MPDM_X(M_hdel));
     mpdm_hset_s(v, L"clone",        MPDM_X(M_clone));
     mpdm_hset_s(v, L"cmp",          MPDM_X(M_cmp));
@@ -1228,6 +1233,8 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"rnd",          MPDM_X(M_rnd));
     mpdm_hset_s(v, L"fmt",          MPDM_X(M_fmt));
     mpdm_hset_s(v, L"join",         MPDM_X(M_join));
+
+    mpdm_hset_s(v, L"exists",       MPDM_X(M_exists));
 
     /* array methods */
     v = mpdm_hset_s(r, L"ARRAY",    MPDM_H(0));
@@ -1240,7 +1247,7 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"push",         MPDM_X(M_push));
     mpdm_hset_s(v, L"pop",          MPDM_X(M_pop));
     mpdm_hset_s(v, L"queue",        MPDM_X(M_queue));
-    mpdm_hset_s(v, L"seek",         MPDM_X(M_seek));
+    mpdm_hset_s(v, L"contains",     MPDM_X(M_seek));
     mpdm_hset_s(v, L"sort",         MPDM_X(M_sort));
     mpdm_hset_s(v, L"clone",        MPDM_X(M_clone));
     mpdm_hset_s(v, L"cmp",          MPDM_X(M_cmp));
@@ -1248,6 +1255,8 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"rnd",          MPDM_X(M_rnd));
     mpdm_hset_s(v, L"fmt",          MPDM_X(M_fmt));
     mpdm_hset_s(v, L"join",         MPDM_X(M_join));
+
+    mpdm_hset_s(v, L"seek",         MPDM_X(M_seek));
 
     /* scalar methods */
     v = mpdm_hset_s(r, L"SCALAR",   MPDM_H(0));
