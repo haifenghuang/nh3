@@ -405,26 +405,23 @@ static mpdm_t M_tr(F_ARGS)
 
 
 /**
- * str.p - Prints a string to a file.
+ * str.p - Prints a string to stdout.
  * @str: the string
- * @f: the file
+ * @arg1: optional string to print
+ * @argn: optional string to print
  *
- * Prints a string to a file. If the file is not set, it prints
- * to stdout.
+ * Prints a string to stdout. Returns the string.
  * [Strings]
  */
-/** str = str.p(); */
-/** str = str.p(f); */
+/** str = str.p([arg1, ...argn]); */
 static mpdm_t M_p(F_ARGS)
 {
-    mpdm_t f;
+    int n;
 
-    if (mpdm_size(a))
-        f = A0;
-    else
-        f = MPDM_F(stdout);
+    mpdm_write_wcs(stdout, mpdm_string(l));
 
-    mpdm_write(f, l);
+    for (n = 0; n < mpdm_size(a); n++)
+        mpdm_write_wcs(stdout, mpdm_string(A(n)));
 
     return l;
 }
