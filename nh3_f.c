@@ -1130,7 +1130,7 @@ static mpdm_t F_randomize(F_ARGS)
  */
 /** number = number.rnd(); */
 /** elem = array.rnd(); */
-/** key_pair = hash.rnd(); */
+/** [key, value] = hash.rnd(); */
 static mpdm_t M_rnd(F_ARGS)
 {
     mpdm_t r;
