@@ -64,8 +64,7 @@
  *
  * Returns the size of a value. For scalars, the size is the
  * string length; for arrays, the number of elements, and
- * for hashes, the number of buckets in the hash (which is
- * probably not useful, see hsize() instead).
+ * for hashes, the number of pairs in the hash.
  * [Value Management]
  */
 /** integer = v.size(); */
@@ -185,7 +184,7 @@ static mpdm_t M_join(F_ARGS)
  * if @del is 0).
  * [Strings]
  */
-/** array = str.splice(i, offset, del); */
+/** [new_str, del_str] = str.splice(i, offset, del); */
 static mpdm_t M_splice(F_ARGS)
 {
     return mpdm_splice(l, A0, IA1, IA2);
@@ -423,6 +422,13 @@ static mpdm_t M_p(F_ARGS)
     for (n = 0; n < mpdm_size(a); n++)
         mpdm_write_wcs(stdout, mpdm_string(A(n)));
 
+    return l;
+}
+
+
+static mpdm_t M_swrite(F_ARGS)
+{
+    mpdm_write(A0, l);
     return l;
 }
 
@@ -1271,6 +1277,7 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"fmt",          MPDM_X(M_fmt));
     mpdm_hset_s(v, L"p",            MPDM_X(M_p));
     mpdm_hset_s(v, L"join",         MPDM_X(M_join));
+    mpdm_hset_s(v, L"write",        MPDM_X(M_swrite));
 
     /* I/O methods */
     v = mpdm_hset_s(r, L"IO",           MPDM_H(0));
