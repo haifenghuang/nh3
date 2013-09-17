@@ -4,9 +4,9 @@ nh3 Programming Language
 nh3 is a general purpose programming language. It was original conceived
 as the 3.x version of the MPSL [1] programming language, but finally
 diverged too much from the original, so a new project name was deemed
-necessary and `nh3' given as a meaningless acronym (just keeping the "3"
+necessary and `nh3' chosen as a meaningless acronym (just keeping the "3"
 in the name). Some concepts and dependencies from the parent source
-(like e.g. depending on the MPDM [2] library) were kept, though.
+(like e.g. dependency on the MPDM [2] library) were kept, though.
 
 This project is still in development and it's a moving target. Deep
 changes may happen that break everything. Use it at your own risk.
