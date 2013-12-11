@@ -48,6 +48,7 @@ int nh3_main(int argc, char *argv[])
     int ok = 0;
     int disasm = 0;
     int enasm = 0;
+    int test_only = 0;
 
     /* skip the executable */
     argv++;
@@ -60,7 +61,7 @@ int nh3_main(int argc, char *argv[])
             printf("Copyright (C) 2003-2013 Angel Ortega <angel@triptico.com>\n");
             printf("This software is covered by the GPL license. NO WARRANTY.\n\n");
 
-            printf("Usage: nh3 [-d] [-a] [-e 'script' | script.nh3 ]\n\n");
+            printf("Usage: nh3 [-d] [-a] [-t] [-e 'script' | script.nh3 ]\n\n");
 
             return 0;
         }
@@ -77,6 +78,9 @@ int nh3_main(int argc, char *argv[])
         else
         if (strcmp(argv[0], "-a") == 0)
             enasm = 1;
+        else
+        if (strcmp(argv[0], "-t") == 0)
+            test_only = 1;
         else {
             /* next argument is a script name; open it */
             if ((script = fopen(argv[0], "r")) == NULL) {
@@ -113,6 +117,9 @@ int nh3_main(int argc, char *argv[])
     if (v != NULL) {
         mpdm_ref(v);
 
+        if (test_only)
+            printf("Syntax OK\n");
+        else
         if (disasm)
             nh3_disasm(mpdm_aget(v, 1));
         else {
