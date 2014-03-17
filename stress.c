@@ -285,6 +285,10 @@ int main(int argc, char *argv[])
 
     do_test("sub sqr(c) { var v = c.read(); c.write(v * v); } var c = &sqr; c.write(1234); T = c.read();", MPDM_I(1234 * 1234));
 
+    /* mappings */
+    do_test("T = ([1 2 3 4]->value * 2).fmt('%j');", MPDM_LS(L"[2,4,6,8]"));
+    do_test("T = ({'a':1 'b':2}=>[value,key]).fmt('%j');", MPDM_LS(L"{\"1\":\"a\",\"2\":\"b\"}"));
+
     test_summary();
 
     nh3_disasm(mpdm_aget(nh3_asm(MPDM_LS(L"LIT 2\nLIT 3\nADD\nRET\n")), 1));
