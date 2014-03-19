@@ -1041,6 +1041,19 @@ static mpdm_t F_chdir(F_ARGS)
 
 
 /**
+ * sys.getcwd - Returns the current working directory
+ *
+ * Returns the current working directory
+ * [Input-Output]
+ */
+/** path = sys.getcwd(); */
+static mpdm_t F_getcwd(F_ARGS)
+{
+    return mpdm_getcwd();
+}
+
+
+/**
  * sys.p - Writes values to stdout.
  * @arg1: first argument
  * @arg2: second argument
@@ -1303,6 +1316,7 @@ void nh3_library_init(mpdm_t r, int argc, char *argv[])
     mpdm_hset_s(v, L"chown",            MPDM_X(F_chown));
     mpdm_hset_s(v, L"glob",             MPDM_X(F_glob));
     mpdm_hset_s(v, L"chdir",            MPDM_X(F_chdir));
+    mpdm_hset_s(v, L"getcwd",           MPDM_X(F_getcwd));
     mpdm_hset_s(v, L"encoding",         MPDM_X(F_encoding));
     mpdm_hset_s(v, L"gettext",          MPDM_X(F_gettext));
     mpdm_hset_s(v, L"gettext_domain",   MPDM_X(F_gettext_domain));
